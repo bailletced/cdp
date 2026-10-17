@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Symfony\Validator;
 
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\StringConstraintsInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Composite;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
 final class AssertValueObject extends Composite
@@ -38,8 +39,7 @@ final class AssertValueObject extends Composite
         $maxLength = null;
 
         // 1. Priorité à l'interface StringConstraintsInterface
-        $interface = \App\Shared\Domain\ValueObject\StringConstraintsInterface::class;
-        if (\is_a($this->class, $interface, true)) {
+        if (\is_a($this->class, StringConstraintsInterface::class, true)) {
             $minLength = $this->class::getMinLength();
             $maxLength = $this->class::getMaxLength();
         }
@@ -59,7 +59,7 @@ final class AssertValueObject extends Composite
         }
 
         // Ajouter la contrainte Email si c'est le VO Email
-        if ($this->class === \App\Shared\Domain\ValueObject\Email::class) {
+        if ($this->class === Email::class) {
             $this->constraints[] = new EmailConstraint();
         }
     }

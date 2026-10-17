@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Symfony\Validator;
 
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\StringConstraintsInterface;
 use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Constraints\Length;
@@ -34,9 +36,9 @@ final class AssertValueObjectInterfaceTest extends TestCase
 
     public function testItFallsBackToReflectionWhenInterfaceNotAvailable(): void
     {
-        // Utiliser Email qui n'implémente pas encore StringConstraintsInterface
-        // mais a les constantes MIN_LENGTH/MAX_LENGTH
-        $constraint = new AssertValueObject(\App\Shared\Domain\ValueObject\Email::class);
+        // Utiliser Email qui implémente StringConstraintsInterface
+        // mais aussi a les constantes MIN_LENGTH/MAX_LENGTH pour le fallback
+        $constraint = new AssertValueObject(Email::class);
 
         $lengthConstraint = null;
         foreach ($constraint->constraints as $c) {
@@ -53,7 +55,7 @@ final class AssertValueObjectInterfaceTest extends TestCase
 }
 
 // VO factice pour le test
-final readonly class FakeStringValueObject implements \App\Shared\Domain\ValueObject\StringConstraintsInterface
+final readonly class FakeStringValueObject implements StringConstraintsInterface
 {
     public function __construct(public string $value) {}
 
