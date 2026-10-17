@@ -1,0 +1,79 @@
+name: Back CI
+
+on:
+  push:
+    branches: [main, feature/**]
+    paths:
+      - 'api/**'
+      - '!api/var/**'
+      - '!api/node_modules/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '!api/var/**'
+      - '!api/node_modules/**'
+
+jobs:
+  back:
+    name: Back QA & Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, intl, opcache, apcu
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v2
+        with:
+          composer-options: '--prefer-dist --no-progress --no-interaction'
+
+      - name: Cache Composer
+        uses: actions/cache@v3
+        with:
+          path: api/vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('api/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Run QA (Rector, PHP-CS-Fixer, PHPStan, deptrac)
+        run: |
+          cd api
+          make qa-back
+
+      - name: Run PHPUnit tests
+        run: |
+          cd api
+          make test-back
+        env:
+          DATABASE_URL: postgresql://app:app@localhost:5432/app?serverVersion=18&charset=utf8
+          APP_ENV: test
+          APP_SECRET: test-secret
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: back-test-results
+          path: api/var/log/
