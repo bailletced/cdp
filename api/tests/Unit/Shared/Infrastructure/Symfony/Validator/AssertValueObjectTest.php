@@ -7,6 +7,8 @@ namespace App\Tests\Unit\Shared\Infrastructure\Symfony\Validator;
 use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Validator\Constraints\Composite;
+use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\Length;
 
 /**
@@ -19,7 +21,7 @@ final class AssertValueObjectTest extends TestCase
         $constraint = new AssertValueObject(Email::class);
 
         $this->assertInstanceOf(
-            \Symfony\Component\Validator\Constraints\Composite::class,
+            Composite::class,
             $constraint,
             'AssertValueObject doit étendre Composite pour inclure des contraintes imbriquées'
         );
@@ -40,7 +42,7 @@ final class AssertValueObjectTest extends TestCase
             if ($c instanceof Length) {
                 $lengthConstraint = $c;
             }
-            if ($c instanceof \Symfony\Component\Validator\Constraints\Email) {
+            if ($c instanceof EmailConstraint) {
                 $emailConstraint = $c;
             }
         }
@@ -49,6 +51,6 @@ final class AssertValueObjectTest extends TestCase
         $this->assertSame(Email::MIN_LENGTH, $lengthConstraint->min);
         $this->assertSame(Email::MAX_LENGTH, $lengthConstraint->max);
         
-        $this->assertInstanceOf(\Symfony\Component\Validator\Constraints\Email::class, $emailConstraint);
+        $this->assertInstanceOf(EmailConstraint::class, $emailConstraint);
     }
 }

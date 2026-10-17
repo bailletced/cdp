@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Infrastructure\Symfony\Validator;
 use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\StringConstraintsInterface;
 use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\Length;
@@ -20,7 +21,7 @@ final class AssertValueObjectInterfaceTest extends TestCase
     public function testItRequiresStringConstraintsInterface(): void
     {
         // Un VO qui n'implémente pas StringConstraintsInterface doit lever une exception
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/doit implémenter.*StringConstraintsInterface/');
 
         new AssertValueObject(FakeNonConstrainedValueObject::class);

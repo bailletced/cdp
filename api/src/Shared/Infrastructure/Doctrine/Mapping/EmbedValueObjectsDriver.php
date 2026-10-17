@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping\ClassMetadata as OrmClassMetadata;
 use Doctrine\ORM\Mapping\Embeddable;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
+use ReflectionClass;
+use ReflectionNamedType;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
 
@@ -47,7 +49,7 @@ final readonly class EmbedValueObjectsDriver implements MappingDriver
             }
 
             $type = $property->getType();
-            if (!$type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+            if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
                 continue;
             }
 
@@ -89,6 +91,6 @@ final readonly class EmbedValueObjectsDriver implements MappingDriver
             return false;
         }
 
-        return [] !== new \ReflectionClass($class)->getAttributes(Embeddable::class);
+        return [] !== (new ReflectionClass($class))->getAttributes(Embeddable::class);
     }
 }

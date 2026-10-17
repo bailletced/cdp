@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Domain\ValueObject;
 
 use App\Shared\Domain\ValueObject\Email;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 final class EmailTest extends TestCase
 {
     public function testItRejectsAnAddressWithoutValidFormat(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("L'adresse e-mail n'est pas valide.");
 
         new Email('pas-un-email');
@@ -19,7 +20,7 @@ final class EmailTest extends TestCase
 
     public function testItRejectsAnAddressLongerThanTheMaximum(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("L'adresse e-mail doit comporter entre 3 et 254 caractères.");
 
         new Email(\str_repeat('a', 64).'@'.\str_repeat('b', 63).'.'.\str_repeat('b', 63).'.'.\str_repeat('b', 62));
@@ -27,7 +28,7 @@ final class EmailTest extends TestCase
 
     public function testABlankAddressIsRejectedAsTooShort(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("L'adresse e-mail doit comporter entre 3 et 254 caractères.");
 
         new Email('   ');

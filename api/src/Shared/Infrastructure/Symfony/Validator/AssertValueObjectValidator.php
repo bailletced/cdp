@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Symfony\Validator;
 
+use InvalidArgumentException;
+use ReflectionProperty;
+use ReflectionType;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -27,7 +30,7 @@ final class AssertValueObjectValidator extends ConstraintValidator
 
         try {
             new ($constraint->class)($value);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ error }}', $e->getMessage())
                 ->setInvalidValue($value)
@@ -44,8 +47,8 @@ final class AssertValueObjectValidator extends ConstraintValidator
             return true;
         }
 
-        $type = new \ReflectionProperty($object, $property)->getType();
+        $type = (new ReflectionProperty($object, $property))->getType();
 
-        return !$type instanceof \ReflectionType || $type->allowsNull();
+        return !$type instanceof ReflectionType || $type->allowsNull();
     }
 }

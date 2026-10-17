@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\ApiPlatform\ObjectMapper;
 
 use App\Shared\Infrastructure\ApiPlatform\Exception\MissingModelException;
+use ReflectionClass;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -62,7 +63,7 @@ final class ObjectMapper
 
         $target = new $targetClass();
         
-        $sourceReflection = new \ReflectionClass($source);
+        $sourceReflection = new ReflectionClass($source);
         foreach ($sourceReflection->getProperties() as $sourceProperty) {
             $propertyName = $sourceProperty->getName();
             if ($this->propertyAccessor->isReadable($source, $propertyName) && 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Domain\ValueObject;
 
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 
 #[ORM\Embeddable]
 final readonly class Email implements StringConstraintsInterface
@@ -21,11 +22,11 @@ final readonly class Email implements StringConstraintsInterface
 
         $length = \mb_strlen($value);
         if ($length < self::MIN_LENGTH || $length > self::MAX_LENGTH) {
-            throw new \InvalidArgumentException(\sprintf("L'adresse e-mail doit comporter entre %d et %d caractères.", self::MIN_LENGTH, self::MAX_LENGTH));
+            throw new InvalidArgumentException(\sprintf("L'adresse e-mail doit comporter entre %d et %d caractères.", self::MIN_LENGTH, self::MAX_LENGTH));
         }
 
         if (false === \filter_var($value, \FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("L'adresse e-mail n'est pas valide.");
+            throw new InvalidArgumentException("L'adresse e-mail n'est pas valide.");
         }
 
         $this->value = $value;

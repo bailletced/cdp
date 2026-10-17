@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Symfony\Validator;
 
 use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\StringConstraintsInterface;
+use InvalidArgumentException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Composite;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
@@ -37,7 +38,7 @@ final class AssertValueObject extends Composite
 
         // Le VO DOIT implémenter StringConstraintsInterface
         if (!\is_a($this->class, StringConstraintsInterface::class, true)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 \sprintf(
                     'Le Value Object "%s" doit implémenter "%s" pour utiliser AssertValueObject.',
                     $this->class,
