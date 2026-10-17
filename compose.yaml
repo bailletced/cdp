@@ -1,0 +1,29 @@
+---
+# Services communs. Les ajouts de développement sont dans compose.override.yaml,
+# lu automatiquement par `docker compose` (T35).
+services:
+  php:
+    environment:
+      SERVER_NAME: ":80"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@database:5432/${POSTGRES_DB:-app}?serverVersion=18&charset=utf8
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      # PostgreSQL 18 range ses données dans un sous-dossier versionné de /var/lib/postgresql.
+      - database_data:/var/lib/postgresql
+
+volumes:
+  database_data:

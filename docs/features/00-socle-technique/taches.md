@@ -23,7 +23,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F00-T04** · `infra` Initialiser le monorepo (`api/`, `front/`, `docker/frankenphp`, `docker/stack`, `.editorconfig`, `.gitignore`, `.gitattributes`) — *Dépend de* : F00-T03 · *Fini quand* : arborescence du §3 en place.
 - [x] **F00-T05** · `infra` `Dockerfile` cibles `php-base` (`dunglas/frankenphp:1-php8.5`, `pdo_pgsql`, `intl`, `opcache`, `apcu`, `tzdata`) et `dev` (Xdebug, Composer) — *Dépend de* : F00-T04 · *Fini quand* : `docker build --target dev` passe, `php -m` liste les extensions.
-- [ ] **F00-T06** · `infra` `compose.yaml` + `compose.override.yaml` : `php` (worker `--watch`), `database` (PostgreSQL 18), `mailpit` (8025), `node` (Vite, proxy `/api` et `/auth` vers `php`) — *Dépend de* : F00-T05 · *Fini quand* : `docker compose up` démarre tout, SPA et API sur la même origine.
+- [x] **F00-T06** · `infra` `compose.yaml` + `compose.override.yaml` : `php` (worker `--watch`), `database` (PostgreSQL 18), `mailpit` (8025), `node` (Vite, proxy `/api` et `/auth` vers `php`) — *Dépend de* : F00-T05 · *Fini quand* : `docker compose up` démarre tout, SPA et API sur la même origine.
 - [ ] **F00-T07** · `infra` `Makefile` : `up`, `down`, `sh`, `migrate`, `migration`, `fixtures`, `openapi`, `qa`, `test`, `test-back`, `test-front`, `e2e`, `help` — *Dépend de* : F00-T06 · *Fini quand* : `make help` liste les cibles, `make up`/`make down` fonctionnent.
 
 ## Application Symfony et noyau Shared (US-00.3)
