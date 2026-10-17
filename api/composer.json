@@ -17,6 +17,7 @@
         "symfony/dotenv": "8.1.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "8.1.*",
+        "symfony/http-foundation": "8.1.*",
         "symfony/mailer": "8.1.*",
         "symfony/messenger": "8.1.*",
         "symfony/monolog-bundle": "^4.1",
@@ -37,7 +38,10 @@
             "symfony/runtime": true
         },
         "bump-after-update": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "platform": {
+            "php": "8.4.6"
+        }
     },
     "autoload": {
         "psr-4": {

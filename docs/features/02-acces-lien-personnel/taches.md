@@ -21,7 +21,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Sécurité et session (US-02.2, US-02.3, US-02.4)
 
 - [x] **F02-T05** · `back` `SecurityUser` + `UserProvider` : chargement par UUID d'`Account`, rôles `ROLE_PRIANT` / `ROLE_ORGANIZER` recalculés à chaque rafraîchissement + tests — *Dépend de* : F02-T03 · *Fini quand* : un organisateur retiré perd son rôle à la requête suivante (test).
-- [ ] **F02-T06** · `back` Firewall avec état, sessions PostgreSQL (`PdoSessionHandler`, migration), cookies `__Host-`, `Secure`, `HttpOnly`, `SameSite=Lax` — *Dépend de* : F02-T05 · *Fini quand* : session partagée entre deux processus PHP (test d'acceptation).
+- [x] **F02-T06** · `back` Firewall avec état, sessions PostgreSQL (`PdoSessionHandler`, migration), cookies `__Host-`, `Secure`, `HttpOnly`, `SameSite=Lax` — *Dépend de* : F02-T05 · *Fini quand* : session partagée entre deux processus PHP (test d'acceptation).
 - [ ] **F02-T07** · `back` `login_link` : `signature_properties: [id, credentialsVersion]`, `check_post_only: true`, `GET /auth/connexion` redirige vers la SPA `/connexion` + tests — *Dépend de* : F02-T06 · *Fini quand* : un GET n'ouvre aucune session (test).
 - [ ] **F02-T08** · `back` `POST /auth/connexion` : ouvre la session et renvoie la cible ; lien expiré, altéré ou révoqué → 401 typé + tests d'acceptation — *Dépend de* : F02-T07 · *Fini quand* : les quatre cas sont testés.
 - [ ] **F02-T09** · `back` `remember_me` (`always_remember_me`, 1 an, `token_provider: doctrine`, migration) — *Dépend de* : F02-T08 · *Fini quand* : test « session supprimée → toujours authentifié par remember-me ».
