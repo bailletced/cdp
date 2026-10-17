@@ -57,7 +57,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Intégration continue (US-00.4, US-00.5)
 
-- [ ] **F00-T28** · `infra` GitHub Actions, job `back` : service PostgreSQL 18, cache Composer, `make qa` back, PHPUnit — *Dépend de* : F00-T20 · *Fini quand* : une PR avec un test cassé est rouge.
-- [ ] **F00-T29** · `infra` Job `front` : cache pnpm, `biome ci`, `tsc --noEmit`, Vitest — *Dépend de* : F00-T23 · *Fini quand* : une erreur de type fait échouer la PR.
-- [ ] **F00-T30** · `infra` Job `contract` : régénère `openapi.json` et `schema.d.ts`, échoue sur différence — *Dépend de* : F00-T24, F00-T28 · *Fini quand* : une dérive volontaire fait échouer la CI.
+- [x] **F00-T28** · `infra` GitHub Actions, job `back` : service PostgreSQL 18, cache Composer, `make qa` back, PHPUnit — *Dépend de* : F00-T20 · *Fini quand* : une PR avec un test cassé est rouge.
+- [x] **F00-T29** · `infra` Job `front` : cache pnpm, `biome ci`, `tsc --noEmit`, Vitest — *Dépend de* : F00-T23 · *Fini quand* : une erreur de type fait échouer la PR.
+- [x] **F00-T30** · `infra` Job `contract` : régénère `openapi.json` et `schema.d.ts`, échoue sur différence — *Dépend de* : F00-T24, F00-T28 · *Fini quand* : une dérive volontaire fait échouer la CI.
 - [ ] **F00-T31** · `doc` `README.md` racine : démarrage (`make up`, `make fixtures`), conventions (couches, code anglais sauf `Priant`/`Inscription`, définition de « terminé ») — *Dépend de* : F00-T07, F00-T20 · *Fini quand* : un nouveau développeur lance le projet en moins de 15 minutes.
