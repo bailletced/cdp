@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Migration pour F02-T06 : table sessions pour PdoSessionHandler.
+ * Migration for F02-T06: sessions table for PdoSessionHandler.
  */
 final class Version20261017190000 extends AbstractMigration
 {

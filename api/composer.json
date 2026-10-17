@@ -52,10 +52,7 @@
     "autoload-dev": {
         "psr-4": {
             "App\\Tests\\": "tests/"
-        },
-        "classmap": [
-            "FeatureContext.php"
-        ]
+        }
     },
     "replace": {
         "symfony/polyfill-ctype": "*",

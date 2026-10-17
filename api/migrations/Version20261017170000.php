@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Migration pour F02-T02 : table account avec contrainte unique sur lower(email).
+ * Migration for F02-T02: account table with unique constraint on lower(email).
  */
 final class Version20261017170000 extends AbstractMigration
 {

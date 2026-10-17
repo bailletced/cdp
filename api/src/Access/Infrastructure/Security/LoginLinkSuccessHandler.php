@@ -11,24 +11,24 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 
 /**
- * Success handler pour login_link.
- * Renvoie la cible au format JSON pour la SPA.
- * Critère F02-T08 : POST /auth/connexion ouvre la session et renvoie la cible.
+ * Success handler for login_link.
+ * Returns the target as JSON for the SPA.
+ * F02-T08: POST /auth/connexion opens the session and returns the target.
  */
 final class LoginLinkSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
     /**
      * Called when authentication succeeded.
-     * Renvoie un JSON avec l'URL de redirection (cible).
+     * Returns a JSON with the redirect URL (target).
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
     {
-        // Récupérer la cible depuis la requête
-        // Pour POST, _target_path est dans les paramètres de la requête
-        // Pour GET, _target_path serait dans les paramètres de query
+        // Get the target from the request
+        // For POST, _target_path is in the request parameters
+        // For GET, _target_path would be in the query parameters
         $targetPath = $request->request->get('_target_path') ?? $request->query->get('_target_path') ?? '/';
-        
-        // Renvoie un JSON avec la cible pour que la SPA puisse rediriger
+
+        // Return JSON with the target so the SPA can redirect
         return new JsonResponse([
             'target' => $targetPath,
         ]);

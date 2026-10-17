@@ -14,20 +14,20 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerI
 use Symfony\Component\Security\Http\LoginLink\Exception\ExpiredLoginLinkException;
 
 /**
- * Failure handler pour login_link.
- * Renvoie une erreur 401 typée pour les liens expirés/altérés/révoqués.
- * Critère F02-T08 : lien expiré, altéré ou révoqué → 401 typé.
+ * Failure handler for login_link.
+ * Returns a typed 401 error for expired/tampered/revoked links.
+ * F02-T08: expired, tampered or revoked link → typed 401.
  */
 final class LoginLinkFailureHandler implements AuthenticationFailureHandlerInterface
 {
     /**
      * Called when authentication failed.
-     * Renvoie un JSON 401 avec le type d'erreur.
+     * Returns a 401 JSON with the error type.
      */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): JsonResponse
     {
         $errorType = $this->determineErrorType($exception);
-        
+
         return new JsonResponse([
             'error' => 'invalid_login_link',
             'type' => $errorType,
@@ -36,9 +36,9 @@ final class LoginLinkFailureHandler implements AuthenticationFailureHandlerInter
     }
 
     /**
-     * Détermine le type d'erreur en parcourant toute la chaîne d'exceptions.
+     * Determines the error type by walking the entire exception chain.
      *
-     * Chaîne typique Symfony LoginLink :
+     * Typical Symfony LoginLink chain:
      *   InvalidLoginLinkAuthenticationException (authenticator)
      *     └─ ExpiredLoginLinkException | InvalidLoginLinkException (handler)
      *          └─ ExpiredSignatureException | InvalidSignatureException | UserNotFoundException
@@ -67,7 +67,8 @@ final class LoginLinkFailureHandler implements AuthenticationFailureHandlerInter
     }
 
     /**
-     * Retourne un message d'erreur convivial.
+     * Returns a user-friendly error message.
+     * TODO: move to translation files (translations/) instead of hardcoding French strings.
      */
     private function getErrorMessage(string $errorType): string
     {

@@ -2,14 +2,20 @@ _security_logout:
     resource: security.route_loader.logout
     type: service
 
-# Route par défaut de Symfony Security pour login_link
+# Symfony Security default route for login_link
 _security_login_link:
     path: /auth/connexion
     methods: [POST]
 
-# Routes pour login_link (F02-T07)
-# GET /auth/connexion : redirige vers SPA /connexion
+# Routes for login_link (F02-T07)
+# GET /auth/connexion: redirects to SPA /connexion
 auth_login_link_get:
     path: /auth/connexion
     methods: [GET]
     controller: App\Access\Infrastructure\Controller\LoginLinkController::loginLinkGet
+
+# GET /auth/status: authentication status (F02-T09)
+auth_status:
+    path: /auth/status
+    methods: [GET]
+    controller: App\Access\Infrastructure\Controller\AuthStatusController::status

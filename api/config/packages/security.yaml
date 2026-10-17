@@ -28,6 +28,18 @@ security:
                 success_handler: App\Access\Infrastructure\Security\LoginLinkSuccessHandler
                 failure_handler: App\Access\Infrastructure\Security\LoginLinkFailureHandler
 
+            # Remember-me (F02-T09): 1 year, persisted in database via Doctrine
+            remember_me:
+                name: __Host-REMEMBERME
+                lifetime: 31536000
+                path: /
+                secure: true
+                httponly: true
+                samesite: lax
+                always_remember_me: true
+                token_provider:
+                    doctrine: true
+
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 

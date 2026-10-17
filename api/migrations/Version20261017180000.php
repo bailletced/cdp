@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Migration pour F02-T03 : table organizer.
+ * Migration for F02-T03: organizer table.
  */
 final class Version20261017180000 extends AbstractMigration
 {

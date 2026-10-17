@@ -1,52 +1,52 @@
 @login_link
-Feature: Authentification par lien personnel (F02-T08)
-    En tant que priant
-    Je veux me connecter avec un lien personnel reçu par email
-    Afin d'accéder à mon espace sans mot de passe
+Feature: Personal login link authentication (F02-T08)
+    As a priant
+    I want to log in with a personal link received by email
+    So that I can access my space without a password
 
     Background:
-        Given le système est initialisé
+        Given the system is initialized
 
-    Scenario: Lien de connexion valide ouvre la session et retourne la cible
-        Given un compte utilisateur existe
-        And un lien de connexion valide est généré pour ce compte avec cible "/mon-espace"
-        When je soumets le lien de connexion via POST
-        Then la réponse doit être "200 OK"
-        And la réponse doit contenir JSON avec "target" égal à "/mon-espace"
+    Scenario: Valid login link opens session and returns target
+        Given an account exists
+        And a valid login link is generated for this account with target "/mon-espace"
+        When I submit the login link via POST
+        Then the response should be "200 OK"
+        And the response should contain JSON with "target" equal to "/mon-espace"
 
-    Scenario: Lien de connexion invalide retourne 401
-        When je soumets un lien de connexion invalide via POST
-        Then la réponse doit être "401 Unauthorized"
-        And la réponse doit contenir JSON avec "error" égal à "invalid_login_link"
-        And la réponse doit contenir JSON avec "type" égal à "invalid"
+    Scenario: Invalid login link returns 401
+        When I submit an invalid login link via POST
+        Then the response should be "401 Unauthorized"
+        And the response should contain JSON with "error" equal to "invalid_login_link"
+        And the response should contain JSON with "type" equal to "invalid"
 
-    Scenario: Lien de connexion expiré retourne 401
-        Given un compte utilisateur existe
-        And un lien de connexion expiré est généré pour ce compte
-        When je soumets le lien de connexion expiré via POST
-        Then la réponse doit être "401 Unauthorized"
-        And la réponse doit contenir JSON avec "error" égal à "invalid_login_link"
-        And la réponse doit contenir JSON avec "type" égal à "expired"
+    Scenario: Expired login link returns 401
+        Given an account exists
+        And an expired login link is generated for this account
+        When I submit the expired login link via POST
+        Then the response should be "401 Unauthorized"
+        And the response should contain JSON with "error" equal to "invalid_login_link"
+        And the response should contain JSON with "type" equal to "expired"
 
-    Scenario: Lien de connexion altéré retourne 401
-        Given un compte utilisateur existe
-        And un lien de connexion valide est généré pour ce compte
-        And le hash du lien est altéré
-        When je soumets le lien de connexion altéré via POST
-        Then la réponse doit être "401 Unauthorized"
-        And la réponse doit contenir JSON avec "error" égal à "invalid_login_link"
-        And la réponse doit contenir JSON avec "type" égal à "altered"
+    Scenario: Tampered login link returns 401
+        Given an account exists
+        And a valid login link is generated for this account
+        And the link hash is tampered
+        When I submit the tampered login link via POST
+        Then the response should be "401 Unauthorized"
+        And the response should contain JSON with "error" equal to "invalid_login_link"
+        And the response should contain JSON with "type" equal to "altered"
 
-    Scenario: Lien de connexion révoqué retourne 401
-        Given un compte utilisateur existe
-        And un lien de connexion valide est généré pour ce compte
-        And le compte est supprimé
-        When je soumets le lien de connexion via POST
-        Then la réponse doit être "401 Unauthorized"
-        And la réponse doit contenir JSON avec "error" égal à "invalid_login_link"
-        And la réponse doit contenir JSON avec "type" égal à "revoked"
+    Scenario: Revoked login link returns 401
+        Given an account exists
+        And a valid login link is generated for this account
+        And the account is deleted
+        When I submit the login link via POST
+        Then the response should be "401 Unauthorized"
+        And the response should contain JSON with "error" equal to "invalid_login_link"
+        And the response should contain JSON with "type" equal to "revoked"
 
-    Scenario: GET sur /auth/connexion redirige vers SPA
-        When je fais une requête GET sur "/auth/connexion"
-        Then la réponse doit être "302 Found"
-        And la réponse doit rediriger vers "/connexion"
+    Scenario: GET on /auth/connexion redirects to SPA
+        When I make a GET request to "/auth/connexion"
+        Then the response should be "302 Found"
+        And the response should redirect to "/connexion"
