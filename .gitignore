@@ -22,3 +22,6 @@ node_modules/
 .env.local
 /api/.phpunit.cache/
 /api/public/bundles/
+
+# Spike Probity/Vibe : captures de sessions (contiennent du code et des transcriptions)
+/tooling/vibe-spike/captures/

@@ -7,7 +7,11 @@ namespace App\Access\Infrastructure\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
+use Symfony\Component\Security\Core\Signature\Exception\ExpiredSignatureException;
+use Symfony\Component\Security\Core\Signature\Exception\InvalidSignatureException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
+use Symfony\Component\Security\Http\LoginLink\Exception\ExpiredLoginLinkException;
 
 /**
  * Failure handler pour login_link.
@@ -32,61 +36,33 @@ final class LoginLinkFailureHandler implements AuthenticationFailureHandlerInter
     }
 
     /**
-     * Détermine le type d'erreur à partir de l'exception.
-     * 
-     * Arbre des exceptions Symfony LoginLink :
-     * InvalidLoginLinkAuthenticationException (authenticator)
-     *   └─ InvalidLoginLinkException (handler)
-     *       ├─ ExpiredLoginLinkException (avec cause: ExpiredSignatureException)
-     *       ├─ InvalidSignatureException (cause directe)
-     *       └─ UserNotFoundException (cause directe)
+     * Détermine le type d'erreur en parcourant toute la chaîne d'exceptions.
+     *
+     * Chaîne typique Symfony LoginLink :
+     *   InvalidLoginLinkAuthenticationException (authenticator)
+     *     └─ ExpiredLoginLinkException | InvalidLoginLinkException (handler)
+     *          └─ ExpiredSignatureException | InvalidSignatureException | UserNotFoundException
      */
     private function determineErrorType(AuthenticationException $exception): string
     {
-        // Niveau 1 : InvalidLoginLinkAuthenticationException
-        $previous = $exception->getPrevious();
-        
-        if ($previous !== null) {
-            $previousClass = get_class($previous);
-            
-            // ExpiredLoginLinkException est déjà typée
-            if (str_contains($previousClass, 'ExpiredLoginLinkException')) {
+        $current = $exception;
+
+        while ($current !== null) {
+            if ($current instanceof ExpiredLoginLinkException || $current instanceof ExpiredSignatureException) {
                 return 'expired';
             }
-            
-            // InvalidLoginLinkException peut avoir différentes causes
-            if (str_contains($previousClass, 'InvalidLoginLinkException')) {
-                $cause = $previous->getPrevious();
-                if ($cause !== null) {
-                    $causeClass = get_class($cause);
-                    
-                    if (str_contains($causeClass, 'InvalidSignatureException')) {
-                        return 'altered';
-                    }
-                    
-                    if (str_contains($causeClass, 'UserNotFoundException')) {
-                        return 'revoked';
-                    }
-                }
-                // Si pas de cause identifiable, c'est un lien invalide
-                return 'invalid';
-            }
-            
-            // Vérification directe (pour ExpiredSignatureException, InvalidSignatureException, UserNotFoundException)
-            if (str_contains($previousClass, 'ExpiredSignatureException')) {
-                return 'expired';
-            }
-            
-            if (str_contains($previousClass, 'InvalidSignatureException')) {
+
+            if ($current instanceof InvalidSignatureException) {
                 return 'altered';
             }
-            
-            if (str_contains($previousClass, 'UserNotFoundException')) {
+
+            if ($current instanceof UserNotFoundException) {
                 return 'revoked';
             }
+
+            $current = $current->getPrevious();
         }
-        
-        // Par défaut, on considère que c'est un lien invalide
+
         return 'invalid';
     }
 

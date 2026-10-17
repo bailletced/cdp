@@ -2,12 +2,15 @@ default:
     suites:
         default:
             contexts:
-                - App\Features\Context\FeatureContext
-                - App\Features\Context\LoginLinkContext
-
+                - FeatureContext
+        login_link:
+            paths: [ '%paths.base%/features/Access/Infrastructure/Security' ]
+            contexts:
+                - FeatureContext
     extensions:
-        Behat\Symfony2Extension:
+        FriendsOfBehat\SymfonyExtension:
             kernel:
-                class: App\Kernel
+                class: App\Shared\Infrastructure\Symfony\Kernel
                 env: test
                 debug: false
+            bootstrap: features/bootstrap/behat_bootstrap.php

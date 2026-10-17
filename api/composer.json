@@ -39,6 +39,7 @@
         },
         "bump-after-update": true,
         "sort-packages": true,
+        "platform-check": false,
         "platform": {
             "php": "8.4.6"
         }
@@ -51,7 +52,10 @@
     "autoload-dev": {
         "psr-4": {
             "App\\Tests\\": "tests/"
-        }
+        },
+        "classmap": [
+            "FeatureContext.php"
+        ]
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
