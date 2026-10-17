@@ -1,0 +1,60 @@
+# deptrac : vérifie l'architecture en couches (Hexagonale)
+# BC = Boundary Control : vérifie qu'aucune couche ne dépend d'une couche plus haute
+
+depfile: deptrac.cache
+
+paths:
+  - ./src
+  - ./tests
+
+exclude_files:
+  - .*\.php$
+
+layers:
+  # Couche Domain (la plus interne)
+  - name: Domain
+    collectors:
+      - type: directory
+        regex: src/Shared/Domain/.*
+      - type: directory
+        regex: src/Chain/Domain/.*
+      - type: directory
+        regex: src/Access/Domain/.*
+
+  # Couche Application
+  - name: Application
+    collectors:
+      - type: directory
+        regex: src/Shared/Application/.*
+      - type: directory
+        regex: src/Chain/Application/.*
+      - type: directory
+        regex: src/Access/Application/.*
+
+  # Couche Infrastructure
+  - name: Infrastructure
+    collectors:
+      - type: directory
+        regex: src/Shared/Infrastructure/.*
+      - type: directory
+        regex: src/Chain/Infrastructure/.*
+      - type: directory
+        regex: src/Access/Infrastructure/.*
+
+  # Tests
+  - name: Tests
+    collectors:
+      - type: directory
+        regex: tests/.*
+
+ruleset:
+  Domain:
+    - Application
+    - Infrastructure
+    - Tests
+  Application:
+    - Infrastructure
+    - Tests
+  Infrastructure:
+    - Tests
+  Tests: []
