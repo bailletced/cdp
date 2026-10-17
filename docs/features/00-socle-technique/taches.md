@@ -15,9 +15,9 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Spike API Platform 5 (US-00.1)
 
-- [ ] **F00-T01** · `back` Spike 1/3 : prototype jetable Symfony 8.1 + API Platform 5.0 avec le `Kernel` et le `MessengerCommandBus` d'apip-ddd (`55a4b3b`) — *Dépend de* : — · *Fini quand* : une commande dispatchée depuis un processor passe dans `doctrine_transaction`, ou les blocages sont notés.
-- [ ] **F00-T02** · `back` Spike 2/3 : porter `AssertValueObject` et l'ObjectMapper (`#[Map(source: …View::class)]`) sur le prototype — *Dépend de* : F00-T01 · *Fini quand* : une ressource DTO lit une View et l'OpenAPI expose `minLength`/`maxLength`.
-- [ ] **F00-T03** · `back` Spike 3/3 : porter `EmbedValueObjectsDriver`, rédiger `docs/adr/0001-api-platform.md` (5.0 ou repli 4.4) — *Dépend de* : F00-T02 · *Fini quand* : ADR validé, prototype supprimé.
+- [x] **F00-T01** · `back` Spike 1/3 : prototype jetable Symfony 8.1 + API Platform 5.0 avec le `Kernel` et le `MessengerCommandBus` d'apip-ddd (`55a4b3b`) — *Dépend de* : — · *Fini quand* : une commande dispatchée depuis un processor passe dans `doctrine_transaction`, ou les blocages sont notés.
+- [x] **F00-T02** · `back` Spike 2/3 : porter `AssertValueObject` et l'ObjectMapper (`#[Map(source: …View::class)]`) sur le prototype — *Dépend de* : F00-T01 · *Fini quand* : une ressource DTO lit une View et l'OpenAPI expose `minLength`/`maxLength`.
+- [x] **F00-T03** · `back` Spike 3/3 : porter `EmbedValueObjectsDriver`, rédiger `docs/adr/0001-api-platform.md` (5.0 ou repli 4.4) — *Dépend de* : F00-T02 · *Fini quand* : ADR validé, prototype supprimé.
 
 ## Monorepo et environnement de dev (US-00.2)
 
