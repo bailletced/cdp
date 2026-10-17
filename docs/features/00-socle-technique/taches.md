@@ -53,7 +53,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F00-T24** · `front` `make openapi` : `api:openapi:export` → `front/src/api/openapi.json` → `openapi-typescript` → `schema.d.ts` — *Dépend de* : F00-T16, F00-T21 · *Fini quand* : types générés depuis l'API de démonstration.
 - [x] **F00-T25** · `front` `queryClient.ts` et `api/client.ts` (`openapi-fetch` + `openapi-react-query`, credentials same-origin, lecture de `X-Server-Time`) — *Dépend de* : F00-T24 · *Fini quand* : un hook de démonstration est testé avec MSW.
 - [x] **F00-T26** · `front` `api/errors.ts` : 422 → erreurs de champ TanStack Form, 409/403/429 → message métier + tests — *Dépend de* : F00-T25 · *Fini quand* : conversion testée sur des réponses réelles capturées du back.
-- [ ] **F00-T27** · `test` Playwright 1.64 sur la stack compose + helper API Mailpit (lire le dernier e-mail d'une adresse, extraire un lien) — *Dépend de* : F00-T06, F00-T22 · *Fini quand* : un test « la page d'accueil répond » passe.
+- [x] **F00-T27** · `test` Playwright 1.64 sur la stack compose + helper API Mailpit (lire le dernier e-mail d'une adresse, extraire un lien) — *Dépend de* : F00-T06, F00-T22 · *Fini quand* : un test « la page d'accueil répond » passe.
 
 ## Intégration continue (US-00.4, US-00.5)
 
