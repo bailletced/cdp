@@ -1,0 +1,26 @@
+# Branche Probity sur Mistral Vibe. À copier dans .vibe/hooks.toml (projet) ou ~/.vibe/hooks.toml.
+# Les hooks de projet ne se chargent que dans un dossier marqué « de confiance » par Vibe.
+#
+# Prérequis : MISTRAL_API_KEY dans l'environnement qui lance `vibe` (validateur IA de Probity).
+#
+# `command` se replace à la racine du dépôt, car Vibe n'indique pas le répertoire d'exécution.
+
+# Évalue chaque écriture et chaque commande avant exécution. `strict = true` : si le hook plante
+# ou dépasse le délai, l'action est REFUSÉE (par défaut Vibe laisserait passer avec un avertissement).
+[[hooks]]
+name = "probity-pre"
+type = "pre_tool"
+match = 're:.*(write_file|search_replace|edit|bash)$'
+command = "sh -c 'cd \"$(git rev-parse --show-toplevel)\" && node tooling/probity-vibe/hook.mjs'"
+timeout = 90
+strict = true
+description = "Probity : TDD imposé avant toute écriture (validateur Mistral)"
+
+# Alimente l'historique de session que Probity présente au validateur (tests lancés, sorties…).
+[[hooks]]
+name = "probity-history"
+type = "post_tool"
+match = "*"
+command = "sh -c 'cd \"$(git rev-parse --show-toplevel)\" && node tooling/probity-vibe/hook.mjs'"
+timeout = 20
+description = "Probity : enregistre les appels d'outil terminés"

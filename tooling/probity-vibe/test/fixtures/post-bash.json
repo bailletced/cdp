@@ -1,0 +1,23 @@
+{
+  "session_id": "6277ca01-9dda-c3cb-1509-a45c62da7aa7",
+  "transcript_path": "/home/user/.vibe/logs/session/unified/6277ca01-9dda-c3cb-1509-a45c62da7aa7",
+  "cwd": "/work/project",
+  "parent_session_id": null,
+  "hook_event_name": "post_tool",
+  "tool_name": "file_system.bash",
+  "tool_call_id": "Ve8dAqDHw",
+  "tool_input": {
+    "command": "php -l /work/project/hello.php"
+  },
+  "tool_status": "success",
+  "tool_output": {
+    "command": "php -l /work/project/hello.php",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "No syntax errors detected in /work/project/hello.php\n",
+    "was_truncated": false
+  },
+  "tool_output_text": "command: php -l /work/project/hello.php\nreturncode: 0\nstderr: \nstdout: No syntax errors detected in /work/project/hello.php\n\nwas_truncated: False",
+  "tool_error": null,
+  "duration_ms": 0
+}

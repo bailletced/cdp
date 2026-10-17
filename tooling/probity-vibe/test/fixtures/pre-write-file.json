@@ -1,0 +1,13 @@
+{
+  "session_id": "6277ca01-9dda-c3cb-1509-a45c62da7aa7",
+  "transcript_path": "/home/user/.vibe/logs/session/unified/6277ca01-9dda-c3cb-1509-a45c62da7aa7",
+  "cwd": "/work/project",
+  "parent_session_id": null,
+  "hook_event_name": "pre_tool",
+  "tool_name": "file_system.write_file",
+  "tool_call_id": "V0B3KOg1x",
+  "tool_input": {
+    "file_path": "/work/project/hello.php",
+    "content": "<?php\necho \" Hello \";\n"
+  }
+}
