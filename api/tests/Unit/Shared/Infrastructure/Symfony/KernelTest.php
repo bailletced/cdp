@@ -10,6 +10,15 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class KernelTest extends TestCase
 {
+    public function testItAutoconfiguresEventListeners(): void
+    {
+        $container = new ContainerBuilder();
+
+        new \ReflectionMethod(Kernel::class, 'build')->invoke(new Kernel('test', true), $container);
+
+        self::assertArrayHasKey('App\Shared\Application\Event\AsEventListener', $container->getAttributeAutoconfigurators());
+    }
+
     public function testItAutoconfiguresCommandHandlers(): void
     {
         $container = new ContainerBuilder();

@@ -6,7 +6,14 @@ framework:
             command.bus:
                 middleware:
                     - doctrine_transaction
+            # Synchrone ; les événements publiés par une commande attendent la fin de sa transaction
+            # (DispatchAfterCurrentBusStamp, voir MessengerEventBus).
+            event.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
         transports:
             sync: 'sync://'
         routing:
             App\Shared\Application\Command\CommandInterface: sync
+            App\Shared\Domain\Event\EventInterface: sync

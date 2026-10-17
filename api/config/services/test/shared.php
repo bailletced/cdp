@@ -15,5 +15,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $services->alias(CommandBusInterface::class, 'App\Shared\Infrastructure\Symfony\Messenger\MessengerCommandBus')->public();
 
     $services->load('App\\Tests\\Functional\\Shared\\Fixture\\', \dirname(__DIR__, 3).'/tests/Functional/Shared/Fixture')
-        ->exclude([\dirname(__DIR__, 3).'/tests/Functional/Shared/Fixture/*Command.php']);
+        ->exclude([\dirname(__DIR__, 3).'/tests/Functional/Shared/Fixture/{*Command,*Event}.php'])
+        ->public();
 };

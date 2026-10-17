@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Symfony;
 
 use App\Shared\Application\Command\AsCommandHandler;
+use App\Shared\Application\Event\AsEventListener;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -29,6 +30,10 @@ final class Kernel extends BaseKernel
     {
         $container->registerAttributeForAutoconfiguration(AsCommandHandler::class, static function (ChildDefinition $definition): void {
             $definition->addTag('messenger.message_handler', ['bus' => 'command.bus']);
+        });
+
+        $container->registerAttributeForAutoconfiguration(AsEventListener::class, static function (ChildDefinition $definition): void {
+            $definition->addTag('messenger.message_handler', ['bus' => 'event.bus']);
         });
     }
 }
