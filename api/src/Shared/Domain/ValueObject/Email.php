@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\ValueObject;
 
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Embeddable]
 final readonly class Email
 {
     public const int MIN_LENGTH = 3;
     public const int MAX_LENGTH = 254;
 
+    #[ORM\Column(name: 'email', length: self::MAX_LENGTH)]
     public string $value;
 
     public function __construct(string $value)
