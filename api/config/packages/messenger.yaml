@@ -18,7 +18,6 @@ framework:
             # Transport pour les messages transactionnels (haute priorité)
             async_transactional:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-                serializer: messenger.transport.serializer
                 options:
                     exchange:
                         name: async_transactional
@@ -35,7 +34,6 @@ framework:
             # Transport pour les campagnes (basse priorité)
             async_bulk:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-                serializer: messenger.transport.serializer
                 options:
                     exchange:
                         name: async_bulk
@@ -52,7 +50,6 @@ framework:
             # Transport pour les messages en échec
             failed:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-                serializer: messenger.transport.serializer
                 options:
                     exchange:
                         name: failed

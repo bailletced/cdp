@@ -13,8 +13,8 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Comptes et organisateurs (US-02.5)
 
-- [ ] **F02-T01** · `back` Access/Domain : agrégat `Account` (`AccountId`, `Email`, `credentialsVersion`, `PriantId?`) + tests unitaires — *Dépend de* : F00-T12 · *Fini quand* : incrément de `credentialsVersion` testé.
-- [ ] **F02-T02** · `back` `AccountRepositoryInterface` + InMemory + Doctrine, migration `account` (unique sur `lower(email)`) + suite abstraite `AccountRepositoryTestCase` — *Dépend de* : F02-T01, F00-T19 · *Fini quand* : la suite passe sur InMemory et PostgreSQL.
+- [x] **F02-T01** · `back` Access/Domain : agrégat `Account` (`AccountId`, `Email`, `credentialsVersion`, `PriantId?`) + tests unitaires — *Dépend de* : F00-T12 · *Fini quand* : incrément de `credentialsVersion` testé.
+- [x] **F02-T02** · `back` `AccountRepositoryInterface` + InMemory + Doctrine, migration `account` (unique sur `lower(email)`) + suite abstraite `AccountRepositoryTestCase` — *Dépend de* : F02-T01, F00-T19 · *Fini quand* : la suite passe sur InMemory et PostgreSQL.
 - [ ] **F02-T03** · `back` Agrégat `Organizer` (`AccountId`, ajouté par, ajouté le) + repository InMemory/Doctrine + migration + tests — *Dépend de* : F02-T02 · *Fini quand* : suite abstraite verte sur les deux implémentations.
 - [ ] **F02-T04** · `back` Console `app:organizer:create <email>` (Access/Infrastructure/Console) : crée `Account` + `Organizer`, idempotente — *Dépend de* : F02-T03 · *Fini quand* : test de commande (création puis relance sans doublon).
 
