@@ -86,6 +86,8 @@
         "api-platform/test": "^5.0",
         "phpunit/phpunit": "^13",
         "symfony/browser-kit": "8.1.*",
-        "symfony/http-client": "8.1.*"
+        "symfony/http-client": "8.1.*",
+        "symfony/maker-bundle": "^1.68",
+        "zenstruck/foundry": "^2.14"
     }
 }

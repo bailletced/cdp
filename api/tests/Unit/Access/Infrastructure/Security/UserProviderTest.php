@@ -142,6 +142,8 @@ final class UserProviderTest extends TestCase
             ->with($this->equalTo($accountId))
             ->willReturn($account);
 
+        // First refresh: is organizer
+        // Second refresh: is no longer organizer
         $this->organizerRepository
             ->expects($this->exactly(2))
             ->method('isOrganizer')
@@ -153,6 +155,45 @@ final class UserProviderTest extends TestCase
 
         $refreshedUser = $this->provider->refreshUser($initialUser);
         $this->assertContains('ROLE_ORGANIZER', $refreshedUser->getRoles());
+    }
+
+    public function testOrganizerRemovedLosesRoleOnRefresh(): void
+    {
+        // Test critère de fin : un organisateur retiré perd son rôle à la requête suivante
+        $uuid = Uuid::v7();
+        $email = 'test@example.com';
+
+        $account = new Account(
+            new AccountId($uuid),
+            new Email($email),
+            1
+        );
+
+        $accountId = new AccountId($uuid);
+
+        $this->accountRepository
+            ->expects($this->exactly(2))
+            ->method('findById')
+            ->with($this->equalTo($accountId))
+            ->willReturn($account);
+
+        // First refresh: is organizer
+        // Second refresh: is no longer organizer
+        $this->organizerRepository
+            ->expects($this->exactly(2))
+            ->method('isOrganizer')
+            ->with($uuid)
+            ->willReturnOnConsecutiveCalls(true, false);
+
+        $initialUser = $this->provider->loadUserByIdentifier($uuid->toRfc4122());
+        $this->assertTrue($initialUser->isOrganizer());
+        $this->assertContains('ROLE_ORGANIZER', $initialUser->getRoles());
+
+        // Refresh: organizer was removed
+        $refreshedUser = $this->provider->refreshUser($initialUser);
+        $this->assertFalse($refreshedUser->isOrganizer());
+        $this->assertNotContains('ROLE_ORGANIZER', $refreshedUser->getRoles());
+        $this->assertContains('ROLE_PRIANT', $refreshedUser->getRoles());
     }
 
     public function testRefreshUserNotSupported(): void
@@ -196,45 +237,5 @@ final class UserProviderTest extends TestCase
 
         $this->assertInstanceOf(SecurityUser::class, $user);
         $this->assertEquals($email, $user->getEmail());
-    }
-
-    public function testOrganizerRemovedLosesRoleOnRefresh(): void
-    {
-        // Test critère de fin : un organisateur retiré perd son rôle à la requête suivante
-        $uuid = Uuid::v7();
-        $email = 'test@example.com';
-
-        $account = new Account(
-            new AccountId($uuid),
-            new Email($email),
-            1
-        );
-
-        $accountId = new AccountId($uuid);
-
-        // User was an organizer
-        $this->accountRepository
-            ->expects($this->exactly(2))
-            ->method('findById')
-            ->with($this->equalTo($accountId))
-            ->willReturn($account);
-
-        // First refresh: is organizer
-        // Second refresh: is no longer organizer
-        $this->organizerRepository
-            ->expects($this->exactly(2))
-            ->method('isOrganizer')
-            ->with($uuid)
-            ->willReturnOnConsecutiveCalls(true, false);
-
-        $initialUser = $this->provider->loadUserByIdentifier($uuid->toRfc4122());
-        $this->assertTrue($initialUser->isOrganizer());
-        $this->assertContains('ROLE_ORGANIZER', $initialUser->getRoles());
-
-        // Refresh: organizer was removed
-        $refreshedUser = $this->provider->refreshUser($initialUser);
-        $this->assertFalse($refreshedUser->isOrganizer());
-        $this->assertNotContains('ROLE_ORGANIZER', $refreshedUser->getRoles());
-        $this->assertContains('ROLE_PRIANT', $refreshedUser->getRoles());
     }
 }

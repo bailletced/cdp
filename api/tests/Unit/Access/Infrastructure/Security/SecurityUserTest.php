@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Access\Infrastructure\Security;
 
+use App\Access\Domain\ValueObject\AccountId;
 use App\Access\Infrastructure\Security\SecurityUser;
+use App\Shared\Domain\ValueObject\Email;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
@@ -138,5 +140,21 @@ final class SecurityUserTest extends TestCase
         $user->updateIsOrganizer(false);
 
         $this->assertEquals($originalRoles, $user->getRoles());
+    }
+
+    public function testCreateFromAccount(): void
+    {
+        $accountId = new AccountId();
+        $email = new Email('test@example.com');
+        
+        $user = new SecurityUser(
+            $accountId->value,
+            $email->value,
+            'password',
+            false
+        );
+
+        $this->assertEquals($accountId->value->toRfc4122(), $user->getUserIdentifier());
+        $this->assertEquals($email->value, $user->getEmail());
     }
 }
