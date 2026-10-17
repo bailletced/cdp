@@ -42,7 +42,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Tests et qualité back (US-00.5)
 
-- [ ] **F00-T19** · `back` PHPUnit 13 strict (`failOnDeprecation`, `failOnNotice`, `failOnWarning`), suites unit/functional/integration/acceptance, base de test PostgreSQL, `ApiTestCase` — *Dépend de* : F00-T13 · *Fini quand* : `make test-back` lance les 4 suites.
+- [x] **F00-T19** · `back` PHPUnit 13 strict (`failOnDeprecation`, `failOnNotice`, `failOnWarning`), suites unit/functional/integration/acceptance, base de test PostgreSQL, `ApiTestCase` — *Dépend de* : F00-T13 · *Fini quand* : `make test-back` lance les 4 suites.
 - [ ] **F00-T20** · `back` Rector, PHP-CS-Fixer (`@Symfony:risky`), PHPStan max (Symfony, Doctrine), deptrac (`deptrac_bc.yaml`, `deptrac_hexa.yaml`) dans `make qa` — *Dépend de* : F00-T19 · *Fini quand* : `make qa` vert ; une dépendance Chain → Access volontaire échoue.
 
 ## SPA et contrat OpenAPI (US-00.4)
