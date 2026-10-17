@@ -95,6 +95,7 @@ final class UserProvider implements UserProviderInterface
             $account->getEmail()->value,
             '', // Password will be handled separately if needed
             $isOrganizer,
+            $account->getCredentialsVersion(),
         );
     }
 }

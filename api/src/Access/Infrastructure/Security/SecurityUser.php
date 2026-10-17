@@ -23,17 +23,20 @@ class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface,
      */
     private array $roles = [];
     private bool $isOrganizer = false;
+    private int $credentialsVersion = 1;
 
     public function __construct(
         Uuid $id,
         string $email,
         string $password,
         bool $isOrganizer = false,
+        int $credentialsVersion = 1,
     ) {
         $this->id = $id;
         $this->email = $email;
         $this->password = $password;
         $this->isOrganizer = $isOrganizer;
+        $this->credentialsVersion = $credentialsVersion;
         $this->roles = $this->buildRoles();
     }
 
@@ -91,6 +94,14 @@ class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface,
     }
 
     /**
+     * Get credentials version for login_link signature.
+     */
+    public function getCredentialsVersion(): int
+    {
+        return $this->credentialsVersion;
+    }
+
+    /**
      * Build roles based on organizer status.
      * Always includes ROLE_PRIANT, and adds ROLE_ORGANIZER if applicable.
      *
@@ -118,5 +129,13 @@ class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface,
 
         $this->isOrganizer = $isOrganizer;
         $this->roles = $this->buildRoles();
+    }
+
+    /**
+     * Update credentials version (e.g., after password change).
+     */
+    public function updateCredentialsVersion(int $version): void
+    {
+        $this->credentialsVersion = $version;
     }
 }

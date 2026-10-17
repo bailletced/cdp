@@ -43,12 +43,14 @@ final class LoginLinkControllerTest extends WebTestCase
         // Vérifier que les routes existent
         $router = $container->get('router');
         
-        $getRoute = $router->getRouteCollection()->get('auth_login_link');
+        // Route GET pour la redirection vers SPA
+        $getRoute = $router->getRouteCollection()->get('auth_login_link_get');
         $this->assertNotNull($getRoute);
         $this->assertEquals('/auth/connexion', $getRoute->getPath());
         $this->assertContains('GET', $getRoute->getMethods());
         
-        $postRoute = $router->getRouteCollection()->get('auth_login_link_verify');
+        // Route POST gérée par Symfony Security login_link
+        $postRoute = $router->getRouteCollection()->get('_security_login_link');
         $this->assertNotNull($postRoute);
         $this->assertEquals('/auth/connexion', $postRoute->getPath());
         $this->assertContains('POST', $postRoute->getMethods());

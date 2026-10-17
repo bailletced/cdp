@@ -19,12 +19,14 @@ security:
             provider: app_user_provider
             stateless: false
 
-            # Login link authentication
+            # Login link authentication (F02-T07, F02-T08)
             login_link:
-                check_route: auth_login_link_verify
+                check_route: _security_login_link
                 login_path: /connexion
                 signature_properties: [id, credentialsVersion]
                 check_post_only: true
+                success_handler: App\Access\Infrastructure\Security\LoginLinkSuccessHandler
+                failure_handler: App\Access\Infrastructure\Security\LoginLinkFailureHandler
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
