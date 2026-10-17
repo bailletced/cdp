@@ -192,5 +192,39 @@ All suites are run with `make test-back`.
 - **PHPUnit 13** (strict mode)
 - **Behat** + **Mink** for acceptance testing
 - **Probity** for TDD enforcement
-- **Mock objects** for unit tests
 - **Symfony test client** for functional tests
+
+### Rule: Use Fakes, NOT Mocks (for unit tests)
+
+**Mocks are FORBIDDEN** for regular unit testing. Use **Fake objects** instead.
+
+**Why:** Mocks make tests brittle (tightly coupled to implementation details). Fakes implement the same interface with simple, predictable behavior.
+
+**DO:**
+```php
+// Fake implementation for testing
+final class FakeEmailSender implements EmailSenderInterface
+{
+    public function send(Email $email): void
+    {
+        // Simple in-memory behavior - no expectations
+        $this->lastEmail = $email;
+    }
+}
+
+// Use the fake in tests
+$sender = new FakeEmailSender();
+$service = new UserRegistrationService($sender);
+$service->register($user);
+
+assert($sender->lastEmail === $expectedEmail);
+```
+
+**DON'T:**
+```php
+// ❌ Mocks are forbidden for regular testing
+$mock = $this->createMock(EmailSenderInterface::class);
+$mock->expects($this->once())->method('send');  // ❌ Brittle: coupled to call count
+```
+
+**Exception:** Mocks are **ONLY ALLOWED** for testing HTTP calls to external services (APIs, webhooks) where you need to verify request/response behavior. Use dedicated HTTP mocking libraries (e.g., Symfony's `HttpClient` with `MockHttpClient`).
