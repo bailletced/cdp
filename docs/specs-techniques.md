@@ -1,16 +1,18 @@
 # Spécifications techniques — 24 heures de prière
 
-**Communion de prière Notre-Dame du Mont Carmel**
+**Communion de prière Notre-Dame du Mont-Carmel**
 
 | | |
 |---|---|
-| Version | 0.1 — brouillon |
+| Version | 0.2 — brouillon (avec les arbitrages du PO) |
 | Date | 17 octobre 2026 |
 | Auteur | Cédric Baillet |
-| Référence | [Spécifications fonctionnelles v0.2](specs-fonctionnelles.md) |
+| Référence | [Spécifications fonctionnelles v0.3](specs-fonctionnelles.md) · [Backlog par feature](features/README.md) |
 | Statut | À valider |
 
-Ce document décrit l'implémentation des spécifications fonctionnelles : architecture, choix techniques et exploitation. Les règles de gestion (RG-xx) renvoient aux spécifications fonctionnelles. Les décisions sont numérotées **T1 à T46** et reprises en [annexe A](#annexe-a--journal-des-décisions-techniques).
+Ce document décrit l'implémentation des spécifications fonctionnelles : architecture, choix techniques et exploitation. Les règles de gestion (RG-xx) renvoient aux spécifications fonctionnelles. Les décisions sont numérotées **T1 à T56** et reprises en [annexe A](#annexe-a--journal-des-décisions-techniques).
+
+**Échéance : 1re édition du samedi 28/11/2026 20h au dimanche 29/11/2026 20h**, avec ouverture des inscriptions vers le 13/11. Claude Code implémente les tâches du [backlog](features/README.md), et Cédric relit et valide.
 
 ---
 
@@ -41,8 +43,8 @@ Ce document décrit l'implémentation des spécifications fonctionnelles : archi
           │ limitation     │      └─────────────┬─────────────┘
           └────────────────┘                    │ API HTTP
                                      ┌──────────▼──────────┐
-                                     │ Fournisseur e-mail  │
-                                     │ (UE)                │
+                                     │ Brevo (e-mails, UE) │
+                                     │                     │
                                      └─────────────────────┘
 
   Externes : GitHub (code, Actions, GHCR) · Sentry (UE) · sonde de disponibilité externe
@@ -85,7 +87,7 @@ Le projet part sur les dernières versions stables, vérifiées le 17/10/2026.
 
 ## 3. Organisation du dépôt (T3, T33)
 
-Le code est dans un monorepo hébergé sur **GitHub**.
+Le code est dans un monorepo hébergé sur **GitHub, en dépôt public** (T50). Le dépôt ne contient aucun secret : ils sont dans Swarm et dans GitHub. Les textes à méditer sont en base, pas dans le code.
 
 ```
 /
@@ -159,7 +161,7 @@ api/src/
 ├── Chain/
 │   ├── Domain/
 │   │   ├── Programme/          Edition (+ Slot), EditionLifecycle, Text, RichText
-│   │   ├── Participation/      Priant, Inscription, Intention, DisplayName, Headcount, RelayMessage
+│   │   ├── Participation/      Priant, Inscription, Intention, DisplayName, RelayMessage
 │   │   ├── Communication/      Campaign, Delivery, CampaignType
 │   │   ├── Policy/             VisibilityPolicy
 │   │   └── Repository/         Interfaces des repositories
@@ -187,7 +189,8 @@ api/src/
         │                       DevicePassCookie, SymfonyCurrentViewer
         ├── ApiPlatform/        Ressources /auth et /api/admin/organizers
         ├── Doctrine/
-        └── Console/            app:organizer:create (amorçage du premier organisateur)
+        └── Console/            app:organizer:create (amorçage du premier organisateur),
+                                app:account:revoke (révocation des accès d'un compte)
 ```
 
 Les sous-namespaces `Programme`, `Participation` et `Communication` de Chain préparent une extraction éventuelle en BC distincts.
@@ -200,9 +203,9 @@ Les sous-namespaces `Programme`, `Participation` et `Communication` de Chain pr�
 |---|---|---|
 | `Edition` (Chain) avec entité interne `Slot` | titre, présentation, `startsAt`, `opensAt`, `lifecycle` (`draft` \| `scheduled`), `scheduledAt`, `reminderSentAt`, `version`. `Slot` : rang, `startsAt`/`endsAt` (UTC), `TextId?` | RG-ED-1 à 6, statut calculé `statusAt($now)`, attribution des textes, « répartir dans l'ordre », duplication |
 | `Text` (Chain) | titre, source, corps (`RichText`), pistes de méditation | RG-TX-3 |
-| `Priant` (Chain) | `Email`, `consentAt?`, `unsubscribedAt?`, `erasedAt?` | RG-IN-2, §5.10 |
-| `Inscription` (Chain) | `EditionId`, `SlotId`, `PriantId?`, `DisplayName`, `Headcount` (1–30), origine (`self` \| `organizer`), `prayedAt?`, `RelayMessage?`, `version` | RG-IN-3 et 5, RG-EP-1, RG-LV-1 à 4 |
-| `Intention` (Chain) | `EditionId`, `PriantId`, texte (500 caractères au plus), `anonymous`, `createdAt` | RG-LV-5 à 7 |
+| `Priant` (Chain) | `Email?` (absent si inscrit par un organisateur), `DisplayName` (un seul nom, modifiable), `consentAt?`, `unsubscribedAt?`, `erasedAt?` | RG-IN-2, RG-IN-5, §5.10 |
+| `Inscription` (Chain) | `EditionId`, `SlotId`, `PriantId`, origine (`self` \| `organizer`), `prayedAt?`, `RelayMessage?`, `version`. Compte pour 1. | RG-IN-3, RG-EP-1, RG-LV-1 à 4 |
+| `Intention` (Chain) | `EditionId`, `PriantId`, texte (500 caractères au plus), `anonymous`, `createdAt`. Signée du nom actuel du priant ou « Anonyme ». | RG-LV-5 à 7 |
 | `Campaign` + `Delivery` (Chain) | type (`empty_slots` \| `free_message` \| `invitation` \| `eve_reminder`), objet, corps, auteur, destinataires figés, statut par destinataire | §5.9-6, idempotence des envois |
 | `Account` (Access) | e-mail normalisé, `credentialsVersion` (révocation des liens), `PriantId?` | Identité de connexion |
 | `Organizer` (Access) | `AccountId`, ajouté par, ajouté le | « au moins un organisateur » |
@@ -216,16 +219,16 @@ Les agrégats se référencent par identité. Le verrou optimiste (`#[ORM\Versio
 |---|---|
 | Éditions | `CreateEdition`, `UpdateEdition`, `ScheduleEdition`, `UnscheduleEdition`, `DuplicateEdition`, `AssignText`, `DistributeTexts` |
 | Textes | `CreateText`, `UpdateText`, `DeleteText` |
-| Participation | `RegisterInscriptions` (plusieurs créneaux), `UpdateInscription`, `CancelInscription`, `MarkPrayed`, `UnmarkPrayed`, `WriteRelayMessage`, `DeleteRelayMessage`, `PostIntention`, `DeleteIntention`, `ErasePriant`, `UnsubscribeInvitations` |
-| Organisateurs | `RegisterInscriptionsForSomeone`, `MoveInscription`, `SendCampaign`, `DeliverCampaignMessage` (asynchrone), `SendEveReminders` (planifiée) |
+| Participation | `RegisterInscriptions` (plusieurs créneaux), `RenamePriant`, `CancelInscription`, `MarkPrayed`, `UnmarkPrayed`, `WriteRelayMessage`, `DeleteRelayMessage`, `PostIntention`, `DeleteIntention`, `ErasePriant`, `UnsubscribeInvitations` |
+| Organisateurs | `RegisterInscriptionsForSomeone` (crée un priant sans e-mail si besoin), `RenamePriant`, `MoveInscription`, `SendCampaign`, `DeliverCampaignMessage` (asynchrone), `SendEveReminders` (planifiée) ; `DeleteTestEdition` (exploitation, §12.7) |
 | Access | `RequestPersonalLink`, `AddOrganizer`, `RemoveOrganizer` |
 
 **Exemple : flux d'une inscription**
 
-1. `POST /api/inscriptions` → `RegisterInscriptionsPayload` (créneaux, nom affiché, nombre de personnes, e-mail, consentement, champ piège).
+1. `POST /api/inscriptions` → `RegisterInscriptionsPayload` (créneaux, nom affiché, e-mail, consentement, champ piège).
 2. `RegisterInscriptionsProcessor` : contrôle anti-abus (§6.7), génère les `InscriptionId`, puis dispatche `RegisterInscriptions`.
 3. Le handler, dans une transaction :
-   - retrouve ou crée le `Priant` ;
+   - retrouve le `Priant` par son e-mail, ou le crée. **S'il existe déjà, son nom n'est jamais écrasé** par le nom saisi (RG-IN-2) : seul `RenamePriant`, en session, peut le changer. Le consentement est daté une seule fois (RG-IN-5) ;
    - vérifie le statut de l'édition et que les créneaux n'ont pas commencé, sauf le créneau en cours (§5.8) ;
    - crée les `Inscription` ;
    - enregistre `InscriptionsRegistered` (et `PriantRegistered` si le priant est nouveau).
@@ -244,10 +247,10 @@ L'unicité (créneau, priant) est garantie par un index unique partiel. Une viol
 - **Identifiants UUID v7** : il suffit de remplacer `Uuid::v4()` par `Uuid::v7()` dans `Identity`.
 - **Créneaux en table** : `Slot` est une entité interne d'`Edition` (`edition_id`, `rank`, `starts_at`, `ends_at`, `text_id`). Les 48 créneaux sont générés à la création de l'édition et régénérés si `startsAt` change, ce qui n'est possible qu'avant la première inscription (RG-ED-3).
 - **Contraintes en base** :
-  - `UNIQUE (slot_id, priant_id) WHERE priant_id IS NOT NULL` (RG-IN-3) ;
-  - `CHECK (headcount BETWEEN 1 AND 30)` ;
-  - clés étrangères vers les créneaux.
-- **Index** : `inscription(slot_id)`, `inscription(priant_id)`, `slot(edition_id, rank)`, `priant(lower(email))`.
+  - `UNIQUE (slot_id, priant_id)` (RG-IN-3) ;
+  - `UNIQUE (lower(email)) WHERE email IS NOT NULL` sur `priant` (RG-IN-2) ;
+  - clés étrangères vers les créneaux et les priants.
+- **Index** : `inscription(slot_id)`, `inscription(priant_id)`, `slot(edition_id, rank)`.
 - **Migrations** : Doctrine Migrations, versionnées dans `api/migrations/`. Elles doivent rester compatibles avec la version précédente du code (on ajoute d'abord, on retire au déploiement suivant), car les anciens réplicas tournent encore pendant la migration (§12.3).
 
 ### 4.6 Temps et fuseau horaire (T9)
@@ -257,7 +260,8 @@ L'unicité (créneau, priant) est garantie par un index unique partiel. Une viol
   - découpe une édition en 48 créneaux réels de 30 minutes à partir de `startsAt` ;
   - produit le libellé de chaque créneau en heure de Paris (« 3h00–3h30 »), en précisant les heures ambiguës (« 2h00 (heure d'hiver) ») ;
   - détermine le moment de la journée (soirée 18h–0h, nuit 0h–6h, matin 6h–12h, après-midi 12h–18h) ;
-  - calcule les échéances, comme « la veille du début à 18h ».
+  - calcule les échéances, comme « la veille du début à 18h » ;
+  - convertit l'heure de début saisie en heure de Paris (`resolveLocalStart`), avec **résolution automatique** (RG-ED-7) : une heure ambiguë prend sa première occurrence, une heure inexistante est décalée d'une heure. L'heure doit tomber sur :00 ou :30.
 - **L'API renvoie** l'instant ISO 8601 UTC, le libellé et le moment de la journée. Le front n'ajoute que l'heure locale du navigateur, via `Intl`, si son fuseau n'est pas `Europe/Paris` (RG-PL-3).
 - **Horloge** : `ClockInterface` (PSR-20) est injectée partout. Les tests utilisent `MockClock`.
 - **Tests obligatoires** :
@@ -319,16 +323,15 @@ statusAt(now) =
 | `GET /api/editions/{id}/live` | tous (champs selon le profil) | Bloc « En ce moment » ou bilan |
 | `GET /api/slots/{id}/text` | inscrits sur ce créneau, organisateurs | Texte complet et pistes de méditation |
 | `POST /api/inscriptions` | tous (protégé contre les abus) | Inscription sur un ou plusieurs créneaux, pose du pass appareil |
-| `PATCH /api/inscriptions/{id}` | priant vérifié propriétaire | Nom affiché, nombre de personnes |
 | `DELETE /api/inscriptions/{id}` | priant vérifié propriétaire, avant le début du créneau | Désinscription |
 | `PUT` / `DELETE /api/inscriptions/{id}/prayed` | priant vérifié propriétaire, dans la fenêtre RG-LV-1 | Pointage |
 | `PUT` / `DELETE /api/inscriptions/{id}/relay-message` | priant vérifié propriétaire, dans la fenêtre RG-LV-3 | Mot de relais |
 | `GET /api/editions/{id}/relay-messages` | inscrits | Fil du relais |
 | `GET /api/editions/{id}/intentions` | inscrits | Intentions |
 | `POST /api/intentions` · `DELETE /api/intentions/{id}` | priant vérifié inscrit · auteur ou organisateur | Dépôt et suppression d'une intention |
-| `GET /api/me` | priant vérifié | Profil, dernier nom affiché, statut des invitations |
+| `GET /api/me` · `PATCH /api/me` | priant vérifié | Profil (nom affiché, statut des invitations) · changement du nom affiché |
 | `GET /api/me/inscriptions?edition=` | priant vérifié | Mes créneaux et l'historique |
-| `GET /api/me/calendar.ics` | priant vérifié | Fichier agenda de l'édition en cours |
+| `GET /api/me/calendar.ics` | priant vérifié | Fichier agenda unique de l'édition en cours (tous ses créneaux) |
 | `POST /api/me/erasure` | priant vérifié | Suppression de ses données (RG-EP-3) |
 | `POST /api/me/invitations-unsubscribe` · `POST /unsubscribe/{token}` | priant vérifié · lien en un clic (RFC 8058) | Désabonnement des invitations |
 | `POST /auth/link-request` | tous (protégé contre les abus) | « Recevoir mon lien » : toujours 202, quelle que soit l'adresse |
@@ -342,7 +345,8 @@ statusAt(now) =
 | `editions` | Lister, créer, modifier, `POST …/schedule`, `POST …/unschedule`, `POST …/duplicate`, `GET …/dashboard` |
 | `texts` | CRUD sur la bibliothèque |
 | `slots` | `PUT …/{id}/text`, `POST /api/admin/editions/{id}/distribute-texts` |
-| `inscriptions` | Lister par édition et par créneau (avec e-mails), créer pour quelqu'un, modifier, supprimer, `POST …/{id}/move` |
+| `inscriptions` | Lister par édition et par créneau (avec e-mails), créer pour quelqu'un, supprimer, `POST …/{id}/move` ; **`GET /api/admin/editions/{id}/inscriptions.csv`** (export : nom, e-mail, créneaux en heure de Paris) |
+| `priants` | `PATCH …/{id}` (nom affiché) |
 | `relay-messages`, `intentions` | Lister, supprimer (modération) |
 | `campaigns` | `POST …/preview` (aperçu et nombre de destinataires), `POST` (envoi), `GET` (historique) |
 | `organizers` | Lister, ajouter, retirer |
@@ -375,7 +379,8 @@ statusAt(now) =
 On utilise le **`login_link` de Symfony** :
 
 - `signature_properties: [id, credentialsVersion]` : incrémenter `credentialsVersion` invalide tous les liens émis ;
-- durée de vie fixée lien par lien (`createLoginLink($user, null, $lifetime)`), jusqu'à la fin de l'édition concernée + 7 jours ;
+- durée de vie fixée lien par lien (`createLoginLink($user, null, $lifetime)`) : jusqu'à la fin de l'édition concernée + 7 jours pour un lien envoyé dans le cadre d'une édition, 7 jours sinon (« Recevoir mon lien » entre deux éditions, organisateurs) ;
+- destination après connexion prise dans une **liste blanche** (`/`, `/mon-espace`) et incluse dans les propriétés signées. Le lien d'invitation mène à `/`, les autres à `/mon-espace`. Il n'y a aucune redirection libre ;
 - pas de `max_uses`, pour que les messageries qui préchargent les liens ne les consomment pas ;
 - identifiant = UUID de l'`Account` : aucun e-mail dans l'URL ;
 - `check_post_only: true`. Le lien pointe sur `GET /auth/connexion?user=…&expires=…&hash=…`, qui redirige vers la page SPA `/connexion`. Celle-ci envoie automatiquement un POST vers `/auth/connexion`, qui ouvre la session puis renvoie vers `/mon-espace`.
@@ -444,16 +449,18 @@ La clé `APP_SECRET` signe les liens : en changer invalide tous les liens en cir
 |---|---|
 | `command.bus` (synchrone) | Commandes métier, avec le middleware `doctrine_transaction` |
 | `event.bus` (synchrone) | Événements, avec `DispatchAfterCurrentBusStamp` |
-| Transport `async` | Doctrine sur PostgreSQL, `use_notify: true` (LISTEN/NOTIFY) : e-mails, `DeliverCampaignMessage` |
+| Transport `async_transactional` | Doctrine sur PostgreSQL, `use_notify: true` (LISTEN/NOTIFY) : confirmation, lien personnel, rappel de la veille. **Consommé en priorité.** |
+| Transport `async_bulk` | Doctrine sur PostgreSQL : `DeliverCampaignMessage` (relances, messages libres, invitations), soumis au quota journalier (§7.3) |
 | Transport `failed` | Doctrine. Surveillé (§12.5), rejeu par `messenger:failed:retry` |
 | `scheduler_default` | Symfony Scheduler (§7.4) |
 
-Politique de nouvelle tentative pour `async` : 5 essais, délai exponentiel (1 min, puis multiplié par 3).
+Le worker consomme `messenger:consume async_transactional async_bulk scheduler_default`, dans cet ordre de priorité. Politique de nouvelle tentative : 5 essais, délai exponentiel (1 min, puis multiplié par 3).
 
 ### 7.2 E-mails (T30)
 
 - Port **`Notifier`** (Chain/Application), avec l'adaptateur **`MailerNotifier`** : Symfony Mailer, `TemplatedEmail`, gabarits Twig dans `api/templates/emails/` (inky et CSS mis en ligne), mise en page sobre aux couleurs de la Communion.
-- **Fournisseur européen** via le bridge API de Symfony : Brevo, Scaleway TEM ou Mailjet, à choisir (§14). **Mailpit** en dev et en e2e.
+- **Brevo** (T47), via le bridge API de Symfony (`symfony/brevo-mailer`), offre gratuite à 300 e-mails par jour, suffisante pour 50 à 150 priants. **Mailpit** en dev et en e2e.
+- **Domaine d'envoi neuf** (T49), sans réputation. DNS configurés dès l'achat (SPF, DKIM et DMARC fournis par Brevo). Les volumes montent progressivement : d'abord les e-mails de test et de l'équipe, puis les confirmations, avant toute relance groupée.
 - **Suivi des clics et des ouvertures désactivé**, sinon les liens personnels seraient réécrits.
 - Domaine d'envoi authentifié (SPF, DKIM, DMARC), et nom d'expéditeur = nom de la Communion.
 
@@ -469,10 +476,11 @@ Politique de nouvelle tentative pour `async` : 5 essais, délai exponentiel (1 m
 ### 7.3 Envois de masse (campagnes)
 
 1. `SendCampaign` crée la `Campaign` et **fige les destinataires** : une `Delivery` par destinataire, au statut `pending`, calculée par `RecipientFinder` selon le type.
-2. Un message `DeliverCampaignMessage(deliveryId)` par destinataire part sur `async`.
+2. Un message `DeliverCampaignMessage(deliveryId)` par destinataire part sur `async_bulk`.
 3. Le handler n'envoie que si la `Delivery` est `pending`, puis la passe à `sent`. Un message rejoué n'envoie donc jamais deux fois.
-4. Le débit vers le fournisseur est limité (`RateLimiter`, par exemple 10 par seconde, à ajuster selon le fournisseur).
-5. Le back-office affiche l'avancement : envoyés, en attente, en échec.
+4. **Quota journalier** (RG-NO-5) : un `DailyEmailQuota` compte les e-mails envoyés dans la journée, en heure de Paris, toutes catégories confondues. La limite est configurable (300 par défaut), dont une réserve pour le transactionnel (60 par défaut). Si le quota disponible pour les envois groupés est épuisé, le message est reporté au lendemain 8h (heure de Paris) avec un `DelayStamp`, et la `Delivery` passe à l'état `deferred`.
+5. Le débit vers le fournisseur est aussi limité (`RateLimiter`, par exemple 5 par seconde).
+6. Le back-office affiche l'avancement : envoyés, reportés, en attente, en échec. L'aperçu d'un envoi indique s'il sera étalé sur plusieurs jours.
 
 Le rappel de la veille réutilise ce mécanisme, avec le type `eve_reminder`.
 
@@ -607,15 +615,16 @@ Aucun service PDF côté serveur.
 
 | Sujet | Mise en œuvre |
 |---|---|
-| Inventaire | E-mail, nom affiché, nombre de personnes, inscriptions, pointages, mots de relais, intentions, sessions et jetons, journaux techniques |
+| Inventaire | E-mail, nom affiché, inscriptions, pointages, mots de relais, intentions, sessions et jetons, journaux techniques, journal des exports |
 | Consentement | Case obligatoire lors de la première inscription, `Priant.consentAt`. *Écart assumé (T46)* : aucun consentement pour une inscription saisie par un organisateur. |
-| Effacement (T19) | `ErasePriant` → `PriantErased`, dans une seule transaction côté Chain : inscriptions futures supprimées ; inscriptions passées anonymisées (« Un priant », `priant_id` mis à `NULL`) ; mots de relais et intentions supprimés ; e-mail effacé. Côté Access : comptes, sessions, remember-me et passes révoqués. |
+| Effacement (T19) | `ErasePriant` → `PriantErased`, dans une seule transaction côté Chain : inscriptions futures supprimées ; le priant est anonymisé sur place (e-mail effacé, nom « Un priant », `erasedAt` renseigné), ce qui anonymise ses inscriptions passées tout en gardant les statistiques ; mots de relais et intentions supprimés. Côté Access : sessions, remember-me et passes révoqués, liens invalidés. **Organisateur-priant** : seul le priant est effacé, l'`Account` et le rôle `Organizer` subsistent. |
+| Export (T55) | L'export CSV des inscrits fait sortir des données personnelles. Il est réservé au rôle organisateur, journalisé (qui, quand) et accompagné d'un rappel de supprimer le fichier après usage. |
 | Conservation (T20) | *Écart assumé* : aucune purge automatique. L'effacement existe déjà, donc une purge pourra être ajoutée sous forme de tâche du Scheduler. |
 | Visibilité | Noms visibles des seuls inscrits, e-mails des seuls organisateurs (§6.5) |
 | Journaux | Aucun e-mail en clair dans les journaux Monolog : les identifiants sont des UUID |
 | Sentry | `send_default_pii: false`, `before_send` qui retire les e-mails, pas de Session Replay |
 | Sous-traitants | Hébergeur du VPS, fournisseur e-mail, Sentry, GitHub : accords de sous-traitance à conserver |
-| Sauvegardes | Instantanés du VPS (T43) : un priant effacé reste présent dans les instantanés jusqu'à leur expiration chez l'hébergeur |
+| Sauvegardes | Sauvegardes Hetzner (T43, T48) : un priant effacé reste présent dans les sauvegardes jusqu'à leur expiration (7 jours) |
 
 ---
 
@@ -623,13 +632,13 @@ Aucun service PDF côté serveur.
 
 ### 12.1 Topologie Swarm (T1, T36, T37, T40)
 
-Un VPS **amd64** (T44), d'environ 2 vCPU et 4 Go, en nœud manager unique.
+Un VPS **Hetzner Cloud** (T48) **amd64** (T44), de type CX32 ou CPX21 (environ 2 à 4 vCPU, 4 Go), en nœud manager unique. Il n'y a pas de préproduction (T52).
 
 | Service | Image | Réplicas | Points clés |
 |---|---|---|---|
 | `traefik` | `traefik:v3` | 1 | Ports 80 et 443, ACME (Let's Encrypt), provider Swarm, redirection HTTPS, en-têtes de sécurité, répartition de charge |
 | `app` | `ghcr.io/<org>/cdp:<sha>` | 2 | FrankenPHP en mode worker ; mise à jour `start-first` ; sonde de santé `GET /health` ; l'entrypoint attend que le schéma soit à jour (§12.3) |
-| `worker` | même image | 1 | Mise à jour `stop-first`. Entrypoint : `doctrine:migrations:migrate`, puis `messenger:consume async scheduler_default --time-limit=3600 --memory-limit=256M` |
+| `worker` | même image | 1 | Mise à jour `stop-first`. Entrypoint : `doctrine:migrations:migrate`, puis `messenger:consume async_transactional async_bulk scheduler_default --time-limit=3600 --memory-limit=256M` |
 | `mercure` | `dunglas/mercure` | 1 | Route `/.well-known/mercure`, abonnés anonymes, JWT de publication |
 | `database` | `postgres:18` | 1 | Volume local, mot de passe en secret, réseau interne uniquement |
 | `portainer` + `agent` | `portainer/portainer-ce` | 1 + global | Interface sur `portainer.<domaine>`, restreinte par liste d'IP (middleware Traefik) ; seul `/api/webhooks/*` est public |
@@ -647,10 +656,16 @@ Le Caddyfile envoie `/api*`, `/auth*`, `/unsubscribe*` et `/health` à PHP, et s
 ### 12.2 Chaîne de livraison (T33, T38, T40, T44)
 
 ```
-PR ─► CI (qualité, tests, e2e, build sans publication)
-main ─► build + push GHCR (:sha, :main)
-tag v* ─► déploiement (Portainer)
+PR ─► CI (qualité, tests, e2e sur l'image construite) ─► fusion seulement si tout est vert
+main ─► build + push GHCR (:sha, :main) ─► déploiement automatique (Portainer)
 ```
+
+**Chaque fusion sur `main` est déployée en production** (T51, à la place des tags `v*`). Comme il n'y a pas de préproduction (T52), les garde-fous sont :
+
+- protection de branche : PR obligatoire, CI verte obligatoire, e2e Playwright joués sur l'image qui sera déployée ;
+- migrations compatibles avec la version précédente ;
+- retour arrière immédiat (Portainer ou `failure_action: rollback`) ;
+- gel pendant une édition en cours.
 
 Le déploiement passe par les **webhooks de service de Portainer** :
 
@@ -663,7 +678,7 @@ Le déploiement passe par les **webhooks de service de Portainer** :
 
 - GitHub Actions avec `docker/build-push-action`, BuildKit et un cache `type=gha,mode=max`, plus des caches de montage pour Composer et pnpm. Une modification du back ne reconstruit pas le front, et inversement. Objectif : moins de 5 minutes avec le cache.
 - Build natif amd64, sans émulation.
-- Coût : minutes illimitées si le dépôt est public, 2 000 minutes par mois s'il est privé.
+- Coût : minutes illimitées, puisque le dépôt est public.
 - GHCR : nettoyage des anciennes versions de l'image (`actions/delete-package-versions`, on garde les 20 dernières).
 
 ### 12.3 Migrations (T39)
@@ -698,14 +713,22 @@ Un secret Swarm ne se modifie pas. Pour en changer, on crée `<nom>_v2`, on met 
 
 ### 12.6 Sauvegardes (T43)
 
-- **Décision** : uniquement les instantanés du VPS proposés par l'hébergeur.
+- **Décision** : uniquement les sauvegardes de l'hébergeur. Chez Hetzner : sauvegardes automatiques quotidiennes (7 conservées, environ +20 % du prix du serveur) et instantanés manuels à la demande.
 - **Risques** :
-  - la base n'est pas forcément cohérente au moment de l'instantané (PostgreSQL rejoue son journal au redémarrage, mais rien ne le garantit) ;
+  - la base n'est pas forcément cohérente au moment de la sauvegarde (PostgreSQL rejoue son journal au redémarrage, mais rien ne le garantit) ;
   - les sauvegardes sont chez le même fournisseur que la production ;
   - la granularité est de l'ordre de la journée.
 - **Recommandations** :
   - `make backup` (`pg_dump` compressé, copié hors du VPS) avant chaque édition et avant chaque migration délicate ;
   - un test de restauration avant la première édition.
+
+### 12.7 Commandes d'exploitation
+
+| Commande | Usage |
+|---|---|
+| `app:organizer:create <email>` | Amorçage du premier organisateur |
+| `app:account:revoke <email>` | Révoque les sessions, les jetons remember-me et les passes, et invalide les liens d'un compte (T53) |
+| `app:edition:delete-test <id>` | Supprime une édition de test, ainsi que ses inscriptions et les priants créés pour l'occasion. Sert à la répétition en production (T52). Refuse toute édition qui a des inscriptions de priants réels. |
 
 ---
 
@@ -762,7 +785,13 @@ Parcours de bout en bout :
 - **Contrat** : contrôle de dérive OpenAPI et types (§5.3).
 - **E2E** : Playwright sur l'image construite.
 
-Jobs GitHub Actions : `back` (avec un service Postgres), `front`, `contract`, `image` (build, publication seulement sur `main`), `e2e`, et `deploy` (sur tag `v*`, voir §12.2).
+Jobs GitHub Actions : `back` (avec un service Postgres), `front`, `contract`, `image` (build, publication seulement sur `main`), `e2e`, et `deploy` (à chaque fusion sur `main`, voir §12.2).
+
+**Répétition générale sans préproduction (T52)** :
+
+1. Le déroulé complet des 24 heures se joue en e2e, avec l'horloge pilotable, autorisée **uniquement** dans l'environnement e2e.
+2. Puis une édition de test en production, avant la programmation de la vraie : quelques organisateurs s'inscrivent, reçoivent les e-mails et testent les liens.
+3. L'édition de test est ensuite supprimée avec `app:edition:delete-test`.
 
 ---
 
@@ -772,12 +801,14 @@ Les zones absentes d'apip-ddd concentrent le risque : authentification, e-mails,
 
 | Lot | Contenu |
 |---|---|
-| **0 — Socle** | Spike de portage de la glue apip-ddd vers API Platform 5 (décision : 5.0 ou 4.4). Monorepo, Docker dev, Makefile, CI qualité. **Squelette** : inscription minimale → e-mail (Mailpit) → lien → session → `/mon-espace`. Image de prod, stack Swarm, Traefik, Portainer, premier déploiement par webhook. Sentry et sonde externe. |
+| **0 — Socle** | Spike de portage de la glue apip-ddd vers API Platform 5 (décision : 5.0 ou 4.4). Monorepo, Docker dev, Makefile, CI qualité. **Squelette** (T54) : compte créé par `app:organizer:create` → « Recevoir mon lien » → e-mail (Mailpit) → lien → session → `/mon-espace`. Tout ce code est définitif. Image de prod, stack Swarm, Traefik, Portainer, premier déploiement par webhook. Sentry et sonde externe. |
 | **1 — Programme** | `Edition`, `Slot`, `ParisCalendar` (avec tests du changement d'heure), statut hybride, bibliothèque de textes, attribution, back-office éditions et textes, planning public |
 | **2 — Participation** | Inscription complète, pass appareil, `VisibilityPolicy` et matrice d'acceptation, mise en avant des créneaux vides, suggestion, confirmation avec `.ics`, espace personnel, désinscription, anti-abus |
 | **3 — Les 24 heures** | « En ce moment » et bilan, Mercure (signaux et mode dégradé), pointage, mots de relais, intentions, modération |
 | **4 — Communication** | Campagnes (relance, message libre, invitation), `Delivery`, désabonnement en un clic, rappel de la veille (Scheduler), alerte sur le transport `failed` |
-| **5 — Finitions** | Effacement RGPD, version imprimable, audit d'accessibilité (axe-core et lecteurs d'écran), procédure d'exploitation, **répétition générale** : une édition de test complète en préproduction, avec une horloge simulée |
+| **5 — Finitions** | Effacement RGPD, version imprimable, audit d'accessibilité (axe-core et lecteurs d'écran), procédure d'exploitation, **répétition générale** : en e2e avec horloge simulée, puis une édition de test en production (§14.2) |
+
+Le calendrier détaillé, avec un jalon d'ouverture des inscriptions vers le 13/11/2026, se trouve dans l'[index du backlog](features/README.md).
 
 ---
 
@@ -794,20 +825,23 @@ Les zones absentes d'apip-ddd concentrent le risque : authentification, e-mails,
 9. **Migrations jouées par le worker seul (T39)** : si le worker ne démarre pas, les nouveaux réplicas de l'app restent bloqués, mais les anciens continuent de servir. Il faut surveiller les déploiements bloqués et respecter la discipline « on ajoute d'abord, on retire ensuite ».
 10. **Hub Mercure à un seul réplica** : s'il tombe, le front repasse en rafraîchissement périodique, sans coupure de service.
 11. **Portainer exposé** : l'interface est restreinte par liste d'IP et seuls les webhooks sont publics. L'URL d'un webhook est un secret : on la garde dans les secrets GitHub et on la change si elle fuite.
-12. **Concurrence** : modification de l'heure de début alors qu'une inscription arrive, ou double clic. Parades : index unique partiel, verrou optimiste, codes 409 et 422.
+12. **Concurrence** : modification de l'heure de début alors qu'une inscription arrive, ou double clic. Parades : index unique, verrou optimiste, codes 409 et 422.
+13. **Calendrier très serré** : six semaines jusqu'à l'édition, quatre jusqu'à l'ouverture des inscriptions, pour le MVP complet. Le débit dépend de la relecture et des contenus de la Communion. Parades : chemin critique suivi chaque semaine, et features « Cible » (Mercure, pointage, relais, intentions, impression) reportables en dernier recours.
+14. **Production sans préproduction, déployée à chaque fusion (T51, T52)** : toute régression part en production. Parades : CI et e2e obligatoires avant la fusion, retour arrière immédiat, gel pendant l'édition, édition de test supprimable.
+15. **Domaine d'envoi neuf (T49)** : risque de spam pour les premiers e-mails. Parades : configuration DNS dès l'achat, montée progressive des volumes, liens personnels aussi accessibles via « Recevoir mon lien ».
 
 ---
 
 ## 17. Points ouverts techniques
 
-1. **Fournisseur e-mail** (Brevo, Scaleway TEM, Mailjet) : à choisir selon le volume attendu et le budget.
-2. **Nom de domaine** et domaine d'envoi des e-mails.
-3. **Dépôt GitHub public ou privé** : cela change le quota de minutes de CI, le stockage GHCR gratuit et les règles de protection des environnements.
-4. **Hébergeur du VPS** (amd64) et sa politique d'instantanés (fréquence, rétention, localisation).
-5. **Déclenchement du déploiement** : sur tag `v*` (proposition) ou à chaque fusion sur `main`.
+1. ~~Fournisseur e-mail~~ → Brevo (T47).
+2. **Nom de domaine** : un nouveau domaine dédié (T49), dont le nom reste à choisir et à acheter **cette semaine**.
+3. ~~Dépôt public ou privé~~ → public (T50).
+4. ~~Hébergeur~~ → Hetzner Cloud (T48), compte et serveur à créer cette semaine.
+5. ~~Déclenchement du déploiement~~ → à chaque fusion sur `main` (T51).
 6. **Compatibilité de l'outillage avec TypeScript 7** (Biome, plugin TanStack Router) : à vérifier au lot 0.
-7. **Palette et typographies** exactes du thème carmélitain.
-8. **Astreinte pendant les 24 heures** : qui reçoit les alertes, et par quel canal.
+7. **Palette et typographies** : proposées par Claude, à valider par la Communion.
+8. **Astreinte pendant les 24 heures** : qui reçoit les alertes, et par quel canal (à fournir par la Communion).
 
 ---
 
@@ -852,15 +886,25 @@ Les zones absentes d'apip-ddd concentrent le risque : authentification, e-mails,
 | T35 | Dev local | Docker Compose + Makefile |
 | T36 | Topologie | 1 nœud ; app ×2 (`start-first`), worker ×1, mercure ×1, PostgreSQL, Traefik, Portainer |
 | T37 | Proxy et TLS | Traefik v3 |
-| T38 | Livraison | Déploiement par webhook |
+| T38 | Livraison | Déploiement par webhook, à chaque fusion sur `main` (T51) |
 | T39 | Migrations | Jouées par le worker seul ; l'app attend un schéma à jour ; mise à jour worker puis app |
 | T40 | Outil de déploiement | Portainer CE (webhooks de service) |
 | T41 | Secrets | Secrets Swarm (`*_FILE`) |
 | T42 | Supervision | Sentry (UE) + sonde externe + journaux JSON + alerte sur le transport `failed` |
-| T43 | Sauvegardes | Instantanés du VPS seuls (risque documenté, `pg_dump` recommandé avant chaque édition) |
+| T43 | Sauvegardes | Sauvegardes de l'hébergeur seules (risque documenté, `pg_dump` recommandé avant chaque édition) |
 | T44 | Processeur du VPS | amd64 |
 | T45 | Durée des créneaux | 30 minutes, fixe (arbitrage fonctionnel) |
 | T46 | Inscription saisie par un organisateur | Pas de recueil de consentement (écart RGPD assumé) |
+| T47 | Fournisseur e-mail | Brevo (offre gratuite, 300 par jour) |
+| T48 | Hébergeur | Hetzner Cloud (CX32/CPX21 amd64, sauvegardes automatiques) |
+| T49 | Domaine | Nouveau domaine dédié (à acheter), domaine d'envoi « chauffé » progressivement |
+| T50 | Visibilité du dépôt | GitHub public |
+| T51 | Déclencheur de déploiement | Chaque fusion sur `main` (remplace les tags `v*`) |
+| T52 | Préproduction | Aucune : répétition en e2e (horloge simulée), puis édition de test en production supprimable |
+| T53 | Révocation d'un compte | Commande `app:account:revoke`, sans interface |
+| T54 | Squelette du lot 0 | Via « Recevoir mon lien » sur un compte créé par commande |
+| T55 | Export des inscrits | CSV dans le back-office (`/api/admin/editions/{id}/inscriptions.csv`) |
+| T56 | E-mails groupés | Transports `async_transactional` (prioritaire) et `async_bulk`, quota journalier avec report au lendemain |
 
 ## Annexe B — Fichiers de référence dans apip-ddd
 

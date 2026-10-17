@@ -1,0 +1,11 @@
+{
+  "name": "cdp-tooling",
+  "private": true,
+  "description": "Outillage de développement transverse (Probity : TDD imposé aux agents)",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@nizos/probity": "^1.10.1"
+  }
+}
