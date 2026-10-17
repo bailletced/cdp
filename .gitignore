@@ -1,1 +1,22 @@
 node_modules/
+
+# Symfony (api/)
+/api/.env.local
+/api/.env.local.php
+/api/.env.*.local
+/api/var/
+/api/vendor/
+/api/config/reference.php
+/api/.php-cs-fixer.cache
+/api/.phpunit.result.cache
+/api/.deptrac*.cache
+/api/.phpstan.cache/
+
+# SPA (front/)
+/front/dist/
+/front/playwright-report/
+/front/test-results/
+
+# Poste de travail
+.DS_Store
+.env.local
