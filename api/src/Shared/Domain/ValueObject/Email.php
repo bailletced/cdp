@@ -7,7 +7,7 @@ namespace App\Shared\Domain\ValueObject;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Embeddable]
-final readonly class Email
+final readonly class Email implements StringConstraintsInterface
 {
     public const int MIN_LENGTH = 3;
     public const int MAX_LENGTH = 254;
@@ -29,5 +29,17 @@ final readonly class Email
         }
 
         $this->value = $value;
+    }
+
+    #[\Override]
+    public static function getMinLength(): ?int
+    {
+        return self::MIN_LENGTH;
+    }
+
+    #[\Override]
+    public static function getMaxLength(): ?int
+    {
+        return self::MAX_LENGTH;
     }
 }

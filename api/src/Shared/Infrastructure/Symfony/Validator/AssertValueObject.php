@@ -34,13 +34,23 @@ final class AssertValueObject extends Composite
 
         $this->message = $message ?? $this->message;
 
-        // Lire les constantes du Value Object pour créer des contraintes
-        $reflection = new \ReflectionClass($this->class);
+        $minLength = null;
+        $maxLength = null;
 
-        $minLength = $reflection->hasConstant('MIN_LENGTH') ? $reflection->getConstant('MIN_LENGTH') : null;
-        $maxLength = $reflection->hasConstant('MAX_LENGTH') ? $reflection->getConstant('MAX_LENGTH') : null;
+        // 1. Priorité à l'interface StringConstraintsInterface
+        $interface = \App\Shared\Domain\ValueObject\StringConstraintsInterface::class;
+        if (\is_a($this->class, $interface, true)) {
+            $minLength = $this->class::getMinLength();
+            $maxLength = $this->class::getMaxLength();
+        }
+        // 2. Fallback : lire les constantes par réflexion
+        else {
+            $reflection = new \ReflectionClass($this->class);
+            $minLength = $reflection->hasConstant('MIN_LENGTH') ? $reflection->getConstant('MIN_LENGTH') : null;
+            $maxLength = $reflection->hasConstant('MAX_LENGTH') ? $reflection->getConstant('MAX_LENGTH') : null;
+        }
 
-        // Ajouter la contrainte Length si le VO définit des bornes
+        // Ajouter la contrainte Length si des bornes sont définies
         if (null !== $minLength || null !== $maxLength) {
             $this->constraints[] = new Length(
                 min: $minLength,
