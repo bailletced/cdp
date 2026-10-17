@@ -47,8 +47,8 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## SPA et contrat OpenAPI (US-00.4)
 
-- [ ] **F00-T21** · `front` Initialiser `front/` : Vite 8, React 19, TypeScript 7 (repli 6.x si Biome ou le plugin TanStack Router sont incompatibles), pnpm, Biome — *Dépend de* : F00-T04 · *Fini quand* : `pnpm build`, `biome ci` et `tsc --noEmit` passent ; choix TS noté dans l'ADR.
-- [ ] **F00-T22** · `front` TanStack Router (routes fichiers via le plugin Vite), `main.tsx`, `router.tsx`, route racine et `/` provisoire — *Dépend de* : F00-T21 · *Fini quand* : navigation typée entre deux routes de test.
+- [x] **F00-T21** · `front` Initialiser `front/` : Vite 8, React 19, TypeScript 7 (repli 6.x si Biome ou le plugin TanStack Router sont incompatibles), pnpm, Biome — *Dépend de* : F00-T04 · *Fini quand* : `pnpm build`, `biome ci` et `tsc --noEmit` passent ; choix TS noté dans l'ADR.
+- [x] **F00-T22** · `front` TanStack Router (routes fichiers via le plugin Vite), `main.tsx`, `router.tsx`, route racine et `/` provisoire — *Dépend de* : F00-T21 · *Fini quand* : navigation typée entre deux routes de test.
 - [ ] **F00-T23** · `front` Vitest 5 + Testing Library + MSW, cible `make test-front` — *Dépend de* : F00-T22 · *Fini quand* : un test de composant avec un handler MSW passe.
 - [ ] **F00-T24** · `front` `make openapi` : `api:openapi:export` → `front/src/api/openapi.json` → `openapi-typescript` → `schema.d.ts` — *Dépend de* : F00-T16, F00-T21 · *Fini quand* : types générés depuis l'API de démonstration.
 - [ ] **F00-T25** · `front` `queryClient.ts` et `api/client.ts` (`openapi-fetch` + `openapi-react-query`, credentials same-origin, lecture de `X-Server-Time`) — *Dépend de* : F00-T24 · *Fini quand* : un hook de démonstration est testé avec MSW.
