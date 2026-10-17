@@ -19,6 +19,13 @@ security:
             provider: app_user_provider
             stateless: false
 
+            # Login link authentication
+            login_link:
+                check_route: auth_login_link_verify
+                login_path: /connexion
+                signature_properties: [id, credentialsVersion]
+                check_post_only: true
+
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 

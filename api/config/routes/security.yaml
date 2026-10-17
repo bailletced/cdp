@@ -1,3 +1,14 @@
 _security_logout:
     resource: security.route_loader.logout
     type: service
+
+# Routes pour login_link (F02-T07)
+auth_login_link:
+    path: /auth/connexion
+    methods: [GET]
+    controller: App\Access\Infrastructure\Controller\LoginLinkController::loginLinkGet
+
+auth_login_link_verify:
+    path: /auth/connexion
+    methods: [POST]
+    controller: App\Access\Infrastructure\Controller\LoginLinkController::loginLinkPost
