@@ -38,7 +38,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F00-T15** · `back` ObjectMapper des ressources DTO + `MissingModelException` → 404 (Shared/Infrastructure/ApiPlatform) + tests — *Dépend de* : F00-T09 · *Fini quand* : un provider de test renvoie 200 puis 404.
 - [x] **F00-T16** · `back` Normalisation des erreurs : 422 `violations[]` avec `propertyPath`, 409 (unicité, verrou optimiste), 403 ; `Cache-Control: private, no-store` par défaut + tests d'acceptation — *Dépend de* : F00-T14, F00-T15 · *Fini quand* : chaque code est couvert par un test.
 - [x] **F00-T17** · `back` Horloge PSR-20 injectée (`ClockInterface`, `MockClock` en test) + en-tête `X-Server-Time` sur chaque réponse — *Dépend de* : F00-T09 · *Fini quand* : test d'acceptation vérifiant l'en-tête avec une horloge figée.
-- [ ] **F00-T18** · `back` Transports Messenger Doctrine (`use_notify`) : `async_transactional` (confirmation, lien, rappel), `async_bulk` (campagnes) et `failed` ; retry 5 essais (1 min ×3), migration + messages factices — *Dépend de* : F00-T10 · *Fini quand* : `messenger:consume async_transactional async_bulk` traite le transactionnel en priorité (test) ; échec → `failed`.
+- [x] **F00-T18** · `back` Transports Messenger Doctrine (`use_notify`) : `async_transactional` (confirmation, lien, rappel), `async_bulk` (campagnes) et `failed` ; retry 5 essais (1 min ×3), migration + messages factices — *Dépend de* : F00-T10 · *Fini quand* : `messenger:consume async_transactional async_bulk` traite le transactionnel en priorité (test) ; échec → `failed`.
 
 ## Tests et qualité back (US-00.5)
 
