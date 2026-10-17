@@ -1,0 +1,9 @@
+doctrine:
+    orm:
+        mappings:
+            # Agrégat factice pour tester le mapping des VO sans dépendre d'une feature.
+            TestFixtures:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/tests/Integration/Fixture'
+                prefix: App\Tests\Integration\Fixture

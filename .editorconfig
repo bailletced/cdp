@@ -1,0 +1,23 @@
+# https://editorconfig.org
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{json,js,mjs,ts,tsx,css,html,yaml,yml}]
+indent_size = 2
+
+# Configuration Symfony : 4 espaces, comme le reste du back.
+[api/**.{yaml,yml}]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+
+[{Dockerfile,Makefile,*.sh}]
+indent_style = tab

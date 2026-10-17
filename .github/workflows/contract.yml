@@ -1,0 +1,119 @@
+name: Contract CI
+
+on:
+  push:
+    branches: [main, feature/**]
+    paths:
+      - 'api/src/**'
+      - 'api/config/**'
+      - 'front/src/api/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/src/**'
+      - 'api/config/**'
+      - 'front/src/api/**'
+
+jobs:
+  contract:
+    name: Contract Check
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, intl
+
+      - name: Install Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: api/vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('api/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+
+      - name: Install Composer
+        run: |
+          cd api
+          composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Cache pnpm
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node-${{ hashFiles('front/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install pnpm dependencies
+        run: |
+          cd front
+          pnpm install --frozen-lockfile
+
+      - name: Regenerate OpenAPI
+        run: |
+          cd api
+          php bin/console api:openapi:export > /tmp/openapi_new.json
+
+      - name: Compare OpenAPI
+        run: |
+          # Comparer le fichier généré avec l'existant
+          if [ -f front/src/api/openapi.json ]; then
+            if ! diff front/src/api/openapi.json /tmp/openapi_new.json; then
+              echo "::error::L'OpenAPI a changé. Exécutez 'make openapi' et commitez les changements."
+              exit 1
+            fi
+          else
+            # Si le fichier n'existe pas, le créer
+            cp /tmp/openapi_new.json front/src/api/openapi.json
+            echo "::warning::openapi.json créé. Commitez ce fichier."
+          fi
+
+      - name: Regenerate TypeScript types
+        run: |
+          cd front
+          pnpm exec openapi-typescript src/api/openapi.json -o /tmp/schema_new.d.ts
+
+      - name: Compare TypeScript types
+        run: |
+          # Comparer le fichier généré avec l'existant
+          if [ -f src/api/schema.d.ts ]; then
+            if ! diff src/api/schema.d.ts /tmp/schema_new.d.ts; then
+              echo "::error::Les types TypeScript ont changé. Exécutez 'make openapi' et commitez les changements."
+              exit 1
+            fi
+          else
+            # Si le fichier n'existe pas, le créer
+            cp /tmp/schema_new.d.ts src/api/schema.d.ts
+            echo "::warning::schema.d.ts créé. Commitez ce fichier."
+          fi
+
+      - name: Verify TypeScript types compile
+        run: |
+          cd front
+          pnpm exec tsc --noEmit

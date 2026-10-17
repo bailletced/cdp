@@ -1,0 +1,74 @@
+framework:
+    messenger:
+        default_bus: command.bus
+        buses:
+            # Chaque commande s'exécute dans une transaction : une exception l'annule entièrement.
+            command.bus:
+                middleware:
+                    - doctrine_transaction
+            # Synchrone ; les événements publiés par une commande attendent la fin de sa transaction
+            # (DispatchAfterCurrentBusStamp, voir MessengerEventBus).
+            event.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+        failure_transport: failed
+        transports:
+            sync: 'sync://'
+            # Transport pour les messages transactionnels (haute priorité)
+            async_transactional:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: messenger.transport.serializer
+                options:
+                    exchange:
+                        name: async_transactional
+                        type: direct
+                    queues:
+                        async_transactional:
+                            binding_keys:
+                                - async_transactional
+                retry_strategy:
+                    max_retries: 5
+                    delay: 60000  # 1 minute
+                    multiplier: 1
+                    max_delay: 60000
+            # Transport pour les campagnes (basse priorité)
+            async_bulk:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: messenger.transport.serializer
+                options:
+                    exchange:
+                        name: async_bulk
+                        type: direct
+                    queues:
+                        async_bulk:
+                            binding_keys:
+                                - async_bulk
+                retry_strategy:
+                    max_retries: 5
+                    delay: 60000  # 1 minute
+                    multiplier: 1
+                    max_delay: 60000
+            # Transport pour les messages en échec
+            failed:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: messenger.transport.serializer
+                options:
+                    exchange:
+                        name: failed
+                        type: direct
+                    queues:
+                        failed:
+                            binding_keys:
+                                - failed
+        routing:
+            App\Shared\Application\Command\CommandInterface: sync
+            App\Shared\Domain\Event\EventInterface: sync
+            # Messages transactionnels (haute priorité)
+            App\Shared\Application\Message\ConfirmationMessage: async_transactional
+            App\Shared\Application\Message\LinkMessage: async_transactional
+            App\Shared\Application\Message\ReminderMessage: async_transactional
+            # Messages bulk (basse priorité)
+            App\Shared\Application\Message\CampaignMessage: async_bulk
+            # Messages en échec
+            App\Shared\Application\Message\MessageInterface: failed

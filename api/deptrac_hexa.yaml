@@ -1,0 +1,43 @@
+# deptrac : vérifie l'isolation entre les modules Chain et Access
+# Une dépendance volontaire Chain → Access doit faire échouer la CI
+
+depfile: deptrac_hexa.cache
+
+paths:
+  - ./src
+
+exclude_files:
+  - .*\.php$
+
+layers:
+  # Module Chain (chain de prière)
+  - name: Chain
+    collectors:
+      - type: directory
+        regex: src/Chain/.*
+
+  # Module Access (accès, authentification)
+  - name: Access
+    collectors:
+      - type: directory
+        regex: src/Access/.*
+
+  # Module Shared (partagé)
+  - name: Shared
+    collectors:
+      - type: directory
+        regex: src/Shared/.*
+
+ruleset:
+  Chain:
+    - Shared
+  Access:
+    - Shared
+  Shared: []
+
+# Interdire toute dépendance entre Chain et Access
+forbidden:
+  - from: Chain
+    to: Access
+  - from: Access
+    to: Chain

@@ -1,0 +1,55 @@
+---
+# Environnement de développement (lu automatiquement avec compose.yaml).
+#
+# Point d'entrée dans le navigateur : http://localhost:8000 (Vite), qui renvoie /api et /auth
+# vers `php` pour rester sur une seule origine (cookies de session, T7). L'API reste
+# joignable directement sur http://localhost:8080 pour le débogage.
+services:
+  php:
+    build:
+      context: .
+      target: dev
+    image: cdp-php-dev
+    command: ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--watch"]
+    volumes:
+      - ./api:/app
+      - ./docker/frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
+    environment:
+      APP_ENV: dev
+      XDEBUG_MODE: ${XDEBUG_MODE:-off}
+      MAILER_DSN: smtp://mailpit:1025
+      FRANKENPHP_WORKER_CONFIG: watch
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - "${PHP_PORT:-8080}:80"
+    tty: true
+
+  database:
+    ports:
+      - "127.0.0.1:${DATABASE_PORT:-5432}:5432"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+
+  node:
+    image: node:24-alpine
+    working_dir: /app
+    volumes:
+      - ./front:/app
+    # Tant que front/ n'est pas initialisé (F00-T21), le conteneur attend au lieu de tomber.
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -f package.json ]; then
+          echo "front/ n'est pas encore initialisé (F00-T21)"
+          exec sleep infinity
+        fi
+        corepack enable
+        pnpm install
+        exec pnpm dev --host 0.0.0.0
+    ports:
+      - "${HTTP_PORT:-8000}:5173"

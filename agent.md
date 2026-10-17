@@ -80,3 +80,23 @@ Communication, simplicité, feedback, courage et respect. Concrètement :
 - **Langues** : documentation et interface en français, code en anglais. Les termes métier `Priant` et `Inscription` sont gardés en français.
 - **Commandes** : passer par le `Makefile` (`make up`, `make test`, `make qa`, `make openapi`…).
 - **Commits** : petits et atomiques. Le message dit le pourquoi et cite l'identifiant de tâche (ex. `F09-T03 : VO DisplayName`).
+
+---
+
+## Skills à charger pour ce projet
+
+### Pour Vibe CLI (Mistral)
+Le skill `php-coding-standards` est **automatiquement chargé** depuis `./.vibe/skills/php-coding-standards/SKILL.md` quand tu travailles dans ce projet. Il définit :
+- Standards de codage PHP (use statements, naming, visibility)
+- **TDD obligatoire** (enforcé par Probity)
+- **Tests d'acceptance Behat Gherkin** : toute feature backend DOIT avoir un test `.feature` pour valider le comportement extérieur
+
+### Pour Claude CLI (Anthropic)
+Claude CLI utilise un système de skills différent (format non compatible avec Vibe). Pour appliquer les mêmes règles :
+1. **Créer un skill Claude** équivalent dans `~/.claude/skills/php-coding-standards/` (format YAML/JSON)
+2. **Ou copier les règles** de `./.vibe/skills/php-coding-standards/SKILL.md` dans ta configuration Claude
+
+Les règles clés à reproduire :
+- ❌ Pas de FQCN (`\App\...`), utiliser des `use` statements
+- ✅ TDD obligatoire (test rouge → code vert → refactor)
+- ✅ Tests d'acceptance en Gherkin avec Behat pour toute feature backend
