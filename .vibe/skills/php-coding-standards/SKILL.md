@@ -1,6 +1,6 @@
 ---
 name: php-coding-standards
-description: Load when working on PHP code in this project to enforce coding standards, including import rules, naming conventions, and best practices.
+description: Load when working on PHP code in this project to enforce coding standards, including import rules, naming conventions, best practices, and testing requirements (TDD + Behat Gherkin).
 ---
 
 # PHP Coding Standards
@@ -136,7 +136,61 @@ function method() { ... }  // ❌ Missing visibility
 
 ## 8. Testing
 
-- Follow the TDD cycle: Red → Green → Refactor
-- Write tests first, then implementation
+### Rule: TDD is mandatory (enforced by Probity)
+
+- Follow the TDD cycle: **Red → Green → Refactor**
+- Write tests **first**, then implementation
 - Keep tests focused on one behavior
 - Use descriptive test method names (e.g., `testItThrowsExceptionWhenEmailIsInvalid`)
+- **Probity** (https://github.com/nizos/probity) is configured in `.claude/settings.json` and **WILL BLOCK** any production code without a failing test first
+
+### Rule: Acceptance tests with Behat Gherkin
+
+**FOR THIS PROJECT SPECIFICALLY:** Every backend feature implementation **MUST** include an **acceptance test written in Gherkin syntax with Behat**.
+
+- **Purpose**: Validate the **exterior** behavior (black box testing)
+- **Format**: `.feature` files in Gherkin syntax
+- **Location**: `api/features/<feature-name>.feature`
+- **When**: As soon as a backend feature is implemented, write the corresponding acceptance test
+
+**Example:**
+```gherkin
+# api/features/inscription.feature
+Feature: Priant inscription
+  As a priant
+  I want to register for a prayer slot
+  So that I can participate in the 24-hour prayer chain
+
+  Scenario: Successful inscription with valid email
+    Given the prayer slot "2026-11-28 14:00-14:30" is available
+    When I submit my inscription with email "priant@example.com" and name "Jean Dupont"
+    Then I should receive a confirmation email
+    And my inscription should be recorded in the database
+
+  Scenario: Failed inscription with invalid email
+    Given the prayer slot "2026-11-28 14:00-14:30" is available
+    When I submit my inscription with email "invalid-email" and name "Jean Dupont"
+    Then I should see an error message "Adresse e-mail invalide"
+    And my inscription should NOT be recorded
+```
+
+**Validation structure:**
+- **Inside** (unit/functional/integration): Validated by **TDD + Probity** (forces test-first development)
+- **Outside** (acceptance): Validated by **Behat Gherkin** (validates end-to-end behavior)
+
+### Rule: Test organization
+
+Tests are organized in 4 suites (see `api/phpunit.xml`):
+- **Unit tests**: Test individual classes in isolation (mock dependencies)
+- **Functional tests**: Test components with real dependencies (Symfony container)
+- **Integration tests**: Test interactions between components
+- **Acceptance tests**: Test end-to-end workflows (Behat Gherkin)
+
+All suites are run with `make test-back`.
+
+### Tools:
+- **PHPUnit 13** (strict mode)
+- **Behat** + **Mink** for acceptance testing
+- **Probity** for TDD enforcement
+- **Mock objects** for unit tests
+- **Symfony test client** for functional tests
