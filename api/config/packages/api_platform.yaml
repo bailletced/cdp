@@ -1,0 +1,10 @@
+api_platform:
+    title: 24 heures de prière
+    description: API de la Communion de prière Notre-Dame du Mont-Carmel
+    version: 1.0.0
+    # JSON-LD/Hydra par défaut et merge-patch pour PATCH : valeurs par défaut d'API Platform 5 (T8).
+    defaults:
+        # L'authentification passe par la session Symfony (T14).
+        stateless: false
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']

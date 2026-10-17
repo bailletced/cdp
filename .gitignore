@@ -20,3 +20,5 @@ node_modules/
 # Poste de travail
 .DS_Store
 .env.local
+/api/.phpunit.cache/
+/api/public/bundles/
