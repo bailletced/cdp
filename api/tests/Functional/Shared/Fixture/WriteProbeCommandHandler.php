@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Functional\Shared\Fixture;
+
+use App\Shared\Application\Command\AsCommandHandler;
+use Doctrine\ORM\EntityManagerInterface;
+
+#[AsCommandHandler]
+final readonly class WriteProbeCommandHandler
+{
+    public function __construct(private EntityManagerInterface $entityManager)
+    {
+    }
+
+    public function __invoke(WriteProbeCommand $command): void
+    {
+        $this->entityManager->getConnection()->executeStatement('INSERT INTO command_bus_probe (value) VALUES (?)', [$command->value]);
+
+        if ($command->fail) {
+            throw new \DomainException('The handler failed.');
+        }
+    }
+}
