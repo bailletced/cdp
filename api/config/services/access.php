@@ -1,8 +1,11 @@
 <?php
 
 use App\Access\Domain\Repository\AccountRepositoryInterface;
+use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineAccountRepository;
+use App\Access\Infrastructure\Doctrine\Repository\DoctrineOrganizerRepository;
 use App\Access\Infrastructure\Repository\InMemoryAccountRepository;
+use App\Access\Infrastructure\Repository\InMemoryOrganizerRepository;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $container): void {
@@ -12,7 +15,17 @@ return static function (ContainerConfigurator $container): void {
             '$registry' => '@doctrine',
         ])
 
+        ->set(DoctrineOrganizerRepository::class)
+        ->args([
+            '$registry' => '@doctrine',
+        ])
+
+        ->set(OrganizerRepositoryInterface::class, DoctrineOrganizerRepository::class)
+
         ->set(InMemoryAccountRepository::class)
+        ->tag('app.in_memory_repository')
+
+        ->set(InMemoryOrganizerRepository::class)
         ->tag('app.in_memory_repository')
     ;
 };
