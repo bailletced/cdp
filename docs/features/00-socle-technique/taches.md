@@ -29,7 +29,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Application Symfony et noyau Shared (US-00.3)
 
 - [x] **F00-T08** · `back` Créer l'app Symfony 8.1 dans `api/` (API Platform, Doctrine ORM 3 + Migrations, Messenger, Mailer), `date.timezone=UTC`, `stateless: false`, JSON-LD + merge-patch — *Dépend de* : F00-T07 · *Fini quand* : `GET /api` répond dans la stack dev.
-- [ ] **F00-T09** · `back` Kernel apip-ddd : `src/{Shared,Chain,Access}/{Domain,Application,Infrastructure}`, `config/services/{shared,chain,access}.php`, autoconfiguration `#[AsCommandHandler]` — *Dépend de* : F00-T08 · *Fini quand* : le conteneur compile, un handler factice est auto-enregistré.
+- [x] **F00-T09** · `back` Kernel apip-ddd : `src/{Shared,Chain,Access}/{Domain,Application,Infrastructure}`, `config/services/{shared,chain,access}.php`, autoconfiguration `#[AsCommandHandler]` — *Dépend de* : F00-T08 · *Fini quand* : le conteneur compile, un handler factice est auto-enregistré.
 - [ ] **F00-T10** · `back` `CommandInterface`, `CommandBusInterface`, `MessengerCommandBus` (`command.bus` + `doctrine_transaction`) + tests fonctionnels — *Dépend de* : F00-T09 · *Fini quand* : un test prouve le rollback sur exception.
 - [ ] **F00-T11** · `back` `event.bus` synchrone avec `DispatchAfterCurrentBusStamp`, `EventBusSpy` pour les tests — *Dépend de* : F00-T10 · *Fini quand* : un test prouve qu'un listener n'est appelé qu'après validation de la transaction.
 - [ ] **F00-T12** · `back` VO `Identity` (UUID v7) et `Email` (trim, minuscules, format, longueur max) + tests unitaires — *Dépend de* : F00-T09 · *Fini quand* : cas limites testés, messages d'erreur en français.
