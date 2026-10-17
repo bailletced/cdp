@@ -33,22 +33,57 @@ final class LoginLinkFailureHandler implements AuthenticationFailureHandlerInter
 
     /**
      * Détermine le type d'erreur à partir de l'exception.
+     * 
+     * Arbre des exceptions Symfony LoginLink :
+     * InvalidLoginLinkAuthenticationException (authenticator)
+     *   └─ InvalidLoginLinkException (handler)
+     *       ├─ ExpiredLoginLinkException (avec cause: ExpiredSignatureException)
+     *       ├─ InvalidSignatureException (cause directe)
+     *       └─ UserNotFoundException (cause directe)
      */
     private function determineErrorType(AuthenticationException $exception): string
     {
-        $message = $exception->getMessage();
+        // Niveau 1 : InvalidLoginLinkAuthenticationException
+        $previous = $exception->getPrevious();
         
-        // Les messages d'erreur de Symfony Security login_link
-        if (str_contains($message, 'expired') || str_contains($message, 'Expired')) {
-            return 'expired';
-        }
-        
-        if (str_contains($message, 'invalid') || str_contains($message, 'Invalid')) {
-            return 'altered';
-        }
-        
-        if (str_contains($message, 'user not found') || str_contains($message, 'User not found')) {
-            return 'revoked';
+        if ($previous !== null) {
+            $previousClass = get_class($previous);
+            
+            // ExpiredLoginLinkException est déjà typée
+            if (str_contains($previousClass, 'ExpiredLoginLinkException')) {
+                return 'expired';
+            }
+            
+            // InvalidLoginLinkException peut avoir différentes causes
+            if (str_contains($previousClass, 'InvalidLoginLinkException')) {
+                $cause = $previous->getPrevious();
+                if ($cause !== null) {
+                    $causeClass = get_class($cause);
+                    
+                    if (str_contains($causeClass, 'InvalidSignatureException')) {
+                        return 'altered';
+                    }
+                    
+                    if (str_contains($causeClass, 'UserNotFoundException')) {
+                        return 'revoked';
+                    }
+                }
+                // Si pas de cause identifiable, c'est un lien invalide
+                return 'invalid';
+            }
+            
+            // Vérification directe (pour ExpiredSignatureException, InvalidSignatureException, UserNotFoundException)
+            if (str_contains($previousClass, 'ExpiredSignatureException')) {
+                return 'expired';
+            }
+            
+            if (str_contains($previousClass, 'InvalidSignatureException')) {
+                return 'altered';
+            }
+            
+            if (str_contains($previousClass, 'UserNotFoundException')) {
+                return 'revoked';
+            }
         }
         
         // Par défaut, on considère que c'est un lien invalide

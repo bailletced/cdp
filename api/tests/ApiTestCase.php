@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\Client;
 
 /**
  * Classe de base pour les tests d'API (acceptance).
@@ -12,16 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  */
 abstract class ApiTestCase extends WebTestCase
 {
-    protected static function createClient(array $options = [], array $server = []): static
-    {
-        $client = parent::createClient($options, $server);
-
-        // Configurer le client pour les tests API
-        $client->disableReboot();
-
-        return $client;
-    }
-
     /**
      * Effectue une requête GET et retourne la réponse.
      */
@@ -43,7 +34,7 @@ abstract class ApiTestCase extends WebTestCase
     protected function post(string $url, array $data = [], array $headers = []): array
     {
         $client = static::createClient();
-        $client->request('POST', $url, [], [], $headers, json_encode($data) ?: '{}');
+        $client->request('POST', $url, $data, [], $headers);
 
         return [
             'status' => $client->getResponse()->getStatusCode(),

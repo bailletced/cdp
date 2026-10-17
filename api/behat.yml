@@ -1,0 +1,13 @@
+default:
+    suites:
+        default:
+            contexts:
+                - App\Features\Context\FeatureContext
+                - App\Features\Context\LoginLinkContext
+
+    extensions:
+        Behat\Symfony2Extension:
+            kernel:
+                class: App\Kernel
+                env: test
+                debug: false
