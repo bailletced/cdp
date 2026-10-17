@@ -9,7 +9,6 @@ use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\ValueObject\AccountId;
 use App\Shared\Domain\ValueObject\Email;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -18,9 +17,9 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 final class DoctrineAccountRepository extends ServiceEntityRepository implements AccountRepositoryInterface
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(\Doctrine\Bundle\DoctrineBundle\Registry $registry, string $entityClass = Account::class)
     {
-        parent::__construct($registry, Account::class);
+        parent::__construct($registry, $entityClass);
     }
 
     #[\Override]
@@ -34,7 +33,7 @@ final class DoctrineAccountRepository extends ServiceEntityRepository implements
     {
         try {
             return $this->createQueryBuilder('a')
-                ->andWhere('lower(a.email.value) = lower(:email)')
+                ->andWhere('lower(a.email.value) = lower (:email)')
                 ->setParameter('email', $email->value)
                 ->getQuery()
                 ->getOneOrNullResult();
@@ -64,7 +63,7 @@ final class DoctrineAccountRepository extends ServiceEntityRepository implements
     {
         return $this->createQueryBuilder('a')
             ->select('1')
-            ->andWhere('lower(a.email.value) = lower(:email)')
+            ->andWhere('lower(a.email.value) = lower (:email)')
             ->setParameter('email', $email->value)
             ->getQuery()
             ->getResult() !== [];

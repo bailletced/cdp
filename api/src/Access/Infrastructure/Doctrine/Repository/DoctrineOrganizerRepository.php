@@ -7,7 +7,6 @@ namespace App\Access\Infrastructure\Doctrine\Repository;
 use App\Access\Domain\Organizer;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -20,9 +19,9 @@ use Symfony\Component\Uid\Uuid;
  */
 final class DoctrineOrganizerRepository extends ServiceEntityRepository implements OrganizerRepositoryInterface
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(\Doctrine\Bundle\DoctrineBundle\Registry $registry, string $entityClass = Organizer::class)
     {
-        parent::__construct($registry, Organizer::class);
+        parent::__construct($registry, $entityClass);
     }
 
     #[\Override]
