@@ -137,10 +137,29 @@ final class LoginLinkContext implements Context
         $this->handleRequest($request);
     }
 
-    #[When('I make a GET request to :path')]
-    public function makeGetRequest(string $path): void
+    #[When('I submit the login link via POST with Origin :origin')]
+    public function submitLoginLinkViaPostWithOrigin(string $origin): void
     {
-        $request = Request::create($path, 'GET');
+        $state = $this->state();
+        if ($state->loginLinkParams === null) {
+            throw new \RuntimeException('No login link params available.');
+        }
+
+        $request = Request::create('/auth/connexion', 'POST', $state->loginLinkParams);
+        $request->headers->set('Origin', $origin);
+        $this->handleRequest($request);
+    }
+
+    #[When('I submit the login link via POST with Sec-Fetch-Site :secFetchSite')]
+    public function submitLoginLinkViaPostWithSecFetchSite(string $secFetchSite): void
+    {
+        $state = $this->state();
+        if ($state->loginLinkParams === null) {
+            throw new \RuntimeException('No login link params available.');
+        }
+
+        $request = Request::create('/auth/connexion', 'POST', $state->loginLinkParams);
+        $request->headers->set('Sec-Fetch-Site', $secFetchSite);
         $this->handleRequest($request);
     }
 }

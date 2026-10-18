@@ -11,6 +11,8 @@ use Behat\Hook\BeforeScenario;
 use Behat\Hook\AfterScenario;
 use Behat\Step\Given;
 use Behat\Step\Then;
+use Behat\Step\When;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -38,6 +40,20 @@ final class SharedContext implements Context
     public function systemIsInitialized(): void
     {
         // Already initialized in setupScenario
+    }
+
+    #[When('I make a POST request to :path')]
+    public function makePostRequest(string $path): void
+    {
+        $request = Request::create($path, 'POST');
+        $this->handleRequest($request);
+    }
+
+    #[When('I make a GET request to :path')]
+    public function makeGetRequest(string $path): void
+    {
+        $request = Request::create($path, 'GET');
+        $this->handleRequest($request);
     }
 
     #[Then('the response should be :expectedStatus')]
@@ -121,9 +137,13 @@ final class SharedContext implements Context
     {
         $map = [
             '200 OK' => Response::HTTP_OK,
-            '401 Unauthorized' => Response::HTTP_UNAUTHORIZED,
+            '201 Created' => Response::HTTP_CREATED,
+            '202 Accepted' => Response::HTTP_ACCEPTED,
+            '204 No Content' => Response::HTTP_NO_CONTENT,
             '302 Found' => Response::HTTP_FOUND,
             '400 Bad Request' => Response::HTTP_BAD_REQUEST,
+            '401 Unauthorized' => Response::HTTP_UNAUTHORIZED,
+            '403 Forbidden' => Response::HTTP_FORBIDDEN,
             '404 Not Found' => Response::HTTP_NOT_FOUND,
             '500 Internal Server Error' => Response::HTTP_INTERNAL_SERVER_ERROR,
         ];

@@ -40,6 +40,13 @@ security:
                 token_provider:
                     doctrine: true
 
+            # Logout (F02-T10): POST /auth/logout destroys the session.
+            # CSRF protection comes from the SameOriginListener (Origin/Sec-Fetch-Site).
+            logout:
+                path: /auth/logout
+                target: /
+                invalidate_session: true
+
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 

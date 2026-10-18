@@ -13,6 +13,7 @@ use App\Access\Infrastructure\Repository\InMemoryAccountRepository;
 use App\Access\Infrastructure\Repository\InMemoryOrganizerRepository;
 use App\Access\Infrastructure\Security\LoginLinkFailureHandler;
 use App\Access\Infrastructure\Security\LoginLinkSuccessHandler;
+use App\Access\Infrastructure\Security\SameOriginListener;
 use App\Access\Infrastructure\Security\SecurityUser;
 use App\Access\Infrastructure\Security\UserProvider;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -65,6 +66,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
 
         ->set(LoginLinkFailureHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(SameOriginListener::class)
         ->autoconfigure()
         ->autowire()
     ;

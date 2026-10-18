@@ -54,11 +54,38 @@ trait BehatKernelTrait
     protected function handleRequest(\Symfony\Component\HttpFoundation\Request $request): void
     {
         $state = $this->state();
+
+        // Attach the scenario cookie jar so the session persists across requests.
+        // Skipped when the step set a Cookie header explicitly (e.g. "only the cookie").
+        if (!$request->headers->has('Cookie') && $state->cookieJar !== []) {
+            $pairs = [];
+            foreach ($state->cookieJar as $name => $value) {
+                $pairs[] = $name . '=' . $value;
+                $request->cookies->set($name, $value);
+            }
+            $request->headers->set('Cookie', implode('; ', $pairs));
+        }
+
         $response = $state->kernel->handle($request, HttpKernelInterface::MAIN_REQUEST);
 
         $this->captureResponse($response);
+        $this->updateCookieJar($response);
 
         $state->kernel->terminate($request, $response);
+    }
+
+    private function updateCookieJar(Response $response): void
+    {
+        $state = $this->state();
+        foreach ($response->headers->getCookies() as $cookie) {
+            $value = $cookie->getValue();
+            $expired = $cookie->getExpiresTime() !== null && $cookie->getExpiresTime() <= time();
+            if ($value === null || $value === '' || $expired) {
+                unset($state->cookieJar[$cookie->getName()]);
+            } else {
+                $state->cookieJar[$cookie->getName()] = $value;
+            }
+        }
     }
 
     protected function captureResponse(Response $response): void

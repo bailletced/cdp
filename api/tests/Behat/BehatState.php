@@ -31,6 +31,7 @@ final class BehatState
     public ?Account $currentAccount = null;
     public ?array $loginLinkParams = null;
     public array $responseCookies = [];
+    public array $cookieJar = [];
     public ?string $lastResponseContent = null;
     public ?int $lastResponseStatus = null;
     public ?array $lastResponseHeaders = null;
@@ -42,6 +43,7 @@ final class BehatState
         $this->currentAccount = null;
         $this->loginLinkParams = null;
         $this->responseCookies = [];
+        $this->cookieJar = [];
         $this->lastResponseContent = null;
         $this->lastResponseStatus = null;
         $this->lastResponseHeaders = null;
