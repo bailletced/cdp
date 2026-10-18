@@ -76,6 +76,48 @@ describe("LoginPage", () => {
     expect(newLink).toHaveAttribute("href", "/receive-my-link");
   });
 
+  it("drops the cached identity before navigating to the guarded page", async () => {
+    // Race found by the E2E suite (F02-T20): the visitor GET /api/me (401)
+    // issued when the SPA loads can still be in flight when the login POST
+    // completes. The /my-space guard must not stay hostage to that stale
+    // request: the cached identity is dropped after a successful login.
+    let meCalls = 0;
+    let releaseVisitorMe: () => void = () => {};
+    server.use(
+      http.get("http://localhost:8080/api/me", async () => {
+        meCalls += 1;
+        if (meCalls === 1) {
+          // Pre-login call: stays in flight until the test ends. A guard
+          // that inherits it never completes (the buggy behavior).
+          await new Promise<void>((resolve) => {
+            releaseVisitorMe = resolve;
+          });
+          return new HttpResponse(null, { status: 401 });
+        }
+        return HttpResponse.json({
+          email: "organizer@example.com",
+          isOrganizer: true,
+        });
+      }),
+      http.post("http://localhost:8080/auth/login", () => {
+        return HttpResponse.json({ target: "/my-space" });
+      }),
+    );
+
+    renderApp(`/login?${LINK_QUERY}`);
+
+    // The identity is fetched again (now authenticated): /my-space shows up
+    // even though the pre-login visitor call never completed.
+    expect(
+      await screen.findByRole("heading", { name: "Mon espace" }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("organizer@example.com"),
+    ).toBeInTheDocument();
+
+    releaseVisitorMe();
+  });
+
   it("shows the invalid state without posting when the link parameters are missing", async () => {
     let posted = false;
     server.use(

@@ -1,6 +1,8 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { baseUrl } from "../api/client";
+import { meQueryOptions } from "../api/hooks";
 
 // Post-login targets allowed by the specs (whitelist): never an open redirect
 const SAFE_TARGETS = ["/", "/my-space"];
@@ -20,6 +22,7 @@ type LoginState = "loading" | "invalid";
 export function LoginPage() {
   const { search } = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [state, setState] = useState<LoginState>("loading");
   // The POST must happen exactly once (StrictMode double-invokes effects)
   const attemptedRef = useRef(false);
@@ -61,6 +64,10 @@ export function LoginPage() {
         }
 
         const body = (await response.json()) as { target?: string };
+        // The identity just changed: drop the cached "me" query before
+        // navigating. Otherwise the /my-space guard can inherit the visitor
+        // 401 cached (or still in flight) from when the SPA loaded (F02-T20).
+        queryClient.removeQueries({ queryKey: meQueryOptions.queryKey });
         navigate({ to: safeTarget(body.target), replace: true });
       } catch {
         setState("invalid");
@@ -68,7 +75,7 @@ export function LoginPage() {
     }
 
     submitLoginLink();
-  }, [user, expires, hash, navigate]);
+  }, [user, expires, hash, navigate, queryClient]);
 
   if (state === "invalid") {
     return (

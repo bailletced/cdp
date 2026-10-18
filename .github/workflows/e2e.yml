@@ -1,0 +1,100 @@
+name: E2E CI
+
+on:
+  push:
+    branches: [main, feature/**]
+    paths:
+      - 'front/**'
+      - 'api/**'
+      - '!front/node_modules/**'
+      - '!front/dist/**'
+      - '.github/workflows/e2e.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'front/**'
+      - 'api/**'
+      - '!front/node_modules/**'
+      - '!front/dist/**'
+      - '.github/workflows/e2e.yml'
+
+jobs:
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mailpit:
+        image: axllent/mailpit:latest
+        ports:
+          - 1025:1025
+          - 8025:8025
+    env:
+      APP_ENV: dev
+      APP_SECRET: e2e-secret
+      DATABASE_URL: postgresql://app:app@localhost:5432/app?serverVersion=18&charset=utf8
+      MAILER_DSN: smtp://localhost:1025
+      MESSENGER_TRANSPORT_DSN: doctrine://default?auto_setup=0
+      # The personal links sent by email point to the front origin (Vite)
+      DEFAULT_URI: http://localhost:8000
+      VITE_API_TARGET: http://localhost:8080
+      MAILPIT_API_URL: http://localhost:8025/api/v1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, intl, opcache, apcu
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+        working-directory: api
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Cache pnpm
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node-${{ hashFiles('front/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install front dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: front
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+        working-directory: front
+
+      - name: Wait for Mailpit
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8025/api/v1/messages > /dev/null && exit 0
+            sleep 1
+          done
+          echo "Mailpit did not start" && exit 1
+
+      - name: Run E2E tests
+        run: pnpm exec playwright test
+        working-directory: front

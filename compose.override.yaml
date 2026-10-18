@@ -18,6 +18,9 @@ services:
       APP_ENV: dev
       XDEBUG_MODE: ${XDEBUG_MODE:-off}
       MAILER_DSN: smtp://mailpit:1025
+      # The personal links sent by email point to the front origin (Vite),
+      # so the API redirects stay on the same origin as the SPA.
+      DEFAULT_URI: http://localhost:${HTTP_PORT:-8000}
       FRANKENPHP_WORKER_CONFIG: watch
     extra_hosts:
       - host.docker.internal:host-gateway
@@ -33,6 +36,8 @@ services:
     image: axllent/mailpit:latest
     ports:
       - "${MAILPIT_PORT:-8025}:8025"
+      # SMTP port also exposed on the host for host-run tooling (E2E worker)
+      - "1025:1025"
 
   node:
     image: node:24-alpine
