@@ -3,7 +3,8 @@ import type { paths } from "./schema";
 
 // In tests, requests target the absolute dev-stack URL intercepted by MSW;
 // in the browser the API is same-origin (proxied by Vite).
-const baseUrl = import.meta.env.MODE === "test" ? "http://localhost:8080" : "";
+export const baseUrl =
+  import.meta.env.MODE === "test" ? "http://localhost:8080" : "";
 
 // Resolve globalThis.fetch at call time (not at createClient time) so test
 // interceptors patching globalThis.fetch (MSW) are picked up.

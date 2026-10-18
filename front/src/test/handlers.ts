@@ -13,4 +13,14 @@ export const handlers = [
       isOrganizer: false,
     });
   }),
+  // POST /auth/link-request: always 202 with the same message (F02-T15)
+  http.post("http://localhost:8080/auth/link-request", () => {
+    return HttpResponse.json(
+      {
+        message:
+          "Si un compte correspond à cette adresse, un lien de connexion vient de vous être envoyé.",
+      },
+      { status: 202 },
+    );
+  }),
 ];
