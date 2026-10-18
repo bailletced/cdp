@@ -27,13 +27,13 @@ abstract class OrganizerRepositoryTestCase extends TestCase
         $this->repository = $this->getRepository();
     }
 
-    public function testSaveAndFindByAccountId(): void
+    public function testAddAndFindByAccountId(): void
     {
         $accountId = Uuid::v7();
         $addedBy = Uuid::v7();
         $organizer = new Organizer($accountId, $addedBy);
 
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
 
         $found = $this->repository->findByAccountId($accountId);
         $this->assertNotNull($found);
@@ -52,7 +52,7 @@ abstract class OrganizerRepositoryTestCase extends TestCase
         $addedBy = Uuid::v7();
         $organizer = new Organizer($accountId, $addedBy);
 
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
 
         $this->assertTrue($this->repository->isOrganizer($accountId));
         $this->assertFalse($this->repository->isOrganizer(Uuid::v7()));
@@ -67,8 +67,8 @@ abstract class OrganizerRepositoryTestCase extends TestCase
         $organizer1 = new Organizer($accountId1, $addedBy);
         $organizer2 = new Organizer($accountId2, $addedBy);
 
-        $this->repository->save($organizer1);
-        $this->repository->save($organizer2);
+        $this->repository->add($organizer1);
+        $this->repository->add($organizer2);
 
         $all = $this->repository->findAll();
         $this->assertCount(2, $all);
@@ -84,12 +84,12 @@ abstract class OrganizerRepositoryTestCase extends TestCase
 
         $this->assertEquals(0, $this->repository->countAll());
 
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
         $this->assertEquals(1, $this->repository->countAll());
 
         $accountId2 = Uuid::v7();
         $organizer2 = new Organizer($accountId2, $addedBy);
-        $this->repository->save($organizer2);
+        $this->repository->add($organizer2);
         $this->assertEquals(2, $this->repository->countAll());
     }
 
@@ -99,7 +99,7 @@ abstract class OrganizerRepositoryTestCase extends TestCase
         $addedBy = Uuid::v7();
         $organizer = new Organizer($accountId, $addedBy);
 
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
         $this->assertEquals(1, $this->repository->countAll());
 
         $this->repository->remove($organizer);
@@ -116,8 +116,8 @@ abstract class OrganizerRepositoryTestCase extends TestCase
         $organizer1 = new Organizer($accountId, $addedBy);
         $organizer2 = new Organizer($accountId, $addedBy);
 
-        $this->repository->save($organizer1);
-        $this->repository->save($organizer2);
+        $this->repository->add($organizer1);
+        $this->repository->add($organizer2);
 
         $all = $this->repository->findAll();
         $this->assertCount(1, $all);

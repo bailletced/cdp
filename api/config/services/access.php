@@ -1,10 +1,11 @@
 <?php
 
+use App\Access\Application\AddOrganizerHandler;
 use App\Access\Domain\Account;
 use App\Access\Domain\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
-use App\Access\Infrastructure\Console\CreateOrganizerCommand;
+use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;
 use App\Access\Infrastructure\Controller\AuthStatusController;
 use App\Access\Infrastructure\Controller\LoginLinkController;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineAccountRepository;
@@ -45,7 +46,11 @@ return static function (ContainerConfigurator $container): void {
         ->set(InMemoryOrganizerRepository::class)
         ->tag('app.in_memory_repository')
 
-        ->set(CreateOrganizerCommand::class)
+        ->set(AddOrganizerHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(CreateOrganizerCliCommand::class)
         ->autoconfigure()
         ->autowire()
         ->tag('console.command')

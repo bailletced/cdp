@@ -28,7 +28,7 @@ abstract class AccountRepositoryTestCase extends TestCase
         $this->repository = $this->getRepository();
     }
 
-    public function testSaveAndFindById(): void
+    public function testAddAndFindById(): void
     {
         $account = new Account(
             new AccountId(),
@@ -37,7 +37,7 @@ abstract class AccountRepositoryTestCase extends TestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         $found = $this->repository->findById($account->getId());
         $this->assertNotNull($found);
@@ -50,7 +50,7 @@ abstract class AccountRepositoryTestCase extends TestCase
         $this->assertNull($found);
     }
 
-    public function testSaveAndFindByEmail(): void
+    public function testAddAndFindByEmail(): void
     {
         $account = new Account(
             new AccountId(),
@@ -59,7 +59,7 @@ abstract class AccountRepositoryTestCase extends TestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         $found = $this->repository->findByEmail(new Email('test@example.com'));
         $this->assertNotNull($found);
@@ -75,7 +75,7 @@ abstract class AccountRepositoryTestCase extends TestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         $found = $this->repository->findByEmail(new Email('TEST@EXAMPLE.COM'));
         $this->assertNotNull($found);
@@ -97,7 +97,7 @@ abstract class AccountRepositoryTestCase extends TestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         $this->assertTrue($this->repository->existsByEmail(new Email('test@example.com')));
         $this->assertTrue($this->repository->existsByEmail(new Email('TEST@EXAMPLE.COM')));
@@ -113,7 +113,7 @@ abstract class AccountRepositoryTestCase extends TestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
         $this->repository->remove($account);
 
         $found = $this->repository->findById($account->getId());
@@ -132,18 +132,18 @@ abstract class AccountRepositoryTestCase extends TestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         // Update credentials version
         $account->incrementCredentialsVersion();
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         $found = $this->repository->findById($account->getId());
         $this->assertNotNull($found);
         $this->assertEquals(2, $found->getCredentialsVersion());
     }
 
-    public function testSaveMultipleAccounts(): void
+    public function testAddMultipleAccounts(): void
     {
         $account1 = new Account(
             new AccountId(),
@@ -159,8 +159,8 @@ abstract class AccountRepositoryTestCase extends TestCase
             null
         );
 
-        $this->repository->save($account1);
-        $this->repository->save($account2);
+        $this->repository->add($account1);
+        $this->repository->add($account2);
 
         $found1 = $this->repository->findById($account1->getId());
         $found2 = $this->repository->findById($account2->getId());
@@ -180,14 +180,14 @@ abstract class AccountRepositoryTestCase extends TestCase
             '123e4567-e89b-12d3-a456-426614174000'
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         $found = $this->repository->findById($account->getId());
         $this->assertNotNull($found);
         $this->assertEquals('123e4567-e89b-12d3-a456-426614174000', $found->getPriantId());
 
         $account->updatePriantId('00000000-0000-0000-0000-000000000000');
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         $found = $this->repository->findById($account->getId());
         $this->assertNotNull($found);

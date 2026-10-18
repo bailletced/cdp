@@ -38,7 +38,7 @@ final class InMemoryAccountRepository implements AccountRepositoryInterface
     }
 
     #[\Override]
-    public function save(Account $account): void
+    public function add(Account $account): void
     {
         $id = (string) $account->getId();
         $lowerEmail = \mb_strtolower($account->getEmail()->value);

@@ -43,19 +43,15 @@ final class DoctrineAccountRepository extends ServiceEntityRepository implements
     }
 
     #[\Override]
-    public function save(Account $account): void
+    public function add(Account $account): void
     {
-        $em = $this->getEntityManager();
-        $em->persist($account);
-        $em->flush();
+        $this->getEntityManager()->persist($account);
     }
 
     #[\Override]
     public function remove(Account $account): void
     {
-        $em = $this->getEntityManager();
-        $em->remove($account);
-        $em->flush();
+        $this->getEntityManager()->remove($account);
     }
 
     #[\Override]

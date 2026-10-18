@@ -6,5 +6,9 @@ namespace App\Shared\Application\Command;
 
 interface CommandBusInterface
 {
-    public function dispatch(CommandInterface $command): void;
+    /**
+     * Dispatch a command on the synchronous command bus (wrapped in a transaction)
+     * and return the handler's result.
+     */
+    public function dispatch(CommandInterface $command): mixed;
 }

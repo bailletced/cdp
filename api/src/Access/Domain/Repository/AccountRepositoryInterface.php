@@ -24,12 +24,14 @@ interface AccountRepositoryInterface
     public function findByEmail(Email $email): ?Account;
 
     /**
-     * Save an account.
+     * Add an account to the repository. The aggregate is persisted when the
+     * surrounding transaction flushes; the repository never flushes itself.
      */
-    public function save(Account $account): void;
+    public function add(Account $account): void;
 
     /**
-     * Remove an account.
+     * Remove an account from the repository. The aggregate is deleted when the
+     * surrounding transaction flushes; the repository never flushes itself.
      */
     public function remove(Account $account): void;
 

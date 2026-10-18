@@ -30,12 +30,14 @@ interface OrganizerRepositoryInterface
     public function isOrganizer(Uuid $accountId): bool;
 
     /**
-     * Save an organizer.
+     * Add an organizer to the repository. The aggregate is persisted when the
+     * surrounding transaction flushes; the repository never flushes itself.
      */
-    public function save(Organizer $organizer): void;
+    public function add(Organizer $organizer): void;
 
     /**
-     * Remove an organizer.
+     * Remove an organizer from the repository. The aggregate is deleted when the
+     * surrounding transaction flushes; the repository never flushes itself.
      */
     public function remove(Organizer $organizer): void;
 

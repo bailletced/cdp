@@ -21,7 +21,7 @@ final class DoctrineOrganizerRepositoryTest extends KernelTestCase
 
         $container = self::getContainer();
         $doctrine = $container->get('doctrine');
-        
+
         $this->repository = new DoctrineOrganizerRepository($doctrine);
         $this->em = $doctrine->getManager();
 
@@ -31,13 +31,14 @@ final class DoctrineOrganizerRepositoryTest extends KernelTestCase
         $this->em->clear();
     }
 
-    public function testSaveAndFindByAccountId(): void
+    public function testAddAndFindByAccountId(): void
     {
         $accountId = Uuid::v7();
         $addedBy = Uuid::v7();
 
         $organizer = new Organizer($accountId, $addedBy);
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
+        $this->em->flush();
         $this->em->clear();
 
         $found = $this->repository->findByAccountId($accountId);
@@ -58,7 +59,8 @@ final class DoctrineOrganizerRepositoryTest extends KernelTestCase
         $otherAccountId = Uuid::v7();
 
         $organizer = new Organizer($accountId, $addedBy);
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
+        $this->em->flush();
         $this->em->clear();
 
         $this->assertTrue($this->repository->isOrganizer($accountId));
@@ -74,8 +76,9 @@ final class DoctrineOrganizerRepositoryTest extends KernelTestCase
         $organizer1 = new Organizer($accountId1, $addedBy);
         $organizer2 = new Organizer($accountId2, $addedBy);
 
-        $this->repository->save($organizer1);
-        $this->repository->save($organizer2);
+        $this->repository->add($organizer1);
+        $this->repository->add($organizer2);
+        $this->em->flush();
         $this->em->clear();
 
         $all = $this->repository->findAll();
@@ -90,7 +93,8 @@ final class DoctrineOrganizerRepositoryTest extends KernelTestCase
         $this->assertEquals(0, $this->repository->countAll());
 
         $organizer = new Organizer($accountId, $addedBy);
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
+        $this->em->flush();
         $this->em->clear();
         $this->assertEquals(1, $this->repository->countAll());
     }
@@ -101,21 +105,59 @@ final class DoctrineOrganizerRepositoryTest extends KernelTestCase
         $addedBy = Uuid::v7();
 
         $organizer = new Organizer($accountId, $addedBy);
-        $this->repository->save($organizer);
+        $this->repository->add($organizer);
+        $this->em->flush();
         $this->em->clear();
-        
+
         $this->assertEquals(1, $this->repository->countAll());
 
         // Find the organizer again to get a managed instance
         $organizerToRemove = $this->repository->findByAccountId($accountId);
         $this->assertNotNull($organizerToRemove);
-        
+
         $this->repository->remove($organizerToRemove);
+        $this->em->flush();
         $this->em->clear();
         $this->assertEquals(0, $this->repository->countAll());
 
         $found = $this->repository->findByAccountId($accountId);
         $this->assertNull($found);
+    }
+
+    public function testAddDoesNotFlush(): void
+    {
+        $organizer = new Organizer(Uuid::v7(), Uuid::v7());
+
+        $this->repository->add($organizer);
+
+        // The repository only registers the aggregate: nothing reaches the database on its own.
+        self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM organizer'));
+
+        $this->em->flush();
+
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM organizer'));
+    }
+
+    public function testRemoveDoesNotFlush(): void
+    {
+        $accountId = Uuid::v7();
+        $addedBy = Uuid::v7();
+
+        $organizer = new Organizer($accountId, $addedBy);
+        $this->repository->add($organizer);
+        $this->em->flush();
+        $this->em->clear();
+
+        $managed = $this->repository->findByAccountId($accountId);
+        $this->assertNotNull($managed);
+
+        $this->repository->remove($managed);
+
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM organizer'));
+
+        $this->em->flush();
+
+        self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM organizer'));
     }
 
     protected function tearDown(): void

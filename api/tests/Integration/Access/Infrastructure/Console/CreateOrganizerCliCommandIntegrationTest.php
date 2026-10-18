@@ -7,7 +7,7 @@ namespace App\Tests\Integration\Access\Infrastructure\Console;
 use App\Access\Domain\Account;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
-use App\Access\Infrastructure\Console\CreateOrganizerCommand;
+use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;
 use App\Shared\Domain\ValueObject\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -15,7 +15,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Uid\Uuid;
 
-final class CreateOrganizerCommandIntegrationTest extends KernelTestCase
+final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
 {
     private AccountRepositoryInterface $accountRepository;
     private OrganizerRepositoryInterface $organizerRepository;
@@ -40,7 +40,7 @@ final class CreateOrganizerCommandIntegrationTest extends KernelTestCase
     public function testCommandCreatesOrganizer(): void
     {
         $container = self::getContainer();
-        $command = $container->get(CreateOrganizerCommand::class);
+        $command = $container->get(CreateOrganizerCliCommand::class);
 
         $input = new ArrayInput([
             'email' => 'test-create@example.com',
@@ -64,7 +64,7 @@ final class CreateOrganizerCommandIntegrationTest extends KernelTestCase
     public function testCommandIsIdempotent(): void
     {
         $container = self::getContainer();
-        $command = $container->get(CreateOrganizerCommand::class);
+        $command = $container->get(CreateOrganizerCliCommand::class);
 
         // First call
         $input1 = new ArrayInput([
@@ -87,7 +87,7 @@ final class CreateOrganizerCommandIntegrationTest extends KernelTestCase
     public function testCommandValidatesEmail(): void
     {
         $container = self::getContainer();
-        $command = $container->get(CreateOrganizerCommand::class);
+        $command = $container->get(CreateOrganizerCliCommand::class);
 
         $input = new ArrayInput([
             'email' => 'invalid-email',

@@ -22,7 +22,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
 
         $container = self::getContainer();
         $doctrine = $container->get('doctrine');
-        
+
         $this->repository = new DoctrineAccountRepository($doctrine);
         $this->em = $doctrine->getManager();
 
@@ -32,7 +32,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
         $this->em->clear();
     }
 
-    public function testSaveAndFindById(): void
+    public function testAddAndFindById(): void
     {
         $account = new Account(
             new AccountId(),
@@ -41,7 +41,8 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
+        $this->em->flush();
         $this->em->clear();
 
         $found = $this->repository->findById($account->getId());
@@ -55,7 +56,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
         $this->assertNull($found);
     }
 
-    public function testSaveAndFindByEmail(): void
+    public function testAddAndFindByEmail(): void
     {
         $account = new Account(
             new AccountId(),
@@ -64,7 +65,8 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
+        $this->em->flush();
         $this->em->clear();
 
         $found = $this->repository->findByEmail(new Email('test@example.com'));
@@ -81,7 +83,8 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
+        $this->em->flush();
         $this->em->clear();
 
         $found = $this->repository->findByEmail(new Email('TEST@EXAMPLE.COM'));
@@ -98,7 +101,8 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
+        $this->em->flush();
         $this->em->clear();
 
         $this->assertTrue($this->repository->existsByEmail(new Email('test@example.com')));
@@ -115,8 +119,10 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
+        $this->em->flush();
         $this->repository->remove($account);
+        $this->em->flush();
         $this->em->clear();
 
         $found = $this->repository->findById($account->getId());
@@ -135,16 +141,61 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
             null
         );
 
-        $this->repository->save($account);
+        $this->repository->add($account);
 
         // Update credentials version
         $account->incrementCredentialsVersion();
-        $this->repository->save($account);
+        $this->repository->add($account);
+        $this->em->flush();
         $this->em->clear();
 
         $found = $this->repository->findById($account->getId());
         $this->assertNotNull($found);
         $this->assertEquals(2, $found->getCredentialsVersion());
+    }
+
+    public function testAddDoesNotFlush(): void
+    {
+        $account = new Account(
+            new AccountId(),
+            new Email('test@example.com'),
+            1,
+            null
+        );
+
+        $this->repository->add($account);
+
+        // The repository only registers the aggregate: nothing reaches the database on its own.
+        self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM account'));
+
+        $this->em->flush();
+
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM account'));
+    }
+
+    public function testRemoveDoesNotFlush(): void
+    {
+        $account = new Account(
+            new AccountId(),
+            new Email('test@example.com'),
+            1,
+            null
+        );
+
+        $this->repository->add($account);
+        $this->em->flush();
+        $this->em->clear();
+
+        $managed = $this->repository->findById($account->getId());
+        $this->assertNotNull($managed);
+
+        $this->repository->remove($managed);
+
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM account'));
+
+        $this->em->flush();
+
+        self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM account'));
     }
 
     protected function tearDown(): void

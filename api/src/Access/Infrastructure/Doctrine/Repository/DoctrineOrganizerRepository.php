@@ -37,19 +37,15 @@ final class DoctrineOrganizerRepository extends ServiceEntityRepository implemen
     }
 
     #[\Override]
-    public function save(Organizer $organizer): void
+    public function add(Organizer $organizer): void
     {
-        $em = $this->getEntityManager();
-        $em->persist($organizer);
-        $em->flush();
+        $this->getEntityManager()->persist($organizer);
     }
 
     #[\Override]
     public function remove(Organizer $organizer): void
     {
-        $em = $this->getEntityManager();
-        $em->remove($organizer);
-        $em->flush();
+        $this->getEntityManager()->remove($organizer);
     }
 
     #[\Override]

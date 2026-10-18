@@ -42,7 +42,7 @@ final class InMemoryOrganizerRepository implements OrganizerRepositoryInterface
     }
 
     #[\Override]
-    public function save(Organizer $organizer): void
+    public function add(Organizer $organizer): void
     {
         $accountId = $organizer->getAccountId()->toRfc4122();
         $this->organizersByAccountId[$accountId] = $organizer;

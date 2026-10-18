@@ -27,8 +27,9 @@ final class MessengerCommandBusTest extends KernelTestCase
 
     public function testASuccessfulCommandIsCommitted(): void
     {
-        $this->commandBus->dispatch(new WriteProbeCommand('kept'));
+        $result = $this->commandBus->dispatch(new WriteProbeCommand('kept'));
 
+        self::assertSame('kept', $result);
         self::assertSame('kept', $this->connection->fetchOne('SELECT value FROM command_bus_probe'));
     }
 
