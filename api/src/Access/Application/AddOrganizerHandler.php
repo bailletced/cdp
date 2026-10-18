@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Access\Application;
 
-use App\Access\Domain\Account;
-use App\Access\Domain\Organizer;
+use App\Access\Domain\Entity\Account;
+use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Domain\ValueObject\AccountId;

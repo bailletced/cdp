@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Access\Infrastructure\Repository;
 
-use App\Access\Domain\Organizer;
+use App\Access\Domain\Entity\Organizer;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineOrganizerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

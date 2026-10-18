@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Factory;
 
-use App\Access\Domain\Account;
+use App\Access\Domain\Entity\Account;
 use App\Access\Domain\ValueObject\AccountId;
 use App\Shared\Domain\ValueObject\Email;
 use Symfony\Component\Uid\Uuid;

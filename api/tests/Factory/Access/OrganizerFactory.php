@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Factory\Access;
 
-use App\Access\Domain\Organizer;
+use App\Access\Domain\Entity\Organizer;
 use Symfony\Component\Uid\Uuid;
 
 /**

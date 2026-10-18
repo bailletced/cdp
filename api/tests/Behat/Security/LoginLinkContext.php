@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat\Security;
 
-use App\Access\Domain\Account;
+use App\Access\Domain\Entity\Account;
 use App\Tests\Behat\BehatKernelTrait;
 use Behat\Behat\Context\Context;
 use Behat\Step\Given;

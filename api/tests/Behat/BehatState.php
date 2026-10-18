@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat;
 
-use App\Access\Domain\Account;
+use App\Access\Domain\Entity\Account;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 

@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Access\Application;
 use App\Access\Application\AddOrganizer;
 use App\Access\Application\AddOrganizerHandler;
 use App\Access\Application\AddOrganizerResult;
-use App\Access\Domain\Account;
+use App\Access\Domain\Entity\Account;
 use App\Access\Domain\ValueObject\AccountId;
 use App\Access\Infrastructure\Repository\InMemoryAccountRepository;
 use App\Access\Infrastructure\Repository\InMemoryOrganizerRepository;

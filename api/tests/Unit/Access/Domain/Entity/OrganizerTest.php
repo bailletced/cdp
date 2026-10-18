@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Access\Domain;
+namespace App\Tests\Unit\Access\Domain\Entity;
 
-use App\Access\Domain\Organizer;
+use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\ValueObject\OrganizerId;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;

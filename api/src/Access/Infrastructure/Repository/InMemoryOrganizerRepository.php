@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Access\Infrastructure\Repository;
 
-use App\Access\Domain\Organizer;
+use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use Symfony\Component\Uid\Uuid;
 

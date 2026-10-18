@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Access\Domain;
+namespace App\Access\Domain\Entity;
 
 use App\Access\Domain\ValueObject\OrganizerId;
 use Doctrine\ORM\Mapping as ORM;

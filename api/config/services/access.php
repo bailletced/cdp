@@ -1,8 +1,8 @@
 <?php
 
 use App\Access\Application\AddOrganizerHandler;
-use App\Access\Domain\Account;
-use App\Access\Domain\Organizer;
+use App\Access\Domain\Entity\Account;
+use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;

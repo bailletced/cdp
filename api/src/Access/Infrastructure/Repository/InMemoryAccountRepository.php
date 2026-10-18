@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Access\Infrastructure\Repository;
 
-use App\Access\Domain\Account;
+use App\Access\Domain\Entity\Account;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\ValueObject\AccountId;
 use App\Shared\Domain\ValueObject\Email;

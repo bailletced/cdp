@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Access\Infrastructure\Console;
 
-use App\Access\Domain\Account;
+use App\Access\Domain\Entity\Account;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;
