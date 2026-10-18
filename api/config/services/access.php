@@ -16,7 +16,9 @@ use App\Access\Infrastructure\Security\LoginLinkPersonalLinkIssuer;
 use App\Access\Infrastructure\Security\LoginLinkSuccessHandler;
 use App\Access\Infrastructure\Security\SameOriginListener;
 use App\Access\Infrastructure\Security\SecurityUser;
+use App\Access\Infrastructure\Security\SymfonyCurrentViewer;
 use App\Access\Infrastructure\Security\UserProvider;
+use App\Shared\Application\Port\CurrentViewer;
 use App\Shared\Application\Port\PersonalLinkIssuer;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -85,5 +87,10 @@ return static function (ContainerConfigurator $container): void {
             new \Symfony\Component\DependencyInjection\Reference(ClockInterface::class),
         ])
         ->alias(PersonalLinkIssuer::class, LoginLinkPersonalLinkIssuer::class)
+
+        ->set(SymfonyCurrentViewer::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(CurrentViewer::class, SymfonyCurrentViewer::class)
     ;
 };
