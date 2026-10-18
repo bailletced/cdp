@@ -1,25 +1,23 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from './client';
-import type { paths } from './schema';
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "./client";
 
-// Hook de démonstration pour le endpoint /api/test
-export function useTestQuery() {
+/**
+ * Current account (GET /api/me, F02-T16).
+ * A 401 (visitor) surfaces as an error state, without retry.
+ */
+export function useMe() {
   return useQuery({
-    queryKey: ['test'],
+    queryKey: ["me"],
     queryFn: async () => {
-      const response = await apiClient.get('/api/test');
-      return response as paths['/api/test']['get']['responses']['200']['content']['application/json'];
-    },
-  });
-}
+      const { data, error } = await apiClient.GET("/api/me");
 
-// Hook générique pour GET
-export function useApiQuery<T>(url: string, queryKey: string[]) {
-  return useQuery<T>({
-    queryKey,
-    queryFn: async () => {
-      const response = await apiClient.get(url);
-      return response.json() as T;
+      if (error) {
+        throw error;
+      }
+
+      return data;
     },
+    // A 401 means "visitor": a normal state, not a transient failure
+    retry: false,
   });
 }

@@ -10,7 +10,6 @@ use App\Tests\Behat\BehatKernelTrait;
 use App\Tests\Factory\AccountFactory;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
-use Behat\Hook\BeforeScenario;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
@@ -29,22 +28,6 @@ final class LinkRequestContext implements Context
     use BehatKernelTrait;
 
     private const EXPECTED_MESSAGE = 'Si un compte correspond à cette adresse, un lien de connexion vient de vous être envoyé.';
-
-    /**
-     * Scenarios use fixed email addresses: start each one with a clean
-     * account table (same isolation strategy as the functional tests).
-     */
-    #[BeforeScenario('@link_request')]
-    public function purgeAccounts(): void
-    {
-        $entityManager = $this->state()->entityManager;
-        if (null === $entityManager) {
-            throw new \RuntimeException('Kernel is not booted.');
-        }
-
-        $entityManager->getConnection()->executeStatement('TRUNCATE account CASCADE');
-        $entityManager->clear();
-    }
 
     #[Given('an account exists with email :email')]
     public function accountExistsWithEmail(string $email): void

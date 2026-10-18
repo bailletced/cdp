@@ -1,27 +1,41 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { Root } from './components/Root';
-import { server } from './test/setup';
+import {
+  RouterProvider,
+  createMemoryHistory,
+  createRouter,
+} from "@tanstack/react-router";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { routeTree } from "./router";
 
-describe('Root component', () => {
-  it('renders the title', () => {
-    render(<Root.Component />);
-    expect(screen.getByText('Chaîne de prière - CDP')).toBeInTheDocument();
+function renderApp(initialPath = "/") {
+  const testRouter = createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries: [initialPath] }),
   });
 
-  it('renders without crashing', () => {
-    render(<Root.Component />);
-    expect(screen.getByRole('heading')).toBeInTheDocument();
+  return render(<RouterProvider router={testRouter} />);
+}
+
+describe("Root component", () => {
+  it("renders the title", async () => {
+    renderApp();
+    expect(
+      await screen.findByText("Chaîne de prière - CDP"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders a heading", async () => {
+    renderApp();
+    expect(await screen.findByRole("heading")).toBeInTheDocument();
   });
 });
 
-// Test avec MSW handler
-describe('API integration with MSW', () => {
-  it('can mock API calls', async () => {
-    // Ce test démontre que MSW fonctionne
-    const response = await fetch('http://localhost:8080/api/test');
+describe("API integration with MSW", () => {
+  it("can mock the /api/me endpoint", async () => {
+    // This test demonstrates that MSW works against the dev-stack URL
+    const response = await fetch("http://localhost:8080/api/me");
     const data = await response.json();
-    
-    expect(data.message).toBe('Test successful');
+
+    expect(data.email).toBe("thomas@example.com");
   });
 });

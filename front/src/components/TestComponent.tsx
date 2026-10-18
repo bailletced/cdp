@@ -1,38 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
+import { apiClient } from "../api/client";
 
 export interface TestComponentProps {
   message?: string;
 }
 
-export function TestComponent({ message = 'Hello' }: TestComponentProps) {
-  const [data, setData] = useState<string | null>(null);
+export function TestComponent({ message = "Hello" }: TestComponentProps) {
+  const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchMe() {
       setLoading(true);
       try {
-        const response = await fetch('http://localhost:8080/api/test');
-        const result = await response.json();
-        setData(result.message);
-      } catch (error) {
-        setData('Error');
+        const { data, error } = await apiClient.GET("/api/me");
+
+        if (error) {
+          throw error;
+        }
+
+        setEmail(data?.email ?? null);
+      } catch {
+        setEmail("Erreur");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchData();
+    fetchMe();
   }, []);
 
   return (
     <div data-testid="test-component">
       <h2>{message}</h2>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <p data-testid="api-message">{data}</p>
-      )}
+      {loading ? <p>Chargement…</p> : <p data-testid="api-message">{email}</p>}
     </div>
   );
 }

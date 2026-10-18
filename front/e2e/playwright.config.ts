@@ -1,7 +1,7 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: '.',
+  testDir: ".",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -11,20 +11,20 @@ export default defineConfig({
     timeout: 5000,
   },
   use: {
-    baseURL: 'http://localhost:8000',
-    trace: 'on-first-retry',
+    baseURL: "http://localhost:8000",
+    trace: "on-first-retry",
   },
   projects: [
     {
-      name: 'chromium',
+      name: "chromium",
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices["Desktop Chrome"],
       },
     },
   ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:8000',
+    command: "pnpm dev",
+    url: "http://localhost:8000",
     reuseExistingServer: !process.env.CI,
     cwd: __dirname,
   },

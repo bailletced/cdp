@@ -6,6 +6,7 @@ use App\Access\Domain\Entity\Account;
 use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
+use App\Access\Infrastructure\ApiPlatform\MeProvider;
 use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;
 use App\Access\Infrastructure\Controller\AuthStatusController;
 use App\Access\Infrastructure\Controller\LinkRequestController;
@@ -53,6 +54,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
 
         ->set(RequestPersonalLinkHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(MeProvider::class)
         ->autoconfigure()
         ->autowire()
 

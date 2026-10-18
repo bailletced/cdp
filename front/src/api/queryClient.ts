@@ -1,5 +1,5 @@
-import { QueryClient } from '@tanstack/react-query';
-import { createApiClient } from './client';
+import { QueryClient } from "@tanstack/react-query";
+import { apiClient } from "./client";
 
 // Créer le client de requêtes avec configuration par défaut
 export const queryClient = new QueryClient({
@@ -15,8 +15,5 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Export du client API à utiliser avec openapi-react-query
-export const apiClient = createApiClient();
-
-// Types pour les hooks générés
-export type ApiClientType = ReturnType<typeof createApiClient>;
+export { apiClient };
+export type ApiClientType = typeof apiClient;

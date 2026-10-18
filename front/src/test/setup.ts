@@ -1,12 +1,13 @@
-import { afterEach, beforeAll, afterAll } from 'vitest';
-import { setupServer } from 'msw/node';
-import { handlers } from './handlers';
+import "@testing-library/jest-dom/vitest";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll } from "vitest";
+import { handlers } from "./handlers";
 
 // Setup MSW server
-const server = setupServer(...handlers);
+export const server = setupServer(...handlers);
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledRequest: "error" });
 });
 
 afterEach(() => {

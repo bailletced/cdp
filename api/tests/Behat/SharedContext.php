@@ -30,6 +30,12 @@ final class SharedContext implements Context
     {
         $this->state()->reset();
         $this->bootKernel();
+
+        // Scenarios use fixed email addresses: start each one with a clean
+        // account table (same isolation strategy as the functional tests).
+        $entityManager = $this->state()->entityManager;
+        $entityManager?->getConnection()->executeStatement('TRUNCATE account CASCADE');
+        $entityManager?->clear();
     }
 
     #[AfterScenario]
