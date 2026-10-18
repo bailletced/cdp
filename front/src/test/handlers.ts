@@ -23,4 +23,8 @@ export const handlers = [
       { status: 202 },
     );
   }),
+  // POST /auth/login: opens the session and returns the target (F02-T08)
+  http.post("http://localhost:8080/auth/login", () => {
+    return HttpResponse.json({ target: "/my-space" });
+  }),
 ];

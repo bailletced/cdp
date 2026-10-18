@@ -1,31 +1,17 @@
-import {
-  RouterProvider,
-  createMemoryHistory,
-  createRouter,
-} from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { routeTree } from "./router";
-
-function renderApp(initialPath = "/") {
-  const testRouter = createRouter({
-    routeTree,
-    history: createMemoryHistory({ initialEntries: [initialPath] }),
-  });
-
-  return render(<RouterProvider router={testRouter} />);
-}
+import { renderApp } from "./test/renderApp";
 
 describe("Root component", () => {
   it("renders the title", async () => {
-    renderApp();
+    renderApp("/");
     expect(
       await screen.findByText("Chaîne de prière - CDP"),
     ).toBeInTheDocument();
   });
 
   it("renders a heading", async () => {
-    renderApp();
+    renderApp("/");
     expect(await screen.findByRole("heading")).toBeInTheDocument();
   });
 });
