@@ -19,3 +19,9 @@ auth_status:
     path: /auth/status
     methods: [GET]
     controller: App\Access\Infrastructure\Controller\AuthStatusController::status
+
+# POST /auth/link-request: request a personal login link by email (F02-T15)
+auth_link_request:
+    path: /auth/link-request
+    methods: [POST]
+    controller: App\Access\Infrastructure\Controller\LinkRequestController::requestLink

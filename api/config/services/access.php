@@ -8,6 +8,7 @@ use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;
 use App\Access\Infrastructure\Controller\AuthStatusController;
+use App\Access\Infrastructure\Controller\LinkRequestController;
 use App\Access\Infrastructure\Controller\LoginLinkController;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineAccountRepository;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineOrganizerRepository;
@@ -70,6 +71,11 @@ return static function (ContainerConfigurator $container): void {
         ->set(LoginLinkController::class)
         ->autoconfigure()
         ->autowire()
+
+        ->set(LinkRequestController::class)
+        ->autoconfigure()
+        ->autowire()
+        ->tag('controller.service_arguments')
 
         ->set(AuthStatusController::class)
         ->autoconfigure()

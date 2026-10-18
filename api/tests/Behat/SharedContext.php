@@ -14,6 +14,8 @@ use Behat\Step\Then;
 use Behat\Step\When;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Zenstruck\Messenger\Test\Bus\TestBus;
+use Zenstruck\Messenger\Test\Transport\TestTransport;
 
 /**
  * Cross-cutting Behat steps shared by all bounded contexts.
@@ -34,6 +36,12 @@ final class SharedContext implements Context
     public function teardownScenario(AfterScenarioScope $scope): void
     {
         $this->shutdownKernel();
+
+        // The messenger test transports keep their state in static
+        // (process-wide) properties: reset them so queued messages
+        // do not leak from one scenario into the next.
+        TestBus::resetAll();
+        TestTransport::resetAll();
     }
 
     #[Given('the system is initialized')]

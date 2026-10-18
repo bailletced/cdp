@@ -14,6 +14,7 @@ return (new Config())
                 (new Suite('default'))
                     ->withContexts(
                         \App\Tests\Behat\SharedContext::class,
+                        \App\Tests\Behat\Controller\LinkRequestContext::class,
                         \App\Tests\Behat\Security\LoginLinkContext::class,
                         \App\Tests\Behat\Security\RememberMeContext::class,
                     )

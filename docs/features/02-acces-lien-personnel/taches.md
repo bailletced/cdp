@@ -33,7 +33,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F02-T13** · `back` Gabarit Twig de base `emails/layout.html.twig` (inky, CSS en ligne, couleurs, pied de page ; brouillon rédigé par Claude, validé par la Communion) ; expéditeur = nom de la Communion (paramètre) — *Dépend de* : F00-T18, F01-T01 · *Fini quand* : test de rendu HTML et texte brut.
 - [x] **F02-T14** · `back` Commande `RequestPersonalLink` + handler : compte connu → lien + e-mail « Votre lien personnel » via `async_transactional` ; inconnu → rien + tests fonctionnels — *Dépend de* : F02-T11, F02-T13 · *Fini quand* : les deux cas testés, aucun e-mail en clair dans les journaux.
-- [ ] **F02-T15** · `back` `POST /auth/link-request` (payload e-mail + champ piège `website`) : toujours 202, sans écart de temps de réponse + tests d'acceptation — *Dépend de* : F02-T14 · *Fini quand* : réponses identiques pour adresse connue, inconnue et piège rempli.
+- [x] **F02-T15** · `back` `POST /auth/link-request` (payload e-mail + champ piège `website`) : toujours 202, sans écart de temps de réponse + tests d'acceptation — *Dépend de* : F02-T14 · *Fini quand* : réponses identiques pour adresse connue, inconnue et piège rempli.
 - [ ] **F02-T16** · `back` `GET /api/me` minimal (e-mail, `isOrganizer`) ; 401 pour un visiteur + tests — *Dépend de* : F02-T12 · *Fini quand* : schéma OpenAPI régénéré, tests par profil.
 
 ## Écrans (US-02.1 à US-02.4)
