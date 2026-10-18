@@ -1,0 +1,70 @@
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\Access\Infrastructure\Security\SecurityUser: 'auto'
+
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers:
+        app_user_provider:
+            id: App\Access\Infrastructure\Security\UserProvider
+
+    firewalls:
+        dev:
+            # Ensure dev tools and static assets are always allowed
+            pattern: ^/(_profiler|_wdt|assets|build)/
+            security: false
+        main:
+            lazy: true
+            provider: app_user_provider
+            stateless: false
+
+            # Login link authentication (F02-T07, F02-T08)
+            login_link:
+                check_route: _security_login_link
+                login_path: /login
+                signature_properties: [id, credentialsVersion]
+                check_post_only: true
+                success_handler: App\Access\Infrastructure\Security\LoginLinkSuccessHandler
+                failure_handler: App\Access\Infrastructure\Security\LoginLinkFailureHandler
+
+            # Remember-me (F02-T09): 1 year, persisted in database via Doctrine
+            remember_me:
+                name: __Host-REMEMBERME
+                lifetime: 31536000
+                path: /
+                secure: true
+                httponly: true
+                samesite: lax
+                always_remember_me: true
+                token_provider:
+                    doctrine: true
+
+            # Logout (F02-T10): POST /auth/logout destroys the session.
+            # CSRF protection comes from the SameOriginListener (Origin/Sec-Fetch-Site).
+            logout:
+                path: /auth/logout
+                target: /
+                invalidate_session: true
+
+            # Activate different ways to authenticate:
+            # https://symfony.com/doc/current/security.html#the-firewall
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Note: Only the *first* matching rule is applied
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
+
+when@test:
+    security:
+        password_hashers:
+            # Password hashers are resource-intensive by design to ensure security.
+            # In tests, it's safe to reduce their cost to improve performance.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon

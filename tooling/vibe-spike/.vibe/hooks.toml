@@ -1,0 +1,25 @@
+# Spike Probity ↔ Mistral Vibe : capture des payloads de hooks, sans rien bloquer.
+# `command` se replace à la racine du dépôt, car Vibe n'indique pas le répertoire d'exécution.
+
+[[hooks]]
+name = "spike-capture-pre"
+type = "pre_tool"
+match = "*"
+command = "sh -c 'cd \"$(git rev-parse --show-toplevel)\" && node tooling/vibe-spike/capture-hook.mjs'"
+timeout = 20
+description = "Enregistre le payload de chaque appel d'outil avant exécution"
+
+[[hooks]]
+name = "spike-capture-post"
+type = "post_tool"
+match = "*"
+command = "sh -c 'cd \"$(git rev-parse --show-toplevel)\" && node tooling/vibe-spike/capture-hook.mjs'"
+timeout = 20
+description = "Enregistre le résultat de chaque outil (utile pour reconstituer l'historique)"
+
+[[hooks]]
+name = "spike-capture-agent"
+type = "post_agent"
+command = "sh -c 'cd \"$(git rev-parse --show-toplevel)\" && node tooling/vibe-spike/capture-hook.mjs'"
+timeout = 20
+description = "Enregistre la fin de chaque tour de l'agent"

@@ -1,95 +1,105 @@
 /**
- * Helpers pour interagir avec Mailpit dans les tests e2e.
- * F00-T27 : Tests Playwright sur la stack compose.
+ * Helpers to interact with Mailpit in the E2E tests (F00-T27, F02-T20).
+ * The HTTP API URL is configurable: `mailpit:8025` in the docker network,
+ * `localhost:8025` on the host / in CI (MAILPIT_API_URL).
  */
-
-import { request } from '@playwright/test';
 
 export interface MailpitEmail {
   id: string;
   from: string;
   to: string[];
   subject: string;
-  body: string;
-  timestamp: string;
+  text: string;
+  html: string;
 }
 
-const MAILPIT_API_URL = 'http://mailpit:8025/api/v1';
+const MAILPIT_API_URL =
+  process.env.MAILPIT_API_URL ?? "http://mailpit:8025/api/v1";
+
+// The list endpoint only returns a summary (no Text/HTML bodies).
+interface MailpitMessageSummary {
+  ID: string;
+  To: Array<{ Address: string }>;
+}
+
+interface MailpitMessage extends MailpitMessageSummary {
+  From: { Address: string };
+  Subject: string;
+  Text: string;
+  HTML: string;
+}
+
+function toEmail(message: MailpitMessage): MailpitEmail {
+  return {
+    id: message.ID,
+    from: message.From.Address,
+    to: message.To.map((recipient) => recipient.Address),
+    subject: message.Subject,
+    text: message.Text,
+    html: message.HTML,
+  };
+}
 
 /**
- * Récupère le dernier e-mail envoyé à une adresse donnée.
+ * Returns the most recent email sent to the given address, or null.
  */
-export async function getLastEmailTo(address: string): Promise<MailpitEmail | null> {
-  const context = await request.newContext();
-  const api = context.request;
+export async function getLastEmailTo(
+  address: string,
+): Promise<MailpitEmail | null> {
+  // Plain fetch: the helpers also run in globalSetup, outside any test
+  // fixture, where the Playwright `request` fixture is not available.
+  const response = await fetch(`${MAILPIT_API_URL}/messages`);
+  const body = (await response.json()) as {
+    messages?: MailpitMessageSummary[];
+  };
 
-  try {
-    // Récupérer tous les messages
-    const response = await api.get(`${MAILPIT_API_URL}/messages`);
-    const messages: MailpitEmail[] = await response.json();
+  const summary = (body.messages ?? [])
+    .filter((message) =>
+      message.To.some((recipient) => recipient.Address === address),
+    )
+    .at(-1);
 
-    // Filtrer par destinataire et retourner le plus récent
-    const filtered = messages.filter((msg) => msg.to.includes(address));
-    
-    if (filtered.length === 0) {
-      return null;
-    }
-
-    // Retourner le plus récent (le dernier dans la liste)
-    return filtered[filtered.length - 1];
-  } catch (error) {
-    console.error('Erreur lors de la récupération des e-mails:', error);
+  if (!summary) {
     return null;
   }
+
+  // The bodies are only available on the single-message endpoint.
+  const fullResponse = await fetch(`${MAILPIT_API_URL}/message/${summary.ID}`);
+  const full = (await fullResponse.json()) as MailpitMessage;
+
+  return toEmail(full);
 }
 
 /**
- * Extrait un lien d'un e-mail.
+ * Extracts the first URL from an email body (plain text first, then HTML).
  */
-export function extractLinkFromEmail(email: MailpitEmail, linkText?: string): string | null {
-  if (!email.body) {
-    return null;
+export function extractLinkFromEmail(email: MailpitEmail): string | null {
+  const fromText = email.text.match(/https?:\/\/[^\s"'<>]+/);
+  if (fromText) {
+    return fromText[0];
   }
 
-  // Rechercher un lien dans le corps de l'e-mail
-  const linkMatch = email.body.match(/https?:\/\/[^\s]+/);
-  
-  if (linkMatch) {
-    return linkMatch[0];
-  }
+  const fromHtml = email.html
+    .replaceAll("&amp;", "&")
+    .match(/https?:\/\/[^\s"'<>]+/);
 
-  // Si un texte de lien est fourni, essayer de le trouver
-  if (linkText) {
-    const textMatch = email.body.match(new RegExp(`${linkText}[\\s\\S]*?(https?:\/\/[^\\s]+)`));
-    if (textMatch) {
-      return textMatch[1];
-    }
-  }
-
-  return null;
+  return fromHtml ? fromHtml[0] : null;
 }
 
 /**
- * Vide tous les messages de Mailpit.
+ * Deletes every message from Mailpit.
  */
 export async function clearMailpit(): Promise<void> {
-  const context = await request.newContext();
-  const api = context.request;
-
-  try {
-    await api.delete(`${MAILPIT_API_URL}/messages`);
-  } catch (error) {
-    console.error('Erreur lors du vidage de Mailpit:', error);
-  }
+  await fetch(`${MAILPIT_API_URL}/messages`, { method: "DELETE" });
 }
 
 /**
- * Attend qu'un e-mail arrive pour un destinataire.
+ * Waits until an email arrives for the given address.
  */
 export async function waitForEmail(
   address: string,
-  timeout: number = 30000,
-  pollInterval: number = 2000,
+  timeout = 30000,
+  pollInterval = 1000,
 ): Promise<MailpitEmail | null> {
   const startTime = Date.now();
 

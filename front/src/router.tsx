@@ -1,15 +1,52 @@
-import { createRouter } from '@tanstack/react-router';
-import { Root } from './components/Root';
+import { createRoute, createRouter, redirect } from "@tanstack/react-router";
+import { meQueryOptions } from "./api/hooks";
+import { queryClient } from "./api/queryClient";
+import { Root } from "./components/Root";
+import { LoginPage } from "./pages/LoginPage";
+import { MySpacePage } from "./pages/MySpacePage";
+import { ReceiveMyLinkPage } from "./pages/ReceiveMyLinkPage";
 
-// Définir les routes
-const routeTree = Root.addChildren([]);
+const receiveMyLinkRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/receive-my-link",
+  component: ReceiveMyLinkPage,
+});
+
+const loginRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/login",
+  component: LoginPage,
+});
+
+// Route guard (F02-T19): a visitor (401 on /api/me) is redirected
+// to /receive-my-link before the page mounts.
+const mySpaceRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/my-space",
+  beforeLoad: async ({ context }) => {
+    try {
+      await context.queryClient.ensureQueryData(meQueryOptions);
+    } catch {
+      throw redirect({ to: "/receive-my-link" });
+    }
+  },
+  component: MySpacePage,
+});
+
+// Define the routes
+export const routeTree = Root.addChildren([
+  receiveMyLinkRoute,
+  loginRoute,
+  mySpaceRoute,
+]);
 
 export const router = createRouter({
   routeTree,
+  context: { queryClient },
 });
 
-// Déclarer les types pour TypeScript
-declare module '@tanstack/react-router' {
+// Declare the types for TypeScript
+declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }

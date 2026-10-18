@@ -52,5 +52,7 @@
     </source>
 
     <extensions>
+        <!-- Boots Foundry per test (kernel tests get the current test container) -->
+        <bootstrap class="Zenstruck\Foundry\PHPUnit\FoundryExtension"/>
     </extensions>
 </phpunit>

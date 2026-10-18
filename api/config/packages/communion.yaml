@@ -1,0 +1,9 @@
+parameters:
+    # Display name of the Communion, used as the sender name of every email (F02-T13)
+    communion_name: '%env(COMMUNION_NAME)%'
+    # Sender address of every email (F02-T14)
+    communion_email: '%env(COMMUNION_EMAIL)%'
+
+twig:
+    globals:
+        communion_name: '%communion_name%'

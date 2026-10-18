@@ -1,0 +1,7 @@
+monolog:
+    handlers:
+        # Captures every record on every channel, so tests can assert that no
+        # personal data (email address, personal link) leaks into the logs (F02-T14).
+        test_capture:
+            type: test
+            level: debug

@@ -1,0 +1,27 @@
+_security_logout:
+    resource: security.route_loader.logout
+    type: service
+
+# Symfony Security default route for login_link
+_security_login_link:
+    path: /auth/login
+    methods: [POST]
+
+# Routes for login_link (F02-T07)
+# GET /auth/login: redirects to SPA /login (keeping the query string)
+auth_login_link_get:
+    path: /auth/login
+    methods: [GET]
+    controller: App\Access\Infrastructure\Controller\LoginLinkController::loginLinkGet
+
+# GET /auth/status: authentication status (F02-T09)
+auth_status:
+    path: /auth/status
+    methods: [GET]
+    controller: App\Access\Infrastructure\Controller\AuthStatusController::status
+
+# POST /auth/link-request: request a personal login link by email (F02-T15)
+auth_link_request:
+    path: /auth/link-request
+    methods: [POST]
+    controller: App\Access\Infrastructure\Controller\LinkRequestController::requestLink

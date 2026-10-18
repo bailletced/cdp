@@ -1,5 +1,13 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+  "files": {
+    "ignore": [
+      "src/api/openapi.json",
+      "src/api/schema.d.ts",
+      "test-results",
+      "playwright-report"
+    ]
+  },
   "organizeImports": {
     "enabled": true
   },

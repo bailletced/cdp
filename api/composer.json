@@ -14,17 +14,24 @@
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.7",
         "symfony/console": "8.1.*",
+        "symfony/doctrine-messenger": "8.1.*",
         "symfony/dotenv": "8.1.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "8.1.*",
+        "symfony/http-foundation": "8.1.*",
         "symfony/mailer": "8.1.*",
         "symfony/messenger": "8.1.*",
         "symfony/monolog-bundle": "^4.1",
         "symfony/object-mapper": "8.1.*",
+        "symfony/password-hasher": "8.1.*",
         "symfony/runtime": "8.1.*",
+        "symfony/security-bundle": "8.1.*",
+        "symfony/security-http": "8.1.*",
+        "symfony/twig-bundle": "8.1.*",
         "symfony/uid": "8.1.*",
         "symfony/validator": "8.1.*",
         "symfony/yaml": "8.1.*",
+        "twig/cssinliner-extra": "^3.26",
         "webmozart/assert": "^2.5"
     },
     "config": {
@@ -34,7 +41,11 @@
             "symfony/runtime": true
         },
         "bump-after-update": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "platform-check": false,
+        "platform": {
+            "php": "8.4.6"
+        }
     },
     "autoload": {
         "psr-4": {
@@ -81,8 +92,14 @@
     },
     "require-dev": {
         "api-platform/test": "^5.0",
+        "behat/behat": "^4.0",
+        "friends-of-behat/symfony-extension": "^2.7",
         "phpunit/phpunit": "^13",
         "symfony/browser-kit": "8.1.*",
-        "symfony/http-client": "8.1.*"
+        "symfony/http-client": "8.1.*",
+        "symfony/maker-bundle": "^1.68",
+        "symfony/translation": "8.1.*",
+        "zenstruck/foundry": "^2.14",
+        "zenstruck/messenger-test": "^1.15"
     }
 }

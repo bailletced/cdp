@@ -1,0 +1,9 @@
+# Test transports (zenstruck/messenger-test): messages are intercepted in
+# memory instead of being stored in the Doctrine outbox. The options avoid
+# the deprecations triggered by TestTransport's defaults (F02-T14).
+framework:
+    messenger:
+        transports:
+            async_transactional: 'test://?catch_exceptions=false&support_delay_stamp=true&impacts_assertions_count=false'
+            async_bulk: 'test://?catch_exceptions=false&support_delay_stamp=true&impacts_assertions_count=false'
+            failed: 'test://?catch_exceptions=false&support_delay_stamp=true&impacts_assertions_count=false'

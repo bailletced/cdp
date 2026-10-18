@@ -1,19 +1,34 @@
-import { http, HttpResponse } from 'msw';
-import { setupWorker } from 'msw';
+import { http, HttpResponse } from "msw";
 
-// Handlers MSW pour les tests
+// MSW handlers for the tests. The absolute URL matches the test base URL
+// of the API client (http://localhost:8080, the dev stack).
 export const handlers = [
-  // Handler pour GET /api/test
-  http.get('http://localhost:8080/api/test', () => {
-    return HttpResponse.json({ message: 'Test successful' });
+  // GET /api/me: authenticated priant
+  http.get("http://localhost:8080/api/me", () => {
+    return HttpResponse.json({
+      "@context": "/api/contexts/Me",
+      "@id": "/api/me",
+      "@type": "Me",
+      email: "thomas@example.com",
+      isOrganizer: false,
+    });
   }),
-  
-  // Handler pour POST /api/test
-  http.post('http://localhost:8080/api/test', async ({ request }) => {
-    const body = await request.json();
-    return HttpResponse.json({ echo: body });
+  // POST /auth/link-request: always 202 with the same message (F02-T15)
+  http.post("http://localhost:8080/auth/link-request", () => {
+    return HttpResponse.json(
+      {
+        message:
+          "Si un compte correspond à cette adresse, un lien de connexion vient de vous être envoyé.",
+      },
+      { status: 202 },
+    );
+  }),
+  // POST /auth/login: opens the session and returns the target (F02-T08)
+  http.post("http://localhost:8080/auth/login", () => {
+    return HttpResponse.json({ target: "/my-space" });
+  }),
+  // POST /auth/logout: destroys the session (F02-T10)
+  http.post("http://localhost:8080/auth/logout", () => {
+    return new HttpResponse(null, { status: 200 });
   }),
 ];
-
-// Setup worker pour le navigateur
-export const worker = setupWorker(...handlers);

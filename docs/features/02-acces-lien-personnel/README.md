@@ -8,7 +8,7 @@
 
 Permettre à quiconque possède un compte (priant ou organisateur) d'ouvrir une **session durable sans mot de passe** grâce au lien personnel reçu par e-mail. C'est la clé de voûte de toutes les actions « au nom du priant » (RG-IN-6) et de l'accès au back-office.
 
-Cette feature porte aussi le **squelette de bout en bout** du lot 0 : e-mail asynchrone (Mailpit) → lien → session → `/mon-espace`. Il traverse les zones absentes d'apip-ddd (authentification, e-mails, worker) et les dérisque dès le départ.
+Cette feature porte aussi le **squelette de bout en bout** du lot 0 : e-mail asynchrone (Mailpit) → lien → session → `/my-space`. Il traverse les zones absentes d'apip-ddd (authentification, e-mails, worker) et les dérisque dès le départ.
 
 > **Choix PO** : le §15 prévoit « inscription minimale → e-mail → lien ». Pour éviter du code jetable (une inscription suppose éditions et créneaux, livrés au lot 1), le squelette passe par « Recevoir mon lien » sur un compte amorcé par `app:organizer:create`. Le même chemin technique est couvert (voir questions ouvertes de l'index).
 
@@ -29,7 +29,7 @@ En tant que **priant**, je veux saisir mon e-mail pour recevoir mon lien personn
 ### US-02.2 — Ouvrir ma session par le lien
 En tant que **priant**, je veux cliquer sur mon lien pour arriver connecté dans mon espace afin de gérer mes inscriptions.
 
-- **Étant donné** un lien valide, **quand** je l'ouvre, **alors** la page `/connexion` confirme automatiquement (POST) puis m'amène sur `/mon-espace`.
+- **Étant donné** un lien valide, **quand** je l'ouvre, **alors** la page `/login` confirme automatiquement (POST) puis m'amène sur `/my-space`.
 - **Étant donné** une messagerie qui précharge les liens (GET seul), **quand** elle visite le lien, **alors** aucune session n'est ouverte et le lien reste utilisable.
 - **Étant donné** un lien expiré, altéré ou révoqué, **quand** je l'ouvre, **alors** un message clair me propose d'en recevoir un nouveau.
 - **Étant donné** un lien demandé hors édition, ou le lien d'un organisateur, **quand** 8 jours ont passé, **alors** il est expiré ; pendant une édition, le lien d'un priant reste valable jusqu'à la fin de l'édition + 7 jours (arbitrage Q8).

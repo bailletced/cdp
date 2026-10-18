@@ -17,7 +17,7 @@ final readonly class WriteProbeCommandHandler
     ) {
     }
 
-    public function __invoke(WriteProbeCommand $command): void
+    public function __invoke(WriteProbeCommand $command): string
     {
         $this->entityManager->getConnection()->executeStatement('INSERT INTO command_bus_probe (value) VALUES (?)', [$command->value]);
         $this->eventBus->dispatch(new ProbeWrittenEvent($command->value));
@@ -25,5 +25,7 @@ final readonly class WriteProbeCommandHandler
         if ($command->fail) {
             throw new \DomainException('The handler failed.');
         }
+
+        return $command->value;
     }
 }

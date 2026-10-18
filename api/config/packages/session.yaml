@@ -1,0 +1,24 @@
+framework:
+    session:
+        # Use PdoSessionHandler for PostgreSQL session storage
+        handler_id: session.handler.pdo
+        # Session cookie configuration
+        name: __Host-Session
+        cookie_path: /
+        cookie_domain: null
+        cookie_secure: true
+        cookie_httponly: true
+        cookie_samesite: lax
+
+services:
+    # Custom service to get PDO from Doctrine DBAL connection
+    session.pdo_connection:
+        factory: ['@doctrine.dbal.default_connection', 'getNativeConnection']
+        class: PDO
+
+    session.handler.pdo:
+        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
+        arguments:
+            - '@session.pdo_connection'
+            - lock_mode: 0
+              table_name: sessions

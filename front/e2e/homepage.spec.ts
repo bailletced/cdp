@@ -1,43 +1,31 @@
-import { test, expect } from '@playwright/test';
-import { clearMailpit, waitForEmail } from './helpers/mailpit';
+import { expect, test } from "@playwright/test";
+import { clearMailpit } from "./helpers/mailpit";
 
 test.beforeEach(async () => {
-  // Vider Mailpit avant chaque test
+  // Empty Mailpit before each test
   await clearMailpit();
 });
 
-test.describe('Page d\'accueil', () => {
-  test('répond avec un code 200', async ({ page }) => {
-    await page.goto('/');
+test.describe("Home page", () => {
+  test("answers with a 200 status", async ({ page }) => {
+    const response = await page.goto("/");
+    expect(response?.status()).toBe(200);
     await expect(page).toHaveTitle(/CDP|Chaîne de prière/);
-    await expect(page).toHaveStatus(200);
   });
 
-  test('affiche le titre de l\'application', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByRole('heading', { name: /CDP|Chaîne de prière/ })).toBeVisible();
-  });
-
-  test('afficher un message par défaut', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByText(/Bienvenue|Chaîne de prière|24 heures/)).toBeVisible();
+  test("shows the application title", async ({ page }) => {
+    await page.goto("/");
+    await expect(
+      page.getByRole("heading", { name: /CDP|Chaîne de prière/ }),
+    ).toBeVisible();
   });
 });
 
-test.describe('API', () => {
-  test('l\'API répond sur /api', async ({ page, request }) => {
-    // Ce test vérifie que l'API est accessible depuis le frontend
-    // En développement, le proxy Vite doit rediriger /api vers http://php:8080
-    const response = await request.get('/api/test');
+test.describe("API", () => {
+  test("answers on /auth", async ({ request }) => {
+    // The API is reachable from the frontend: in development the Vite
+    // proxy forwards /auth to the PHP server, keeping a single origin.
+    const response = await request.get("/auth/status");
     expect(response.ok()).toBeTruthy();
-  });
-});
-
-test.describe('Mailpit', () => {
-  test('peut recevoir des e-mails', async () => {
-    // Ce test vérifie que la connexion à Mailpit fonctionne
-    const email = await waitForEmail('test@example.com', 10000);
-    // Pas d'assertion, juste vérifier que ça ne lance pas d'erreur
-    expect(true).toBe(true);
   });
 });

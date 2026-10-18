@@ -20,10 +20,10 @@ final class MessengerCommandBus implements CommandBusInterface
     }
 
     #[\Override]
-    public function dispatch(CommandInterface $command): void
+    public function dispatch(CommandInterface $command): mixed
     {
         try {
-            $this->handle($command);
+            return $this->handle($command);
         } catch (HandlerFailedException $e) {
             // Le bus enveloppe l'exception du handler : l'appelant reçoit l'exception métier d'origine.
             throw \current($e->getWrappedExceptions()) ?: $e;

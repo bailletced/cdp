@@ -16,9 +16,13 @@ node_modules/
 /front/dist/
 /front/playwright-report/
 /front/test-results/
+/front/e2e/.messenger-worker.pid
 
 # Poste de travail
 .DS_Store
 .env.local
 /api/.phpunit.cache/
 /api/public/bundles/
+
+# Spike Probity/Vibe : captures de sessions (contiennent du code et des transcriptions)
+/tooling/vibe-spike/captures/

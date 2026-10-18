@@ -228,3 +228,114 @@ $mock->expects($this->once())->method('send');  // ❌ Brittle: coupled to call 
 ```
 
 **Exception:** Mocks are **ONLY ALLOWED** for testing HTTP calls to external services (APIs, webhooks) where you need to verify request/response behavior. Use dedicated HTTP mocking libraries (e.g., Symfony's `HttpClient` with `MockHttpClient`).
+
+## 9. Language
+
+### Rule: Code, comments, and `.feature` files MUST be in English
+
+All source code, inline comments, docblocks, and Behat `.feature` files (Gherkin) must be written **entirely in English**.
+
+**DO:**
+```gherkin
+# api/features/login_link.feature
+Feature: Personal login link
+  As a priant
+  I want to log in with a personal link
+  So that I can access my space without a password
+
+  Scenario: Valid login link opens session
+    Given an account exists
+    When I submit a valid login link via POST
+    Then the response should be "200 OK"
+```
+
+```php
+// Return the redirect target for the SPA
+return new JsonResponse(['target' => $targetPath]);
+```
+
+**DON'T:**
+```gherkin
+# ❌ French is forbidden in .feature files
+Feature: Lien de connexion personnel
+  Scenario: Lien valide ouvre la session
+    Given un compte existe
+```
+
+```php
+// ❌ French comments are forbidden
+// Renvoie la cible de redirection pour la SPA
+return new JsonResponse(['target' => $targetPath]);
+```
+
+**Why:**
+- Consistency across the codebase
+- International collaboration readiness
+- Gherkin keywords are English; mixing languages is confusing
+- Tooling and IDE support assume English
+
+**Exception:** User-facing strings (error messages, email templates, UI text) may be in French if the product is French-only. These belong in translation files (`translations/`), not hardcoded in source code.
+
+### Rule: Route URIs MUST be in English
+
+All route paths — API endpoints (`/auth/login`, `/auth/logout`, `/api/me`) and SPA pages (`/login`, `/receive-my-link`, `/my-space`) — must be written **entirely in English**, even though the product is French-only. Route URIs are part of the code (and are user-visible in email links), not user-facing prose.
+
+**DO:**
+```yaml
+# api/config/routes/security.yaml
+_security_login_link:
+    path: /auth/login
+```
+
+**DON'T:**
+```yaml
+# ❌ French route URIs are forbidden
+_security_login_link:
+    path: /auth/connexion
+```
+
+**Why:**
+- Route URIs appear in emails, logs, and browser history: they are technical identifiers
+- Consistency with the English codebase rule above
+- Renaming a route after release breaks every email already sent
+
+## 10. Behat Context Organization
+
+### Rule: Split Behat contexts by Bounded Context (BC)
+
+**Never put all step definitions in a single giant `FeatureContext`.** Split contexts by bounded context, mirroring the domain structure.
+
+**Structure:**
+```
+api/tests/Behat/
+├── BehatState.php              # Shared mutable state (POPO)
+├── BehatKernelTrait.php        # Trait: kernel boot/shutdown + state access
+├── SharedContext.php           # Cross-cutting steps (system init, response assertions)
+├── Security/
+│   ├── LoginLinkContext.php    # login_link BC steps
+│   └── RememberMeContext.php   # remember_me BC steps
+└── Account/
+    └── AccountContext.php      # account BC steps
+```
+
+**Shared state:** Use a `BehatState` POPO stored in a static property within `BehatKernelTrait`. Each context accesses it via `$this->state()`. Reset it in `#[BeforeScenario]`.
+
+**Lifecycle hooks:** Only `SharedContext` has `#[BeforeScenario]` / `#[AfterScenario]` hooks (kernel boot, Foundry init). Other contexts are stateless consumers of the shared state.
+
+**behat.yml:** List all contexts explicitly per suite:
+```yaml
+default:
+    suites:
+        login_link:
+            paths: ['%paths.base%/features/Access/Infrastructure/Security']
+            contexts:
+                - App\Tests\Behat\SharedContext
+                - App\Tests\Behat\Security\LoginLinkContext
+                - App\Tests\Behat\Security\RememberMeContext
+```
+
+**Why:**
+- A giant FeatureContext becomes unmaintainable (300+ lines, dozens of steps)
+- BC-aligned contexts mirror the domain and are easier to navigate
+- New features add a new context file instead of growing an existing one
+- Shared state is explicit (BehatState) rather than hidden in a monolith
