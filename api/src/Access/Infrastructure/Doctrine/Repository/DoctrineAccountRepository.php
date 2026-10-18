@@ -10,7 +10,6 @@ use App\Access\Domain\ValueObject\AccountId;
 use App\Shared\Domain\ValueObject\Email;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @template-extends ServiceEntityRepository<Account>
@@ -32,11 +31,14 @@ final class DoctrineAccountRepository extends ServiceEntityRepository implements
     public function findByEmail(Email $email): ?Account
     {
         try {
-            return $this->createQueryBuilder('a')
+            /** @var Account|null $account */
+            $account = $this->createQueryBuilder('a')
                 ->andWhere('lower(a.email.value) = lower (:email)')
                 ->setParameter('email', $email->value)
                 ->getQuery()
                 ->getOneOrNullResult();
+
+            return $account;
         } catch (NonUniqueResultException) {
             return null;
         }
@@ -57,11 +59,11 @@ final class DoctrineAccountRepository extends ServiceEntityRepository implements
     #[\Override]
     public function existsByEmail(Email $email): bool
     {
-        return $this->createQueryBuilder('a')
+        return [] !== $this->createQueryBuilder('a')
             ->select('1')
             ->andWhere('lower(a.email.value) = lower (:email)')
             ->setParameter('email', $email->value)
             ->getQuery()
-            ->getResult() !== [];
+            ->getResult();
     }
 }

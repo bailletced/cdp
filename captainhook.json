@@ -1,0 +1,18 @@
+{
+    "config": {
+        "bootstrap": "api/vendor/autoload.php"
+    },
+    "hooks": {
+        "pre-commit": {
+            "enabled": true,
+            "actions": [
+                {
+                    "action": "make qa-back PHP=\"cd api &&\""
+                },
+                {
+                    "action": "COREPACK_ENABLE_PROJECT_SPEC=0 make qa-front NODE=\"cd front &&\""
+                }
+            ]
+        }
+    }
+}

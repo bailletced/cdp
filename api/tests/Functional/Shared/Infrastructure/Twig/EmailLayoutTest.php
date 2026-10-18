@@ -15,6 +15,7 @@ use Twig\Environment;
 final class EmailLayoutTest extends KernelTestCase
 {
     private Environment $twig;
+
     private string $communionName;
 
     protected function setUp(): void
@@ -29,7 +30,7 @@ final class EmailLayoutTest extends KernelTestCase
     {
         $template = $this->twig->createTemplate(
             "{% extends 'emails/layout.html.twig' %}"
-            . "{% block content %}<p>Bonjour,</p>{% endblock %}"
+            .'{% block content %}<p>Bonjour,</p>{% endblock %}'
         );
 
         $html = $template->render();
@@ -48,7 +49,7 @@ final class EmailLayoutTest extends KernelTestCase
     {
         $template = $this->twig->createTemplate(
             "{% extends 'emails/layout.txt.twig' %}"
-            . "{% block content %}Bonjour,{% endblock %}"
+            .'{% block content %}Bonjour,{% endblock %}'
         );
 
         $text = $template->render();

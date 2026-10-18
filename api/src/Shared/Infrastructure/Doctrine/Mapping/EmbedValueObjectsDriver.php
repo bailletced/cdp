@@ -87,10 +87,10 @@ final readonly class EmbedValueObjectsDriver implements MappingDriver
      */
     private function isEmbeddable(string $class): bool
     {
-        if (!\class_exists($class)) {
+        if (!class_exists($class)) {
             return false;
         }
 
-        return [] !== (new ReflectionClass($class))->getAttributes(Embeddable::class);
+        return [] !== new ReflectionClass($class)->getAttributes(Embeddable::class);
     }
 }

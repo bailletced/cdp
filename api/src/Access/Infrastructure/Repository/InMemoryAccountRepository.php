@@ -33,7 +33,8 @@ final class InMemoryAccountRepository implements AccountRepositoryInterface
     #[\Override]
     public function findByEmail(Email $email): ?Account
     {
-        $lowerEmail = \mb_strtolower($email->value);
+        $lowerEmail = mb_strtolower($email->value);
+
         return $this->accountsByEmail[$lowerEmail] ?? null;
     }
 
@@ -41,7 +42,7 @@ final class InMemoryAccountRepository implements AccountRepositoryInterface
     public function add(Account $account): void
     {
         $id = (string) $account->getId();
-        $lowerEmail = \mb_strtolower($account->getEmail()->value);
+        $lowerEmail = mb_strtolower($account->getEmail()->value);
 
         $this->accountsById[$id] = $account;
         $this->accountsByEmail[$lowerEmail] = $account;
@@ -51,7 +52,7 @@ final class InMemoryAccountRepository implements AccountRepositoryInterface
     public function remove(Account $account): void
     {
         $id = (string) $account->getId();
-        $lowerEmail = \mb_strtolower($account->getEmail()->value);
+        $lowerEmail = mb_strtolower($account->getEmail()->value);
 
         unset($this->accountsById[$id]);
         unset($this->accountsByEmail[$lowerEmail]);
@@ -60,7 +61,8 @@ final class InMemoryAccountRepository implements AccountRepositoryInterface
     #[\Override]
     public function existsByEmail(Email $email): bool
     {
-        $lowerEmail = \mb_strtolower($email->value);
+        $lowerEmail = mb_strtolower($email->value);
+
         return isset($this->accountsByEmail[$lowerEmail]);
     }
 }

@@ -32,7 +32,7 @@ final class ServerTimeSubscriber implements EventSubscriberInterface
     {
         $response = $event->getResponse();
         $dateTime = $this->clock->now();
-        
+
         $response->headers->set('X-Server-Time', $dateTime->format('U'));
     }
 }

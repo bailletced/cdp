@@ -72,7 +72,7 @@ class Account
      */
     public function incrementCredentialsVersion(): void
     {
-        $this->credentialsVersion++;
+        ++$this->credentialsVersion;
     }
 
     public function updatePriantId(?string $priantId): void

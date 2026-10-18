@@ -1,60 +1,57 @@
-# deptrac : vérifie l'architecture en couches (Hexagonale)
-# BC = Boundary Control : vérifie qu'aucune couche ne dépend d'une couche plus haute
+# deptrac: checks the hexagonal layering (Boundary Control)
+# No layer may depend on a higher (more external) layer:
+# Domain is the innermost layer, Infrastructure the outermost, Tests on top.
 
-depfile: deptrac.cache
+deptrac:
+  paths:
+    - ./src
+    - ./tests
 
-paths:
-  - ./src
-  - ./tests
+  layers:
+    # Domain layer (innermost)
+    - name: Domain
+      collectors:
+        - type: directory
+          value: src/Shared/Domain/.*
+        - type: directory
+          value: src/Chain/Domain/.*
+        - type: directory
+          value: src/Access/Domain/.*
 
-exclude_files:
-  - .*\.php$
+    # Application layer
+    - name: Application
+      collectors:
+        - type: directory
+          value: src/Shared/Application/.*
+        - type: directory
+          value: src/Chain/Application/.*
+        - type: directory
+          value: src/Access/Application/.*
 
-layers:
-  # Couche Domain (la plus interne)
-  - name: Domain
-    collectors:
-      - type: directory
-        regex: src/Shared/Domain/.*
-      - type: directory
-        regex: src/Chain/Domain/.*
-      - type: directory
-        regex: src/Access/Domain/.*
+    # Infrastructure layer
+    - name: Infrastructure
+      collectors:
+        - type: directory
+          value: src/Shared/Infrastructure/.*
+        - type: directory
+          value: src/Chain/Infrastructure/.*
+        - type: directory
+          value: src/Access/Infrastructure/.*
 
-  # Couche Application
-  - name: Application
-    collectors:
-      - type: directory
-        regex: src/Shared/Application/.*
-      - type: directory
-        regex: src/Chain/Application/.*
-      - type: directory
-        regex: src/Access/Application/.*
+    # Tests
+    - name: Tests
+      collectors:
+        - type: directory
+          value: tests/.*
 
-  # Couche Infrastructure
-  - name: Infrastructure
-    collectors:
-      - type: directory
-        regex: src/Shared/Infrastructure/.*
-      - type: directory
-        regex: src/Chain/Infrastructure/.*
-      - type: directory
-        regex: src/Access/Infrastructure/.*
-
-  # Tests
-  - name: Tests
-    collectors:
-      - type: directory
-        regex: tests/.*
-
-ruleset:
-  Domain:
-    - Application
-    - Infrastructure
-    - Tests
-  Application:
-    - Infrastructure
-    - Tests
-  Infrastructure:
-    - Tests
-  Tests: []
+  ruleset:
+    Domain: []
+    Application:
+      - Domain
+    Infrastructure:
+      - Domain
+      - Application
+    Tests:
+      - Domain
+      - Application
+      - Infrastructure

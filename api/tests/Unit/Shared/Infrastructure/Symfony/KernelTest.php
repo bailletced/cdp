@@ -17,7 +17,7 @@ final class KernelTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        (new ReflectionMethod(Kernel::class, 'build'))->invoke(new Kernel('test', true), $container);
+        new ReflectionMethod(Kernel::class, 'build')->invoke(new Kernel('test', true), $container);
 
         self::assertArrayHasKey(AsEventListener::class, $container->getAttributeAutoconfigurators());
     }
@@ -26,7 +26,7 @@ final class KernelTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        (new ReflectionMethod(Kernel::class, 'build'))->invoke(new Kernel('test', true), $container);
+        new ReflectionMethod(Kernel::class, 'build')->invoke(new Kernel('test', true), $container);
 
         self::assertArrayHasKey(AsCommandHandler::class, $container->getAttributeAutoconfigurators());
     }

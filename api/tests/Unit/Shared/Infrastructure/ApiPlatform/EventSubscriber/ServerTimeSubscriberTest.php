@@ -56,7 +56,7 @@ final class ServerTimeSubscriberTest extends TestCase
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = $this->createMock(Request::class);
-        
+
         return new ResponseEvent(
             $kernel,
             $request,

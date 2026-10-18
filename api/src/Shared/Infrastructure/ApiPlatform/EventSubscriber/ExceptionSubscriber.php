@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Normalise les réponses d'erreur et ajoute les en-têtes Cache-Control.
- * 
+ *
  * - 422 : violations[] avec propertyPath (déjà géré par API Platform)
  * - 409 : erreurs d'unicité et verrou optimiste (via ConflictException)
  * - 403 : erreurs d'autorisation (via AccessDeniedException)
@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final class ExceptionSubscriber implements EventSubscriberInterface
 {
     private const string DEFAULT_CACHE_CONTROL = 'private, no-store';
+
     private const string SYMFONY_DEFAULT_CACHE_CONTROL = 'no-cache, private';
 
     #[\Override]
@@ -38,19 +39,19 @@ final class ExceptionSubscriber implements EventSubscriberInterface
     public function addCacheControlHeader(ResponseEvent $event): void
     {
         $response = $event->getResponse();
-        
+
         $currentCacheControl = $response->headers->get('Cache-Control');
-        
+
         // Si pas de Cache-Control, ou si c'est la valeur par défaut de Symfony, on la remplace
-        if (null === $currentCacheControl || 
-            $currentCacheControl === self::SYMFONY_DEFAULT_CACHE_CONTROL) {
+        if (null === $currentCacheControl
+            || self::SYMFONY_DEFAULT_CACHE_CONTROL === $currentCacheControl) {
             $response->headers->set('Cache-Control', self::DEFAULT_CACHE_CONTROL);
         }
     }
 
     /**
      * Normalise les réponses d'erreur.
-     * 
+     *
      * Les erreurs de validation (422) sont déjà gérées par API Platform avec le bon format.
      * On s'assure juste que les exceptions personnalisées retournent le bon code HTTP.
      */

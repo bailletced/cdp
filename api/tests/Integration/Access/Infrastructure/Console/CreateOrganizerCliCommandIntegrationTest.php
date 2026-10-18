@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Access\Infrastructure\Console;
 
-use App\Access\Domain\Entity\Account;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;
@@ -13,12 +12,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Uid\Uuid;
 
 final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
 {
     private AccountRepositoryInterface $accountRepository;
+
     private OrganizerRepositoryInterface $organizerRepository;
+
     private EntityManagerInterface $em;
 
     protected function setUp(): void
@@ -45,7 +45,7 @@ final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
         $input = new ArrayInput([
             'email' => 'test-create@example.com',
         ]);
-        
+
         $output = new BufferedOutput();
         $exitCode = $command->run($input, $output);
 
@@ -92,7 +92,7 @@ final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
         $input = new ArrayInput([
             'email' => 'invalid-email',
         ]);
-        
+
         $output = new BufferedOutput();
         $exitCode = $command->run($input, $output);
 

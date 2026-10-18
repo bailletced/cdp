@@ -20,7 +20,9 @@ use Symfony\Component\Uid\Uuid;
 final class UserProviderTest extends TestCase
 {
     private UserProvider $provider;
+
     private AccountRepositoryInterface $accountRepository;
+
     private OrganizerRepositoryInterface $organizerRepository;
 
     protected function setUp(): void
@@ -46,7 +48,7 @@ final class UserProviderTest extends TestCase
         );
 
         $accountId = new AccountId($uuid);
-        
+
         $this->accountRepository
             ->expects($this->once())
             ->method('findById')
@@ -80,7 +82,7 @@ final class UserProviderTest extends TestCase
         );
 
         $accountId = new AccountId($uuid);
-        
+
         $this->accountRepository
             ->expects($this->once())
             ->method('findById')
@@ -105,7 +107,7 @@ final class UserProviderTest extends TestCase
         $uuid = Uuid::v7();
 
         $accountId = new AccountId($uuid);
-        
+
         $this->accountRepository
             ->expects($this->once())
             ->method('findById')
@@ -220,7 +222,7 @@ final class UserProviderTest extends TestCase
         );
 
         $accountId = new AccountId($uuid);
-        
+
         $this->accountRepository
             ->expects($this->once())
             ->method('findById')

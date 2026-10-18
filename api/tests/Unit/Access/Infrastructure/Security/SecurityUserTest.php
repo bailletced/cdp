@@ -62,10 +62,10 @@ final class SecurityUserTest extends TestCase
     public function testEraseCredentials(): void
     {
         $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
-        
+
         // This method should not throw any errors
         $user->eraseCredentials();
-        
+
         $this->assertTrue(true); // If we get here, the method worked
     }
 
@@ -146,7 +146,7 @@ final class SecurityUserTest extends TestCase
     {
         $accountId = new AccountId();
         $email = new Email('test@example.com');
-        
+
         $user = new SecurityUser(
             $accountId->value,
             $email->value,

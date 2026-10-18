@@ -29,7 +29,7 @@ final readonly class AddOrganizerHandler
     {
         $account = $this->accountRepository->findByEmail($command->email);
 
-        if ($account === null) {
+        if (null === $account) {
             $account = new Account(new AccountId(), $command->email);
             $this->accountRepository->add($account);
             $outcome = AddOrganizerResult::AccountCreated;

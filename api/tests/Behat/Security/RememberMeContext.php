@@ -39,12 +39,12 @@ final class RememberMeContext implements Context
             }
         }
 
-        if ($cookieValue === null || $cookieHeaderName === null) {
-            throw new \RuntimeException(sprintf("Cookie '%s' not found in captured response cookies", $cookieName));
+        if (null === $cookieValue || null === $cookieHeaderName) {
+            throw new \RuntimeException(\sprintf("Cookie '%s' not found in captured response cookies", $cookieName));
         }
 
         $request = Request::create($path, 'GET');
-        $request->headers->set('Cookie', $cookieHeaderName . '=' . $cookieValue);
+        $request->headers->set('Cookie', $cookieHeaderName.'='.$cookieValue);
         $request->cookies->set($cookieHeaderName, $cookieValue);
 
         $this->handleRequest($request);

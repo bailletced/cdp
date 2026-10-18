@@ -31,9 +31,6 @@ final class LoginLinkPersonalLinkIssuer implements PersonalLinkIssuer
     public function issue(string $accountId, ?\DateTimeImmutable $editionEndsAt = null): PersonalLink
     {
         $user = $this->userProvider->loadUserByIdentifier($accountId);
-        if (!$user instanceof SecurityUser) {
-            throw new \LogicException(\sprintf('Expected %s, got %s', SecurityUser::class, get_debug_type($user)));
-        }
 
         $expiresAt = $this->computeExpiresAt($user->isOrganizer(), $editionEndsAt);
         $lifetime = $expiresAt->getTimestamp() - $this->clock->now()->getTimestamp();
@@ -52,7 +49,7 @@ final class LoginLinkPersonalLinkIssuer implements PersonalLinkIssuer
     {
         $now = $this->clock->now();
 
-        if (!$isOrganizer && $editionEndsAt !== null) {
+        if (!$isOrganizer && null !== $editionEndsAt) {
             $editionGraceEnd = $editionEndsAt->modify(self::SEVEN_DAYS);
             if ($now < $editionGraceEnd) {
                 return $editionGraceEnd;

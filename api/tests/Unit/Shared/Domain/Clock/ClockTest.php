@@ -18,7 +18,7 @@ final class ClockTest extends TestCase
     public function testSystemClockImplementsClockInterface(): void
     {
         $clock = new SystemClock();
-        
+
         $this->assertInstanceOf(ClockInterface::class, $clock);
     }
 
@@ -42,7 +42,7 @@ final class ClockTest extends TestCase
     public function testMockClockImplementsClockInterface(): void
     {
         $clock = new MockClock();
-        
+
         $this->assertInstanceOf(ClockInterface::class, $clock);
     }
 
@@ -60,7 +60,7 @@ final class ClockTest extends TestCase
     {
         $timestamp = 1700000000;
         $clock = new MockClock($timestamp);
-        
+
         $this->assertSame($timestamp, $clock->currentTimestamp());
     }
 

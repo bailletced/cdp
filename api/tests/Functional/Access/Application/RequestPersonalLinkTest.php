@@ -28,8 +28,11 @@ final class RequestPersonalLinkTest extends KernelTestCase
     use InteractsWithMessenger;
 
     private CommandBusInterface $commandBus;
+
     private EntityManagerInterface $entityManager;
+
     private InMemoryMailTransport $mailTransport;
+
     private TestHandler $logCapture;
 
     protected function setUp(): void
@@ -86,13 +89,13 @@ final class RequestPersonalLinkTest extends KernelTestCase
         $email = $this->mailTransport->sent[0] ?? self::fail('No email was sent.');
         self::assertInstanceOf(MimeEmail::class, $email);
 
-        $to = array_map(static fn (Address $address) => $address->getAddress(), $email->getTo());
+        $to = array_map(static fn (Address $address): string => $address->getAddress(), $email->getTo());
         self::assertSame(['thomas@example.com'], $to);
         self::assertSame('Votre lien personnel', $email->getSubject());
 
-        $fromAddresses = array_map(static fn (Address $address) => $address->getAddress(), $email->getFrom());
+        $fromAddresses = array_map(static fn (Address $address): string => $address->getAddress(), $email->getFrom());
         self::assertSame([self::getContainer()->getParameter('communion_email')], $fromAddresses);
-        $fromNames = array_map(static fn (Address $address) => $address->getName(), $email->getFrom());
+        $fromNames = array_map(static fn (Address $address): string => $address->getName(), $email->getFrom());
         self::assertSame([self::getContainer()->getParameter('communion_name')], $fromNames);
 
         $html = $email->getHtmlBody();

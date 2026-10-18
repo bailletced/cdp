@@ -47,7 +47,7 @@ final class LoginLinkFailureHandler implements AuthenticationFailureHandlerInter
     {
         $current = $exception;
 
-        while ($current !== null) {
+        while ($current instanceof \Throwable) {
             if ($current instanceof ExpiredLoginLinkException || $current instanceof ExpiredSignatureException) {
                 return 'expired';
             }

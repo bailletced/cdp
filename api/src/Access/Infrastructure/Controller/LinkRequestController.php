@@ -42,7 +42,7 @@ final class LinkRequestController
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param array<mixed, mixed> $payload
      */
     private function isHoneypotFilled(array $payload): bool
     {
@@ -52,7 +52,7 @@ final class LinkRequestController
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param array<mixed, mixed> $payload
      */
     private function dispatchIfValidEmail(array $payload): void
     {

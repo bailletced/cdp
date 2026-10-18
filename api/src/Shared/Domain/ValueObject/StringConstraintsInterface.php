@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace App\Shared\Domain\ValueObject;
 
 /**
- * Interface pour les Value Objects qui ont des contraintes de longueur de chaîne.
- * Permet à AssertValueObject de récupérer les bornes min/max sans utiliser la réflexion.
+ * Interface for value objects with string length constraints.
+ * Lets AssertValueObject read the min/max bounds without reflection.
  */
 interface StringConstraintsInterface
 {
     /**
-     * Retourne la longueur minimale autorisée, ou null si non applicable.
+     * Returns the minimum allowed length.
+     *
+     * @return int<1, max>
      */
-    public static function getMinLength(): ?int;
+    public static function getMinLength(): int;
 
     /**
-     * Retourne la longueur maximale autorisée, ou null si non applicable.
+     * Returns the maximum allowed length.
+     *
+     * @return int<1, max>
      */
-    public static function getMaxLength(): ?int;
+    public static function getMaxLength(): int;
 }

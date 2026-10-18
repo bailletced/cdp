@@ -40,7 +40,9 @@ final class ObjectMapperTest extends TestCase
 
     public function testItMapsFromSource(): void
     {
-        $source = new class { public string $name = 'test'; };
+        $source = new class {
+            public string $name = 'test';
+        };
         $result = $this->mapper->mapFromSource($source, \stdClass::class);
 
         $this->assertInstanceOf(\stdClass::class, $result);

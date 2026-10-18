@@ -23,7 +23,7 @@ final class EmailTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("L'adresse e-mail doit comporter entre 3 et 254 caractères.");
 
-        new Email(\str_repeat('a', 64).'@'.\str_repeat('b', 63).'.'.\str_repeat('b', 63).'.'.\str_repeat('b', 62));
+        new Email(str_repeat('a', 64).'@'.str_repeat('b', 63).'.'.str_repeat('b', 63).'.'.str_repeat('b', 62));
     }
 
     public function testABlankAddressIsRejectedAsTooShort(): void

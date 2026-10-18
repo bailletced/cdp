@@ -22,7 +22,7 @@ final class AuthStatusController
     public function status(): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
-        $authenticated = $token !== null && $token->getUserIdentifier() !== '';
+        $authenticated = null !== $token && '' !== $token->getUserIdentifier();
 
         return new JsonResponse([
             'authenticated' => $authenticated,

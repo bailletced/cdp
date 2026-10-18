@@ -7,9 +7,6 @@ namespace App\Access\Domain\Repository;
 use App\Access\Domain\Entity\Organizer;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @template-extends RepositoryInterface<Organizer>
- */
 interface OrganizerRepositoryInterface
 {
     /**

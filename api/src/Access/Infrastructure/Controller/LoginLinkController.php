@@ -6,7 +6,6 @@ namespace App\Access\Infrastructure\Controller;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Controller for the GET /auth/login route.
@@ -20,10 +19,10 @@ final class LoginLinkController
      * GET /auth/login redirects to the SPA /login.
      * Per F02-T07: redirect to the SPA /login, preserving the query string.
      */
-    public function loginLinkGet(Request $request): Response
+    public function loginLinkGet(Request $request): RedirectResponse
     {
         $query = $request->query->all();
-        $target = '/login'.($query === [] ? '' : '?'.http_build_query($query));
+        $target = '/login'.([] === $query ? '' : '?'.http_build_query($query));
 
         return new RedirectResponse($target);
     }

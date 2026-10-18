@@ -17,7 +17,7 @@ final class ExceptionTest extends TestCase
     public function testMissingModelExceptionHasCorrectStatusCode(): void
     {
         $exception = new MissingModelException('TestModel');
-        
+
         $this->assertSame(404, $exception->getStatusCode());
         $this->assertStringContainsString('TestModel', $exception->getMessage());
     }
@@ -25,14 +25,14 @@ final class ExceptionTest extends TestCase
     public function testConflictExceptionHasCorrectStatusCode(): void
     {
         $exception = new ConflictException();
-        
+
         $this->assertSame(409, $exception->getStatusCode());
     }
 
     public function testAccessDeniedExceptionHasCorrectStatusCode(): void
     {
         $exception = new AccessDeniedException();
-        
+
         $this->assertSame(403, $exception->getStatusCode());
     }
 
@@ -40,7 +40,7 @@ final class ExceptionTest extends TestCase
     {
         $message = 'Conflit personnalisé';
         $exception = new ConflictException($message);
-        
+
         $this->assertSame($message, $exception->getMessage());
         $this->assertSame(409, $exception->getStatusCode());
     }
@@ -49,7 +49,7 @@ final class ExceptionTest extends TestCase
     {
         $message = 'Accès refusé personnalisé';
         $exception = new AccessDeniedException($message);
-        
+
         $this->assertSame($message, $exception->getMessage());
         $this->assertSame(403, $exception->getStatusCode());
     }

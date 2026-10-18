@@ -65,29 +65,33 @@ final class AssertValueObjectInterfaceTest extends TestCase
         $this->assertInstanceOf(Length::class, $lengthConstraint);
         $this->assertSame(3, $lengthConstraint->min);
         $this->assertSame(254, $lengthConstraint->max);
-        
+
         $this->assertInstanceOf(EmailConstraint::class, $emailConstraint);
     }
 }
 
-// VO factice qui implémente l'interface
+// Fake VO implementing the interface
 final readonly class FakeStringValueObject implements StringConstraintsInterface
 {
-    public function __construct(public string $value) {}
+    public function __construct(public string $value)
+    {
+    }
 
-    public static function getMinLength(): ?int
+    public static function getMinLength(): int
     {
         return 5;
     }
 
-    public static function getMaxLength(): ?int
+    public static function getMaxLength(): int
     {
         return 100;
     }
 }
 
-// VO factice qui N'IMPLÉMENTE PAS l'interface (pour le test d'échec)
+// Fake VO that does NOT implement the interface (for the failure test)
 final readonly class FakeNonConstrainedValueObject
 {
-    public function __construct(public string $value) {}
+    public function __construct(public string $value)
+    {
+    }
 }

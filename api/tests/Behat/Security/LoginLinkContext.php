@@ -38,7 +38,7 @@ final class LoginLinkContext implements Context
     public function validLoginLinkGeneratedForAccountWithTarget(string $targetPath): void
     {
         $state = $this->state();
-        if ($state->currentAccount === null) {
+        if (null === $state->currentAccount) {
             throw new \RuntimeException('No account available. Create an account first.');
         }
 
@@ -56,7 +56,7 @@ final class LoginLinkContext implements Context
         $loginLinkDetails = $handler->createLoginLink($securityUser);
 
         $url = $loginLinkDetails->getUrl();
-        parse_str(parse_url($url, PHP_URL_QUERY), $queryParams);
+        parse_str(parse_url($url, \PHP_URL_QUERY), $queryParams);
 
         $state->loginLinkParams = [
             'user' => $queryParams['user'] ?? '',
@@ -84,17 +84,17 @@ final class LoginLinkContext implements Context
     public function hashIsAltered(): void
     {
         $state = $this->state();
-        if ($state->loginLinkParams === null) {
+        if (null === $state->loginLinkParams) {
             throw new \RuntimeException('No login link params available.');
         }
-        $state->loginLinkParams['hash'] = $state->loginLinkParams['hash'] . 'ALTERED';
+        $state->loginLinkParams['hash'] .= 'ALTERED';
     }
 
     #[Given('the account is deleted')]
     public function accountIsDeleted(): void
     {
         $state = $this->state();
-        if ($state->currentAccount === null) {
+        if (null === $state->currentAccount) {
             throw new \RuntimeException('No account available.');
         }
 
@@ -102,7 +102,7 @@ final class LoginLinkContext implements Context
         $accountId = $state->currentAccount->getId()->value->toRfc4122();
         $account = $state->entityManager->getRepository(Account::class)->find($accountId);
 
-        if ($account !== null) {
+        if (null !== $account) {
             $state->entityManager->remove($account);
             $state->entityManager->flush();
         }
@@ -112,7 +112,7 @@ final class LoginLinkContext implements Context
     public function submitLoginLinkViaPost(): void
     {
         $state = $this->state();
-        if ($state->loginLinkParams === null) {
+        if (null === $state->loginLinkParams) {
             throw new \RuntimeException('No login link params available.');
         }
 
@@ -148,7 +148,7 @@ final class LoginLinkContext implements Context
     public function submitLoginLinkViaPostWithOrigin(string $origin): void
     {
         $state = $this->state();
-        if ($state->loginLinkParams === null) {
+        if (null === $state->loginLinkParams) {
             throw new \RuntimeException('No login link params available.');
         }
 
@@ -161,7 +161,7 @@ final class LoginLinkContext implements Context
     public function submitLoginLinkViaPostWithSecFetchSite(string $secFetchSite): void
     {
         $state = $this->state();
-        if ($state->loginLinkParams === null) {
+        if (null === $state->loginLinkParams) {
             throw new \RuntimeException('No login link params available.');
         }
 

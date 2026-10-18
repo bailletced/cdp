@@ -6,7 +6,6 @@ namespace App\Access\Infrastructure\Security;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 
@@ -21,7 +20,7 @@ final class LoginLinkSuccessHandler implements AuthenticationSuccessHandlerInter
      * Called when authentication succeeded.
      * Returns a JSON with the redirect URL (target).
      */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token): JsonResponse
     {
         // Get the target from the request
         // For POST, _target_path is in the request parameters

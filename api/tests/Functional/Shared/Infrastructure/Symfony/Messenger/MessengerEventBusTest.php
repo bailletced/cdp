@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 final class MessengerEventBusTest extends KernelTestCase
 {
     private CommandBusInterface $commandBus;
+
     private ProbeRecorder $recorder;
 
     protected function setUp(): void

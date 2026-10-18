@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Behat;
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
-use Behat\Hook\BeforeScenario;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Hook\AfterScenario;
+use Behat\Hook\BeforeScenario;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
@@ -77,9 +77,7 @@ final class SharedContext implements Context
         $statusCode = $this->mapStatusStringToCode($expectedStatus);
 
         if ($state->lastResponseStatus !== $statusCode) {
-            throw new \RuntimeException(
-                sprintf('Expected status %d (%s), got %d', $statusCode, $expectedStatus, $state->lastResponseStatus)
-            );
+            throw new \RuntimeException(\sprintf('Expected status %d (%s), got %d', $statusCode, $expectedStatus, $state->lastResponseStatus));
         }
     }
 
@@ -87,7 +85,7 @@ final class SharedContext implements Context
     public function responseShouldContainJsonWithEqualTo(string $key, string $expectedValue): void
     {
         $state = $this->state();
-        if ($state->lastResponseContent === null) {
+        if (null === $state->lastResponseContent) {
             throw new \RuntimeException('No response content available');
         }
 
@@ -98,14 +96,12 @@ final class SharedContext implements Context
         }
 
         $actual = $data[$key];
-        if (is_bool($actual)) {
+        if (\is_bool($actual)) {
             $actual = $actual ? 'true' : 'false';
         }
 
         if ((string) $actual !== $expectedValue) {
-            throw new \RuntimeException(
-                sprintf("Expected '%s' for key '$key', got '%s'", $expectedValue, $actual)
-            );
+            throw new \RuntimeException(\sprintf("Expected '%s' for key '$key', got '%s'", $expectedValue, $actual));
         }
     }
 
@@ -119,9 +115,7 @@ final class SharedContext implements Context
 
         $location = $state->lastResponseHeaders['location'][0] ?? '';
         if (!str_contains($location, $expectedPath)) {
-            throw new \RuntimeException(
-                sprintf("Expected redirect to contain '%s', got '%s'", $expectedPath, $location)
-            );
+            throw new \RuntimeException(\sprintf("Expected redirect to contain '%s', got '%s'", $expectedPath, $location));
         }
     }
 
@@ -141,9 +135,7 @@ final class SharedContext implements Context
 
         if (!$found) {
             $available = implode(', ', array_keys($state->responseCookies)) ?: '(none)';
-            throw new \RuntimeException(
-                sprintf("Expected response to set cookie containing '%s', got cookies: %s", $cookieName, $available)
-            );
+            throw new \RuntimeException(\sprintf("Expected response to set cookie containing '%s', got cookies: %s", $cookieName, $available));
         }
     }
 

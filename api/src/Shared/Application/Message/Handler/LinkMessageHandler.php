@@ -29,7 +29,7 @@ final class LinkMessageHandler
 
     public function __invoke(LinkMessage $message): void
     {
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from(new Address($this->senderEmail, $this->senderName))
             ->to($message->email->value)
             ->subject($message->subject)

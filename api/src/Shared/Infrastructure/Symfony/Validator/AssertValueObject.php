@@ -36,30 +36,19 @@ final class AssertValueObject extends Composite
 
         $this->message = $message ?? $this->message;
 
-        // Le VO DOIT implémenter StringConstraintsInterface
-        if (!\is_a($this->class, StringConstraintsInterface::class, true)) {
-            throw new InvalidArgumentException(
-                \sprintf(
-                    'Le Value Object "%s" doit implémenter "%s" pour utiliser AssertValueObject.',
-                    $this->class,
-                    StringConstraintsInterface::class
-                )
-            );
+        // The VO must implement StringConstraintsInterface
+        if (!is_a($this->class, StringConstraintsInterface::class, true)) {
+            throw new InvalidArgumentException(\sprintf('Le Value Object "%s" doit implémenter "%s" pour utiliser AssertValueObject.', $this->class, StringConstraintsInterface::class));
         }
 
-        $minLength = $this->class::getMinLength();
-        $maxLength = $this->class::getMaxLength();
+        // The interface guarantees the bounds, so the Length constraint is always added
+        $this->constraints[] = new Length(
+            min: $this->class::getMinLength(),
+            max: $this->class::getMaxLength(),
+        );
 
-        // Ajouter la contrainte Length si des bornes sont définies
-        if (null !== $minLength || null !== $maxLength) {
-            $this->constraints[] = new Length(
-                min: $minLength,
-                max: $maxLength,
-            );
-        }
-
-        // Ajouter la contrainte Email si c'est le VO Email
-        if ($this->class === Email::class) {
+        // Add the Email constraint for the Email VO
+        if (Email::class === $this->class) {
             $this->constraints[] = new EmailConstraint();
         }
     }

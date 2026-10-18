@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpKernel\Client;
 
 /**
  * Classe de base pour les tests d'API (acceptance).
@@ -64,6 +63,6 @@ abstract class ApiTestCase extends WebTestCase
      */
     protected function getJsonContent(string $content): array
     {
-        return json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        return json_decode($content, true, 512, \JSON_THROW_ON_ERROR);
     }
 }

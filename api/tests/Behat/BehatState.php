@@ -27,13 +27,21 @@ final class BehatState
     }
 
     public ?KernelInterface $kernel = null;
+
     public ?EntityManagerInterface $entityManager = null;
+
     public ?Account $currentAccount = null;
+
     public ?array $loginLinkParams = null;
+
     public array $responseCookies = [];
+
     public array $cookieJar = [];
+
     public ?string $lastResponseContent = null;
+
     public ?int $lastResponseStatus = null;
+
     public ?array $lastResponseHeaders = null;
 
     public function reset(): void

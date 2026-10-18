@@ -11,10 +11,6 @@ use App\Shared\Application\Message\ReminderMessage;
 use App\Shared\Domain\ValueObject\Email;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Messenger\MessageBus;
-use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
-use Symfony\Component\Messenger\Transport\TransportFactory;
-use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
  * Test unitaire pour vérifier le routage des messages vers les transports.
@@ -45,7 +41,7 @@ final class MessengerTransportTest extends TestCase
         $now = new DateTimeImmutable();
 
         $confirmation = new ConfirmationMessage($email, 'token', $now);
-        
+
         // Vérifier que le message peut être sérialisé (nécessaire pour Messenger)
         $serialized = serialize($confirmation);
         $unserialized = unserialize($serialized);

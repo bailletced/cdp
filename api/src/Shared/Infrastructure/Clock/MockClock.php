@@ -20,7 +20,7 @@ final class MockClock implements ClockInterface
         if ($dateTimeOrTimestamp instanceof DateTimeImmutable) {
             $this->dateTime = $dateTimeOrTimestamp;
         } else {
-            $this->dateTime = new DateTimeImmutable('@' . $dateTimeOrTimestamp, new DateTimeZone('UTC'));
+            $this->dateTime = new DateTimeImmutable('@'.$dateTimeOrTimestamp, new DateTimeZone('UTC'));
         }
     }
 
@@ -44,7 +44,7 @@ final class MockClock implements ClockInterface
      */
     public function setTimestamp(int $timestamp): void
     {
-        $this->dateTime = new DateTimeImmutable('@' . $timestamp, new DateTimeZone('UTC'));
+        $this->dateTime = new DateTimeImmutable('@'.$timestamp, new DateTimeZone('UTC'));
     }
 
     /**

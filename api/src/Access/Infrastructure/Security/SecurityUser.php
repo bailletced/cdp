@@ -16,13 +16,18 @@ use Symfony\Component\Uid\Uuid;
 class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
 {
     private Uuid $id;
+
     private string $email;
+
     private string $password;
+
     /**
      * @var string[]
      */
     private array $roles = [];
+
     private bool $isOrganizer = false;
+
     private int $credentialsVersion = 1;
 
     public function __construct(

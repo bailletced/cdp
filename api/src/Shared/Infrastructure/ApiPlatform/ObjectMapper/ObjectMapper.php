@@ -10,24 +10,30 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 /**
- * ObjectMapper pour les ressources API Platform.
- * 
- * Mappe les données (array ou object) vers un objet cible,
- * avec gestion des erreurs MissingModelException.
+ * Object mapper for API Platform resources.
+ *
+ * Maps data (array or object) to a target object,
+ * throwing MissingModelException on unknown models.
  */
 final class ObjectMapper
 {
-    public function __construct(
-        private PropertyAccessorInterface $propertyAccessor = new PropertyAccess(),
-    ) {
+    private PropertyAccessorInterface $propertyAccessor;
+
+    public function __construct(?PropertyAccessorInterface $propertyAccessor = null)
+    {
+        $this->propertyAccessor = $propertyAccessor ?? PropertyAccess::createPropertyAccessor();
     }
 
     /**
-     * Mappe un tableau de données vers un nouvel objet.
-     * 
+     * Maps a data array to a new object.
+     *
      * @template T of object
-     * @param class-string<T> $targetClass
+     *
+     * @param array<string, mixed> $data
+     * @param class-string<T>      $targetClass
+     *
      * @return T
+     *
      * @throws MissingModelException
      */
     public function mapToObject(array $data, string $targetClass): object
@@ -37,7 +43,7 @@ final class ObjectMapper
         }
 
         $target = new $targetClass();
-        
+
         foreach ($data as $property => $value) {
             if ($this->propertyAccessor->isWritable($target, $property)) {
                 $this->propertyAccessor->setValue($target, $property, $value);
@@ -49,10 +55,13 @@ final class ObjectMapper
 
     /**
      * Mappe un objet source vers un nouvel objet cible.
-     * 
+     *
      * @template T of object
+     *
      * @param class-string<T> $targetClass
+     *
      * @return T
+     *
      * @throws MissingModelException
      */
     public function mapFromSource(object $source, string $targetClass): object
@@ -62,12 +71,12 @@ final class ObjectMapper
         }
 
         $target = new $targetClass();
-        
+
         $sourceReflection = new ReflectionClass($source);
         foreach ($sourceReflection->getProperties() as $sourceProperty) {
             $propertyName = $sourceProperty->getName();
-            if ($this->propertyAccessor->isReadable($source, $propertyName) && 
-                $this->propertyAccessor->isWritable($target, $propertyName)) {
+            if ($this->propertyAccessor->isReadable($source, $propertyName)
+                && $this->propertyAccessor->isWritable($target, $propertyName)) {
                 $value = $this->propertyAccessor->getValue($source, $propertyName);
                 $this->propertyAccessor->setValue($target, $propertyName, $value);
             }

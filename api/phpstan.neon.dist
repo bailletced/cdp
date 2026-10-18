@@ -3,9 +3,9 @@ includes:
 
 parameters:
     level: max
+    # Production code only: the test suite is not analysed by PHPStan
     paths:
         - src
-        - tests
         - config
         - migrations
     excludePaths:
@@ -13,18 +13,6 @@ parameters:
         - vendor/*
         - public/*
         - node_modules/*
-    checkMissingIterableValueType: false
-
-    # Symfony
-    stubFiles:
-        - vendor/phpstan/phpstan-stubfiles/stubs/Symfony/Component/DependencyInjection/ContainerBuilder.neon
-
     # Doctrine
     dynamicConstantNames:
         - Doctrine\ORM\Mapping\ClassMetadata::CUSTOM_STATE_SAVEPoint
-
-    # Ignorer les dépréciations Doctrine
-    ignoreErrors:
-        - '#^Call to an undefined method Doctrine\\.*#'
-        - '#^Property Doctrine\\.*#'
-        - '#^Method Doctrine\\.*#'

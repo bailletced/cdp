@@ -30,7 +30,7 @@ final class MeProvider implements ProviderInterface
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      */
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?Me
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Me
     {
         $user = $this->tokenStorage->getToken()?->getUser();
 

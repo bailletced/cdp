@@ -48,10 +48,17 @@ final class CreateOrganizerCliCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $emailString = $input->getArgument(self::ARGUMENT_EMAIL);
 
+        if (!\is_string($emailString)) {
+            $io->error('The email argument must be a string.');
+
+            return Command::INVALID;
+        }
+
         try {
             $email = new Email($emailString);
         } catch (\InvalidArgumentException $e) {
             $io->error(\sprintf('Invalid email address: %s', $e->getMessage()));
+
             return Command::FAILURE;
         }
 

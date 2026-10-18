@@ -17,7 +17,9 @@ use PHPUnit\Framework\TestCase;
 final class AddOrganizerHandlerTest extends TestCase
 {
     private InMemoryAccountRepository $accountRepository;
+
     private InMemoryOrganizerRepository $organizerRepository;
+
     private AddOrganizerHandler $handler;
 
     protected function setUp(): void

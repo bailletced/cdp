@@ -121,7 +121,7 @@ abstract class OrganizerRepositoryTestCase extends TestCase
 
         $all = $this->repository->findAll();
         $this->assertCount(1, $all);
-        
+
         $found = $this->repository->findByAccountId($accountId);
         $this->assertNotNull($found);
         $this->assertSame($organizer2, $found);

@@ -13,9 +13,9 @@ use Symfony\Component\Uid\Uuid;
  * @template-extends ServiceEntityRepository<Organizer>
  *
  * @method Organizer|null find($id, $lockMode = null, $lockVersion = null)
- * @method Organizer|null findOneBy(array $criteria)
+ * @method Organizer|null findOneBy(array<string, mixed> $criteria)
  * @method Organizer[]    findAll()
- * @method Organizer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Organizer[]    findBy(array<string, mixed> $criteria, array<string, mixed>|null $orderBy = null, $limit = null, $offset = null)
  */
 final class DoctrineOrganizerRepository extends ServiceEntityRepository implements OrganizerRepositoryInterface
 {
@@ -33,7 +33,7 @@ final class DoctrineOrganizerRepository extends ServiceEntityRepository implemen
     #[\Override]
     public function isOrganizer(Uuid $accountId): bool
     {
-        return $this->findByAccountId($accountId) !== null;
+        return null !== $this->findByAccountId($accountId);
     }
 
     #[\Override]

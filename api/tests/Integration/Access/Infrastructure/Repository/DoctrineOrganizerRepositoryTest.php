@@ -13,6 +13,7 @@ use Symfony\Component\Uid\Uuid;
 final class DoctrineOrganizerRepositoryTest extends KernelTestCase
 {
     private DoctrineOrganizerRepository $repository;
+
     private EntityManagerInterface $em;
 
     protected function setUp(): void

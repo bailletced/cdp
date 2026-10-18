@@ -43,11 +43,11 @@ final class AssertValueObjectValidator extends ConstraintValidator
         $object = $this->context->getObject();
         $property = $this->context->getPropertyName();
 
-        if (!\is_object($object) || null === $property || !\property_exists($object, $property)) {
+        if (!\is_object($object) || null === $property || !property_exists($object, $property)) {
             return true;
         }
 
-        $type = (new ReflectionProperty($object, $property))->getType();
+        $type = new ReflectionProperty($object, $property)->getType();
 
         return !$type instanceof ReflectionType || $type->allowsNull();
     }

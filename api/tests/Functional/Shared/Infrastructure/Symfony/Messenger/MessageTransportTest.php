@@ -13,7 +13,6 @@ use App\Shared\Domain\ValueObject\Email;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 /**
  * Test pour F00-T18 : Transports Messenger Doctrine.

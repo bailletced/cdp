@@ -18,9 +18,9 @@ final class OrganizerFactory
         ?Uuid $addedBy = null,
         ?\DateTimeImmutable $addedAt = null
     ): Organizer {
-        $accountId = $accountId ?? Uuid::v7();
-        $addedBy = $addedBy ?? Uuid::v7();
-        $addedAt = $addedAt ?? new \DateTimeImmutable();
+        $accountId ??= Uuid::v7();
+        $addedBy ??= Uuid::v7();
+        $addedAt ??= new \DateTimeImmutable();
 
         return new Organizer(
             $accountId,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Access\Application\AddOrganizerHandler;
 use App\Access\Application\RequestPersonalLinkHandler;
 use App\Access\Domain\Entity\Account;
@@ -31,14 +33,14 @@ return static function (ContainerConfigurator $container): void {
     $container->services()
         ->set(DoctrineAccountRepository::class)
         ->args([
-            new \Symfony\Component\DependencyInjection\Reference('doctrine'),
+            new Symfony\Component\DependencyInjection\Reference('doctrine'),
             Account::class,
         ])
         ->alias(AccountRepositoryInterface::class, DoctrineAccountRepository::class)
 
         ->set(DoctrineOrganizerRepository::class)
         ->args([
-            new \Symfony\Component\DependencyInjection\Reference('doctrine'),
+            new Symfony\Component\DependencyInjection\Reference('doctrine'),
             Organizer::class,
         ])
         ->alias(OrganizerRepositoryInterface::class, DoctrineOrganizerRepository::class)
@@ -103,9 +105,9 @@ return static function (ContainerConfigurator $container): void {
         ->autoconfigure()
         ->autowire()
         ->args([
-            new \Symfony\Component\DependencyInjection\Reference(UserProvider::class),
-            new \Symfony\Component\DependencyInjection\Reference('security.authenticator.login_link_handler.main'),
-            new \Symfony\Component\DependencyInjection\Reference(ClockInterface::class),
+            new Symfony\Component\DependencyInjection\Reference(UserProvider::class),
+            new Symfony\Component\DependencyInjection\Reference('security.authenticator.login_link_handler.main'),
+            new Symfony\Component\DependencyInjection\Reference(ClockInterface::class),
         ])
         ->alias(PersonalLinkIssuer::class, LoginLinkPersonalLinkIssuer::class)
 

@@ -49,20 +49,13 @@ final class LinkRequestContext implements Context
     {
         $state = $this->state();
 
-        if ($state->lastResponseStatus !== Response::HTTP_ACCEPTED) {
-            throw new \RuntimeException(\sprintf(
-                'Expected status 202 (Accepted), got %d',
-                $state->lastResponseStatus ?? 0,
-            ));
+        if (Response::HTTP_ACCEPTED !== $state->lastResponseStatus) {
+            throw new \RuntimeException(\sprintf('Expected status 202 (Accepted), got %d', $state->lastResponseStatus ?? 0));
         }
 
         $body = json_decode($state->lastResponseContent ?? '', true);
         if (!\is_array($body) || ['message' => self::EXPECTED_MESSAGE] !== $body) {
-            throw new \RuntimeException(\sprintf(
-                'Expected body {"message": "%s"}, got "%s"',
-                self::EXPECTED_MESSAGE,
-                (string) $state->lastResponseContent,
-            ));
+            throw new \RuntimeException(\sprintf('Expected body {"message": "%s"}, got "%s"', self::EXPECTED_MESSAGE, (string) $state->lastResponseContent));
         }
     }
 
@@ -71,7 +64,7 @@ final class LinkRequestContext implements Context
     {
         $messages = $this->queuedLinkMessages();
 
-        if (\count($messages) !== 1) {
+        if (1 !== \count($messages)) {
             throw new \RuntimeException(\sprintf('Expected exactly 1 queued link message, got %d', \count($messages)));
         }
 

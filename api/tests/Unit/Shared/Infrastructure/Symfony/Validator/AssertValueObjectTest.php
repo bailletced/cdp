@@ -37,7 +37,7 @@ final class AssertValueObjectTest extends TestCase
         // Trouver la contrainte Length
         $lengthConstraint = null;
         $emailConstraint = null;
-        
+
         foreach ($constraint->constraints as $c) {
             if ($c instanceof Length) {
                 $lengthConstraint = $c;
@@ -50,7 +50,7 @@ final class AssertValueObjectTest extends TestCase
         $this->assertInstanceOf(Length::class, $lengthConstraint, 'Doit inclure une contrainte Length');
         $this->assertSame(Email::MIN_LENGTH, $lengthConstraint->min);
         $this->assertSame(Email::MAX_LENGTH, $lengthConstraint->max);
-        
+
         $this->assertInstanceOf(EmailConstraint::class, $emailConstraint);
     }
 }

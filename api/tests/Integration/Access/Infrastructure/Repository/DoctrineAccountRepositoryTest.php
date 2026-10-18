@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 final class DoctrineAccountRepositoryTest extends KernelTestCase
 {
     private DoctrineAccountRepository $repository;
+
     private EntityManagerInterface $em;
 
     protected function setUp(): void

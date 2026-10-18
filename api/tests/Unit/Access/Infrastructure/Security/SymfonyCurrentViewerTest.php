@@ -23,7 +23,9 @@ use Symfony\Component\Uid\Uuid;
 final class SymfonyCurrentViewerTest extends TestCase
 {
     private TokenStorageInterface $tokenStorage;
+
     private AccountRepositoryInterface $accountRepository;
+
     private SymfonyCurrentViewer $currentViewer;
 
     protected function setUp(): void

@@ -8,9 +8,6 @@ use App\Shared\Domain\ValueObject\Identifier;
 use App\Shared\Domain\ValueObject\Identity;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @template-extends Identity<OrganizerId>
- */
 #[ORM\Embeddable]
 final readonly class OrganizerId implements Identifier
 {

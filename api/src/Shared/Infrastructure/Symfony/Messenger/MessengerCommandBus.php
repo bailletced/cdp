@@ -26,7 +26,7 @@ final class MessengerCommandBus implements CommandBusInterface
             return $this->handle($command);
         } catch (HandlerFailedException $e) {
             // Le bus enveloppe l'exception du handler : l'appelant reçoit l'exception métier d'origine.
-            throw \current($e->getWrappedExceptions()) ?: $e;
+            throw current($e->getWrappedExceptions()) ?: $e;
         }
     }
 }

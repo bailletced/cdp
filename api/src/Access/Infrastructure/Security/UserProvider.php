@@ -17,6 +17,8 @@ use Symfony\Component\Uid\Uuid;
 /**
  * User provider that loads SecurityUser from Account by UUID.
  * Roles are recalculated on each refresh based on the current state.
+ *
+ * @implements UserProviderInterface<SecurityUser>
  */
 final class UserProvider implements UserProviderInterface
 {
@@ -26,9 +28,6 @@ final class UserProvider implements UserProviderInterface
     ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
         try {
@@ -40,47 +39,38 @@ final class UserProvider implements UserProviderInterface
         $accountId = new AccountId($uuid);
         $account = $this->accountRepository->findById($accountId);
 
-        if ($account === null) {
+        if (null === $account) {
             throw new UserNotFoundException(\sprintf('User with identifier "%s" not found.', $identifier));
         }
 
         return $this->createSecurityUser($account);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadUserByUsername(string $username): UserInterface
     {
         // For compatibility, but we use UUID as identifier
         return $this->loadUserByIdentifier($username);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof SecurityUser) {
-            throw new UnsupportedUserException(\sprintf('Instances of "%s" are not supported.', \get_class($user)));
+            throw new UnsupportedUserException(\sprintf('Instances of "%s" are not supported.', $user::class));
         }
 
         $accountId = new AccountId($user->getId());
         $account = $this->accountRepository->findById($accountId);
 
-        if ($account === null) {
+        if (null === $account) {
             throw new UserNotFoundException(\sprintf('User with identifier "%s" not found.', $user->getId()->toRfc4122()));
         }
 
         return $this->createSecurityUser($account);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supportsClass(string $class): bool
     {
-        return SecurityUser::class === $class || \is_subclass_of($class, SecurityUser::class);
+        return SecurityUser::class === $class || is_subclass_of($class, SecurityUser::class);
     }
 
     /**

@@ -23,18 +23,24 @@ use Symfony\Component\Uid\Uuid;
  * Link lifetime policy (arbitrage Q8):
  * - during an edition (up to its end + 7 days): the link expires at edition end + 7 days
  * - otherwise (between editions): 7 days
- * - organizer accounts: always 7 days
+ * - organizer accounts: always 7 days.
  */
 final class LoginLinkPersonalLinkIssuerTest extends TestCase
 {
     private const NOW = 1763000000; // Fixed point in time (UTC)
+
     private const SEVEN_DAYS_IN_SECONDS = 7 * 24 * 60 * 60;
+
     private const LINK_URL = 'https://example.com/auth/login?user=abc&expires=123&hash=def';
 
     private MockClock $clock;
+
     private AccountRepositoryInterface $accountRepository;
+
     private OrganizerRepositoryInterface $organizerRepository;
+
     private LoginLinkPersonalLinkIssuer $issuer;
+
     private ?int $capturedLifetime = null;
 
     protected function setUp(): void
@@ -51,7 +57,7 @@ final class LoginLinkPersonalLinkIssuerTest extends TestCase
 
                 return new LoginLinkDetails(
                     self::LINK_URL,
-                    $this->clock->now()->modify(sprintf('+%d seconds', (int) $lifetime))
+                    $this->clock->now()->modify(\sprintf('+%d seconds', (int) $lifetime))
                 );
             });
 

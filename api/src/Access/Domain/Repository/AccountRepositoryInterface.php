@@ -8,9 +8,6 @@ use App\Access\Domain\Entity\Account;
 use App\Access\Domain\ValueObject\AccountId;
 use App\Shared\Domain\ValueObject\Email;
 
-/**
- * @template-extends RepositoryInterface<Account>
- */
 interface AccountRepositoryInterface
 {
     /**

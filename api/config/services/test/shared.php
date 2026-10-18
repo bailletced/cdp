@@ -12,8 +12,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->autowire()
         ->autoconfigure();
 
-    $services->load('App\\Tests\\Functional\\Shared\\Fixture\\', \dirname(__DIR__, 3).'/tests/Functional/Shared/Fixture')
-        ->exclude([\dirname(__DIR__, 3).'/tests/Functional/Shared/Fixture/{*Command,*Event}.php'])
+    $services->load('App\\Tests\\Functional\\Shared\\Fixture\\', dirname(__DIR__, 3).'/tests/Functional/Shared/Fixture')
+        ->exclude([dirname(__DIR__, 3).'/tests/Functional/Shared/Fixture/{*Command,*Event}.php'])
         ->public();
 
     // The mailer TransportFactoryInterface is not autoconfigured: tag the fake factory explicitly.

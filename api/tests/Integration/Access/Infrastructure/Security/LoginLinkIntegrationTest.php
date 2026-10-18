@@ -45,7 +45,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
         $accountUuid = Uuid::v7();
         $account = new Account(
             new AccountId($accountUuid),
-            new Email('test-login-link-valid-' . $accountUuid->toRfc4122() . '@example.com'),
+            new Email('test-login-link-valid-'.$accountUuid->toRfc4122().'@example.com'),
             1
         );
 
@@ -113,7 +113,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
         $accountUuid = Uuid::v7();
         $account = new Account(
             new AccountId($accountUuid),
-            new Email('test-login-link-altered-' . $accountUuid->toRfc4122() . '@example.com'),
+            new Email('test-login-link-altered-'.$accountUuid->toRfc4122().'@example.com'),
             1
         );
 
@@ -124,7 +124,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
 
         // Generate a valid link then tamper with the hash
         $loginLinkParams = $this->generateLoginLinkParamsForUuid($accountUuid);
-        $loginLinkParams['hash'] = $loginLinkParams['hash'] . 'ALTERED';
+        $loginLinkParams['hash'] .= 'ALTERED';
 
         $client->request('POST', '/auth/login', array_merge(
             $loginLinkParams,
@@ -156,7 +156,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
         $tempUuid = Uuid::v7();
         $tempAccount = new Account(
             new AccountId($tempUuid),
-            new Email('test-login-link-revoked-' . $tempUuid->toRfc4122() . '@example.com'),
+            new Email('test-login-link-revoked-'.$tempUuid->toRfc4122().'@example.com'),
             1
         );
 
@@ -210,7 +210,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
         $url = $loginLinkDetails->getUrl();
 
         // Extract the parameters (format: /auth/login?user=...&expires=...&hash=...)
-        parse_str(parse_url($url, PHP_URL_QUERY), $queryParams);
+        parse_str(parse_url($url, \PHP_URL_QUERY), $queryParams);
 
         return [
             'user' => $queryParams['user'] ?? '',

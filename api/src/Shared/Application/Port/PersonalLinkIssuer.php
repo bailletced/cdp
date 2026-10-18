@@ -19,7 +19,7 @@ interface PersonalLinkIssuer
      * - otherwise (between editions): 7 days
      * - organizer accounts: always 7 days
      *
-     * @param string $accountId Account UUID (RFC 4122)
+     * @param string                  $accountId     Account UUID (RFC 4122)
      * @param \DateTimeImmutable|null $editionEndsAt End of the edition the link is issued for; null when issued outside an edition
      */
     public function issue(string $accountId, ?\DateTimeImmutable $editionEndsAt = null): PersonalLink;

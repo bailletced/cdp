@@ -40,14 +40,14 @@ final class SameOriginListener implements EventSubscriberInterface
             return;
         }
 
-        if ($request->headers->get('Sec-Fetch-Site') === 'cross-site') {
+        if ('cross-site' === $request->headers->get('Sec-Fetch-Site')) {
             $event->setResponse($this->forbidden());
 
             return;
         }
 
         $origin = $request->headers->get('Origin');
-        if ($origin !== null && !$this->isSameOrigin($request, $origin)) {
+        if (null !== $origin && !$this->isSameOrigin($request, $origin)) {
             $event->setResponse($this->forbidden());
         }
     }
@@ -55,11 +55,11 @@ final class SameOriginListener implements EventSubscriberInterface
     private function isSameOrigin(Request $request, string $origin): bool
     {
         $parts = parse_url($origin);
-        if ($parts === false || !isset($parts['host'])) {
+        if (false === $parts || !isset($parts['host'])) {
             return false;
         }
 
-        if (strcasecmp($parts['host'], $request->getHost()) !== 0) {
+        if (0 !== strcasecmp($parts['host'], $request->getHost())) {
             return false;
         }
 

@@ -34,7 +34,7 @@ final class OrganizerTest extends TestCase
         $after = new \DateTimeImmutable();
 
         $addedAt = $organizer->getAddedAt();
-        
+
         $this->assertSame($accountId, $organizer->getAccountId());
         $this->assertSame($addedBy, $organizer->getAddedBy());
         $this->assertGreaterThanOrEqual($before, $addedAt);
