@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\Application\AddOrganizerHandler;
+use App\Access\Application\RequestPersonalLinkHandler;
 use App\Access\Domain\Entity\Account;
 use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
@@ -47,6 +48,10 @@ return static function (ContainerConfigurator $container): void {
         ->tag('app.in_memory_repository')
 
         ->set(AddOrganizerHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(RequestPersonalLinkHandler::class)
         ->autoconfigure()
         ->autowire()
 

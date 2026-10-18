@@ -1,0 +1,16 @@
+{# Personal link email, plain-text version (F02-T14). #}
+{% extends 'emails/layout.txt.twig' %}
+
+{% block title %}Votre lien personnel{% endblock %}
+
+{% block content %}
+Bonjour,
+
+Vous avez demandé un lien personnel pour vous connecter à votre espace. Cliquez sur ce lien pour vous connecter :
+
+{{ link }}
+
+Ce lien est personnel : ne le partagez pas. Il expire automatiquement ; vous pouvez en demander un nouveau à tout moment.
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.
+{% endblock %}

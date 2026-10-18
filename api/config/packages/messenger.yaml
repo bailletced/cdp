@@ -19,13 +19,9 @@ framework:
             async_transactional:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
-                    exchange:
-                        name: async_transactional
-                        type: direct
-                    queues:
-                        async_transactional:
-                            binding_keys:
-                                - async_transactional
+                    table_name: messenger_messages_async_transactional
+                    queue_name: async_transactional
+                    use_notify: true
                 retry_strategy:
                     max_retries: 5
                     delay: 60000  # 1 minute
@@ -35,13 +31,9 @@ framework:
             async_bulk:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
-                    exchange:
-                        name: async_bulk
-                        type: direct
-                    queues:
-                        async_bulk:
-                            binding_keys:
-                                - async_bulk
+                    table_name: messenger_messages_async_bulk
+                    queue_name: async_bulk
+                    use_notify: true
                 retry_strategy:
                     max_retries: 5
                     delay: 60000  # 1 minute
@@ -51,13 +43,9 @@ framework:
             failed:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
-                    exchange:
-                        name: failed
-                        type: direct
-                    queues:
-                        failed:
-                            binding_keys:
-                                - failed
+                    table_name: messenger_messages_failed
+                    queue_name: failed
+                    use_notify: true
         routing:
             App\Shared\Application\Command\CommandInterface: sync
             App\Shared\Domain\Event\EventInterface: sync
