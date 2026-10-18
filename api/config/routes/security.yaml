@@ -4,13 +4,13 @@ _security_logout:
 
 # Symfony Security default route for login_link
 _security_login_link:
-    path: /auth/connexion
+    path: /auth/login
     methods: [POST]
 
 # Routes for login_link (F02-T07)
-# GET /auth/connexion: redirects to SPA /connexion
+# GET /auth/login: redirects to SPA /login (keeping the query string)
 auth_login_link_get:
-    path: /auth/connexion
+    path: /auth/login
     methods: [GET]
     controller: App\Access\Infrastructure\Controller\LoginLinkController::loginLinkGet
 

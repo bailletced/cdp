@@ -13,7 +13,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerI
 /**
  * Success handler for login_link.
  * Returns the target as JSON for the SPA.
- * F02-T08: POST /auth/connexion opens the session and returns the target.
+ * F02-T08: POST /auth/login opens the session and returns the target.
  */
 final class LoginLinkSuccessHandler implements AuthenticationSuccessHandlerInterface
 {

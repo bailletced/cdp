@@ -12,206 +12,206 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Tests d'intégration pour login_link (F02-T08).
- * Critère de fin : POST /auth/connexion ouvre la session et renvoie la cible.
- * Les 4 cas : lien valide, expiré, altéré, révoqué → 401 typé.
+ * Integration tests for login_link (F02-T08).
+ * Done when: POST /auth/login opens the session and returns the target.
+ * The 4 cases: valid, expired, tampered, revoked link → typed 401.
  */
 final class LoginLinkIntegrationTest extends WebTestCase
 {
     /**
-     * Teste que GET /auth/connexion redirige vers /connexion (F02-T07).
+     * Tests that GET /auth/login redirects to the SPA /login (F02-T07).
      */
-    public function testGetAuthConnexionRedirectsToSpa(): void
+    public function testGetAuthLoginRedirectsToSpa(): void
     {
         $client = static::createClient();
-        
-        // GET /auth/connexion doit rediriger vers /connexion
-        $client->request('GET', '/auth/connexion');
-        
+
+        // GET /auth/login redirects to /login
+        $client->request('GET', '/auth/login');
+
         $response = $client->getResponse();
-        
+
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
-        $this->assertStringContainsString('/connexion', $response->headers->get('Location'));
+        $this->assertEquals('/login', $response->headers->get('Location'));
     }
 
     /**
-     * Teste que POST avec un token valide ouvre la session et renvoie la cible.
+     * Tests that a POST with a valid token opens the session and returns the target.
      */
     public function testPostWithValidTokenOpensSessionAndReturnsTarget(): void
     {
         $client = static::createClient();
-        
-        // Créer un compte pour le test avec email unique
+
+        // Create an account for the test with a unique email
         $accountUuid = Uuid::v7();
         $account = new Account(
             new AccountId($accountUuid),
             new Email('test-login-link-valid-' . $accountUuid->toRfc4122() . '@example.com'),
             1
         );
-        
+
         $container = self::getContainer();
         $em = $container->get('doctrine.orm.entity_manager');
         $em->persist($account);
         $em->flush();
-        
-        // Générer un lien de connexion avec la cible
+
+        // Generate a login link with the target
         $loginLinkParams = $this->generateLoginLinkParamsForUuid($accountUuid);
-        
-        // POST /auth/connexion avec les paramètres du lien de connexion
-        // login_link attend user, expires, hash et _target_path
-        $client->request('POST', '/auth/connexion', array_merge(
+
+        // POST /auth/login with the login link parameters
+        // login_link expects user, expires, hash and _target_path
+        $client->request('POST', '/auth/login', array_merge(
             $loginLinkParams,
-            ['_target_path' => '/mon-espace']
+            ['_target_path' => '/my-space']
         ));
-        
+
         $response = $client->getResponse();
-        
-        // Doit retourner 200 avec JSON contenant la cible
+
+        // Must return 200 with JSON containing the target
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('target', $data);
-        $this->assertEquals('/mon-espace', $data['target']);
-        
-        // Nettoyer
+        $this->assertEquals('/my-space', $data['target']);
+
+        // Cleanup
         $em->remove($account);
         $em->flush();
     }
 
     /**
-     * Teste qu'un token invalide retourne 401.
+     * Tests that an invalid token returns 401.
      */
     public function testPostWithInvalidTokenReturns401(): void
     {
         $client = static::createClient();
-        
-        // POST avec des paramètres manifestement invalides
-        $client->request('POST', '/auth/connexion', [
+
+        // POST with obviously invalid parameters
+        $client->request('POST', '/auth/login', [
             'user' => 'invalid_user_id',
             'expires' => time() + 3600,
             'hash' => 'invalid_hash',
         ]);
-        
+
         $response = $client->getResponse();
-        
-        // Doit retourner 401
+
+        // Must return 401
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('error', $data);
         $this->assertEquals('invalid_login_link', $data['error']);
     }
 
     /**
-     * Teste qu'un token altéré retourne 401.
+     * Tests that a tampered token returns 401.
      */
     public function testPostWithAlteredTokenReturns401(): void
     {
         $client = static::createClient();
-        
-        // Créer un compte avec email unique
+
+        // Create an account with a unique email
         $accountUuid = Uuid::v7();
         $account = new Account(
             new AccountId($accountUuid),
             new Email('test-login-link-altered-' . $accountUuid->toRfc4122() . '@example.com'),
             1
         );
-        
+
         $container = self::getContainer();
         $em = $container->get('doctrine.orm.entity_manager');
         $em->persist($account);
         $em->flush();
-        
-        // Générer un lien valide puis altérer le hash
+
+        // Generate a valid link then tamper with the hash
         $loginLinkParams = $this->generateLoginLinkParamsForUuid($accountUuid);
         $loginLinkParams['hash'] = $loginLinkParams['hash'] . 'ALTERED';
-        
-        $client->request('POST', '/auth/connexion', array_merge(
+
+        $client->request('POST', '/auth/login', array_merge(
             $loginLinkParams,
-            ['_target_path' => '/mon-espace']
+            ['_target_path' => '/my-space']
         ));
-        
+
         $response = $client->getResponse();
-        
-        // Doit retourner 401
+
+        // Must return 401
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('error', $data);
         $this->assertEquals('invalid_login_link', $data['error']);
-        
-        // Nettoyer
+
+        // Cleanup
         $em->remove($account);
         $em->flush();
     }
 
     /**
-     * Teste qu'un token pour un compte révoqué (supprimé) retourne 401.
+     * Tests that a token for a revoked (deleted) account returns 401.
      */
     public function testPostWithRevokedLinkReturns401(): void
     {
         $client = static::createClient();
-        
-        // Créer un compte temporaire avec email unique
+
+        // Create a temporary account with a unique email
         $tempUuid = Uuid::v7();
         $tempAccount = new Account(
             new AccountId($tempUuid),
             new Email('test-login-link-revoked-' . $tempUuid->toRfc4122() . '@example.com'),
             1
         );
-        
+
         $container = self::getContainer();
         $em = $container->get('doctrine.orm.entity_manager');
         $em->persist($tempAccount);
         $em->flush();
-        
-        // Générer un lien pour ce compte
+
+        // Generate a link for this account
         $loginLinkParams = $this->generateLoginLinkParamsForUuid($tempUuid);
-        
-        // Supprimer le compte (révoquer le lien)
+
+        // Delete the account (revoke the link)
         $em->remove($tempAccount);
         $em->flush();
-        
-        // Tester avec le lien révoqué
-        $client->request('POST', '/auth/connexion', array_merge(
+
+        // Test with the revoked link
+        $client->request('POST', '/auth/login', array_merge(
             $loginLinkParams,
-            ['_target_path' => '/mon-espace']
+            ['_target_path' => '/my-space']
         ));
-        
+
         $response = $client->getResponse();
-        
-        // Doit retourner 401
+
+        // Must return 401
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('error', $data);
         $this->assertEquals('invalid_login_link', $data['error']);
     }
 
     /**
-     * Génère les paramètres login_link pour un UUID donné.
-     * Retourne un tableau avec user, expires, hash.
+     * Generates the login_link parameters for a given UUID.
+     * Returns an array with user, expires, hash.
      */
     private function generateLoginLinkParamsForUuid(Uuid $uuid): array
     {
         $container = self::getContainer();
-        
-        // Charger le SecurityUser
+
+        // Load the SecurityUser
         $userProvider = $container->get('App\\Access\\Infrastructure\\Security\\UserProvider');
         $securityUser = $userProvider->loadUserByIdentifier($uuid->toRfc4122());
-        
-        // Générer le lien via LoginLinkHandler
+
+        // Generate the link via the LoginLinkHandler
         $handler = $container->get('security.authenticator.login_link_handler.main');
-        
-        // createLoginLink retourne un LoginLinkDetails
+
+        // createLoginLink returns a LoginLinkDetails
         $loginLinkDetails = $handler->createLoginLink($securityUser);
-        
-        // Extraire les paramètres de l'URL générée
+
+        // Extract the parameters from the generated URL
         $url = $loginLinkDetails->getUrl();
-        
-        // Extraire les paramètres (format: /auth/connexion?user=...&expires=...&hash=...)
+
+        // Extract the parameters (format: /auth/login?user=...&expires=...&hash=...)
         parse_str(parse_url($url, PHP_URL_QUERY), $queryParams);
-        
+
         return [
             'user' => $queryParams['user'] ?? '',
             'expires' => $queryParams['expires'] ?? '',

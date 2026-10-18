@@ -276,6 +276,29 @@ return new JsonResponse(['target' => $targetPath]);
 
 **Exception:** User-facing strings (error messages, email templates, UI text) may be in French if the product is French-only. These belong in translation files (`translations/`), not hardcoded in source code.
 
+### Rule: Route URIs MUST be in English
+
+All route paths — API endpoints (`/auth/login`, `/auth/logout`, `/api/me`) and SPA pages (`/login`, `/receive-my-link`, `/my-space`) — must be written **entirely in English**, even though the product is French-only. Route URIs are part of the code (and are user-visible in email links), not user-facing prose.
+
+**DO:**
+```yaml
+# api/config/routes/security.yaml
+_security_login_link:
+    path: /auth/login
+```
+
+**DON'T:**
+```yaml
+# ❌ French route URIs are forbidden
+_security_login_link:
+    path: /auth/connexion
+```
+
+**Why:**
+- Route URIs appear in emails, logs, and browser history: they are technical identifiers
+- Consistency with the English codebase rule above
+- Renaming a route after release breaks every email already sent
+
 ## 10. Behat Context Organization
 
 ### Rule: Split Behat contexts by Bounded Context (BC)

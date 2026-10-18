@@ -27,6 +27,13 @@ final class LoginLinkContext implements Context
         $this->state()->currentAccount = $account;
     }
 
+    #[Given('I am logged in as this account')]
+    public function loggedInAsThisAccount(): void
+    {
+        $this->validLoginLinkGeneratedForAccountSimple();
+        $this->submitLoginLinkViaPost();
+    }
+
     #[Given('a valid login link is generated for this account with target :targetPath')]
     public function validLoginLinkGeneratedForAccountWithTarget(string $targetPath): void
     {
@@ -62,13 +69,13 @@ final class LoginLinkContext implements Context
     #[Given('a valid login link is generated for this account')]
     public function validLoginLinkGeneratedForAccountSimple(): void
     {
-        $this->validLoginLinkGeneratedForAccountWithTarget('/mon-espace');
+        $this->validLoginLinkGeneratedForAccountWithTarget('/my-space');
     }
 
     #[Given('an expired login link is generated for this account')]
     public function expiredLoginLinkGeneratedForAccount(): void
     {
-        $this->validLoginLinkGeneratedForAccountWithTarget('/mon-espace');
+        $this->validLoginLinkGeneratedForAccountWithTarget('/my-space');
         // Cast to string: LoginLinkHandler requires expires to be a numeric string
         $this->state()->loginLinkParams['expires'] = (string) (time() - 3600);
     }
@@ -109,7 +116,7 @@ final class LoginLinkContext implements Context
             throw new \RuntimeException('No login link params available.');
         }
 
-        $request = Request::create('/auth/connexion', 'POST', $state->loginLinkParams);
+        $request = Request::create('/auth/login', 'POST', $state->loginLinkParams);
         $this->handleRequest($request);
     }
 
@@ -128,7 +135,7 @@ final class LoginLinkContext implements Context
     #[When('I submit an invalid login link via POST')]
     public function submitInvalidLoginLinkViaPost(): void
     {
-        $request = Request::create('/auth/connexion', 'POST', [
+        $request = Request::create('/auth/login', 'POST', [
             'user' => 'invalid_user_id',
             'expires' => time() + 3600,
             'hash' => 'invalid_hash',
@@ -145,7 +152,7 @@ final class LoginLinkContext implements Context
             throw new \RuntimeException('No login link params available.');
         }
 
-        $request = Request::create('/auth/connexion', 'POST', $state->loginLinkParams);
+        $request = Request::create('/auth/login', 'POST', $state->loginLinkParams);
         $request->headers->set('Origin', $origin);
         $this->handleRequest($request);
     }
@@ -158,7 +165,7 @@ final class LoginLinkContext implements Context
             throw new \RuntimeException('No login link params available.');
         }
 
-        $request = Request::create('/auth/connexion', 'POST', $state->loginLinkParams);
+        $request = Request::create('/auth/login', 'POST', $state->loginLinkParams);
         $request->headers->set('Sec-Fetch-Site', $secFetchSite);
         $this->handleRequest($request);
     }

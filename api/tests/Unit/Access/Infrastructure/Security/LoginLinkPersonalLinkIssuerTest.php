@@ -29,7 +29,7 @@ final class LoginLinkPersonalLinkIssuerTest extends TestCase
 {
     private const NOW = 1763000000; // Fixed point in time (UTC)
     private const SEVEN_DAYS_IN_SECONDS = 7 * 24 * 60 * 60;
-    private const LINK_URL = 'https://example.com/auth/connexion?user=abc&expires=123&hash=def';
+    private const LINK_URL = 'https://example.com/auth/login?user=abc&expires=123&hash=def';
 
     private MockClock $clock;
     private AccountRepositoryInterface $accountRepository;

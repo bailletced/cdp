@@ -9,10 +9,10 @@ Feature: Personal login link authentication (F02-T08)
 
     Scenario: Valid login link opens session and returns target
         Given an account exists
-        And a valid login link is generated for this account with target "/mon-espace"
+        And a valid login link is generated for this account with target "/my-space"
         When I submit the login link via POST
         Then the response should be "200 OK"
-        And the response should contain JSON with "target" equal to "/mon-espace"
+        And the response should contain JSON with "target" equal to "/my-space"
 
     Scenario: Invalid login link returns 401
         When I submit an invalid login link via POST
@@ -46,7 +46,7 @@ Feature: Personal login link authentication (F02-T08)
         And the response should contain JSON with "error" equal to "invalid_login_link"
         And the response should contain JSON with "type" equal to "revoked"
 
-    Scenario: GET on /auth/connexion redirects to SPA
-        When I make a GET request to "/auth/connexion"
+    Scenario: GET on /auth/login redirects to the SPA
+        When I make a GET request to "/auth/login"
         Then the response should be "302 Found"
-        And the response should redirect to "/connexion"
+        And the response should redirect to "/login"

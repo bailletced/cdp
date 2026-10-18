@@ -75,7 +75,7 @@ final class RequestPersonalLinkTest extends KernelTestCase
         self::assertInstanceOf(LinkMessage::class, $message);
         self::assertSame('thomas@example.com', $message->email->value);
         self::assertSame('Votre lien personnel', $message->subject);
-        self::assertStringContainsString('/auth/connexion', $message->link);
+        self::assertStringContainsString('/auth/login', $message->link);
 
         // Consume the message like a worker would: the email is sent
         $this->transport('async_transactional')->processOrFail();

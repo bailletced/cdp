@@ -35,7 +35,7 @@ final class LinkMessageHandlerTest extends KernelTestCase
 
         $handler(new LinkMessage(
             new Email('thomas@example.com'),
-            'http://localhost/auth/connexion?user=abc&expires=123&hash=def',
+            'http://localhost/auth/login?user=abc&expires=123&hash=def',
             'Votre lien personnel',
         ));
 
@@ -55,11 +55,11 @@ final class LinkMessageHandlerTest extends KernelTestCase
         $html = $email->getHtmlBody();
         self::assertIsString($html);
         // Twig escapes the link in the HTML body ("&" becomes "&amp;")
-        self::assertStringContainsString(htmlspecialchars('http://localhost/auth/connexion?user=abc&expires=123&hash=def'), $html);
+        self::assertStringContainsString(htmlspecialchars('http://localhost/auth/login?user=abc&expires=123&hash=def'), $html);
         self::assertStringContainsString('Ce lien est personnel', $html);
 
         $text = $email->getTextBody();
         self::assertIsString($text);
-        self::assertStringContainsString('http://localhost/auth/connexion?user=abc&expires=123&hash=def', $text);
+        self::assertStringContainsString('http://localhost/auth/login?user=abc&expires=123&hash=def', $text);
     }
 }

@@ -22,7 +22,7 @@ security:
             # Login link authentication (F02-T07, F02-T08)
             login_link:
                 check_route: _security_login_link
-                login_path: /connexion
+                login_path: /login
                 signature_properties: [id, credentialsVersion]
                 check_post_only: true
                 success_handler: App\Access\Infrastructure\Security\LoginLinkSuccessHandler
