@@ -26,8 +26,10 @@ describe("LoginPage", () => {
 
     releasePost();
 
-    // The API answers 200 { target: "/my-space" }: the placeholder page shows up
-    expect(await screen.findByText("Mon espace")).toBeInTheDocument();
+    // The API answers 200 { target: "/my-space" }: the space page shows up
+    expect(
+      await screen.findByRole("heading", { name: "Mon espace" }),
+    ).toBeInTheDocument();
   });
 
   it("posts the link parameters as form params, exactly once", async () => {
@@ -41,7 +43,7 @@ describe("LoginPage", () => {
 
     renderApp(`/login?${LINK_QUERY}`);
 
-    await screen.findByText("Mon espace");
+    await screen.findByRole("heading", { name: "Mon espace" });
 
     expect(bodies).toHaveLength(1);
     expect(bodies[0]).toContain("user=abc");

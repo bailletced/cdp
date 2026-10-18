@@ -27,4 +27,8 @@ export const handlers = [
   http.post("http://localhost:8080/auth/login", () => {
     return HttpResponse.json({ target: "/my-space" });
   }),
+  // POST /auth/logout: destroys the session (F02-T10)
+  http.post("http://localhost:8080/auth/logout", () => {
+    return new HttpResponse(null, { status: 200 });
+  }),
 ];

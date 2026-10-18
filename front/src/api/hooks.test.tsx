@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 import { server } from "../test/setup";
-import { useMe } from "./hooks";
+import { useMe, useViewer } from "./hooks";
 
 // A fresh QueryClient per test so the ['me'] cache never leaks between tests
 function createWrapper() {
@@ -47,5 +47,41 @@ describe("useMe", () => {
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
+  });
+});
+
+describe("useViewer", () => {
+  it("exposes the viewer for an authenticated account", async () => {
+    const { result } = renderHook(() => useViewer(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.viewer).toEqual({
+      email: "thomas@example.com",
+      isOrganizer: false,
+    });
+    expect(result.current.isVisitor).toBe(false);
+  });
+
+  it("flags a visitor on 401, without a viewer", async () => {
+    server.use(
+      http.get("http://localhost:8080/api/me", () => {
+        return new HttpResponse(null, { status: 401 });
+      }),
+    );
+
+    const { result } = renderHook(() => useViewer(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isVisitor).toBe(true);
+    });
+
+    expect(result.current.viewer).toBeUndefined();
   });
 });
