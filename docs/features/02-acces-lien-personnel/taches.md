@@ -26,7 +26,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F02-T08** · `back` `POST /auth/connexion` : ouvre la session et renvoie la cible ; lien expiré, altéré ou révoqué → 401 typé + tests d'acceptation — *Dépend de* : F02-T07 · *Fini quand* : les quatre cas sont testés.
 - [x] **F02-T09** · `back` `remember_me` (`always_remember_me`, 1 an, `token_provider: doctrine`, migration) — *Dépend de* : F02-T08 · *Fini quand* : test « session supprimée → toujours authentifié par remember-me ».
 - [x] **F02-T10** · `back` `POST /auth/logout` + vérification `Origin`/`Sec-Fetch-Site` et CSRF same-origin sur toute requête non sûre — *Dépend de* : F02-T09 · *Fini quand* : déconnexion testée ; POST d'une autre origine → 403.
-- [ ] **F02-T11** · `back` Port `PersonalLinkIssuer` (Shared/Application/Port) + adaptateur `login_link` : pendant une édition (de l'ouverture à la fin + 7 j) durée = fin + 7 j, sinon 7 j ; toujours 7 j pour un compte organisateur — *Dépend de* : F02-T07 · *Fini quand* : les trois cas testés avec `MockClock`.
+- [x] **F02-T11** · `back` Port `PersonalLinkIssuer` (Shared/Application/Port) + adaptateur `login_link` : pendant une édition (de l'ouverture à la fin + 7 j) durée = fin + 7 j, sinon 7 j ; toujours 7 j pour un compte organisateur — *Dépend de* : F02-T07 · *Fini quand* : les trois cas testés avec `MockClock`.
 - [ ] **F02-T12** · `back` VO `Viewer` (Shared/Domain/Security : `priantId?`, `verified`, `coveredInscriptionIds[]`, `isOrganizer`) + port `CurrentViewer` + `SymfonyCurrentViewer` (session seule) + tests — *Dépend de* : F02-T05 · *Fini quand* : visiteur, priant vérifié et organisateur produisent le bon `Viewer`.
 
 ## Lien par e-mail (US-02.1)
