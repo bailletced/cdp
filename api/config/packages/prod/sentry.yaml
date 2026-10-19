@@ -9,8 +9,8 @@ sentry:
         traces_sample_rate: 0.1
         # Environnement pour filtrer dans l'interface Sentry.
         environment: prod
-    # Processeur qui filtre les e-mails avant envoi.
-    before_send: '@App\Shared\Infrastructure\Sentry\EmailFilteringSentryProcessor'
+        # Processeur qui filtre les e-mails avant envoi (id de service, sans « @ »).
+        before_send: 'App\Shared\Infrastructure\Sentry\EmailFilteringSentryProcessor'
     # Intégration Symfony : capture les exceptions non gérées.
     messenger:
         enabled: true
