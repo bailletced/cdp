@@ -61,6 +61,17 @@ services:
           memory: 128M
         reservations:
           memory: 64M
+      labels:
+        # Middleware security-headers (F03-T11) : en-têtes de sécurité HTTP.
+        # Référencé par le service app : security-headers@swarm
+        - traefik.http.middlewares.security-headers.headers.stsSeconds=31536000
+        - traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true
+        - traefik.http.middlewares.security-headers.headers.stsPreload=true
+        - traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true
+        - traefik.http.middlewares.security-headers.headers.referrerPolicy=same-origin
+        - traefik.http.middlewares.security-headers.headers.permissionsPolicy=geolocation=(), microphone=(), camera=()
+        - traefik.http.middlewares.security-headers.headers.customResponseHeaders.X-Frame-Options=DENY
+        - "traefik.http.middlewares.security-headers.headers.customResponseHeaders.Content-Security-Policy=default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     logging:
       driver: json-file
       options:
