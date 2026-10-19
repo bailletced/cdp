@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
+import { PageTitle } from "../components/PageTitle";
 
 const GENERIC_ERROR_MESSAGE = "Une erreur est survenue. Veuillez réessayer.";
 
@@ -47,7 +48,7 @@ export function ReceiveMyLinkPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
-      <h2>Recevoir mon lien</h2>
+      <PageTitle>Recevoir mon lien</PageTitle>
       {state === "sent" || state === "error" ? (
         <output>{message}</output>
       ) : (

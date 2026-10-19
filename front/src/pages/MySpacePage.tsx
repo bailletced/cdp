@@ -3,6 +3,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { baseUrl } from "../api/client";
 import { useViewer } from "../api/hooks";
+import { LoadingState } from "../components/LoadingState";
+import { PageTitle } from "../components/PageTitle";
 
 /**
  * /my-space (F02-T19): personal space skeleton.
@@ -32,15 +34,15 @@ export function MySpacePage() {
   if (isLoading || !viewer) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
-        <h2>Mon espace</h2>
-        <p>Chargement…</p>
+        <PageTitle>Mon espace</PageTitle>
+        <LoadingState />
       </div>
     );
   }
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
-      <h2>Mon espace</h2>
+      <PageTitle>Mon espace</PageTitle>
       <p>{viewer.email}</p>
       <button type="button" onClick={handleLogout} disabled={loggingOut}>
         {loggingOut ? "Déconnexion en cours…" : "Me déconnecter"}

@@ -9,6 +9,7 @@ import {
   Spinner,
   TextField,
 } from "@heroui/react";
+import { PageTitle } from "../components/PageTitle";
 
 /**
  * /demo (F01-T05): demonstration page of the themed HeroUI components.
@@ -19,7 +20,7 @@ export function DemoPage() {
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-8 px-4 py-8">
       <div className="grid gap-2">
-        <h1>Composants</h1>
+        <PageTitle>Composants</PageTitle>
         <p>
           Démonstration du thème carmélitain (F01) : boutons, champs, case à
           cocher, lien et chargement, corps de texte 18 px.

@@ -1,3 +1,5 @@
+import { PageTitle } from "../components/PageTitle";
+
 /**
  * /confidentialite — provisional content (F01-T07: the footer links here;
  * the definitive legal content lands with F25).
@@ -5,7 +7,7 @@
 export function ConfidentialitePage() {
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-4 px-4 py-8">
-      <h2>Confidentialité</h2>
+      <PageTitle>Confidentialité</PageTitle>
       <p>
         Contenu provisoire : la politique de confidentialité définitive sera
         publiée avant l&apos;ouverture des inscriptions (F25).

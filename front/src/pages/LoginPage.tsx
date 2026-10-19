@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { baseUrl } from "../api/client";
 import { meQueryOptions } from "../api/hooks";
+import { LoadingState } from "../components/LoadingState";
+import { PageTitle } from "../components/PageTitle";
 
 // Post-login targets allowed by the specs (whitelist): never an open redirect
 const SAFE_TARGETS = ["/", "/my-space"];
@@ -80,7 +82,7 @@ export function LoginPage() {
   if (state === "invalid") {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
-        <h2>Connexion</h2>
+        <PageTitle>Connexion</PageTitle>
         <p>
           Ce lien n'est plus valide : il a peut-être expiré ou a déjà été
           utilisé.
@@ -92,8 +94,8 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
-      <h2>Connexion</h2>
-      <p>Connexion en cours…</p>
+      <PageTitle>Connexion</PageTitle>
+      <LoadingState label="Connexion en cours…" />
     </div>
   );
 }
