@@ -1,0 +1,120 @@
+/* F01 — Thème « carmélitain » sur HeroUI v3 + Tailwind CSS 4.
+ * Palette, typographie et rayons mesurés dans docs/design/theme.md (WCAG AA). */
+
+@import "@heroui/react/styles";
+
+/* Self-hosted font (CSP `font-src 'self'`): Atkinson Hyperlegible, OFL 1.1 — public/fonts/OFL.txt */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/AtkinsonHyperlegible-Italic.woff2") format("woff2");
+}
+
+/* Carmelite palette — every pair measured AA in docs/design/theme.md.
+ * HeroUI v3 maps these variables to Tailwind colors (bg-background, text-foreground,
+ * bg-surface, text-muted, bg-accent, text-success, text-danger, border-border, ring-focus…). */
+@layer base {
+  :root {
+    --background: #ffffff; /* beaucoup de blanc */
+    --foreground: #2b2118; /* texte courant : 15,75:1 */
+    --surface: #faf5ec; /* crème : cartes, bandeaux */
+    --surface-foreground: #2b2118;
+    --surface-secondary: #faf5ec;
+    --surface-secondary-foreground: #2b2118;
+    --muted: #6e6259; /* « à pourvoir », aide : 5,91:1 */
+    --accent: #6b4226; /* marron carmélite : action principale, 8,63:1 */
+    --accent-foreground: #ffffff;
+    --accent-hover: #54331b;
+    --default: #f1e7d3; /* crème soutenu : boutons secondaires (bordure ajoutée plus bas) */
+    --default-foreground: #2b2118;
+    --success: #1e6b34; /* 6,55:1 */
+    --success-foreground: #ffffff;
+    --warning: #8a6d1f; /* 4,90:1 */
+    --warning-foreground: #ffffff;
+    --danger: #b3261e; /* 6,54:1 */
+    --danger-foreground: #ffffff;
+    --border: #8c7b63; /* bordures : 4,09:1 (WCAG 1.4.11 ≥ 3:1) */
+    --separator: #d8cbb2;
+    --focus: #6b4226; /* indicateur de focus : 8,63:1 */
+    --link: #6b4226;
+    --field-background: #ffffff;
+    --field-foreground: #2b2118;
+    --field-placeholder: #6e6259;
+    --field-border: #8c7b63;
+    --field-border-width: 1px;
+    --radius: 0.5rem; /* 8 px — boutons, champs (cartes en rounded-xl = 12 px) */
+  }
+}
+
+/* Typography — échelle mobile-first de docs/design/theme.md : aucun texte sous 18 px */
+@layer base {
+  html {
+    font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  }
+
+  body {
+    font-size: 1.125rem; /* 18 px */
+    line-height: 1.6;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  h1 {
+    font-size: 2rem; /* 32 px */
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 1.5rem; /* 24 px */
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.25rem; /* 20 px */
+    line-height: 1.4;
+    font-weight: 700;
+  }
+}
+
+/* HeroUI components render at text-sm/text-xs by default — bring every label,
+ * field and message to the 18 px body size (US-01.2). */
+.button,
+.label,
+.field-error,
+.checkbox,
+.checkbox [data-slot="description"],
+[data-slot="input"],
+[data-slot="textarea"] {
+  font-size: 1.125rem;
+}
+
+/* Links are underlined at rest: never distinguished by color alone (§5.3-1) */
+.link {
+  text-decoration: underline;
+  text-decoration-color: var(--separator);
+}
+
+/* Secondary/tertiary buttons sit on a cream background — give them a visible
+ * boundary (WCAG 1.4.11 ≥ 3:1). The outline variant already has border-border. */
+.button--secondary,
+.button--tertiary {
+  box-shadow: inset 0 0 0 1px var(--border);
+}

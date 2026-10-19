@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -8,7 +9,7 @@ const apiTarget = process.env.VITE_API_TARGET ?? "http://php:80";
 export default defineConfig({
   // Code-based routing (src/router.tsx): no tanstackRouter() plugin needed,
   // it would fail looking for a file-based src/routes directory.
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     port: 8000,
     proxy: {

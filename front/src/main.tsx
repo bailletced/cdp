@@ -3,6 +3,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { queryClient } from "./api/queryClient";
+import "./index.css";
 import { router } from "./router";
 
 const rootElement = document.getElementById("root");
