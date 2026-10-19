@@ -98,8 +98,10 @@
  * field and message to the 18 px body size (US-01.2). */
 .button,
 .label,
+.description,
 .field-error,
 .checkbox,
+.checkbox__content,
 .checkbox [data-slot="description"],
 [data-slot="input"],
 [data-slot="textarea"] {
@@ -117,4 +119,70 @@
 .button--secondary,
 .button--tertiary {
   box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* F01-T06 — Touch targets ≥ 44 × 44 px and visible, contrasted focus (US-01.2/01.3) */
+
+/* Buttons: 44 px tall (48 px for lg), at least 44 px wide, sober 8 px radius */
+.button {
+  height: 2.75rem;
+  min-width: 2.75rem;
+  border-radius: var(--radius-lg);
+}
+.button--sm {
+  height: 2.75rem;
+}
+.button--lg {
+  height: 3rem;
+}
+.button--icon-only {
+  width: 2.75rem;
+}
+.button--icon-only.button--sm {
+  width: 2.75rem;
+}
+.button--icon-only.button--lg {
+  width: 3rem;
+}
+
+/* Fields: at least 44 px tall */
+[data-slot="input"],
+[data-slot="textarea"] {
+  min-height: 2.75rem;
+}
+
+/* Checkbox: the whole labelled control is the target — at least 44 px tall,
+ * with a 24 px box (easier to see and hit than the 16 px default) */
+.checkbox,
+.checkbox__content {
+  min-height: 2.75rem;
+}
+.checkbox__control {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Links: extend the tap area to 44 px high without changing the line box
+ * (padding compensated by a negative margin) */
+.link {
+  padding-block: 0.5rem;
+  margin-block: -0.5rem;
+}
+
+/* Focus: 3 px ring in the primary brown (8,63:1 on white) on HeroUI
+ * components, 3 px outline on plain interactive elements */
+:focus-visible {
+  --tw-ring-width: 3px;
+}
+
+@layer base {
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
 }
