@@ -1,0 +1,107 @@
+# Portainer CE + Agent (F03-T12) — gestion du Swarm.
+# Déploiement : docker stack deploy -c docker/stack/portainer.yaml portainer
+#
+# Accès :
+#   - Interface : https://portainer.${DOMAIN} (restreint par IP allowlist)
+#   - Webhooks  : https://portainer.${DOMAIN}/api/webhooks/<token> (public, CI)
+#
+# Variables requises :
+#   DOMAIN              : domaine racine (ex. priere.example.com)
+#   PORTAINER_ALLOWED_IPS : liste d'IP autorisées pour l'interface (ex. "1.2.3.4/32,5.6.7.8/32")
+#
+# Après déploiement, créer les webhooks pour les services app et worker :
+#   1. Se connecter à Portainer → Stacks → cdp → Webhooks → Add webhook
+#   2. Ou via API : POST /api/stacks/webhooks/<token>
+#   3. Stocker les tokens dans les secrets GitHub (PORTAINER_WEBHOOK_APP, PORTAINER_WEBHOOK_WORKER)
+
+version: "3.8"
+
+services:
+  agent:
+    image: portainer/agent:latest
+    environment:
+      AGENT_CLUSTER_ADDR: tasks.agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.platform.os == linux
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    volumes:
+      - portainer_data:/data
+    networks:
+      - agent_network
+      - edge
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+      labels:
+        # Activer Traefik pour ce service
+        - traefik.enable=true
+        - traefik.docker.network=edge
+
+        # --- Router interface web (restreint par IP) ---
+        - traefik.http.routers.portainer-web.rule=Host(`portainer.${DOMAIN:-localhost}`)
+        - traefik.http.routers.portainer-web.entrypoints=websecure
+        - traefik.http.routers.portainer-web.tls=true
+        - traefik.http.routers.portainer-web.tls.certresolver=letsencrypt
+        - traefik.http.routers.portainer-web.middlewares=portainer-ipallowlist@swarm,security-headers@swarm
+        - traefik.http.routers.portainer-web.service=portainer-web
+        - traefik.http.routers.portainer-web.priority=100
+
+        # --- Router webhooks (public, pour la CI) ---
+        # Priorité plus haute pour matcher avant le router web.
+        - traefik.http.routers.portainer-webhooks.rule=Host(`portainer.${DOMAIN:-localhost}`) && PathPrefix(`/api/webhooks`)
+        - traefik.http.routers.portainer-webhooks.entrypoints=websecure
+        - traefik.http.routers.portainer-webhooks.tls=true
+        - traefik.http.routers.portainer-webhooks.tls.certresolver=letsencrypt
+        - traefik.http.routers.portainer-webhooks.service=portainer-web
+        - traefik.http.routers.portainer-webhooks.priority=200
+
+        # --- Service (port 9000 de Portainer CE) ---
+        - traefik.http.services.portainer-web.loadbalancer.server.port=9000
+
+        # --- Middleware IP allowlist pour l'interface web ---
+        # Remplacer PORTAINER_ALLOWED_IPS par les IP du mainteneur (format CIDR, séparées par virgule).
+        - traefik.http.middlewares.portainer-ipallowlist.ipallowlist.sourcerange=${PORTAINER_ALLOWED_IPS:-127.0.0.1/32}
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  agent_network:
+    driver: overlay
+    attachable: true
+  edge:
+    external: true
+
+volumes:
+  portainer_data:
+    driver: local
