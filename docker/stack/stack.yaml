@@ -86,10 +86,13 @@ services:
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
+      # SentryBundle lit le DSN au boot du noyau : le worker plante sans ce fichier.
+      SENTRY_DSN_FILE: /run/secrets/sentry_dsn
     secrets:
       - app_secret
       - db_password
       - mailer_dsn
+      - sentry_dsn
     networks:
       - internal
     deploy:
@@ -103,10 +106,11 @@ services:
         delay: 5s
         max_attempts: 3
       resources:
+        # Deux consommateurs Messenger (un par file PostgreSQL).
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
     logging:
       driver: json-file
       options:
