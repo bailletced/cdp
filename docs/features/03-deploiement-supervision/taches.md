@@ -37,8 +37,8 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Chaîne de livraison (US-03.1, US-03.3)
 
-- [ ] **F03-T15** · `infra` Job CI `image` : `docker/build-push-action`, BuildKit, cache `type=gha,mode=max`, caches de montage Composer/pnpm, amd64 natif, push GHCR `:sha`/`:main` sur `main` seulement — *Dépend de* : F03-T04, F00-T30 · *Fini quand* : build < 5 min avec cache, rien n'est publié depuis une PR.
-- [ ] **F03-T16** · `infra` Job CI `e2e` : Playwright sur l'image construite (compose de test avec Mailpit), bloquant pour le déploiement, traces en artefact en cas d'échec — *Dépend de* : F03-T15, F00-T27 · *Fini quand* : squelette F02 vert sur l'image de prod.
+- [x] **F03-T15** · `infra` Job CI `image` : `docker/build-push-action`, BuildKit, cache `type=gha,mode=max`, caches de montage Composer/pnpm, amd64 natif, push GHCR `:sha`/`:main` sur `main` seulement — *Dépend de* : F03-T04, F00-T30 · *Fini quand* : build < 5 min avec cache, rien n'est publié depuis une PR.
+- [x] **F03-T16** · `infra` Job CI `e2e` : Playwright sur l'image construite (compose de test avec Mailpit), bloquant pour le déploiement, traces en artefact en cas d'échec — *Dépend de* : F03-T15, F00-T27 · *Fini quand* : squelette F02 vert sur l'image de prod.
 - [ ] **F03-T17** · `infra` Job CI `deploy` à chaque fusion sur `main` (après `image` et `e2e` verts) : webhook `worker` `?tag=<sha>`, puis `app`, attente de `/health` = SHA (10 min max) ; déclenchement manuel possible ; environnement GitHub `production` — *Dépend de* : F03-T14, F03-T16 · *Fini quand* : une fusion déploie sans coupure (sonde continue pendant l'opération).
 - [ ] **F03-T18** · `infra` Dépôt public : protection de `main` (CI verte obligatoire), secret scanning et push protection, nettoyage GHCR (`actions/delete-package-versions`, 20 versions) — *Dépend de* : F03-T15 · *Fini quand* : fusion impossible sans CI verte, workflow de nettoyage actif.
 
