@@ -4,6 +4,16 @@ import { defineConfig, devices } from "@playwright/test";
 const frontDir = import.meta.dirname;
 const apiDir = path.resolve(frontDir, "../api");
 
+// Host-network defaults for local runs (`pnpm exec playwright test` on a
+// machine with the docker stack up). In the docker stack and in CI these are
+// set explicitly (docker-compose, .github/workflows/e2e.yml) and win.
+// They must reach the API server (webServer) and the messenger worker
+// (globalSetup), which both inherit this process environment.
+process.env.VITE_API_TARGET ??= "http://localhost:8080";
+process.env.MAILPIT_API_URL ??= "http://localhost:8025/api/v1";
+process.env.MAILER_DSN ??= "smtp://localhost:1025";
+process.env.DEFAULT_URI ??= "http://localhost:8000";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
