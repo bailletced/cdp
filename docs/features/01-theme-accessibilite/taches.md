@@ -26,7 +26,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [ ] **F01-T07** · `front` Layout public : en-tête (« Communion de prière Notre-Dame du Mont-Carmel », depuis une configuration unique), pied de page (Confidentialité, Recevoir mon lien), lien d'évitement, régions — *Dépend de* : F01-T06 · *Fini quand* : test de rendu, structure de titres correcte.
 - [ ] **F01-T08** · `front` `PageTitle` (titre du document, focus et annonce au changement de route), `LoadingState`, `ErrorState`, `EmptyState` + tests — *Dépend de* : F01-T07 · *Fini quand* : tests Testing Library sur focus et annonce.
 - [x] **F01-T09** · `front` `FormField` (libellé, aide, erreur reliée par `aria-describedby`, intégration TanStack Form) et `ConfirmDialog` (React Aria) + tests — *Dépend de* : F01-T06, F00-T26 · *Fini quand* : erreurs 422 converties s'affichent sur le bon champ dans un test.
-- [ ] **F01-T10** · `front` Région `aria-live` et notifications de confirmation accessibles (fermeture clavier, durée suffisante) + tests — *Dépend de* : F01-T07 · *Fini quand* : un message est annoncé dans un test.
+- [x] **F01-T10** · `front` Région `aria-live` et notifications de confirmation accessibles (fermeture clavier, durée suffisante) + tests — *Dépend de* : F01-T07 · *Fini quand* : un message est annoncé dans un test.
 - [ ] **F01-T11** · `front` Pages 404 et erreur globale (`errorComponent`), route `/confidentialite` au contenu provisoire — *Dépend de* : F01-T08 · *Fini quand* : les trois pages s'affichent dans le layout.
 
 ## Contrôles (US-01.4)

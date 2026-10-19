@@ -3,6 +3,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { queryClient } from "./api/queryClient";
+import { Notifications } from "./components/Notifications";
 import "./index.css";
 import { router } from "./router";
 
@@ -16,6 +17,7 @@ ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Notifications />
     </QueryClientProvider>
   </React.StrictMode>,
 );
