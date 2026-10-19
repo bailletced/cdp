@@ -52,3 +52,42 @@ Notes :
   fonds et reste visible quel que soit l'élément focalisé.
 - Un état « désactivé » n'est jamais porteur d'information essentielle : le libellé reste
   lisible (assombri mais ≥ 4,5:1) ou l'action est retirée.
+
+## Typographie (F01-T02)
+
+### Police
+
+**Atkinson Hyperlegible** (Braille Institute, licence OFL 1.1) : conçue pour la basse vision,
+formes très distinctes (pas de confusion `l`/`1`/`I`, `O`/`0`). **Auto-hébergée** : les fichiers
+`woff2` sont servis par le front (`front/public/fonts/`), aucune requête externe — compatible
+avec une CSP `font-src 'self'`.
+
+Graisses utilisées : **400** (courant) et **700** (titres, boutons). Pas de 300 : trop fine
+pour un public âgé.
+
+### Échelle (mobile d'abord, 360 px)
+
+| Niveau | Taille | Interlignage | Graisse | Usage |
+|---|---:|---:|---|---|
+| Corps | **18 px** (1,125 rem) | 1,6 | 400 | Tout texte courant — **jamais sous 18 px** (US-01.2) |
+| Titre h3 | **20 px** (1,25 rem) | 1,4 | 700 | Sous-sections |
+| Titre h2 | **24 px** (1,5 rem) | 1,3 | 700 | Titres de page secondaires |
+| Titre h1 | **32 px** (2 rem) | 1,25 | 700 | Titre principal de chaque page (unique, recevant le focus) |
+
+- **Petits textes** (légendes, méta) : jamais réduits en dessous de 18 px — on différencie
+  par la couleur `muted`, pas par la taille.
+- **Interlignage** : 1,6 pour le corps (confort de lecture, WCAG 1.4.12 en cas de zoom).
+- **Longueur de ligne** : maximum ~ 70 caractères (`max-width: 70ch` sur les blocs de texte).
+- **Boutons et champs** : libellé en 18 px, 700 pour les actions principales.
+
+### Rayons
+
+Sobres et chaleureux : `8 px` (boutons, champs), `12 px` (cartes, bandeaux). Pas de pillule
+complète, pas d'angle vif.
+
+### Implémentation
+
+- Police : `@font-face` dans `front/src/index.css`, fichiers dans `front/public/fonts/`
+  (400, 700 + licence OFL).
+- Échelle et rayons : thèmes HeroUI surchargés dans `front/src/index.css`
+  (corps 18 px, `rounded-lg` / `rounded-xl`, contour de focus primaire 3 px).
