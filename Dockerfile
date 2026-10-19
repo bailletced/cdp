@@ -53,7 +53,9 @@ WORKDIR /app
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY front/package.json ./front/
 
-RUN corepack enable && pnpm install --frozen-lockfile --config.minimum-release-age=0 --config.dangerously-allow-all-builds=true
+# pnpm 12 est installé via npm (binaire natif) : le corepack embarqué dans
+# node:24-alpine ne connaît pas la clé de signature des releases pnpm 12.
+RUN npm install --global pnpm@12.14.0 && pnpm install --frozen-lockfile --config.minimum-release-age=0 --config.dangerously-allow-all-builds=true
 
 COPY front/ ./front/
 

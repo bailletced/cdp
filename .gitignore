@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 
 # Lockfiles parasites : le projet est 100 % pnpm (workspace, lockfile racine)
 package-lock.json

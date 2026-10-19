@@ -1,6 +1,7 @@
 {
   "name": "cdp-front",
   "private": true,
+  "packageManager": "pnpm@12.14.0",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

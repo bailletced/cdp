@@ -156,7 +156,9 @@ jobs:
           node-version: '22'
 
       - name: Setup pnpm
-        run: corepack enable
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
 
       - name: Install front dependencies
         run: pnpm install --frozen-lockfile
