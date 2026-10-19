@@ -59,9 +59,7 @@ describe("filterSentryEvent", () => {
 
   it("masks email in breadcrumbs", () => {
     const event = {
-      breadcrumbs: [
-        { message: "User priant@example.com logged in" },
-      ],
+      breadcrumbs: [{ message: "User priant@example.com logged in" }],
     };
 
     const filtered = filterSentryEvent(event as never);

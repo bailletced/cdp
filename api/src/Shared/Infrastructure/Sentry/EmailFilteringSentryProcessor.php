@@ -44,7 +44,7 @@ final class EmailFilteringSentryProcessor
         }
 
         $id = $user->getId();
-        if (null !== $id) {
+        if (\is_string($id)) {
             $user->setId($this->maskEmails($id));
         }
 
@@ -63,7 +63,11 @@ final class EmailFilteringSentryProcessor
             return;
         }
 
-        $event->setExtra($this->filterArray($extra));
+        foreach ($extra as $key => $value) {
+            $extra[$key] = $this->filterValue($value);
+        }
+
+        $event->setExtra($extra);
     }
 
     private function filterTags(Event $event): void
@@ -74,7 +78,7 @@ final class EmailFilteringSentryProcessor
         }
 
         foreach ($tags as $key => $value) {
-            if (\is_string($value) && $this->containsEmail($value)) {
+            if ($this->containsEmail($value)) {
                 $tags[$key] = self::FILTERED_PLACEHOLDER;
             }
         }
@@ -90,40 +94,33 @@ final class EmailFilteringSentryProcessor
         }
 
         foreach ($exceptions as $exception) {
-            if (!$exception instanceof \Sentry\ExceptionDataBag) {
-                continue;
-            }
-
-            $value = $exception->getValue();
-            if (null !== $value) {
-                $exception->setValue($this->maskEmails($value));
-            }
-
-            $type = $exception->getType();
-            if (null !== $type) {
-                $exception->setType($this->maskEmails($type));
-            }
+            $exception->setValue($this->maskEmails($exception->getValue()));
+            $exception->setType($this->maskEmails($exception->getType()));
         }
     }
 
     /**
-     * @param array<string, mixed> $data
-     *
-     * @return array<string, mixed>
+     * Filters a single value: a string containing an email is replaced or
+     * masked, an array is filtered recursively, anything else passes through.
      */
-    private function filterArray(array $data): array
+    private function filterValue(mixed $value): mixed
     {
-        foreach ($data as $key => $value) {
-            if (\is_string($value)) {
-                $data[$key] = $this->containsEmail($value)
-                    ? self::FILTERED_PLACEHOLDER
-                    : $this->maskEmails($value);
-            } elseif (\is_array($value)) {
-                $data[$key] = $this->filterArray($value);
-            }
+        if (\is_string($value)) {
+            return $this->containsEmail($value)
+                ? self::FILTERED_PLACEHOLDER
+                : $this->maskEmails($value);
         }
 
-        return $data;
+        if (\is_array($value)) {
+            $filtered = [];
+            foreach ($value as $key => $item) {
+                $filtered[$key] = $this->filterValue($item);
+            }
+
+            return $filtered;
+        }
+
+        return $value;
     }
 
     private function containsEmail(string $value): bool
