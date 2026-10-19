@@ -25,5 +25,8 @@ $kernel->boot();
 $application = new Application($kernel);
 $application->setAutoExit(false);
 $application->find('doctrine:database:create')->run(new ArrayInput(['--if-not-exists' => true]), new NullOutput());
+// Le schéma vient des migrations (comme en production) : en CI, la base est vierge
+// et rien d'autre ne crée les tables dans le chemin PHPUnit.
+$application->find('doctrine:migrations:migrate')->run(new ArrayInput(['--no-interaction' => true]), new NullOutput());
 
 $kernel->shutdown();

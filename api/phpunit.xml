@@ -14,6 +14,8 @@
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
         <server name="APP_ENV" value="test" force="true" />
+        <!-- Transport mail de test : l'env du conteneur de dev (smtp://mailpit) ne doit pas fuiter ici. -->
+        <env name="MAILER_DSN" value="in-memory://default" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
     </php>
 
