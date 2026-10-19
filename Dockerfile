@@ -94,4 +94,4 @@ USER appuser
 COPY --link --chmod=644 docker/frankenphp/Caddyfile.prod /etc/frankenphp/Caddyfile
 COPY --link --chmod=755 docker/frankenphp/docker-entrypoint-prod.sh /usr/local/bin/docker-entrypoint
 ENTRYPOINT ["docker-entrypoint"]
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+CMD ["app"]

@@ -1,10 +1,48 @@
 #!/bin/sh
 set -e
 
-# En prod, vendor/ est déjà installé dans l'image (F03-T04).
-# On affiche juste la version pour le log de démarrage.
-if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
-	php bin/console -V || true
-fi
+# Entrypoint prod (F03-T07) : deux modes — app (serveur web) et worker (migrations + messenger).
+# Usage:
+#   docker-entrypoint app frankenphp run --config /etc/frankenphp/Caddyfile
+#   docker-entrypoint worker
 
-exec docker-php-entrypoint "$@"
+MODE="${1:-app}"
+shift || true
+
+case "$MODE" in
+  app)
+    # Attend que le schéma soit à jour (le worker joue les migrations).
+    # 60 itérations × 5 s = 5 minutes max.
+    echo "[app] Waiting for schema to be up-to-date (max 5 min)..."
+    i=0
+    while [ "$i" -lt 60 ]; do
+      if php bin/console doctrine:migrations:up-to-date --no-interaction --quiet 2>/dev/null; then
+        echo "[app] Schema is up-to-date."
+        break
+      fi
+      i=$((i + 1))
+      if [ "$i" -eq 60 ]; then
+        echo "[app] Timeout: schema not up-to-date after 5 minutes." >&2
+        exit 1
+      fi
+      sleep 5
+    done
+
+    exec docker-php-entrypoint frankenphp run --config /etc/frankenphp/Caddyfile
+    ;;
+
+  worker)
+    # Joue les migrations, puis consomme les messages.
+    echo "[worker] Running migrations..."
+    php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --quiet
+
+    echo "[worker] Starting messenger consume..."
+    exec php bin/console messenger:consume async_transactional async_bulk scheduler_default \
+      --time-limit=3600 --memory-limit=256M
+    ;;
+
+  *)
+    echo "Usage: docker-entrypoint {app|worker} [command...]" >&2
+    exit 1
+    ;;
+esac
