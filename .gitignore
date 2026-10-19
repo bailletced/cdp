@@ -17,6 +17,8 @@ node_modules/
 /front/playwright-report/
 /front/test-results/
 /front/e2e/.messenger-worker.pid
+# Lockfile parasite recréé par le conteneur node (workspace pnpm : le lockfile racine fait foi)
+/front/pnpm-lock.yaml
 
 # Poste de travail
 .DS_Store
