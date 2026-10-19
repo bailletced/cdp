@@ -46,7 +46,7 @@ export function ReceiveMyLinkPage() {
   }
 
   return (
-    <main>
+    <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <h2>Recevoir mon lien</h2>
       {state === "sent" || state === "error" ? (
         <output>{message}</output>
@@ -74,6 +74,6 @@ export function ReceiveMyLinkPage() {
           </button>
         </form>
       )}
-    </main>
+    </div>
   );
 }

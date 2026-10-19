@@ -17,7 +17,7 @@ import {
  */
 export function DemoPage() {
   return (
-    <main className="mx-auto grid w-full max-w-3xl gap-8 px-4 py-8">
+    <div className="mx-auto grid w-full max-w-3xl gap-8 px-4 py-8">
       <div className="grid gap-2">
         <h1>Composants</h1>
         <p>
@@ -85,6 +85,6 @@ export function DemoPage() {
         </p>
         <Spinner aria-label="Chargement en cours" />
       </section>
-    </main>
+    </div>
   );
 }

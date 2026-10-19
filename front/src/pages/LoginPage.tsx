@@ -79,21 +79,21 @@ export function LoginPage() {
 
   if (state === "invalid") {
     return (
-      <main>
+      <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <h2>Connexion</h2>
         <p>
           Ce lien n'est plus valide : il a peut-être expiré ou a déjà été
           utilisé.
         </p>
         <Link to="/receive-my-link">Recevoir un nouveau lien</Link>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main>
+    <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <h2>Connexion</h2>
       <p>Connexion en cours…</p>
-    </main>
+    </div>
   );
 }

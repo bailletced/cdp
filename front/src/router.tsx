@@ -2,6 +2,7 @@ import { createRoute, createRouter, redirect } from "@tanstack/react-router";
 import { meQueryOptions } from "./api/hooks";
 import { queryClient } from "./api/queryClient";
 import { Root } from "./components/Root";
+import { ConfidentialitePage } from "./pages/ConfidentialitePage";
 import { DemoPage } from "./pages/DemoPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
@@ -11,6 +12,13 @@ const receiveMyLinkRoute = createRoute({
   getParentRoute: () => Root,
   path: "/receive-my-link",
   component: ReceiveMyLinkPage,
+});
+
+// Provisional content until F25 (the footer links here, F01-T07)
+const confidentialiteRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/confidentialite",
+  component: ConfidentialitePage,
 });
 
 // Component demonstration page (F01-T05)
@@ -44,6 +52,7 @@ const mySpaceRoute = createRoute({
 // Define the routes
 export const routeTree = Root.addChildren([
   receiveMyLinkRoute,
+  confidentialiteRoute,
   demoRoute,
   loginRoute,
   mySpaceRoute,

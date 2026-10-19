@@ -31,20 +31,20 @@ export function MySpacePage() {
 
   if (isLoading || !viewer) {
     return (
-      <main>
+      <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <h2>Mon espace</h2>
         <p>Chargement…</p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main>
+    <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <h2>Mon espace</h2>
       <p>{viewer.email}</p>
       <button type="button" onClick={handleLogout} disabled={loggingOut}>
         {loggingOut ? "Déconnexion en cours…" : "Me déconnecter"}
       </button>
-    </main>
+    </div>
   );
 }

@@ -1,20 +1,23 @@
 import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
+import { SITE_NAME } from "./config/site";
 import { renderApp } from "./test/renderApp";
 import { server } from "./test/setup";
 
 describe("Root component", () => {
-  it("renders the title", async () => {
+  it("renders the community brand in the header", async () => {
     renderApp("/");
     expect(
-      await screen.findByText("Chaîne de prière - CDP"),
+      await screen.findByRole("link", { name: SITE_NAME }),
     ).toBeInTheDocument();
   });
 
-  it("renders a heading", async () => {
-    renderApp("/");
-    expect(await screen.findByRole("heading")).toBeInTheDocument();
+  it("renders a heading on a page", async () => {
+    renderApp("/receive-my-link");
+    expect(
+      await screen.findByRole("heading", { name: "Recevoir mon lien" }),
+    ).toBeInTheDocument();
   });
 });
 
