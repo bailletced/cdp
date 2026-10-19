@@ -155,6 +155,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Setup pnpm
+        run: corepack enable
+
       - name: Install front dependencies
         run: pnpm install --frozen-lockfile
         working-directory: front
