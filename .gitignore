@@ -24,5 +24,8 @@ node_modules/
 /api/.phpunit.cache/
 /api/public/bundles/
 
+# Sauvegardes de la base de prod (make backup, F03-T23)
+/backups/
+
 # Spike Probity/Vibe : captures de sessions (contiennent du code et des transcriptions)
 /tooling/vibe-spike/captures/
