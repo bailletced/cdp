@@ -204,7 +204,7 @@ Les identifiants `F<NN>-T<NN>` sont stables ; une dépendance pointe toujours ve
 - si le schéma change : migration Doctrine réversible et compatible avec la version précédente du code (« on ajoute d'abord, on retire ensuite ») ; toute table rattachée à une édition porte une clé étrangère `ON DELETE CASCADE` (suppression d'une édition de test, F27-T02) ;
 - e-mails : transport `async_transactional` (confirmation, lien, mise à jour, rappel) ou `async_bulk` (campagnes, soumis au quota journalier) ;
 - aucune adresse e-mail en clair dans les journaux ; seules les ressources `/api/admin/*` exposent des e-mails ;
-- interface : check-list d'accessibilité respectée (F01-T13), textes en français, heures en heure de Paris, nom « Communion de prière Notre-Dame du Mont-Carmel ».
+- interface : check-list d'accessibilité respectée ([docs/design/accessibilite.md](../design/accessibilite.md), F01-T13), textes en français, heures en heure de Paris, nom « Communion de prière Notre-Dame du Mont-Carmel ».
 
 ---
 
