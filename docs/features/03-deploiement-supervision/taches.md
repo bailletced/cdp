@@ -20,7 +20,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Image de production (US-03.1)
 
-- [ ] **F03-T04** · `infra` `Dockerfile` cibles `front-build` (`node:24`, `pnpm install --frozen-lockfile`, `vite build`) et `prod` (`composer install --no-dev`, `front/dist`, utilisateur non root, opcache, argument SHA) — *Dépend de* : F00-T05, F00-T21 · *Fini quand* : l'image démarre et sert `/` et `/api`.
+- [x] **F03-T04** · `infra` `Dockerfile` cibles `front-build` (`node:24`, `pnpm install --frozen-lockfile`, `vite build`) et `prod` (`composer install --no-dev`, `front/dist`, utilisateur non root, opcache, argument SHA) — *Dépend de* : F00-T05, F00-T21 · *Fini quand* : l'image démarre et sert `/` et `/api`.
 - [ ] **F03-T05** · `infra` Caddyfile prod : `/api*`, `/auth*`, `/unsubscribe*`, `/health` → PHP (mode worker) ; statique avec repli `index.html` ; cache long des fichiers hachés — *Dépend de* : F03-T04 · *Fini quand* : une route SPA profonde rechargée renvoie `index.html`.
 - [ ] **F03-T06** · `back` `GET /health` : ping PostgreSQL, `version` (SHA), état du schéma + tests — *Dépend de* : F00-T19 · *Fini quand* : 200 base joignable, 503 sinon (tests).
 - [ ] **F03-T07** · `infra` Entrypoints `app` (attend `doctrine:migrations:up-to-date`, 5 min max) et `worker` (`migrate`, puis `messenger:consume async_transactional async_bulk scheduler_default --time-limit=3600 --memory-limit=256M`) — *Dépend de* : F03-T04, F03-T06 · *Fini quand* : un app démarré avant le worker attend le schéma (test en compose).

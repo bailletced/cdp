@@ -1,0 +1,51 @@
+{
+	# TLS est géré par Traefik en production (T37) ; en dev on reste en HTTP.
+	auto_https off
+
+	{$CADDY_GLOBAL_OPTIONS}
+
+	frankenphp {
+		{$FRANKENPHP_CONFIG}
+	}
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+{$SERVER_NAME::80} {
+	log {
+		{$CADDY_SERVER_LOG_OPTIONS}
+	}
+
+	root /app/api/public
+	encode zstd br gzip
+
+	# Cache long pour les fichiers hachés (Vite).
+	@hashed {
+		path /assets/* /fonts/*
+		file
+	}
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+	# Désactive le suivi Topics sauf demande explicite : https://github.com/jkarlin/topics
+	header ?Permissions-Policy "browsing-topics=()"
+
+	@phpRoute {
+		not file {path}
+	}
+	rewrite @phpRoute index.php
+
+	@frontController path index.php
+	php @frontController {
+		{$FRANKENPHP_SITE_CONFIG}
+
+		worker {
+			file ./public/index.php
+		}
+	}
+
+	file_server {
+		hide *.php
+	}
+}
