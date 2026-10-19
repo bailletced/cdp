@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { useMe } from "../api/hooks";
 import { SITE_NAME } from "../config/site";
+import { NotFoundPage } from "../pages/NotFoundPage";
 import type { AppRouterContext } from "../routerContext";
 
 // Standalone link style for TanStack Router links (the .link class of the
@@ -19,6 +20,11 @@ const NAV_LINK =
  * The <main> landmark is provided here: pages render their content inside it.
  */
 export const Root = createRootRouteWithContext<AppRouterContext>()({
+  // The 404 page renders inside this layout (F01-T11). The global error
+  // page is wired as the router's defaultErrorComponent (router.tsx): a
+  // route-level errorComponent on the root route would replace this
+  // layout instead of rendering inside it.
+  notFoundComponent: NotFoundPage,
   component: () => {
     const { data, isLoading, isError } = useMe();
 

@@ -8,11 +8,19 @@ test.beforeEach(async () => {
   await clearMailpit();
 });
 
-test.describe("Home page", () => {
-  test("answers with a 200 status", async ({ page }) => {
+test.describe("Racine / (pas encore d'accueil : la 404 s'affiche dans le layout)", () => {
+  test("answers with a 200 status and shows the 404 page inside the layout", async ({
+    page,
+  }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
-    await expect(page).toHaveTitle(SITE_NAME);
+    await expect(page).toHaveTitle(`Page introuvable — ${SITE_NAME}`);
+    await expect(
+      page.getByRole("heading", { name: "Page introuvable" }),
+    ).toBeVisible();
+    // The public layout still wraps the 404 page
+    await expect(page.getByRole("banner")).toBeVisible();
+    await expect(page.getByRole("contentinfo")).toBeVisible();
   });
 
   test("shows the public layout: brand, skip link, footer", async ({

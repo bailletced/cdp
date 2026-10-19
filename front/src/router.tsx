@@ -4,6 +4,7 @@ import { queryClient } from "./api/queryClient";
 import { Root } from "./components/Root";
 import { ConfidentialitePage } from "./pages/ConfidentialitePage";
 import { DemoPage } from "./pages/DemoPage";
+import { ErrorPage } from "./pages/ErrorPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
 import { ReceiveMyLinkPage } from "./pages/ReceiveMyLinkPage";
@@ -61,6 +62,10 @@ export const routeTree = Root.addChildren([
 export const router = createRouter({
   routeTree,
   context: { queryClient },
+  // Global error page (F01-T11): as a default error component, it renders
+  // inside the public layout when any route fails (a root-route
+  // errorComponent would replace the layout).
+  defaultErrorComponent: ErrorPage,
 });
 
 // Declare the types for TypeScript

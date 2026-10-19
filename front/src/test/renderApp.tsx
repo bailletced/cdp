@@ -5,6 +5,7 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { render } from "@testing-library/react";
+import { ErrorPage } from "../pages/ErrorPage";
 import { routeTree } from "../router";
 
 // Renders the app at the given path with an in-memory history
@@ -20,6 +21,8 @@ export function renderApp(initialPath: string) {
     routeTree,
     history: createMemoryHistory({ initialEntries: [initialPath] }),
     context: { queryClient },
+    // Same global error page as the production router (F01-T11)
+    defaultErrorComponent: ErrorPage,
   });
 
   return render(

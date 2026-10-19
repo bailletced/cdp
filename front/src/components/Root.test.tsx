@@ -59,3 +59,36 @@ describe("public layout (F01-T07)", () => {
     ).toHaveAttribute("href", "/my-space");
   });
 });
+
+describe("404 and /confidentialite pages (F01-T11)", () => {
+  it("renders the 404 page inside the layout for an unknown path", async () => {
+    renderApp("/chemin-inconnu");
+
+    // The layout wraps the 404 page
+    expect(await screen.findByRole("banner")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", {
+        name: "Page introuvable",
+        level: 1,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Retour à l'accueil" }),
+    ).toHaveAttribute("href", "/");
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+
+    // The document title is set by PageTitle (F01-T08)
+    expect(document.title).toBe(`Page introuvable — ${SITE_NAME}`);
+  });
+
+  it("renders the provisional /confidentialite page inside the layout", async () => {
+    renderApp("/confidentialite");
+
+    expect(await screen.findByRole("banner")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Confidentialité", level: 1 }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+    expect(document.title).toBe(`Confidentialité — ${SITE_NAME}`);
+  });
+});
