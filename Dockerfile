@@ -43,6 +43,11 @@ ENTRYPOINT ["docker-entrypoint"]
 # --- front-build (F03-T04) : compile la SPA React/Vite ---
 FROM node:24-alpine AS front-build
 
+ARG VITE_APP_SHA=unknown
+ARG VITE_SENTRY_DSN=
+ENV VITE_APP_SHA=$VITE_APP_SHA
+ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
+
 WORKDIR /app
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./

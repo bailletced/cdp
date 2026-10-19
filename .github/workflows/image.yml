@@ -78,6 +78,8 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
           build-args: |
             SHA=${{ github.sha }}
+            VITE_APP_SHA=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
           cache-from: type=gha,mode=max
           cache-to: type=gha,mode=max
           platforms: linux/amd64
@@ -92,6 +94,8 @@ jobs:
           push: false
           build-args: |
             SHA=${{ github.sha }}
+            VITE_APP_SHA=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
           cache-from: type=gha,mode=max
           cache-to: type=gha,mode=max
           platforms: linux/amd64
@@ -119,6 +123,8 @@ jobs:
           tags: cdp-prod:ci
           build-args: |
             SHA=${{ github.sha }}
+            VITE_APP_SHA=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
           cache-from: type=gha,mode=max
           cache-to: type=gha,mode=max
 

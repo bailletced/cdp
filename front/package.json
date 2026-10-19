@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@heroui/react": "^3.2.6",
+    "@sentry/react": "^11.8.0",
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-router": "^1.70.0",
     "react": "^19.0.0",

@@ -4,8 +4,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { queryClient } from "./api/queryClient";
 import { Notifications } from "./components/Notifications";
+import { initSentry } from "./config/sentry";
 import "./index.css";
 import { router } from "./router";
+
+// Initialise Sentry en production (F03-T20).
+initSentry();
 
 const rootElement = document.getElementById("root");
 
