@@ -73,7 +73,7 @@ Communication, simplicité, feedback, courage et respect. Concrètement :
 - Refactore seulement quand tout est vert, sans changer le comportement.
 - En cas de refus, lis la raison et suis le cycle. Ne contourne jamais le hook : pas d'écriture par `sed`, `cat >` ou d'autres commandes shell, et pas de désactivation.
 - Les fichiers générés (`openapi.json`, `schema.d.ts`, `routeTree.gen.ts`) sont exclus de la règle. Les migrations Doctrine (`api/migrations/`) et la configuration sont hors de son périmètre.
-- Prérequis : Node.js ≥ 22 et `npm install` à la racine.
+- Prérequis : Node.js ≥ 22 et `pnpm install` à la racine.
 
 ## Conventions
 

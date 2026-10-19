@@ -1,5 +1,8 @@
 node_modules/
 
+# Lockfiles parasites : le projet est 100 % pnpm (workspace, lockfile racine)
+package-lock.json
+
 # Symfony (api/)
 /api/.env.local
 /api/.env.local.php
