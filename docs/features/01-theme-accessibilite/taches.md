@@ -31,5 +31,5 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Contrôles (US-01.4)
 
-- [ ] **F01-T12** · `test` `@axe-core/playwright` : helper `expectNoA11yViolations` bloquant, appliqué à `/`, `/confidentialite` et à la 404 — *Dépend de* : F01-T11, F00-T27 · *Fini quand* : une violation volontaire fait échouer l'e2e.
+- [x] **F01-T12** · `test` `@axe-core/playwright` : helper `expectNoA11yViolations` bloquant, appliqué à `/`, `/confidentialite` et à la 404 — *Dépend de* : F01-T11, F00-T27 · *Fini quand* : une violation volontaire fait échouer l'e2e.
 - [ ] **F01-T13** · `doc` Check-list accessibilité des développeurs (couleur jamais seule, libellés, 44 px, ordre de tabulation, messages d'erreur) dans `docs/design/accessibilite.md` — *Dépend de* : F01-T06 · *Fini quand* : référencée dans la définition de « terminé ».
