@@ -36,9 +36,29 @@ case "$MODE" in
     echo "[worker] Running migrations..."
     php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --quiet
 
-    echo "[worker] Starting messenger consume..."
-    exec php bin/console messenger:consume async_transactional async_bulk scheduler_default \
-      --time-limit=3600 --memory-limit=256M
+    # Un processus par file : un worker Messenger ne peut écouter (LISTEN/NOTIFY
+    # PostgreSQL) qu'une seule table à la fois, et les transports doctrine du
+    # projet ont des tables séparées (async_transactional, async_bulk).
+    echo "[worker] Starting messenger consume (async_transactional)..."
+    php bin/console messenger:consume async_transactional --time-limit=3600 --memory-limit=128M &
+    TRANSACTIONAL_PID=$!
+    echo "[worker] Starting messenger consume (async_bulk)..."
+    php bin/console messenger:consume async_bulk --time-limit=3600 --memory-limit=128M &
+    BULK_PID=$!
+
+    # Arrêt propre : TERM/INT est transmis aux consommateurs.
+    trap 'kill "$TRANSACTIONAL_PID" "$BULK_PID" 2>/dev/null' TERM INT
+
+    # Si un consommateur meurt, on arrête l'autre et on sort avec son code :
+    # l'orchestrateur (Swarm/Portainer) redémarre le conteneur.
+    while kill -0 "$TRANSACTIONAL_PID" 2>/dev/null && kill -0 "$BULK_PID" 2>/dev/null; do
+      sleep 5
+    done
+    kill "$TRANSACTIONAL_PID" "$BULK_PID" 2>/dev/null
+    wait "$TRANSACTIONAL_PID" 2>/dev/null
+    STATUS=$?
+    wait "$BULK_PID" 2>/dev/null
+    exit "$STATUS"
     ;;
 
   *)

@@ -23,6 +23,14 @@ function consoleCommand(command: string): void {
  * The worker pid is stored so globalTeardown can stop it.
  */
 export default async function globalSetup(): Promise<void> {
+  // Prod-image mode (PLAYWRIGHT_BASE_URL, Image CI): the docker stack already
+  // runs the migrations and a messenger worker, and the CI job creates the
+  // organizer account inside the app container.
+  if (process.env.PLAYWRIGHT_BASE_URL) {
+    await clearMailpit();
+    return;
+  }
+
   consoleCommand("messenger:setup-transports");
   consoleCommand("doctrine:migrations:migrate --no-interaction");
   consoleCommand(`app:organizer:create ${E2E_ORGANIZER_EMAIL}`);
