@@ -1,3 +1,4 @@
+import { Button, Input, Label, TextField } from "@heroui/react";
 import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
 import { PageTitle } from "../components/PageTitle";
@@ -52,15 +53,14 @@ export function ReceiveMyLinkPage() {
       {state === "sent" || state === "error" ? (
         <output>{message}</output>
       ) : (
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="email">Adresse e-mail</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-          />
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-start gap-6"
+        >
+          <TextField className="max-w-md">
+            <Label>Adresse e-mail</Label>
+            <Input name="email" type="email" required autoComplete="email" />
+          </TextField>
           {/* Honeypot: hidden from humans, filled by bots */}
           <input
             type="text"
@@ -70,9 +70,13 @@ export function ReceiveMyLinkPage() {
             aria-hidden="true"
             hidden
           />
-          <button type="submit" disabled={state === "submitting"}>
+          <Button
+            type="submit"
+            variant="primary"
+            isDisabled={state === "submitting"}
+          >
             {state === "submitting" ? "Envoi en cours…" : "Recevoir mon lien"}
-          </button>
+          </Button>
         </form>
       )}
     </div>
