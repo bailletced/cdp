@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Sentry;
 
 use Sentry\Event;
-use Sentry\UserDataBag;
 
 /**
  * Sentry event processor that filters email addresses (F03-T19).
@@ -15,6 +14,7 @@ use Sentry\UserDataBag;
 final class EmailFilteringSentryProcessor
 {
     private const EMAIL_PATTERN = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
+
     private const FILTERED_PLACEHOLDER = '[FILTERED]';
 
     public function __invoke(Event $event): Event
@@ -108,6 +108,7 @@ final class EmailFilteringSentryProcessor
 
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function filterArray(array $data): array

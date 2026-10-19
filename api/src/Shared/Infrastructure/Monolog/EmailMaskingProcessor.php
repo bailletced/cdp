@@ -15,6 +15,7 @@ use Monolog\Processor\ProcessorInterface;
 final class EmailMaskingProcessor implements ProcessorInterface
 {
     private const EMAIL_PATTERN = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
+
     private const MASKED_PLACEHOLDER = '[FILTERED]';
 
     public function __invoke(LogRecord $record): LogRecord
@@ -36,6 +37,7 @@ final class EmailMaskingProcessor implements ProcessorInterface
 
     /**
      * @param array<mixed> $data
+     *
      * @return array<mixed>
      */
     private function maskArray(array $data): array
