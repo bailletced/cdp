@@ -1,0 +1,4 @@
+# Production : DSN lu depuis le fichier Docker Swarm (F03-T08).
+framework:
+    mailer:
+        dsn: '%env(trim:file:MAILER_DSN_FILE)%'
