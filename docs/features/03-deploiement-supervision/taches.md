@@ -44,7 +44,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Supervision et sauvegarde (US-03.4)
 
-- [ ] **F03-T19** · `back` Sentry back (`sentry/sentry-symfony`, région UE, `send_default_pii: false`, `before_send` sans e-mails, traces à 10 %) + test du filtre — *Dépend de* : F03-T08 · *Fini quand* : une exception de test arrive sans e-mail.
+- [x] **F03-T19** · `back` Sentry back (`sentry/sentry-symfony`, région UE, `send_default_pii: false`, `before_send` sans e-mails, traces à 10 %) + test du filtre — *Dépend de* : F03-T08 · *Fini quand* : une exception de test arrive sans e-mail.
 - [ ] **F03-T20** · `front` Sentry front (`@sentry/react`, sans Session Replay, filtrage des e-mails, release = SHA) — *Dépend de* : F03-T04 · *Fini quand* : erreur de test visible dans Sentry avec la bonne release.
 - [ ] **F03-T21** · `back` Monolog JSON sur stderr + processeur qui masque les adresses e-mail + test — *Dépend de* : F00-T09 · *Fini quand* : un journal contenant un e-mail est masqué (test).
 - [ ] **F03-T22** · `infra` Sonde externe hors VPS : `/health` et `/` chaque minute, alertes e-mail et notification push — *Dépend de* : F03-T14 · *Fini quand* : arrêt volontaire de l'app → alerte reçue.
