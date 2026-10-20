@@ -8,7 +8,7 @@
 # Secrets (à créer avant le déploiement) :
 #   echo "..." | docker secret create app_secret -
 #   echo "..." | docker secret create db_password -
-#   echo "..." | docker secret create mailer_dsn -
+#   echo "brevo+smtp://EMAIL%40DOMAIN:SMTP_KEY@smtp-relay.brevo.com:587" | docker secret create mailer_dsn_v2 -
 #   echo "..." | docker secret create mercure_publisher_jwt_key -
 #   echo "..." | docker secret create sentry_dsn -
 
@@ -24,6 +24,7 @@ services:
       # (build-arg SHA=sha-<sha>). Un webhook Portainer ne change que le tag de
       # l'image — surcharger APP_SHA ici figerait /health sur l'ancien SHA.
       SERVER_NAME: ${SERVER_NAME:-:80}
+      COMMUNION_EMAIL: no-reply@bailletced.org
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
@@ -32,7 +33,7 @@ services:
     secrets:
       - app_secret
       - db_password
-      - mailer_dsn
+      - mailer_dsn_v2
       - mercure_publisher_jwt_key
       - sentry_dsn
     networks:
@@ -101,7 +102,7 @@ services:
     secrets:
       - app_secret
       - db_password
-      - mailer_dsn
+      - mailer_dsn_v2
       - sentry_dsn
     networks:
       - internal
@@ -178,7 +179,7 @@ secrets:
     external: true
   db_password:
     external: true
-  mailer_dsn:
+  mailer_dsn_v2:
     external: true
   mercure_publisher_jwt_key:
     external: true
