@@ -31,8 +31,12 @@ export default async function globalSetup(): Promise<void> {
     return;
   }
 
-  consoleCommand("messenger:setup-transports");
+  // Migrations d'abord : la migration F00-T18 crée les tables Messenger.
+  // setup-transports ensuite est idempotent (il les trouve existantes) —
+  // dans l'autre ordre, sur une base vierge (CI), migrate échouait avec
+  // "Duplicate table: messenger_messages_async_transactional".
   consoleCommand("doctrine:migrations:migrate --no-interaction");
+  consoleCommand("messenger:setup-transports");
   consoleCommand(`app:organizer:create ${E2E_ORGANIZER_EMAIL}`);
 
   const worker: ChildProcess = spawn(
