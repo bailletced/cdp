@@ -56,6 +56,7 @@ jobs:
             --jq '.[] | {id, name: .metadata.container.tags[0], created_at} | @tsv' | sort -k3 -r | head -30
 
       - name: Delete old versions
+        if: ${{ !inputs.dry_run }}
         uses: actions/delete-package-versions@v5
         with:
           # Le nom du package GHCR = nom du repo (sans le owner).
