@@ -49,10 +49,22 @@ jobs:
           echo "=== Dry run : ${DRY_RUN} ==="
           echo ""
 
+          # --- Détecter si le owner est un User ou une Organization ---
+          # bailletced = User → endpoint /user/packages/...
+          # Si org → endpoint /orgs/{org}/packages/...
+          OWNER_TYPE=$(gh api "/users/${OWNER}" --jq '.type')
+          if [ "$OWNER_TYPE" = "Organization" ]; then
+            PACKAGES_BASE="/orgs/${OWNER}/packages"
+          else
+            PACKAGES_BASE="/user/packages"
+          fi
+          echo "Owner type: ${OWNER_TYPE} → API base: ${PACKAGES_BASE}"
+          echo ""
+
           # --- Lister toutes les versions (page 1, max 100) ---
           VERSIONS_JSON=$(gh api \
             -H "Accept: application/vnd.github+json" \
-            "/orgs/${OWNER}/packages/container/${PACKAGE_NAME}/versions?per_page=100")
+            "${PACKAGES_BASE}/container/${PACKAGE_NAME}/versions?per_page=100")
 
           TOTAL=$(echo "$VERSIONS_JSON" | jq 'length')
           echo "Total versions trouvées : $TOTAL"
@@ -132,7 +144,7 @@ jobs:
             HTTP_CODE=$(gh api \
               -X DELETE \
               -H "Accept: application/vnd.github+json" \
-              "/orgs/${OWNER}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}" \
+              "${PACKAGES_BASE}/container/${PACKAGE_NAME}/versions/${VERSION_ID}" \
               -w "%{http_code}" -s -o /dev/null || echo "000")
 
             if [ "$HTTP_CODE" = "204" ]; then
@@ -154,7 +166,7 @@ jobs:
           echo "=== Versions restantes ==="
           gh api \
             -H "Accept: application/vnd.github+json" \
-            "/orgs/${OWNER}/packages/container/${PACKAGE_NAME}/versions?per_page=100" \
+            "${PACKAGES_BASE}/container/${PACKAGE_NAME}/versions?per_page=100" \
             --jq '.[] | [.metadata.container.tags[0] // "untagged", .created_at] | @tsv' \
             | sort -t$'\t' -k2 -r
 
