@@ -8,7 +8,7 @@
 # Secrets (à créer avant le déploiement) :
 #   echo "..." | docker secret create app_secret -
 #   echo "..." | docker secret create db_password -
-#   echo "smtp://EMAIL%40DOMAIN:SMTP_KEY@smtp-relay.brevo.com:587" | docker secret create mailer_dsn_v3 -
+#   echo "smtp://EMAIL%40DOMAIN:SMTP_KEY@smtp-relay.brevo.com:587" | docker secret create mailer_dsn_v4 -
 #   echo "..." | docker secret create mercure_publisher_jwt_key -
 #   echo "..." | docker secret create sentry_dsn -
 
@@ -33,7 +33,7 @@ services:
     secrets:
       - app_secret
       - db_password
-      - source: mailer_dsn_v3
+      - source: mailer_dsn_v4
         target: mailer_dsn
       - mercure_publisher_jwt_key
       - sentry_dsn
@@ -103,7 +103,7 @@ services:
     secrets:
       - app_secret
       - db_password
-      - source: mailer_dsn_v3
+      - source: mailer_dsn_v4
         target: mailer_dsn
       - sentry_dsn
     networks:
@@ -181,7 +181,7 @@ secrets:
     external: true
   db_password:
     external: true
-  mailer_dsn_v3:
+  mailer_dsn_v4:
     external: true
   mercure_publisher_jwt_key:
     external: true
