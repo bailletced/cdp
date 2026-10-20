@@ -25,23 +25,28 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success')
 
+    env:
+      # En workflow_run, github.sha = SHA du run déclencheur ; on prend head_sha
+      # du run original pour avoir le commit poussé sur main.
+      DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+
     steps:
       - name: Deploy worker (migrations first)
         run: |
-          curl -sf -X POST "${{ secrets.PORTAINER_WEBHOOK_WORKER }}?tag=sha-${{ github.sha }}"
-          echo "Worker webhook called with tag sha-${{ github.sha }}"
+          curl -sf -X POST "${{ secrets.PORTAINER_WEBHOOK_WORKER }}?tag=sha-${{ env.DEPLOY_SHA }}"
+          echo "Worker webhook called with tag sha-${{ env.DEPLOY_SHA }}"
 
       - name: Wait for worker migrations
         run: sleep 30
 
       - name: Deploy app
         run: |
-          curl -sf -X POST "${{ secrets.PORTAINER_WEBHOOK_APP }}?tag=sha-${{ github.sha }}"
-          echo "App webhook called with tag sha-${{ github.sha }}"
+          curl -sf -X POST "${{ secrets.PORTAINER_WEBHOOK_APP }}?tag=sha-${{ env.DEPLOY_SHA }}"
+          echo "App webhook called with tag sha-${{ env.DEPLOY_SHA }}"
 
       - name: Wait for /health to return the deployed SHA (max 10 min)
         run: |
-          EXPECTED_SHA="sha-${{ github.sha }}"
+          EXPECTED_SHA="sha-${{ env.DEPLOY_SHA }}"
           URL="${{ secrets.PRODUCTION_URL }}/health"
 
           for i in $(seq 1 60); do
@@ -64,5 +69,5 @@ jobs:
 
       - name: Deployment summary
         run: |
-          echo "Deployed sha-${{ github.sha }} to ${{ secrets.PRODUCTION_URL }}"
+          echo "Deployed sha-${{ env.DEPLOY_SHA }} to ${{ secrets.PRODUCTION_URL }}"
           curl -sf "${{ secrets.PRODUCTION_URL }}/health" | head -c 500

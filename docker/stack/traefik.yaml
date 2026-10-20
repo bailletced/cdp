@@ -63,6 +63,9 @@ services:
         reservations:
           memory: 64M
       labels:
+        # Nécessaire pour que Traefik traite ses propres labels (middleware)
+        # quand providers.swarm.exposedByDefault=false.
+        - traefik.enable=true
         # Middleware security-headers (F03-T11) : en-têtes de sécurité HTTP.
         # Référencé par le service app : security-headers@swarm
         - traefik.http.middlewares.security-headers.headers.stsSeconds=31536000
