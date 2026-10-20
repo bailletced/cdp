@@ -64,6 +64,15 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    healthcheck:
+      # L'image frankenphp embarque un HEALTHCHECK HTTP (Caddy :2019/metrics) que
+      # le worker ne passe pas (pas de serveur HTTP). On vérifie que le worker
+      # boot et joint la base, comme l'app.
+      test: ["CMD-SHELL", "php bin/console messenger:stats > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
 
   database:
     image: postgres:18-alpine
