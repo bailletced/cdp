@@ -31,3 +31,4 @@ return new Config()
                 ])
             )
     );
+// CI trigger
