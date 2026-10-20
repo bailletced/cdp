@@ -73,12 +73,17 @@ ENV APP_SHA=$SHA
 RUN <<-EOF
 	mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 	apt-get update
-	apt-get install -y --no-install-recommends git unzip
+	apt-get install -y --no-install-recommends git unzip supervisor
 	install-php-extensions @composer
 	rm -rf /var/lib/apt/lists/*
 EOF
 
 COPY --link docker/frankenphp/conf.d/30-app.prod.ini $PHP_INI_DIR/app.conf.d/
+
+# Supervisor : gère les consommateurs Messenger du worker (F03-T09).
+# Les redémarre auto si crash → le conteneur reste up, Swarm voit 1/1.
+COPY --link docker/frankenphp/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+COPY --link docker/frankenphp/supervisor/worker.conf /etc/supervisor/conf.d/worker.conf
 
 WORKDIR /app/api
 
