@@ -33,7 +33,8 @@ services:
     secrets:
       - app_secret
       - db_password
-      - mailer_dsn_v2
+      - source: mailer_dsn_v2
+        target: mailer_dsn
       - mercure_publisher_jwt_key
       - sentry_dsn
     networks:
@@ -102,7 +103,8 @@ services:
     secrets:
       - app_secret
       - db_password
-      - mailer_dsn_v2
+      - source: mailer_dsn_v2
+        target: mailer_dsn
       - sentry_dsn
     networks:
       - internal
