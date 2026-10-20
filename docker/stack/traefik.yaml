@@ -6,8 +6,8 @@
 #   - Service "app" déployé avec les labels Traefik (voir stack.yaml)
 #   - DNS pointant vers le VPS (F03-T02)
 #
-# Certificats : Let's Encrypt staging d'abord (ACME_STAGING=true),
-# puis production (ACME_STAGING=false).
+# Certificats : Let's Encrypt staging d'abord (ACME_CA_SERVER par défaut),
+# puis production : ACME_CA_SERVER=https://acme-v02.api.letsencrypt.org/directory
 
 version: "3.8"
 
@@ -31,7 +31,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-      # Staging par défaut (rate limits), passer ACME_STAGING=false en prod
+      # Staging par défaut (rate limits) ; prod : ACME_CA_SERVER=https://acme-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.letsencrypt.acme.caserver=${ACME_CA_SERVER:-https://acme-staging-v02.api.letsencrypt.org/directory}
       # Logs
       - --log.level=INFO
