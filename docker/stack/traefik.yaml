@@ -62,11 +62,10 @@ services:
           memory: 128M
         reservations:
           memory: 64M
-      labels:
-        # NOTE : le middleware security-headers@swarm est défini sur le service
-        # app (stack.yaml) car exposedByDefault=false empêche Traefik de traiter
-        # ses propres labels sans traefik.enable=true (qui causerait une erreur
-        # "port is missing" car le service Traefik n'a pas de port de service LB).
+      # NOTE : le middleware security-headers@swarm est défini sur le service
+      # app (stack.yaml) car exposedByDefault=false empêche Traefik de traiter
+      # ses propres labels sans traefik.enable=true (qui causerait une erreur
+      # "port is missing" car le service Traefik n'a pas de port de service LB).
     logging:
       driver: json-file
       options:
