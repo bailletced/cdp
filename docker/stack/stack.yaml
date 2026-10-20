@@ -16,7 +16,7 @@ version: "3.8"
 
 services:
   app:
-    image: ghcr.io/bailletced/cdp:${IMAGE_TAG:-latest}
+    image: ghcr.io/bailletced/cdp:${IMAGE_TAG:-main}
     command: ["app"]
     environment:
       APP_ENV: prod
@@ -80,7 +80,7 @@ services:
         max-file: "5"
 
   worker:
-    image: ghcr.io/bailletced/cdp:${IMAGE_TAG:-latest}
+    image: ghcr.io/bailletced/cdp:${IMAGE_TAG:-main}
     command: ["worker"]
     environment:
       APP_ENV: prod
@@ -147,8 +147,7 @@ services:
 
 networks:
   edge:
-    driver: overlay
-    attachable: true
+    external: true
   internal:
     driver: overlay
     internal: true
