@@ -2,7 +2,7 @@ name: Cleanup GHCR
 
 # F03-T18 : nettoyage des anciennes versions d'images GHCR.
 # Garde les N dernières versions (tags sha-*), supprime le reste.
-# Le tag "main" est ignoré (toujours conservé).
+# Le tag "main" est toujours conservé.
 # S'exécute hebdomadairement, après chaque push sur main, et manuellement.
 
 on:
@@ -31,58 +31,134 @@ jobs:
       contents: read
 
     steps:
-      # Debug : lister les versions existantes avant suppression
-      - name: List existing versions
+      - name: Cleanup old GHCR versions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PACKAGE_NAME: ${{ github.event.repository.name }}
+          # github.event.repository.name n'existe que pour push/PR.
+          # On dérive le nom du package depuis github.repository (owner/repo).
+          REPO_FULL: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          MIN_KEEP: ${{ inputs.min_versions_to_keep || '20' }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
         run: |
-          echo "=== Packages GHCR pour ${{ github.repository }} ==="
-          gh api \
+          set -euo pipefail
+
+          PACKAGE_NAME="${REPO_FULL##*/}"
+          echo "=== Package GHCR : ${OWNER}/${PACKAGE_NAME} ==="
+          echo "=== Conserve les ${MIN_KEEP} dernières versions + tag 'main' ==="
+          echo "=== Dry run : ${DRY_RUN} ==="
+          echo ""
+
+          # --- Lister toutes les versions (page 1, max 100) ---
+          VERSIONS_JSON=$(gh api \
             -H "Accept: application/vnd.github+json" \
-            "/orgs/${{ github.repository_owner }}/packages?package_type=container" \
-            --jq '.[] | select(.name=="'"$PACKAGE_NAME"'") | {id, name, version_count: .versions_count}'
+            "/orgs/${OWNER}/packages/container/${PACKAGE_NAME}/versions?per_page=100")
+
+          TOTAL=$(echo "$VERSIONS_JSON" | jq 'length')
+          echo "Total versions trouvées : $TOTAL"
+          echo ""
+
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "Aucune version trouvée. Rien à faire."
+            exit 0
+          fi
+
+          # --- Afficher les versions avant cleanup ---
+          echo "=== Versions avant cleanup ==="
+          echo "$VERSIONS_JSON" | jq -r \
+            '.[] | [.id, (.metadata.container.tags[0] // "untagged"), .created_at] | @tsv' \
+            | sort -t$'\t' -k3 -r
+          echo ""
+
+          # --- Calculer les IDs à conserver ---
+          # Stratégie : garder "main"/"master"/"develop" + les N plus récentes
+          KEEP_IDS=$(echo "$VERSIONS_JSON" | jq -r --argjson min_keep "$MIN_KEEP" '
+            def is_protected: ((.metadata.container.tags[0] // "untagged") as $t | ["main","master","develop"] | index($t)) != null;
+            [.[] | select(is_protected)] as $protected
+            |
+            ([.[] | select(is_protected | not)] | sort_by(.created_at) | reverse) as $others
+            |
+            ($others[:$min_keep]) as $keep_recent
+            |
+            ([$protected[], $keep_recent[]] | map(.id | tostring))
+          ')
+
+          echo "IDs à conserver :"
+          echo "$KEEP_IDS" | jq -r '.[]'
+          echo ""
+
+          # --- Calculer les IDs à supprimer ---
+          DELETE_IDS=$(echo "$VERSIONS_JSON" | jq -r --argjson keep "$KEEP_IDS" '
+            [.[] | select((.id | tostring) as $id | $keep | index($id) | not) | .id]
+          ')
+
+          DELETE_COUNT=$(echo "$DELETE_IDS" | jq 'length')
+          echo "Versions à supprimer : $DELETE_COUNT"
+
+          if [ "$DELETE_COUNT" -eq 0 ]; then
+            echo "Rien à supprimer."
+            exit 0
+          fi
+
+          # Afficher ce qui sera supprimé
+          echo ""
+          echo "=== Versions à supprimer ==="
+          echo "$VERSIONS_JSON" | jq -r --argjson delete_ids "$DELETE_IDS" '
+            ($delete_ids | map(tostring)) as $del_str
+            |
+            [.[] | select((.id | tostring) as $id | $del_str | index($id))]
+            | .[]
+            | [.id, (.metadata.container.tags[0] // "untagged"), .created_at]
+            | @tsv
+          ' | sort -t$'\t' -k3 -r
+
+          # --- Suppression ---
+          if [ "$DRY_RUN" = "true" ]; then
+            echo ""
+            echo "=== DRY RUN — aucune suppression effectuée ==="
+            exit 0
+          fi
 
           echo ""
-          echo "=== Versions du package $PACKAGE_NAME ==="
-          PACKAGE_ID=$(gh api \
-            -H "Accept: application/vnd.github+json" \
-            "/orgs/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME" \
-            --jq '.id')
+          echo "=== Suppression en cours ==="
 
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            "/orgs/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions?per_page=100" \
-            --jq '.[] | {id, name: .metadata.container.tags[0], created_at} | @tsv' | sort -k3 -r | head -30
+          DELETED=0
+          FAILED=0
 
-      - name: Delete old versions
-        if: ${{ !inputs.dry_run }}
-        uses: actions/delete-package-versions@v5
-        with:
-          # Le nom du package GHCR = nom du repo (sans le owner).
-          # Ex: bailletced/cdp → package-name: cdp
-          package-name: ${{ github.event.repository.name }}
-          package-type: container
-          min-versions-to-keep: ${{ inputs.min_versions_to_keep || '20' }}
-          # Ignore le tag "main" (toujours conservé) et les tags de branche.
-          ignore-versions: '^(main|master|develop)$'
-          # Token explicite (évite les problèmes de permission).
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # Supprime aussi les versions non taggées (digest seul).
-          delete-only-untagged-versions: false
+          for VERSION_ID in $(echo "$DELETE_IDS" | jq -r '.[]'); do
+            TAG=$(echo "$VERSIONS_JSON" | jq -r --arg id "$VERSION_ID" \
+              '.[] | select(.id | tostring == $id) | .metadata.container.tags[0] // "untagged"')
 
-      # Debug : lister les versions restantes après suppression
-      - name: List remaining versions
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PACKAGE_NAME: ${{ github.event.repository.name }}
-        run: |
-          echo "=== Versions restantes (après cleanup) ==="
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            "/orgs/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME/versions?per_page=100" \
-            --jq '.[] | {name: .metadata.container.tags[0], created_at} | @tsv' | sort -k2 -r | head -25
+            HTTP_CODE=$(gh api \
+              -X DELETE \
+              -H "Accept: application/vnd.github+json" \
+              "/orgs/${OWNER}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}" \
+              -w "%{http_code}" -s -o /dev/null || echo "000")
+
+            if [ "$HTTP_CODE" = "204" ]; then
+              echo "  [OK] Supprimé : version $VERSION_ID (tag: $TAG)"
+              DELETED=$((DELETED + 1))
+            else
+              echo "  [ERR] Échec suppression version $VERSION_ID (tag: $TAG) — HTTP $HTTP_CODE"
+              FAILED=$((FAILED + 1))
+            fi
+          done
 
           echo ""
-          echo "Total: $(gh api -H "Accept: application/vnd.github+json" "/orgs/${{ github.repository_owner }}/packages/container/$PACKAGE_NAME" --jq '.version_count') versions"
+          echo "=== Résumé ==="
+          echo "Supprimées : $DELETED"
+          echo "Échecs     : $FAILED"
+
+          # --- Afficher les versions restantes ---
+          echo ""
+          echo "=== Versions restantes ==="
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/orgs/${OWNER}/packages/container/${PACKAGE_NAME}/versions?per_page=100" \
+            --jq '.[] | [.metadata.container.tags[0] // "untagged", .created_at] | @tsv' \
+            | sort -t$'\t' -k2 -r
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::warning::${FAILED} suppressions ont échoué"
+            exit 1
+          fi
