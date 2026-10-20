@@ -81,7 +81,9 @@ final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
         $exitCode = $command->run($input2, $output2);
 
         $this->assertEquals(0, $exitCode);
-        $this->assertStringContainsString('already an organizer', $output2->fetch());
+        // Normalise les espaces : SymfonyStyle wrappe le texte à 80 colonnes en CI
+        $outputString = (string) preg_replace('/\s+/', ' ', $output2->fetch());
+        $this->assertStringContainsString('already an organizer', $outputString);
     }
 
     public function testCommandValidatesEmail(): void
