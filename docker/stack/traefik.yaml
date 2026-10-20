@@ -63,19 +63,10 @@ services:
         reservations:
           memory: 64M
       labels:
-        # Nécessaire pour que Traefik traite ses propres labels (middleware)
-        # quand providers.swarm.exposedByDefault=false.
-        - traefik.enable=true
-        # Middleware security-headers (F03-T11) : en-têtes de sécurité HTTP.
-        # Référencé par le service app : security-headers@swarm
-        - traefik.http.middlewares.security-headers.headers.stsSeconds=31536000
-        - traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true
-        - traefik.http.middlewares.security-headers.headers.stsPreload=true
-        - traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true
-        - traefik.http.middlewares.security-headers.headers.referrerPolicy=same-origin
-        - traefik.http.middlewares.security-headers.headers.permissionsPolicy=geolocation=(), microphone=(), camera=()
-        - traefik.http.middlewares.security-headers.headers.customResponseHeaders.X-Frame-Options=DENY
-        - "traefik.http.middlewares.security-headers.headers.customResponseHeaders.Content-Security-Policy=default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        # NOTE : le middleware security-headers@swarm est défini sur le service
+        # app (stack.yaml) car exposedByDefault=false empêche Traefik de traiter
+        # ses propres labels sans traefik.enable=true (qui causerait une erreur
+        # "port is missing" car le service Traefik n'a pas de port de service LB).
     logging:
       driver: json-file
       options:
