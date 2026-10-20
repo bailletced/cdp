@@ -14,6 +14,10 @@ version: "3.8"
 services:
   traefik:
     image: traefik:v3.3
+    environment:
+      # Docker 29.x a supprimé le support de l'API 1.24 — forcer une version récente.
+      # 1.51 = Docker 29.0 (correspond au daemon 29.9.1, API max 1.56).
+      - DOCKER_API_VERSION=1.51
     command:
       # Provider Docker Swarm
       - --providers.swarm=true
@@ -27,7 +31,7 @@ services:
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --entrypoints.web.http.redirections.entryPoint.permanent=true
       # ACME Let's Encrypt
-      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@bailletced.org}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web

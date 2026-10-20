@@ -43,7 +43,7 @@ final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
         $command = $container->get(CreateOrganizerCliCommand::class);
 
         $input = new ArrayInput([
-            'email' => 'test-create@example.com',
+            'email' => 'test-create@bailletced.org',
         ]);
 
         $output = new BufferedOutput();
@@ -56,7 +56,7 @@ final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
 
         // Verify in database
         $this->em->clear();
-        $account = $this->accountRepository->findByEmail(new Email('test-create@example.com'));
+        $account = $this->accountRepository->findByEmail(new Email('test-create@bailletced.org'));
         $this->assertNotNull($account);
         $this->assertTrue($this->organizerRepository->isOrganizer($account->getId()->value));
     }
@@ -68,14 +68,14 @@ final class CreateOrganizerCliCommandIntegrationTest extends KernelTestCase
 
         // First call
         $input1 = new ArrayInput([
-            'email' => 'test-idempotent@example.com',
+            'email' => 'test-idempotent@bailletced.org',
         ]);
         $output1 = new BufferedOutput();
         $command->run($input1, $output1);
 
         // Second call
         $input2 = new ArrayInput([
-            'email' => 'test-idempotent@example.com',
+            'email' => 'test-idempotent@bailletced.org',
         ]);
         $output2 = new BufferedOutput();
         $exitCode = $command->run($input2, $output2);

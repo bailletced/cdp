@@ -27,7 +27,7 @@ describe("API integration with MSW", () => {
     const response = await fetch("http://localhost:8080/api/me");
     const data = await response.json();
 
-    expect(data.email).toBe("thomas@example.com");
+    expect(data.email).toBe("thomas@bailletced.org");
   });
 });
 

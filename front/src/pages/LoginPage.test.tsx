@@ -95,7 +95,7 @@ describe("LoginPage", () => {
           return new HttpResponse(null, { status: 401 });
         }
         return HttpResponse.json({
-          email: "organizer@example.com",
+          email: "organizer@bailletced.org",
           isOrganizer: true,
         });
       }),
@@ -112,7 +112,7 @@ describe("LoginPage", () => {
       await screen.findByRole("heading", { name: "Mon espace" }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText("organizer@example.com"),
+      await screen.findByText("organizer@bailletced.org"),
     ).toBeInTheDocument();
 
     releaseVisitorMe();

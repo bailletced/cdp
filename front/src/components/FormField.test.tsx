@@ -137,7 +137,7 @@ describe("FormField (F01-T09)", () => {
     // A syntactically valid address: jsdom blocks the submit event when the
     // HTML5 constraint validation fails; the 422 violation comes from the API.
     fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
-      target: { value: "invalide@example.com" },
+      target: { value: "invalide@bailletced.org" },
     });
     fireEvent.change(screen.getByLabelText("Nom"), {
       target: { value: "Dupont" },

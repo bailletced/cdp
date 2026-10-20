@@ -9,7 +9,7 @@ export const handlers = [
       "@context": "/api/contexts/Me",
       "@id": "/api/me",
       "@type": "Me",
-      email: "thomas@example.com",
+      email: "thomas@bailletced.org",
       isOrganizer: false,
     });
   }),

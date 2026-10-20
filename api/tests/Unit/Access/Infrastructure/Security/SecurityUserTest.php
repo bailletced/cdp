@@ -15,21 +15,21 @@ final class SecurityUserTest extends TestCase
     public function testGetUserIdentifier(): void
     {
         $uuid = Uuid::v7();
-        $user = new SecurityUser($uuid, 'test@example.com', 'password', false);
+        $user = new SecurityUser($uuid, 'test@bailletced.org', 'password', false);
 
         $this->assertEquals($uuid->toRfc4122(), $user->getUserIdentifier());
     }
 
     public function testGetEmail(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
 
-        $this->assertEquals('test@example.com', $user->getEmail());
+        $this->assertEquals('test@bailletced.org', $user->getEmail());
     }
 
     public function testGetRolesNotOrganizer(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
 
         $roles = $user->getRoles();
         $this->assertContains('ROLE_PRIANT', $roles);
@@ -38,7 +38,7 @@ final class SecurityUserTest extends TestCase
 
     public function testGetRolesIsOrganizer(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', true);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', true);
 
         $roles = $user->getRoles();
         $this->assertContains('ROLE_PRIANT', $roles);
@@ -47,21 +47,21 @@ final class SecurityUserTest extends TestCase
 
     public function testGetPassword(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password123', false);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password123', false);
 
         $this->assertEquals('password123', $user->getPassword());
     }
 
     public function testGetSalt(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
 
         $this->assertNull($user->getSalt());
     }
 
     public function testEraseCredentials(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
 
         // This method should not throw any errors
         $user->eraseCredentials();
@@ -71,8 +71,8 @@ final class SecurityUserTest extends TestCase
 
     public function testIsOrganizer(): void
     {
-        $userNotOrganizer = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
-        $userOrganizer = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', true);
+        $userNotOrganizer = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
+        $userOrganizer = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', true);
 
         $this->assertFalse($userNotOrganizer->isOrganizer());
         $this->assertTrue($userOrganizer->isOrganizer());
@@ -81,7 +81,7 @@ final class SecurityUserTest extends TestCase
     public function testGetId(): void
     {
         $uuid = Uuid::v7();
-        $user = new SecurityUser($uuid, 'test@example.com', 'password', false);
+        $user = new SecurityUser($uuid, 'test@bailletced.org', 'password', false);
 
         $this->assertEquals($uuid, $user->getId());
     }
@@ -89,9 +89,9 @@ final class SecurityUserTest extends TestCase
     public function testIsEqualTo(): void
     {
         $uuid = Uuid::v7();
-        $user1 = new SecurityUser($uuid, 'test@example.com', 'password', false);
-        $user2 = new SecurityUser($uuid, 'test@example.com', 'password', false);
-        $user3 = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
+        $user1 = new SecurityUser($uuid, 'test@bailletced.org', 'password', false);
+        $user2 = new SecurityUser($uuid, 'test@bailletced.org', 'password', false);
+        $user3 = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
 
         $this->assertTrue($user1->isEqualTo($user2));
         $this->assertFalse($user1->isEqualTo($user3));
@@ -100,7 +100,7 @@ final class SecurityUserTest extends TestCase
     public function testIsEqualToNotSecurityUser(): void
     {
         $uuid = Uuid::v7();
-        $user = new SecurityUser($uuid, 'test@example.com', 'password', false);
+        $user = new SecurityUser($uuid, 'test@bailletced.org', 'password', false);
         $otherUser = $this->createMock(\Symfony\Component\Security\Core\User\UserInterface::class);
 
         $this->assertFalse($user->isEqualTo($otherUser));
@@ -108,7 +108,7 @@ final class SecurityUserTest extends TestCase
 
     public function testUpdateIsOrganizerFromFalseToTrue(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
 
         $this->assertFalse($user->isOrganizer());
         $this->assertNotContains('ROLE_ORGANIZER', $user->getRoles());
@@ -121,7 +121,7 @@ final class SecurityUserTest extends TestCase
 
     public function testUpdateIsOrganizerFromTrueToFalse(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', true);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', true);
 
         $this->assertTrue($user->isOrganizer());
         $this->assertContains('ROLE_ORGANIZER', $user->getRoles());
@@ -134,7 +134,7 @@ final class SecurityUserTest extends TestCase
 
     public function testUpdateIsOrganizerNoChange(): void
     {
-        $user = new SecurityUser(Uuid::v7(), 'test@example.com', 'password', false);
+        $user = new SecurityUser(Uuid::v7(), 'test@bailletced.org', 'password', false);
         $originalRoles = $user->getRoles();
 
         $user->updateIsOrganizer(false);
@@ -145,7 +145,7 @@ final class SecurityUserTest extends TestCase
     public function testCreateFromAccount(): void
     {
         $accountId = new AccountId();
-        $email = new Email('test@example.com');
+        $email = new Email('test@bailletced.org');
 
         $user = new SecurityUser(
             $accountId->value,

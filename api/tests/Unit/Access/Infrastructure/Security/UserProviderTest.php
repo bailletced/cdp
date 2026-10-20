@@ -39,7 +39,7 @@ final class UserProviderTest extends TestCase
     public function testLoadUserByIdentifier(): void
     {
         $uuid = Uuid::v7();
-        $email = 'test@example.com';
+        $email = 'test@bailletced.org';
 
         $account = new Account(
             new AccountId($uuid),
@@ -73,7 +73,7 @@ final class UserProviderTest extends TestCase
     public function testLoadUserByIdentifierWithOrganizer(): void
     {
         $uuid = Uuid::v7();
-        $email = 'organizer@example.com';
+        $email = 'organizer@bailletced.org';
 
         $account = new Account(
             new AccountId($uuid),
@@ -127,7 +127,7 @@ final class UserProviderTest extends TestCase
     public function testRefreshUserUpdatesRoles(): void
     {
         $uuid = Uuid::v7();
-        $email = 'test@example.com';
+        $email = 'test@bailletced.org';
 
         $account = new Account(
             new AccountId($uuid),
@@ -163,7 +163,7 @@ final class UserProviderTest extends TestCase
     {
         // Test critère de fin : un organisateur retiré perd son rôle à la requête suivante
         $uuid = Uuid::v7();
-        $email = 'test@example.com';
+        $email = 'test@bailletced.org';
 
         $account = new Account(
             new AccountId($uuid),
@@ -213,7 +213,7 @@ final class UserProviderTest extends TestCase
     public function testLoadUserByUsername(): void
     {
         $uuid = Uuid::v7();
-        $email = 'test@example.com';
+        $email = 'test@bailletced.org';
 
         $account = new Account(
             new AccountId($uuid),

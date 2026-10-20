@@ -36,6 +36,6 @@ final class EmailTest extends TestCase
 
     public function testItTrimsAndLowercasesTheAddress(): void
     {
-        self::assertSame('marie@example.com', new Email('  Marie@Example.COM ')->value);
+        self::assertSame('marie@bailletced.org', new Email('  Marie@bailletced.org ')->value);
     }
 }

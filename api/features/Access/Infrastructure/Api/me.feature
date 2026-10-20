@@ -12,18 +12,18 @@ Feature: Current account API endpoint (F02-T16)
         Then the response should be "401 Unauthorized"
 
     Scenario: Authenticated priant gets their email and isOrganizer false
-        Given an account exists with email "thomas@example.com"
+        Given an account exists with email "thomas@bailletced.org"
         And I am logged in as this account
         When I make a GET request to "/api/me"
         Then the response should be "200 OK"
-        And the response should contain JSON with "email" equal to "thomas@example.com"
+        And the response should contain JSON with "email" equal to "thomas@bailletced.org"
         And the response should contain JSON with "isOrganizer" equal to "false"
 
     Scenario: Authenticated organizer gets isOrganizer true
-        Given an account exists with email "organisateur@example.com"
+        Given an account exists with email "organisateur@bailletced.org"
         And this account is an organizer
         And I am logged in as this account
         When I make a GET request to "/api/me"
         Then the response should be "200 OK"
-        And the response should contain JSON with "email" equal to "organisateur@example.com"
+        And the response should contain JSON with "email" equal to "organisateur@bailletced.org"
         And the response should contain JSON with "isOrganizer" equal to "true"

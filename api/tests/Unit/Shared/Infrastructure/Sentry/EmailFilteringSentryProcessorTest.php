@@ -26,7 +26,7 @@ final class EmailFilteringSentryProcessorTest extends TestCase
     {
         $event = $this->createEvent();
         $event->setUser(UserDataBag::createFromArray([
-            'email' => 'priant@example.com',
+            'email' => 'priant@bailletced.org',
             'id' => '123',
         ]));
 
@@ -54,7 +54,7 @@ final class EmailFilteringSentryProcessorTest extends TestCase
     public function testItFiltersEmailFromTags(): void
     {
         $event = $this->createEvent();
-        $event->setTags(['email' => 'thomas@example.com', 'env' => 'prod']);
+        $event->setTags(['email' => 'thomas@bailletced.org', 'env' => 'prod']);
 
         $filtered = ($this->processor)($event);
 
@@ -67,14 +67,14 @@ final class EmailFilteringSentryProcessorTest extends TestCase
     {
         $event = $this->createEvent();
         $event->setExtra(['breadcrumbs' => [
-            ['message' => 'User priant@example.com logged in'],
+            ['message' => 'User priant@bailletced.org logged in'],
         ]]);
 
         $filtered = ($this->processor)($event);
 
         $extra = $filtered->getExtra();
         $this->assertStringNotContainsString(
-            'priant@example.com',
+            'priant@bailletced.org',
             json_encode($extra) ?: ''
         );
     }
@@ -83,7 +83,7 @@ final class EmailFilteringSentryProcessorTest extends TestCase
     {
         $event = $this->createEvent();
         $exception = new \Sentry\ExceptionDataBag(
-            new \RuntimeException('Failed to send email to priant@example.com')
+            new \RuntimeException('Failed to send email to priant@bailletced.org')
         );
         $event->setExceptions([$exception]);
 
@@ -91,7 +91,7 @@ final class EmailFilteringSentryProcessorTest extends TestCase
 
         $exceptions = $filtered->getExceptions();
         $this->assertStringNotContainsString(
-            'priant@example.com',
+            'priant@bailletced.org',
             $exceptions[0]->getValue() ?? ''
         );
     }

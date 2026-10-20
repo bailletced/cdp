@@ -6,7 +6,7 @@ import { workerPidFile } from "./workerPid";
 
 const apiDir = path.resolve(import.meta.dirname, "../../api");
 
-export const E2E_ORGANIZER_EMAIL = "e2e-organizer@example.com";
+export const E2E_ORGANIZER_EMAIL = "e2e-organizer@bailletced.org";
 
 function consoleCommand(command: string): void {
   execSync(`php bin/console ${command}`, {

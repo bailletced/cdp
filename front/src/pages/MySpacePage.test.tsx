@@ -11,7 +11,7 @@ describe("MySpacePage", () => {
     expect(
       await screen.findByRole("heading", { name: "Mon espace" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("thomas@example.com")).toBeInTheDocument();
+    expect(screen.getByText("thomas@bailletced.org")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Me déconnecter" }),
     ).toBeInTheDocument();

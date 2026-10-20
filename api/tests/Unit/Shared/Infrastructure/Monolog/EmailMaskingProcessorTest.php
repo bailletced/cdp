@@ -24,12 +24,12 @@ final class EmailMaskingProcessorTest extends TestCase
 
     public function testItMasksEmailInMessage(): void
     {
-        $record = $this->createRecord('Sending personal link to priant@example.com');
+        $record = $this->createRecord('Sending personal link to priant@bailletced.org');
 
         $masked = ($this->processor)($record);
 
         $this->assertSame('Sending personal link to [FILTERED]', $masked->message);
-        $this->assertStringNotContainsString('priant@example.com', $masked->message);
+        $this->assertStringNotContainsString('priant@bailletced.org', $masked->message);
     }
 
     public function testItMasksEmailInContext(): void
@@ -58,7 +58,7 @@ final class EmailMaskingProcessorTest extends TestCase
 
     public function testItMasksEmailInExtra(): void
     {
-        $record = $this->createRecord('Event', [], ['email' => 'admin@example.com']);
+        $record = $this->createRecord('Event', [], ['email' => 'admin@bailletced.org']);
 
         $masked = ($this->processor)($record);
 
@@ -67,7 +67,7 @@ final class EmailMaskingProcessorTest extends TestCase
 
     public function testItMasksMultipleEmailsInOneString(): void
     {
-        $record = $this->createRecord('From jean@example.com to marie@example.org');
+        $record = $this->createRecord('From jean@bailletced.org to marie@example.org');
 
         $masked = ($this->processor)($record);
 

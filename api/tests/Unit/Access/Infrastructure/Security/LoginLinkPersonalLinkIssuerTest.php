@@ -124,7 +124,7 @@ final class LoginLinkPersonalLinkIssuerTest extends TestCase
     private function givenAccountExists(bool $isOrganizer): string
     {
         $uuid = Uuid::v7();
-        $account = new Account(new AccountId($uuid), new Email('priant@example.com'));
+        $account = new Account(new AccountId($uuid), new Email('priant@bailletced.org'));
 
         $this->accountRepository
             ->method('findById')

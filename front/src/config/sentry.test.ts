@@ -10,7 +10,7 @@ describe("filterSentryEvent", () => {
 
   it("filters email from user data", () => {
     const event = {
-      user: { email: "priant@example.com", id: "123" },
+      user: { email: "priant@bailletced.org", id: "123" },
     };
 
     const filtered = filterSentryEvent(event as never);
@@ -32,7 +32,7 @@ describe("filterSentryEvent", () => {
 
   it("masks email in tags", () => {
     const event = {
-      tags: { email: "thomas@example.com", env: "prod" },
+      tags: { email: "thomas@bailletced.org", env: "prod" },
     };
 
     const filtered = filterSentryEvent(event as never);
@@ -45,7 +45,7 @@ describe("filterSentryEvent", () => {
     const event = {
       exception: {
         values: [
-          { type: "Error", value: "Failed to send to priant@example.com" },
+          { type: "Error", value: "Failed to send to priant@bailletced.org" },
         ],
       },
     };
@@ -59,7 +59,7 @@ describe("filterSentryEvent", () => {
 
   it("masks email in breadcrumbs", () => {
     const event = {
-      breadcrumbs: [{ message: "User priant@example.com logged in" }],
+      breadcrumbs: [{ message: "User priant@bailletced.org logged in" }],
     };
 
     const filtered = filterSentryEvent(event as never);

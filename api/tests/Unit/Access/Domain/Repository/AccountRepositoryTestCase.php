@@ -32,7 +32,7 @@ abstract class AccountRepositoryTestCase extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -54,14 +54,14 @@ abstract class AccountRepositoryTestCase extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
 
         $this->repository->add($account);
 
-        $found = $this->repository->findByEmail(new Email('test@example.com'));
+        $found = $this->repository->findByEmail(new Email('test@bailletced.org'));
         $this->assertNotNull($found);
         $this->assertSame($account, $found);
     }
@@ -70,21 +70,21 @@ abstract class AccountRepositoryTestCase extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
 
         $this->repository->add($account);
 
-        $found = $this->repository->findByEmail(new Email('TEST@EXAMPLE.COM'));
+        $found = $this->repository->findByEmail(new Email('TEST@bailletced.org'));
         $this->assertNotNull($found);
         $this->assertSame($account, $found);
     }
 
     public function testFindByEmailReturnsNullForNonExistentEmail(): void
     {
-        $found = $this->repository->findByEmail(new Email('nonexistent@example.com'));
+        $found = $this->repository->findByEmail(new Email('nonexistent@bailletced.org'));
         $this->assertNull($found);
     }
 
@@ -92,23 +92,23 @@ abstract class AccountRepositoryTestCase extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
 
         $this->repository->add($account);
 
-        $this->assertTrue($this->repository->existsByEmail(new Email('test@example.com')));
-        $this->assertTrue($this->repository->existsByEmail(new Email('TEST@EXAMPLE.COM')));
-        $this->assertFalse($this->repository->existsByEmail(new Email('other@example.com')));
+        $this->assertTrue($this->repository->existsByEmail(new Email('test@bailletced.org')));
+        $this->assertTrue($this->repository->existsByEmail(new Email('TEST@bailletced.org')));
+        $this->assertFalse($this->repository->existsByEmail(new Email('other@bailletced.org')));
     }
 
     public function testRemove(): void
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -119,7 +119,7 @@ abstract class AccountRepositoryTestCase extends TestCase
         $found = $this->repository->findById($account->getId());
         $this->assertNull($found);
 
-        $foundByEmail = $this->repository->findByEmail(new Email('test@example.com'));
+        $foundByEmail = $this->repository->findByEmail(new Email('test@bailletced.org'));
         $this->assertNull($foundByEmail);
     }
 
@@ -127,7 +127,7 @@ abstract class AccountRepositoryTestCase extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -147,14 +147,14 @@ abstract class AccountRepositoryTestCase extends TestCase
     {
         $account1 = new Account(
             new AccountId(),
-            new Email('test1@example.com'),
+            new Email('test1@bailletced.org'),
             1,
             null
         );
 
         $account2 = new Account(
             new AccountId(),
-            new Email('test2@example.com'),
+            new Email('test2@bailletced.org'),
             1,
             null
         );
@@ -175,7 +175,7 @@ abstract class AccountRepositoryTestCase extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             '123e4567-e89b-12d3-a456-426614174000'
         );

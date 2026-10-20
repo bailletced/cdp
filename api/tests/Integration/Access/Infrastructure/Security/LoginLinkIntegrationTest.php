@@ -45,7 +45,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
         $accountUuid = Uuid::v7();
         $account = new Account(
             new AccountId($accountUuid),
-            new Email('test-login-link-valid-'.$accountUuid->toRfc4122().'@example.com'),
+            new Email('test-login-link-valid-'.$accountUuid->toRfc4122().'@bailletced.org'),
             1
         );
 
@@ -113,7 +113,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
         $accountUuid = Uuid::v7();
         $account = new Account(
             new AccountId($accountUuid),
-            new Email('test-login-link-altered-'.$accountUuid->toRfc4122().'@example.com'),
+            new Email('test-login-link-altered-'.$accountUuid->toRfc4122().'@bailletced.org'),
             1
         );
 
@@ -156,7 +156,7 @@ final class LoginLinkIntegrationTest extends WebTestCase
         $tempUuid = Uuid::v7();
         $tempAccount = new Account(
             new AccountId($tempUuid),
-            new Email('test-login-link-revoked-'.$tempUuid->toRfc4122().'@example.com'),
+            new Email('test-login-link-revoked-'.$tempUuid->toRfc4122().'@bailletced.org'),
             1
         );
 
