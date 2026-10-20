@@ -1,10 +1,11 @@
-# Traefik v3 (F03-T10) — Reverse proxy edge pour CDP.
+# Traefik v3.6 (F03-T10) — Reverse proxy edge pour CDP.
 # Déploiement : docker stack deploy -c docker/stack/traefik.yaml traefik
 #
 # Prérequis :
 #   - Réseau "edge" créé (docker network create --driver overlay --attachable edge)
 #   - Service "app" déployé avec les labels Traefik (voir stack.yaml)
 #   - DNS pointant vers le VPS (F03-T02)
+#   - Docker 29.x : nécessite Traefik >= v3.6.1 (fix API version, issue #12253)
 #
 # Certificats : Let's Encrypt staging d'abord (ACME_CA_SERVER par défaut),
 # puis production : ACME_CA_SERVER=https://acme-v02.api.letsencrypt.org/directory
@@ -13,11 +14,7 @@ version: "3.8"
 
 services:
   traefik:
-    image: traefik:v3.3
-    environment:
-      # Docker 29.x a supprimé le support de l'API 1.24 — forcer une version récente.
-      # 1.51 = Docker 29.0 (correspond au daemon 29.9.1, API max 1.56).
-      - DOCKER_API_VERSION=1.51
+    image: traefik:v3.6.1
     command:
       # Provider Docker Swarm
       - --providers.swarm=true
