@@ -8,6 +8,10 @@ name: Deploy
 # (:main). L'Image CI pousse :main avec le même SHA que :sha-<sha>, donc
 # le /health reflète le bon SHA après redéploiement.
 #
+# IMPORTANT : Deploy ne se déclenche que via workflow_run (après Image CI).
+# Le workflow_dispatch est gardé pour test manuel, mais vérifie que l'image
+# sha-<DEPLOY_SHA> existe sur GHCR avant de continuer.
+#
 # Secrets requis (environnement GitHub "production") :
 #   PORTAINER_WEBHOOK_WORKER : URL webhook Portainer du service cdp_worker
 #   PORTAINER_WEBHOOK_APP    : URL webhook Portainer du service cdp_app
@@ -33,6 +37,8 @@ jobs:
       # En workflow_run, on prend head_sha du run original pour avoir
       # le commit poussé sur main.
       DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      REPO_FULL: ${{ github.repository }}
+      OWNER: ${{ github.repository_owner }}
 
     steps:
       - name: Vérifier les secrets
@@ -44,18 +50,19 @@ jobs:
           echo "=== Vérification des secrets (environment: production) ==="
           if [ -z "$WEBHOOK_WORKER" ]; then
             echo "::error::PORTAINER_WEBHOOK_WORKER est vide ou non défini"
+            exit 1
           else
-            echo "PORTAINER_WEBHOOK_WORKER : défini (${#WEBHOOK_WORKER} caractères)"
-            echo "  URL: $WEBHOOK_WORKER"
+            echo "PORTAINER_WEBHOOK_WORKER : OK (${#WEBHOOK_WORKER} caractères)"
           fi
           if [ -z "$WEBHOOK_APP" ]; then
             echo "::error::PORTAINER_WEBHOOK_APP est vide ou non défini"
+            exit 1
           else
-            echo "PORTAINER_WEBHOOK_APP    : défini (${#WEBHOOK_APP} caractères)"
-            echo "  URL: $WEBHOOK_APP"
+            echo "PORTAINER_WEBHOOK_APP    : OK (${#WEBHOOK_APP} caractères)"
           fi
           if [ -z "$PROD_URL" ]; then
             echo "::error::PRODUCTION_URL est vide ou non défini"
+            exit 1
           else
             echo "PRODUCTION_URL           : $PROD_URL"
           fi
@@ -64,16 +71,78 @@ jobs:
           echo "Event: ${{ github.event_name }}"
           echo ""
 
+      - name: Vérifier que l'image existe sur GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PACKAGE_NAME="${REPO_FULL##*/}"
+          EXPECTED_TAG="sha-${{ env.DEPLOY_SHA }}"
+
+          echo "=== Vérification image GHCR ==="
+          echo "Package : ${OWNER}/${PACKAGE_NAME}"
+          echo "Tag attendu : ${EXPECTED_TAG}"
+          echo ""
+
+          # Détecter si owner est User ou Organization
+          OWNER_TYPE=$(gh api "/users/${OWNER}" --jq '.type')
+          if [ "$OWNER_TYPE" = "Organization" ]; then
+            PACKAGES_BASE="/orgs/${OWNER}/packages"
+          else
+            PACKAGES_BASE="/user/packages"
+          fi
+
+          # Lister les versions et chercher le tag attendu
+          VERSIONS=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            "${PACKAGES_BASE}/container/${PACKAGE_NAME}/versions?per_page=100")
+
+          # Chercher une version avec le tag sha-<DEPLOY_SHA>
+          FOUND=$(echo "$VERSIONS" | jq -r --arg tag "$EXPECTED_TAG" \
+            '[.[] | select(.metadata.container.tags != null and (.metadata.container.tags | index($tag)))] | length')
+
+          if [ "$FOUND" -eq 0 ]; then
+            echo "::error::Aucune version avec le tag '${EXPECTED_TAG}' trouvée sur GHCR."
+            echo ""
+            echo "Cela signifie que l'Image CI n'a pas encore poussé cette image."
+            echo "Causes possibles :"
+            echo "  - Le commit ne touche pas les fichiers du path-filter de Image CI"
+            echo "  - L'Image CI a échoué"
+            echo "  - Tu as déclenché Deploy manuellement pour un commit non buildé"
+            echo ""
+            echo "Versions disponibles (tags) :"
+            echo "$VERSIONS" | jq -r '.[0:10][] | .metadata.container.tags[0] // "untagged"' | sort -u
+            exit 1
+          fi
+
+          echo "Image trouvée : ${EXPECTED_TAG} existe sur GHCR"
+
+          # Vérifier aussi que :main pointe vers le même SHA
+          MAIN_VERSION=$(echo "$VERSIONS" | jq -r \
+            '[.[] | select(.metadata.container.tags != null and (.metadata.container.tags | index("main")))] | .[0]')
+          if [ "$MAIN_VERSION" != "null" ]; then
+            MAIN_CREATED=$(echo "$MAIN_VERSION" | jq -r '.created_at')
+            SHA_CREATED=$(echo "$VERSIONS" | jq -r --arg tag "$EXPECTED_TAG" \
+              '.[] | select(.metadata.container.tags != null and (.metadata.container.tags | index($tag))) | .created_at')
+            echo ":main créé le : $MAIN_CREATED"
+            echo "${EXPECTED_TAG} créé le : $SHA_CREATED"
+            if [ "$MAIN_CREATED" != "$SHA_CREATED" ]; then
+              echo "::warning::Le tag :main ne pointe pas vers le même SHA que ${EXPECTED_TAG}"
+              echo "::warning::Le webhook Portainer déploie :main, pas ${EXPECTED_TAG}"
+              echo "::warning::Le /health pourrait retourner l'ancien SHA"
+            fi
+          fi
+          echo ""
+
       - name: Deploy worker (migrations first)
         run: |
-          echo "Calling worker webhook..."
+          echo "Appel du webhook worker..."
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             "${{ secrets.PORTAINER_WEBHOOK_WORKER }}" || echo "000")
 
           if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "204" ]; then
-            echo "Worker webhook called successfully (HTTP $HTTP_CODE)"
+            echo "Webhook worker appelé (HTTP $HTTP_CODE)"
           else
-            echo "::error::Worker webhook failed (HTTP $HTTP_CODE)"
+            echo "::error::Webhook worker a échoué (HTTP $HTTP_CODE)"
             exit 1
           fi
 
@@ -82,14 +151,14 @@ jobs:
 
       - name: Deploy app
         run: |
-          echo "Calling app webhook..."
+          echo "Appel du webhook app..."
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             "${{ secrets.PORTAINER_WEBHOOK_APP }}" || echo "000")
 
           if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "204" ]; then
-            echo "App webhook called successfully (HTTP $HTTP_CODE)"
+            echo "Webhook app appelé (HTTP $HTTP_CODE)"
           else
-            echo "::error::App webhook failed (HTTP $HTTP_CODE)"
+            echo "::error::Webhook app a échoué (HTTP $HTTP_CODE)"
             exit 1
           fi
 
@@ -107,7 +176,7 @@ jobs:
               ACTUAL_SHA=$(echo "$RESPONSE" | grep -o '"version":"[^"]*"' | cut -d'"' -f4 || true)
               if [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ]; then
                 echo ""
-                echo "Deploiement confirmé : $ACTUAL_SHA"
+                echo "Déploiement confirmé : $ACTUAL_SHA"
                 exit 0
               fi
               echo "Tentative $i/60 : en attente de $EXPECTED_SHA, reçu ${ACTUAL_SHA:-<none>}"
@@ -119,9 +188,11 @@ jobs:
 
           echo ""
           echo "::error::Timeout : /health n'a pas retourné $EXPECTED_SHA après 10 minutes"
+          echo "Dernier /health connu : ${ACTUAL_SHA:-<aucune réponse>}"
           exit 1
 
       - name: Deployment summary
+        if: success()
         run: |
           echo "Déployé : sha-${{ env.DEPLOY_SHA }}"
           echo "URL     : ${{ secrets.PRODUCTION_URL }}"
