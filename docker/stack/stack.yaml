@@ -16,11 +16,13 @@ version: "3.8"
 
 services:
   app:
-    image: ghcr.io/hozana/cdp:${IMAGE_TAG:-latest}
+    image: ghcr.io/bailletced/cdp:${IMAGE_TAG:-latest}
     command: ["app"]
     environment:
       APP_ENV: prod
-      APP_SHA: ${IMAGE_TAG:-latest}
+      # APP_SHA n'est PAS surchargé ici : il est embarqué dans l'image au build
+      # (build-arg SHA=sha-<sha>). Un webhook Portainer ne change que le tag de
+      # l'image — surcharger APP_SHA ici figerait /health sur l'ancien SHA.
       SERVER_NAME: ${SERVER_NAME:-:80}
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
@@ -78,11 +80,10 @@ services:
         max-file: "5"
 
   worker:
-    image: ghcr.io/hozana/cdp:${IMAGE_TAG:-latest}
+    image: ghcr.io/bailletced/cdp:${IMAGE_TAG:-latest}
     command: ["worker"]
     environment:
       APP_ENV: prod
-      APP_SHA: ${IMAGE_TAG:-latest}
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
