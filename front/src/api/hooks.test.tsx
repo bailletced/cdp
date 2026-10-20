@@ -31,7 +31,7 @@ describe("useMe", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data?.email).toBe("thomas@example.com");
+    expect(result.current.data?.email).toBe("thomas@bailletced.org");
     expect(result.current.data?.isOrganizer).toBe(false);
   });
 
@@ -61,7 +61,7 @@ describe("useViewer", () => {
     });
 
     expect(result.current.viewer).toEqual({
-      email: "thomas@example.com",
+      email: "thomas@bailletced.org",
       isOrganizer: false,
     });
     expect(result.current.isVisitor).toBe(false);

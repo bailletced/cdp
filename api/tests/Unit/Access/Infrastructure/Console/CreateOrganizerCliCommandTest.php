@@ -21,7 +21,7 @@ final class CreateOrganizerCliCommandTest extends TestCase
         $command = new CreateOrganizerCliCommand($bus);
 
         $output = new BufferedOutput();
-        $exitCode = $command->run(new ArrayInput(['email' => 'New@Example.com']), $output);
+        $exitCode = $command->run(new ArrayInput(['email' => 'New@bailletced.org']), $output);
 
         self::assertSame(Command::SUCCESS, $exitCode);
 
@@ -29,11 +29,11 @@ final class CreateOrganizerCliCommandTest extends TestCase
         if (!$dispatched instanceof AddOrganizer) {
             self::fail(\sprintf('Expected %s to be dispatched, got %s.', AddOrganizer::class, get_debug_type($dispatched)));
         }
-        self::assertSame('new@example.com', $dispatched->email->value);
+        self::assertSame('new@bailletced.org', $dispatched->email->value);
 
         $display = $output->fetch();
-        self::assertStringContainsString('Created new account with email "New@Example.com".', $display);
-        self::assertStringContainsString('Successfully created organizer with email "New@Example.com".', $display);
+        self::assertStringContainsString('Created new account with email "New@bailletced.org".', $display);
+        self::assertStringContainsString('Successfully created organizer with email "New@bailletced.org".', $display);
     }
 
     public function testItReportsAnOrganizerAddedToAnExistingAccount(): void
@@ -42,12 +42,12 @@ final class CreateOrganizerCliCommandTest extends TestCase
         $command = new CreateOrganizerCliCommand($bus);
 
         $output = new BufferedOutput();
-        $exitCode = $command->run(new ArrayInput(['email' => 'priant@example.com']), $output);
+        $exitCode = $command->run(new ArrayInput(['email' => 'priant@bailletced.org']), $output);
 
         self::assertSame(Command::SUCCESS, $exitCode);
 
         $display = $output->fetch();
-        self::assertStringContainsString('Successfully created organizer with email "priant@example.com".', $display);
+        self::assertStringContainsString('Successfully created organizer with email "priant@bailletced.org".', $display);
         self::assertStringNotContainsString('Created new account', $display);
     }
 
@@ -57,10 +57,10 @@ final class CreateOrganizerCliCommandTest extends TestCase
         $command = new CreateOrganizerCliCommand($bus);
 
         $output = new BufferedOutput();
-        $exitCode = $command->run(new ArrayInput(['email' => 'organizer@example.com']), $output);
+        $exitCode = $command->run(new ArrayInput(['email' => 'organizer@bailletced.org']), $output);
 
         self::assertSame(Command::SUCCESS, $exitCode);
-        self::assertStringContainsString('Account with email "organizer@example.com" is already an organizer.', $output->fetch());
+        self::assertStringContainsString('Account with email "organizer@bailletced.org" is already an organizer.', $output->fetch());
     }
 
     public function testItFailsOnAnInvalidEmailWithoutDispatching(): void

@@ -15,7 +15,7 @@ final class AccountTest extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com')
+            new Email('test@bailletced.org')
         );
 
         $this->assertEquals(1, $account->getCredentialsVersion());
@@ -25,7 +25,7 @@ final class AccountTest extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             5
         );
 
@@ -36,7 +36,7 @@ final class AccountTest extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1
         );
 
@@ -51,7 +51,7 @@ final class AccountTest extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             '123e4567-e89b-12d3-a456-426614174000'
         );
@@ -63,7 +63,7 @@ final class AccountTest extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com')
+            new Email('test@bailletced.org')
         );
 
         $this->assertNull($account->getPriantId());
@@ -73,7 +73,7 @@ final class AccountTest extends TestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com')
+            new Email('test@bailletced.org')
         );
 
         $account->updatePriantId('123e4567-e89b-12d3-a456-426614174000');
@@ -88,7 +88,7 @@ final class AccountTest extends TestCase
         $accountId = new AccountId();
         $account = new Account(
             $accountId,
-            new Email('test@example.com')
+            new Email('test@bailletced.org')
         );
 
         $this->assertSame($accountId, $account->getId());
@@ -96,7 +96,7 @@ final class AccountTest extends TestCase
 
     public function testGetEmail(): void
     {
-        $email = new Email('test@example.com');
+        $email = new Email('test@bailletced.org');
         $account = new Account(
             new AccountId(),
             $email

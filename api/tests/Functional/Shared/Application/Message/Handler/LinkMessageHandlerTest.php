@@ -34,7 +34,7 @@ final class LinkMessageHandlerTest extends KernelTestCase
         self::assertInstanceOf(LinkMessageHandler::class, $handler);
 
         $handler(new LinkMessage(
-            new Email('thomas@example.com'),
+            new Email('thomas@bailletced.org'),
             'http://localhost/auth/login?user=abc&expires=123&hash=def',
             'Votre lien personnel',
         ));
@@ -44,7 +44,7 @@ final class LinkMessageHandlerTest extends KernelTestCase
         self::assertInstanceOf(MimeEmail::class, $email);
 
         $to = array_map(static fn (Address $address): string => $address->getAddress(), $email->getTo());
-        self::assertSame(['thomas@example.com'], $to);
+        self::assertSame(['thomas@bailletced.org'], $to);
         self::assertSame('Votre lien personnel', $email->getSubject());
 
         $fromAddresses = array_map(static fn (Address $address): string => $address->getAddress(), $email->getFrom());

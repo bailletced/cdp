@@ -32,7 +32,7 @@ final class MessageTransportTest extends KernelTestCase
     public function testConfirmationMessageIsRoutedToAsyncTransactional(): void
     {
         $message = new ConfirmationMessage(
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             'token-123',
             new DateTimeImmutable()
         );
@@ -46,7 +46,7 @@ final class MessageTransportTest extends KernelTestCase
     public function testLinkMessageIsRoutedToAsyncTransactional(): void
     {
         $message = new LinkMessage(
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             'http://example.com/link',
             'Test Subject',
             new DateTimeImmutable()
@@ -60,7 +60,7 @@ final class MessageTransportTest extends KernelTestCase
     public function testReminderMessageIsRoutedToAsyncTransactional(): void
     {
         $message = new ReminderMessage(
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             'Reminder content',
             new DateTimeImmutable('+1 day'),
             new DateTimeImmutable()
@@ -75,7 +75,7 @@ final class MessageTransportTest extends KernelTestCase
     {
         $message = new CampaignMessage(
             'campaign-123',
-            ['recipient1@example.com', 'recipient2@example.com'],
+            ['recipient1@bailletced.org', 'recipient2@bailletced.org'],
             'Campaign Subject',
             'email_template',
             new DateTimeImmutable('+1 hour'),
@@ -89,9 +89,9 @@ final class MessageTransportTest extends KernelTestCase
 
     public function testMessagesImplementMessageInterface(): void
     {
-        $this->assertInstanceOf(MessageInterface::class, new ConfirmationMessage(new Email('test@example.com'), 'token'));
-        $this->assertInstanceOf(MessageInterface::class, new LinkMessage(new Email('test@example.com'), 'http://example.com', 'Subject'));
-        $this->assertInstanceOf(MessageInterface::class, new ReminderMessage(new Email('test@example.com'), 'content', new DateTimeImmutable()));
-        $this->assertInstanceOf(MessageInterface::class, new CampaignMessage('camp-1', ['test@example.com'], 'Subject', 'template', new DateTimeImmutable()));
+        $this->assertInstanceOf(MessageInterface::class, new ConfirmationMessage(new Email('test@bailletced.org'), 'token'));
+        $this->assertInstanceOf(MessageInterface::class, new LinkMessage(new Email('test@bailletced.org'), 'http://example.com', 'Subject'));
+        $this->assertInstanceOf(MessageInterface::class, new ReminderMessage(new Email('test@bailletced.org'), 'content', new DateTimeImmutable()));
+        $this->assertInstanceOf(MessageInterface::class, new CampaignMessage('camp-1', ['test@bailletced.org'], 'Subject', 'template', new DateTimeImmutable()));
     }
 }

@@ -31,11 +31,11 @@ final class AddOrganizerHandlerTest extends TestCase
 
     public function testItCreatesAnAccountAndAnOrganizerForAnUnknownEmail(): void
     {
-        $outcome = ($this->handler)(new AddOrganizer(new Email('new@example.com')));
+        $outcome = ($this->handler)(new AddOrganizer(new Email('new@bailletced.org')));
 
         self::assertSame(AddOrganizerResult::AccountCreated, $outcome);
 
-        $account = $this->accountRepository->findByEmail(new Email('new@example.com'));
+        $account = $this->accountRepository->findByEmail(new Email('new@bailletced.org'));
         self::assertNotNull($account);
         self::assertSame(1, $account->getCredentialsVersion());
         self::assertTrue($this->organizerRepository->isOrganizer($account->getId()->value));
@@ -44,10 +44,10 @@ final class AddOrganizerHandlerTest extends TestCase
 
     public function testItPromotesAnExistingAccountWithoutTouchingIt(): void
     {
-        $account = new Account(new AccountId(), new Email('priant@example.com'));
+        $account = new Account(new AccountId(), new Email('priant@bailletced.org'));
         $this->accountRepository->add($account);
 
-        $outcome = ($this->handler)(new AddOrganizer(new Email('priant@example.com')));
+        $outcome = ($this->handler)(new AddOrganizer(new Email('priant@bailletced.org')));
 
         self::assertSame(AddOrganizerResult::OrganizerCreated, $outcome);
         self::assertTrue($this->organizerRepository->isOrganizer($account->getId()->value));
@@ -62,10 +62,10 @@ final class AddOrganizerHandlerTest extends TestCase
 
     public function testItMatchesTheEmailCaseInsensitively(): void
     {
-        $account = new Account(new AccountId(), new Email('case@example.com'));
+        $account = new Account(new AccountId(), new Email('case@bailletced.org'));
         $this->accountRepository->add($account);
 
-        $outcome = ($this->handler)(new AddOrganizer(new Email('CASE@example.com')));
+        $outcome = ($this->handler)(new AddOrganizer(new Email('CASE@bailletced.org')));
 
         self::assertSame(AddOrganizerResult::OrganizerCreated, $outcome);
         self::assertSame(1, $this->organizerRepository->countAll());
@@ -73,11 +73,11 @@ final class AddOrganizerHandlerTest extends TestCase
 
     public function testItIsIdempotentWhenTheAccountIsAlreadyAnOrganizer(): void
     {
-        $account = new Account(new AccountId(), new Email('organizer@example.com'));
+        $account = new Account(new AccountId(), new Email('organizer@bailletced.org'));
         $this->accountRepository->add($account);
-        ($this->handler)(new AddOrganizer(new Email('organizer@example.com')));
+        ($this->handler)(new AddOrganizer(new Email('organizer@bailletced.org')));
 
-        $outcome = ($this->handler)(new AddOrganizer(new Email('organizer@example.com')));
+        $outcome = ($this->handler)(new AddOrganizer(new Email('organizer@bailletced.org')));
 
         self::assertSame(AddOrganizerResult::AlreadyOrganizer, $outcome);
         self::assertSame(1, $this->organizerRepository->countAll());

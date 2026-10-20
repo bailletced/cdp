@@ -22,7 +22,7 @@ final class EmailMaskingProcessorTest extends KernelTestCase
         $this->assertInstanceOf(LoggerInterface::class, $logger);
 
         // Unique email so the assertion is not polluted by previous runs.
-        $email = 'priant-'.bin2hex(random_bytes(6)).'@example.com';
+        $email = 'priant-'.bin2hex(random_bytes(6)).'@bailletced.org';
         $logger->error('Sending personal link to '.$email, ['email' => $email]);
 
         $logFile = $container->getParameter('kernel.logs_dir')

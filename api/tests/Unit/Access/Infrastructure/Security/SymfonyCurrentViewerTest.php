@@ -53,10 +53,10 @@ final class SymfonyCurrentViewerTest extends TestCase
     {
         $uuid = Uuid::v7();
         $priantId = Uuid::v7()->toRfc4122();
-        $account = new Account(new AccountId($uuid), new Email('priant@example.com'), 1, $priantId);
+        $account = new Account(new AccountId($uuid), new Email('priant@bailletced.org'), 1, $priantId);
 
         $this->tokenStorage->method('getToken')->willReturn(
-            new UsernamePasswordToken(new SecurityUser($uuid, 'priant@example.com', ''), 'main')
+            new UsernamePasswordToken(new SecurityUser($uuid, 'priant@bailletced.org', ''), 'main')
         );
         $this->accountRepository->method('findById')->willReturn($account);
 
@@ -72,10 +72,10 @@ final class SymfonyCurrentViewerTest extends TestCase
     public function testOrganizerProducesOrganizerViewer(): void
     {
         $uuid = Uuid::v7();
-        $account = new Account(new AccountId($uuid), new Email('anne@example.com'));
+        $account = new Account(new AccountId($uuid), new Email('anne@bailletced.org'));
 
         $this->tokenStorage->method('getToken')->willReturn(
-            new UsernamePasswordToken(new SecurityUser($uuid, 'anne@example.com', '', true), 'main')
+            new UsernamePasswordToken(new SecurityUser($uuid, 'anne@bailletced.org', '', true), 'main')
         );
         $this->accountRepository->method('findById')->willReturn($account);
 
@@ -92,10 +92,10 @@ final class SymfonyCurrentViewerTest extends TestCase
     {
         $uuid = Uuid::v7();
         $priantId = Uuid::v7()->toRfc4122();
-        $account = new Account(new AccountId($uuid), new Email('anne@example.com'), 1, $priantId);
+        $account = new Account(new AccountId($uuid), new Email('anne@bailletced.org'), 1, $priantId);
 
         $this->tokenStorage->method('getToken')->willReturn(
-            new UsernamePasswordToken(new SecurityUser($uuid, 'anne@example.com', '', true), 'main')
+            new UsernamePasswordToken(new SecurityUser($uuid, 'anne@bailletced.org', '', true), 'main')
         );
         $this->accountRepository->method('findById')->willReturn($account);
 

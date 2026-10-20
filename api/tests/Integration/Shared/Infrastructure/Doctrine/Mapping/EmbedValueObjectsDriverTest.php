@@ -24,13 +24,13 @@ final class EmbedValueObjectsDriverTest extends KernelTestCase
         $schemaTool->createSchema($metadata);
 
         $id = new ProbeAggregateId();
-        $entityManager->persist(new ProbeAggregate($id, new Email('Marie@Example.com')));
+        $entityManager->persist(new ProbeAggregate($id, new Email('Marie@bailletced.org')));
         $entityManager->flush();
         $entityManager->clear();
 
         $found = $entityManager->find(ProbeAggregate::class, $id->value);
 
-        self::assertSame('marie@example.com', $found?->email->value);
+        self::assertSame('marie@bailletced.org', $found?->email->value);
         self::assertTrue($found->id->equals($id));
     }
 

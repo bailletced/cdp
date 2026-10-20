@@ -28,7 +28,7 @@ describe("ReceiveMyLinkPage", () => {
     const { unmount } = render(<ReceiveMyLinkPage />);
 
     fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
-      target: { value: "thomas@example.com" },
+      target: { value: "thomas@bailletced.org" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Recevoir mon lien" }));
 
@@ -40,7 +40,7 @@ describe("ReceiveMyLinkPage", () => {
     render(<ReceiveMyLinkPage />);
 
     fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
-      target: { value: "inconnu@example.com" },
+      target: { value: "inconnu@bailletced.org" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Recevoir mon lien" }));
 
@@ -66,12 +66,15 @@ describe("ReceiveMyLinkPage", () => {
     render(<ReceiveMyLinkPage />);
 
     fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
-      target: { value: "thomas@example.com" },
+      target: { value: "thomas@bailletced.org" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Recevoir mon lien" }));
 
     await screen.findByRole("status");
-    expect(capturedBody).toEqual({ email: "thomas@example.com", website: "" });
+    expect(capturedBody).toEqual({
+      email: "thomas@bailletced.org",
+      website: "",
+    });
   });
 
   it("shows a generic error message when the request fails", async () => {
@@ -84,7 +87,7 @@ describe("ReceiveMyLinkPage", () => {
     render(<ReceiveMyLinkPage />);
 
     fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
-      target: { value: "thomas@example.com" },
+      target: { value: "thomas@bailletced.org" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Recevoir mon lien" }));
 

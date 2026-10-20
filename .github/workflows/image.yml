@@ -13,25 +13,25 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Dockerfile'
-      - 'api/**'
-      - 'front/**'
-      - 'docker/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/workflows/image.yml'
+      - "Dockerfile"
+      - "api/**"
+      - "front/**"
+      - "docker/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - ".github/workflows/image.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'Dockerfile'
-      - 'api/**'
-      - 'front/**'
-      - 'docker/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/workflows/image.yml'
+      - "Dockerfile"
+      - "api/**"
+      - "front/**"
+      - "docker/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - ".github/workflows/image.yml"
 
 env:
   REGISTRY: ghcr.io
@@ -153,12 +153,12 @@ jobs:
           exit 1
 
       - name: Create the e2e organizer account (inside the app container)
-        run: docker compose -f docker-compose.e2e.yml exec -T app php bin/console app:organizer:create e2e-organizer@example.com
+        run: docker compose -f docker-compose.e2e.yml exec -T app php bin/console app:organizer:create e2e-organizer@bailletced.org
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6

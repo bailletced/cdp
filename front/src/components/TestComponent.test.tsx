@@ -18,7 +18,7 @@ describe("TestComponent", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("api-message")).toHaveTextContent(
-        "thomas@example.com",
+        "thomas@bailletced.org",
       );
     });
   });

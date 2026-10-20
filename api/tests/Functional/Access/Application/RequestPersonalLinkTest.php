@@ -66,9 +66,9 @@ final class RequestPersonalLinkTest extends KernelTestCase
 
     public function testKnownAccountReceivesPersonalLinkEmail(): void
     {
-        AccountFactory::createOne(['email' => new Email('thomas@example.com')]);
+        AccountFactory::createOne(['email' => new Email('thomas@bailletced.org')]);
 
-        $this->commandBus->dispatch(new RequestPersonalLink(new Email('thomas@example.com')));
+        $this->commandBus->dispatch(new RequestPersonalLink(new Email('thomas@bailletced.org')));
 
         // The link message is routed to the async_transactional transport
         $this->transport('async_transactional')->queue()->assertCount(1);
@@ -76,7 +76,7 @@ final class RequestPersonalLinkTest extends KernelTestCase
 
         $message = $this->transport('async_transactional')->queue()->first(LinkMessage::class)->getMessage();
         self::assertInstanceOf(LinkMessage::class, $message);
-        self::assertSame('thomas@example.com', $message->email->value);
+        self::assertSame('thomas@bailletced.org', $message->email->value);
         self::assertSame('Votre lien personnel', $message->subject);
         self::assertStringContainsString('/auth/login', $message->link);
 
@@ -90,7 +90,7 @@ final class RequestPersonalLinkTest extends KernelTestCase
         self::assertInstanceOf(MimeEmail::class, $email);
 
         $to = array_map(static fn (Address $address): string => $address->getAddress(), $email->getTo());
-        self::assertSame(['thomas@example.com'], $to);
+        self::assertSame(['thomas@bailletced.org'], $to);
         self::assertSame('Votre lien personnel', $email->getSubject());
 
         $fromAddresses = array_map(static fn (Address $address): string => $address->getAddress(), $email->getFrom());
@@ -111,7 +111,7 @@ final class RequestPersonalLinkTest extends KernelTestCase
 
     public function testUnknownAccountGetsNothing(): void
     {
-        $this->commandBus->dispatch(new RequestPersonalLink(new Email('inconnu@example.com')));
+        $this->commandBus->dispatch(new RequestPersonalLink(new Email('inconnu@bailletced.org')));
 
         $this->transport('async_transactional')->queue()->assertEmpty();
         self::assertCount(0, $this->mailTransport->sent);
@@ -119,9 +119,9 @@ final class RequestPersonalLinkTest extends KernelTestCase
 
     public function testPersonalLinkIsNotLoggedInClear(): void
     {
-        AccountFactory::createOne(['email' => new Email('thomas@example.com')]);
+        AccountFactory::createOne(['email' => new Email('thomas@bailletced.org')]);
 
-        $this->commandBus->dispatch(new RequestPersonalLink(new Email('thomas@example.com')));
+        $this->commandBus->dispatch(new RequestPersonalLink(new Email('thomas@bailletced.org')));
         $this->transport('async_transactional')->processOrFail();
 
         $message = $this->transport('async_transactional')->acknowledged()->first(LinkMessage::class)->getMessage();
@@ -141,7 +141,7 @@ final class RequestPersonalLinkTest extends KernelTestCase
             }
         }
 
-        self::assertStringNotContainsString('thomas@example.com', $renderedWithoutDoctrine);
+        self::assertStringNotContainsString('thomas@bailletced.org', $renderedWithoutDoctrine);
         self::assertStringNotContainsString($message->link, $rendered);
     }
 }

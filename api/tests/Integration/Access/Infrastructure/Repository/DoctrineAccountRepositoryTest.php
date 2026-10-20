@@ -37,7 +37,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -61,7 +61,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -70,7 +70,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
         $this->em->flush();
         $this->em->clear();
 
-        $found = $this->repository->findByEmail(new Email('test@example.com'));
+        $found = $this->repository->findByEmail(new Email('test@bailletced.org'));
         $this->assertNotNull($found);
         $this->assertEquals($account->getId(), $found->getId());
     }
@@ -79,7 +79,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -88,7 +88,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
         $this->em->flush();
         $this->em->clear();
 
-        $found = $this->repository->findByEmail(new Email('TEST@EXAMPLE.COM'));
+        $found = $this->repository->findByEmail(new Email('TEST@bailletced.org'));
         $this->assertNotNull($found);
         $this->assertEquals($account->getId(), $found->getId());
     }
@@ -97,7 +97,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -106,16 +106,16 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
         $this->em->flush();
         $this->em->clear();
 
-        $this->assertTrue($this->repository->existsByEmail(new Email('test@example.com')));
-        $this->assertTrue($this->repository->existsByEmail(new Email('TEST@EXAMPLE.COM')));
-        $this->assertFalse($this->repository->existsByEmail(new Email('other@example.com')));
+        $this->assertTrue($this->repository->existsByEmail(new Email('test@bailletced.org')));
+        $this->assertTrue($this->repository->existsByEmail(new Email('TEST@bailletced.org')));
+        $this->assertFalse($this->repository->existsByEmail(new Email('other@bailletced.org')));
     }
 
     public function testRemove(): void
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -129,7 +129,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
         $found = $this->repository->findById($account->getId());
         $this->assertNull($found);
 
-        $foundByEmail = $this->repository->findByEmail(new Email('test@example.com'));
+        $foundByEmail = $this->repository->findByEmail(new Email('test@bailletced.org'));
         $this->assertNull($foundByEmail);
     }
 
@@ -137,7 +137,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -159,7 +159,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );
@@ -178,7 +178,7 @@ final class DoctrineAccountRepositoryTest extends KernelTestCase
     {
         $account = new Account(
             new AccountId(),
-            new Email('test@example.com'),
+            new Email('test@bailletced.org'),
             1,
             null
         );

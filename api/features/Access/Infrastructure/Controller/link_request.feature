@@ -8,27 +8,27 @@ Feature: Personal link request endpoint (F02-T15)
         Given the system is initialized
 
     Scenario: Known account: link is requested, identical response
-        Given an account exists with email "thomas@example.com"
+        Given an account exists with email "thomas@bailletced.org"
         When I POST JSON to "/auth/link-request" with body:
             """
-            {"email": "thomas@example.com", "website": ""}
+            {"email": "thomas@bailletced.org", "website": ""}
             """
         Then the response should be the generic accepted response
-        And a link message is queued for "thomas@example.com"
+        And a link message is queued for "thomas@bailletced.org"
 
     Scenario: Unknown account: identical response, nothing is sent
         When I POST JSON to "/auth/link-request" with body:
             """
-            {"email": "inconnu@example.com", "website": ""}
+            {"email": "inconnu@bailletced.org", "website": ""}
             """
         Then the response should be the generic accepted response
         And no link message is queued
 
     Scenario: Filled honeypot: identical response, nothing is sent
-        Given an account exists with email "thomas@example.com"
+        Given an account exists with email "thomas@bailletced.org"
         When I POST JSON to "/auth/link-request" with body:
             """
-            {"email": "thomas@example.com", "website": "http://spam.example.com"}
+            {"email": "thomas@bailletced.org", "website": "http://spam.example.com"}
             """
         Then the response should be the generic accepted response
         And no link message is queued

@@ -163,7 +163,7 @@ Feature: Priant inscription
 
   Scenario: Successful inscription with valid email
     Given the prayer slot "2026-11-28 14:00-14:30" is available
-    When I submit my inscription with email "priant@example.com" and name "Jean Dupont"
+    When I submit my inscription with email "priant@bailletced.org" and name "Jean Dupont"
     Then I should receive a confirmation email
     And my inscription should be recorded in the database
 

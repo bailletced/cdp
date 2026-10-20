@@ -20,13 +20,13 @@ final class MessengerTransportTest extends TestCase
 {
     public function testMessagesAreCorrectlyTyped(): void
     {
-        $email = new Email('test@example.com');
+        $email = new Email('test@bailletced.org');
         $now = new DateTimeImmutable();
 
         $confirmation = new ConfirmationMessage($email, 'token', $now);
         $link = new LinkMessage($email, 'http://example.com', 'Subject', $now);
         $reminder = new ReminderMessage($email, 'content', $now, $now);
-        $campaign = new CampaignMessage('camp-1', ['test@example.com'], 'Subject', 'template', $now, $now);
+        $campaign = new CampaignMessage('camp-1', ['test@bailletced.org'], 'Subject', 'template', $now, $now);
 
         $this->assertSame('token', $confirmation->token);
         $this->assertSame('http://example.com', $link->link);
@@ -37,7 +37,7 @@ final class MessengerTransportTest extends TestCase
 
     public function testMessagesCanBeSerialized(): void
     {
-        $email = new Email('test@example.com');
+        $email = new Email('test@bailletced.org');
         $now = new DateTimeImmutable();
 
         $confirmation = new ConfirmationMessage($email, 'token', $now);
