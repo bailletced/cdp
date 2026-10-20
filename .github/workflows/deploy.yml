@@ -1,13 +1,17 @@
 name: Deploy
 
 # F03-T17 : déploiement continu à chaque fusion sur main.
-# Appelle les webhooks Portainer (worker d'abord, puis app), attend que
-# /health retourne le SHA déployé (10 min max).
+# Appelle les webhooks Portainer (worker d'abord pour les migrations,
+# puis app), attend que /health retourne le SHA déployé (10 min max).
+#
+# Les webhooks Portainer redéploient le service avec l'image configurée
+# (:main). L'Image CI pousse :main avec le même SHA que :sha-<sha>, donc
+# le /health reflète le bon SHA après redéploiement.
 #
 # Secrets requis (environnement GitHub "production") :
-#   PORTAINER_WEBHOOK_WORKER : token webhook Portainer du service worker
-#   PORTAINER_WEBHOOK_APP    : token webhook Portainer du service app
-#   PRODUCTION_URL           : URL de production (https://<domaine>)
+#   PORTAINER_WEBHOOK_WORKER : URL webhook Portainer du service cdp_worker
+#   PORTAINER_WEBHOOK_APP    : URL webhook Portainer du service cdp_app
+#   PRODUCTION_URL           : https://bailletced.org
 
 on:
   workflow_run:
@@ -26,48 +30,72 @@ jobs:
       (github.event.workflow_run.conclusion == 'success')
 
     env:
-      # En workflow_run, github.sha = SHA du run déclencheur ; on prend head_sha
-      # du run original pour avoir le commit poussé sur main.
+      # En workflow_run, on prend head_sha du run original pour avoir
+      # le commit poussé sur main.
       DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     steps:
       - name: Deploy worker (migrations first)
         run: |
-          curl -sf -X POST "${{ secrets.PORTAINER_WEBHOOK_WORKER }}?tag=sha-${{ env.DEPLOY_SHA }}"
-          echo "Worker webhook called with tag sha-${{ env.DEPLOY_SHA }}"
+          echo "Calling worker webhook..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            "${{ secrets.PORTAINER_WEBHOOK_WORKER }}" || echo "000")
+
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "204" ]; then
+            echo "Worker webhook called successfully (HTTP $HTTP_CODE)"
+          else
+            echo "::error::Worker webhook failed (HTTP $HTTP_CODE)"
+            exit 1
+          fi
 
       - name: Wait for worker migrations
         run: sleep 30
 
       - name: Deploy app
         run: |
-          curl -sf -X POST "${{ secrets.PORTAINER_WEBHOOK_APP }}?tag=sha-${{ env.DEPLOY_SHA }}"
-          echo "App webhook called with tag sha-${{ env.DEPLOY_SHA }}"
+          echo "Calling app webhook..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            "${{ secrets.PORTAINER_WEBHOOK_APP }}" || echo "000")
+
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "204" ]; then
+            echo "App webhook called successfully (HTTP $HTTP_CODE)"
+          else
+            echo "::error::App webhook failed (HTTP $HTTP_CODE)"
+            exit 1
+          fi
 
       - name: Wait for /health to return the deployed SHA (max 10 min)
         run: |
           EXPECTED_SHA="sha-${{ env.DEPLOY_SHA }}"
           URL="${{ secrets.PRODUCTION_URL }}/health"
 
+          echo "Attente du déploiement de $EXPECTED_SHA sur $URL"
+          echo ""
+
           for i in $(seq 1 60); do
             RESPONSE=$(curl -sf "$URL" 2>/dev/null || true)
             if [ -n "$RESPONSE" ]; then
               ACTUAL_SHA=$(echo "$RESPONSE" | grep -o '"version":"[^"]*"' | cut -d'"' -f4 || true)
               if [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ]; then
-                echo "Deployed version matches: $ACTUAL_SHA"
+                echo ""
+                echo "Deploiement confirmé : $ACTUAL_SHA"
                 exit 0
               fi
-              echo "Waiting for $EXPECTED_SHA, got: ${ACTUAL_SHA:-<none>} (attempt $i/60)"
+              echo "Tentative $i/60 : en attente de $EXPECTED_SHA, reçu ${ACTUAL_SHA:-<none>}"
             else
-              echo "Health check not responding yet (attempt $i/60)"
+              echo "Tentative $i/60 : /health ne répond pas encore"
             fi
             sleep 10
           done
 
-          echo "Timeout: /health did not return $EXPECTED_SHA after 10 minutes"
+          echo ""
+          echo "::error::Timeout : /health n'a pas retourné $EXPECTED_SHA après 10 minutes"
           exit 1
 
       - name: Deployment summary
         run: |
-          echo "Deployed sha-${{ env.DEPLOY_SHA }} to ${{ secrets.PRODUCTION_URL }}"
-          curl -sf "${{ secrets.PRODUCTION_URL }}/health" | head -c 500
+          echo "Déployé : sha-${{ env.DEPLOY_SHA }}"
+          echo "URL     : ${{ secrets.PRODUCTION_URL }}"
+          echo ""
+          echo "Health check :"
+          curl -sf "${{ secrets.PRODUCTION_URL }}/health" | jq .
