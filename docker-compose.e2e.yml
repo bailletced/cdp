@@ -20,7 +20,6 @@ services:
     command: ["app"]
     environment:
       APP_ENV: prod
-      APP_SHA: ${IMAGE_TAG:-test}
       SERVER_NAME: ":80"
       DEFAULT_URI: http://localhost:9080
       APP_SECRET_FILE: /run/secrets/app_secret
@@ -51,7 +50,6 @@ services:
     command: ["worker"]
     environment:
       APP_ENV: prod
-      APP_SHA: ${IMAGE_TAG:-test}
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
