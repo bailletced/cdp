@@ -35,6 +35,35 @@ jobs:
       DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     steps:
+      - name: Vérifier les secrets
+        env:
+          WEBHOOK_WORKER: ${{ secrets.PORTAINER_WEBHOOK_WORKER }}
+          WEBHOOK_APP: ${{ secrets.PORTAINER_WEBHOOK_APP }}
+          PROD_URL: ${{ secrets.PRODUCTION_URL }}
+        run: |
+          echo "=== Vérification des secrets (environment: production) ==="
+          if [ -z "$WEBHOOK_WORKER" ]; then
+            echo "::error::PORTAINER_WEBHOOK_WORKER est vide ou non défini"
+          else
+            echo "PORTAINER_WEBHOOK_WORKER : défini (${#WEBHOOK_WORKER} caractères)"
+            echo "  URL: $WEBHOOK_WORKER"
+          fi
+          if [ -z "$WEBHOOK_APP" ]; then
+            echo "::error::PORTAINER_WEBHOOK_APP est vide ou non défini"
+          else
+            echo "PORTAINER_WEBHOOK_APP    : défini (${#WEBHOOK_APP} caractères)"
+            echo "  URL: $WEBHOOK_APP"
+          fi
+          if [ -z "$PROD_URL" ]; then
+            echo "::error::PRODUCTION_URL est vide ou non défini"
+          else
+            echo "PRODUCTION_URL           : $PROD_URL"
+          fi
+          echo ""
+          echo "DEPLOY_SHA: ${{ env.DEPLOY_SHA }}"
+          echo "Event: ${{ github.event_name }}"
+          echo ""
+
       - name: Deploy worker (migrations first)
         run: |
           echo "Calling worker webhook..."
