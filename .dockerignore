@@ -2,6 +2,8 @@
 docs
 node_modules
 **/node_modules
+.pnpm-store
+**/.pnpm-store
 **/vendor
 **/var
 **/.DS_Store

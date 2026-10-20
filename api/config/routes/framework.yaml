@@ -2,3 +2,9 @@ when@dev:
     _errors:
         resource: '@FrameworkBundle/Resources/config/routing/errors.php'
         prefix: /_error
+
+# GET /health: health check endpoint (F03-T06)
+health:
+    path: /health
+    methods: [GET]
+    controller: App\Shared\Infrastructure\Controller\HealthController::health

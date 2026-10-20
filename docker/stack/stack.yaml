@@ -1,0 +1,169 @@
+# Docker Swarm stack (F03-T09) — CDP production.
+# Déploiement : docker stack deploy -c docker/stack/stack.yaml cdp
+#
+# Réseaux :
+#   - edge    : exposé à Traefik (app, portainer)
+#   - internal: base de données (app, worker, database)
+#
+# Secrets (à créer avant le déploiement) :
+#   echo "..." | docker secret create app_secret -
+#   echo "..." | docker secret create db_password -
+#   echo "..." | docker secret create mailer_dsn -
+#   echo "..." | docker secret create mercure_publisher_jwt_key -
+#   echo "..." | docker secret create sentry_dsn -
+
+version: "3.8"
+
+services:
+  app:
+    image: ghcr.io/hozana/cdp:${IMAGE_TAG:-latest}
+    command: ["app"]
+    environment:
+      APP_ENV: prod
+      APP_SHA: ${IMAGE_TAG:-latest}
+      SERVER_NAME: ${SERVER_NAME:-:80}
+      APP_SECRET_FILE: /run/secrets/app_secret
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      MAILER_DSN_FILE: /run/secrets/mailer_dsn
+      MERCURE_PUBLISHER_JWT_KEY_FILE: /run/secrets/mercure_publisher_jwt_key
+      SENTRY_DSN_FILE: /run/secrets/sentry_dsn
+    secrets:
+      - app_secret
+      - db_password
+      - mailer_dsn
+      - mercure_publisher_jwt_key
+      - sentry_dsn
+    networks:
+      - edge
+      - internal
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 1
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+      labels:
+        # Traefik (F03-T10) : routage du domaine vers le service app
+        - traefik.enable=true
+        - traefik.http.routers.app.rule=Host(`${DOMAIN:-localhost}`)
+        - traefik.http.routers.app.entrypoints=websecure
+        - traefik.http.routers.app.tls=true
+        - traefik.http.routers.app.tls.certresolver=letsencrypt
+        - traefik.http.services.app.loadbalancer.server.port=80
+        # Middleware sécurité (F03-T11)
+        - traefik.http.routers.app.middlewares=security-headers@swarm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  worker:
+    image: ghcr.io/hozana/cdp:${IMAGE_TAG:-latest}
+    command: ["worker"]
+    environment:
+      APP_ENV: prod
+      APP_SHA: ${IMAGE_TAG:-latest}
+      APP_SECRET_FILE: /run/secrets/app_secret
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      MAILER_DSN_FILE: /run/secrets/mailer_dsn
+      # SentryBundle lit le DSN au boot du noyau : le worker plante sans ce fichier.
+      SENTRY_DSN_FILE: /run/secrets/sentry_dsn
+    secrets:
+      - app_secret
+      - db_password
+      - mailer_dsn
+      - sentry_dsn
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: stop-first
+        failure_action: rollback
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+      resources:
+        # Deux consommateurs Messenger (un par file PostgreSQL).
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - database_data:/var/lib/postgresql
+    networks:
+      - internal
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  edge:
+    driver: overlay
+    attachable: true
+  internal:
+    driver: overlay
+    internal: true
+
+volumes:
+  database_data:
+    driver: local
+
+secrets:
+  app_secret:
+    external: true
+  db_password:
+    external: true
+  mailer_dsn:
+    external: true
+  mercure_publisher_jwt_key:
+    external: true
+  sentry_dsn:
+    external: true

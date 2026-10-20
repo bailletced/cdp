@@ -1,0 +1,16 @@
+# Production Sentry (F03-T19) : monitoring des erreurs, région UE, sans PII.
+# Le DSN est lu depuis le secret Docker Swarm (SENTRY_DSN_FILE).
+sentry:
+    dsn: '%env(trim:file:SENTRY_DSN_FILE)%'
+    options:
+        # Ne jamais envoyer de PII (noms, e-mails, IP) à Sentry.
+        send_default_pii: false
+        # 10 % des transactions pour le tracing.
+        traces_sample_rate: 0.1
+        # Environnement pour filtrer dans l'interface Sentry.
+        environment: prod
+        # Processeur qui filtre les e-mails avant envoi (id de service, sans « @ »).
+        before_send: 'App\Shared\Infrastructure\Sentry\EmailFilteringSentryProcessor'
+    # Intégration Symfony : capture les exceptions non gérées.
+    messenger:
+        enabled: true

@@ -1,0 +1,11 @@
+# Production (F03-T08) : connexion DB par champs séparés, secrets depuis fichiers.
+doctrine:
+    dbal:
+        driver: pdo_pgsql
+        host: database
+        port: 5432
+        dbname: app
+        user: app
+        password: '%env(trim:file:DB_PASSWORD_FILE)%'
+        server_version: '18'
+        charset: utf8

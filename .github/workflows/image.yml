@@ -1,0 +1,194 @@
+name: Image CI
+
+# F03-T15 : construit et publie l'image de production sur GHCR.
+# - Sur main : build + push avec tags :main et :<sha>
+# - Sur PR : build uniquement (vérifie que l'image compile)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'api/**'
+      - 'front/**'
+      - 'docker/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - '.github/workflows/image.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'api/**'
+      - 'front/**'
+      - 'docker/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - '.github/workflows/image.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    name: Build & Push Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=,suffix=,format=short
+            type=ref,event=branch
+          flavor: |
+            latest=false
+
+      - name: Build and push (main)
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: prod
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          build-args: |
+            SHA=${{ github.sha }}
+            VITE_APP_SHA=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
+          cache-from: type=gha,mode=max
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          provenance: false
+
+      - name: Build only (PR)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: prod
+          push: false
+          build-args: |
+            SHA=${{ github.sha }}
+            VITE_APP_SHA=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
+          cache-from: type=gha,mode=max
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+  e2e-image:
+    name: E2E on Production Image
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build production image (local)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: prod
+          push: false
+          load: true
+          tags: cdp-prod:ci
+          build-args: |
+            SHA=${{ github.sha }}
+            VITE_APP_SHA=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
+          cache-from: type=gha,mode=max
+          cache-to: type=gha,mode=max
+
+      - name: Start test stack (image + PostgreSQL + Mailpit)
+        run: |
+          docker compose -f docker-compose.e2e.yml up -d --wait
+        env:
+          IMAGE_TAG: ci
+
+      - name: Wait for app health
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:9080/health > /dev/null; then
+              echo "App is healthy"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "App did not become healthy"
+          docker compose -f docker-compose.e2e.yml logs
+          exit 1
+
+      - name: Create the e2e organizer account (inside the app container)
+        run: docker compose -f docker-compose.e2e.yml exec -T app php bin/console app:organizer:create e2e-organizer@example.com
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - name: Install front dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: front
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+        working-directory: front
+
+      - name: Run E2E tests on production image
+        run: pnpm exec playwright test
+        working-directory: front
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:9080
+          MAILPIT_API_URL: http://localhost:8025/api/v1
+
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            front/test-results/
+            front/playwright-report/
+          retention-days: 7
+
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.e2e.yml logs
+
+      - name: Stop test stack
+        if: always()
+        run: docker compose -f docker-compose.e2e.yml down -v

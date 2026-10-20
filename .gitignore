@@ -1,4 +1,8 @@
 node_modules/
+.pnpm-store/
+
+# Lockfiles parasites : le projet est 100 % pnpm (workspace, lockfile racine)
+package-lock.json
 
 # Symfony (api/)
 /api/.env.local
@@ -17,12 +21,17 @@ node_modules/
 /front/playwright-report/
 /front/test-results/
 /front/e2e/.messenger-worker.pid
+# Lockfile parasite recréé par le conteneur node (workspace pnpm : le lockfile racine fait foi)
+/front/pnpm-lock.yaml
 
 # Poste de travail
 .DS_Store
 .env.local
 /api/.phpunit.cache/
 /api/public/bundles/
+
+# Sauvegardes de la base de prod (make backup, F03-T23)
+/backups/
 
 # Spike Probity/Vibe : captures de sessions (contiennent du code et des transcriptions)
 /tooling/vibe-spike/captures/

@@ -6,9 +6,16 @@ COMPOSE ?= docker compose
 PHP ?= $(COMPOSE) exec -T php
 NODE ?= $(COMPOSE) exec -T node
 
+# Production (F03) : le VPS est atteint via un alias SSH (voir docs/exploitation/runbook.md).
+SSH_HOST ?= cdp-prod
+STACK ?= cdp
+DB_USER ?= app
+DB_NAME ?= app
+BACKUP_DIR ?= backups
+
 .DEFAULT_GOAL := help
 
-.PHONY: help up down sh migrate migration fixtures openapi qa qa-back qa-front test test-back test-front e2e
+.PHONY: help up down sh migrate migration fixtures openapi qa qa-back qa-front test test-back test-front e2e backup
 
 help: ## Liste les cibles
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z0-9-]+:.*## / {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -58,3 +65,9 @@ test-front: ## Tests Vitest
 
 e2e: ## Tests Playwright sur la stack compose
 	cd front && pnpm exec playwright test $(ARGS)
+
+backup: ## Sauvegarde la base de prod (pg_dump via SSH, fichier daté copié en local)
+	@mkdir -p $(BACKUP_DIR)
+	@file="$(BACKUP_DIR)/cdp-$(shell date +%Y%m%d-%H%M%S).sql.gz"; \
+	ssh $(SSH_HOST) 'tmp=$$(mktemp); docker exec $$(docker ps -q -f name=$(STACK)_database) pg_dump -U $(DB_USER) $(DB_NAME) > $$tmp && gzip -c $$tmp; status=$$?; rm -f $$tmp; exit $$status' > $$file || { rm -f $$file; exit 1; }; \
+	gzip -t $$file && echo "Sauvegarde écrite : $$file" && ls -lh $$file

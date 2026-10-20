@@ -1,0 +1,3 @@
+# Production : secret lu depuis le fichier Docker Swarm (F03-T08).
+framework:
+    secret: '%env(trim:file:APP_SECRET_FILE)%'

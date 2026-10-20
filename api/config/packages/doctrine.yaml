@@ -1,11 +1,7 @@
 doctrine:
     dbal:
-        url: '%env(resolve:DATABASE_URL)%'
-
-        # IMPORTANT: You MUST configure your server version,
-        # either here or in the DATABASE_URL env var (see .env file)
-        #server_version: '16'
-
+        # En dev/test, l'URL complète est dans DATABASE_URL (voir .env).
+        # En prod, les champs sont définis séparément (voir config/packages/prod/doctrine.yaml).
         profiling_collect_backtrace: '%kernel.debug%'
     orm:
         validate_xml_mapping: true
@@ -26,9 +22,15 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Access/Domain'
                 prefix: App\Access\Domain
 
+when@dev:
+    doctrine:
+        dbal:
+            url: '%env(resolve:DATABASE_URL)%'
+
 when@test:
     doctrine:
         dbal:
+            url: '%env(resolve:DATABASE_URL)%'
             # "TEST_TOKEN" is typically set by ParaTest
             dbname_suffix: '_test%env(default::TEST_TOKEN)%'
 

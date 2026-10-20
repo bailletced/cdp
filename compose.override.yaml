@@ -53,8 +53,9 @@ services:
           echo "front/ n'est pas encore initialisé (F00-T21)"
           exec sleep infinity
         fi
-        corepack enable
+        npm install --global pnpm@12.14.0
         pnpm install
         exec pnpm dev --host 0.0.0.0
     ports:
-      - "${HTTP_PORT:-8000}:5173"
+      # Vite écoute sur 8000 dans le conteneur (front/vite.config.ts, baseURL Playwright).
+      - "${HTTP_PORT:-8000}:8000"

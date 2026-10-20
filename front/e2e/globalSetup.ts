@@ -23,8 +23,20 @@ function consoleCommand(command: string): void {
  * The worker pid is stored so globalTeardown can stop it.
  */
 export default async function globalSetup(): Promise<void> {
-  consoleCommand("messenger:setup-transports");
+  // Prod-image mode (PLAYWRIGHT_BASE_URL, Image CI): the docker stack already
+  // runs the migrations and a messenger worker, and the CI job creates the
+  // organizer account inside the app container.
+  if (process.env.PLAYWRIGHT_BASE_URL) {
+    await clearMailpit();
+    return;
+  }
+
+  // Migrations d'abord : la migration F00-T18 crée les tables Messenger.
+  // setup-transports ensuite est idempotent (il les trouve existantes) —
+  // dans l'autre ordre, sur une base vierge (CI), migrate échouait avec
+  // "Duplicate table: messenger_messages_async_transactional".
   consoleCommand("doctrine:migrations:migrate --no-interaction");
+  consoleCommand("messenger:setup-transports");
   consoleCommand(`app:organizer:create ${E2E_ORGANIZER_EMAIL}`);
 
   const worker: ChildProcess = spawn(

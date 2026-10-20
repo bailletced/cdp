@@ -1,0 +1,103 @@
+# Compose de test e2e sur l'image de production (F03-T16).
+# Utilisé par la CI pour valider l'image avant déploiement.
+#
+# Usage :
+#   docker build --target prod -t cdp-prod:test --build-arg SHA=test .
+#   IMAGE_TAG=test docker compose -f docker-compose.e2e.yml up -d
+#   docker compose -f docker-compose.e2e.yml exec -T app php bin/console app:organizer:create e2e-organizer@example.com
+#   cd front && PLAYWRIGHT_BASE_URL=http://localhost:9080 MAILPIT_API_URL=http://localhost:8025/api/v1 pnpm exec playwright test
+#
+# L'image de production lit ses secrets dans des fichiers (APP_SECRET_FILE,
+# DB_PASSWORD_FILE, MAILER_DSN_FILE, SENTRY_DSN_FILE — voir api/.env.prod et
+# config/packages/prod/), comme la stack Swarm. Ici ce sont des valeurs bidon
+# montées depuis docker/e2e/secrets/ : ne jamais réutiliser ailleurs.
+
+name: cdp-e2e
+
+services:
+  app:
+    image: cdp-prod:${IMAGE_TAG:-test}
+    command: ["app"]
+    environment:
+      APP_ENV: prod
+      APP_SHA: ${IMAGE_TAG:-test}
+      SERVER_NAME: ":80"
+      DEFAULT_URI: http://localhost:9080
+      APP_SECRET_FILE: /run/secrets/app_secret
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      MAILER_DSN_FILE: /run/secrets/mailer_dsn
+      SENTRY_DSN_FILE: /run/secrets/sentry_dsn
+    secrets:
+      - app_secret
+      - db_password
+      - mailer_dsn
+      - sentry_dsn
+    depends_on:
+      database:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    ports:
+      - "9080:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  worker:
+    image: cdp-prod:${IMAGE_TAG:-test}
+    command: ["worker"]
+    environment:
+      APP_ENV: prod
+      APP_SHA: ${IMAGE_TAG:-test}
+      APP_SECRET_FILE: /run/secrets/app_secret
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      MAILER_DSN_FILE: /run/secrets/mailer_dsn
+      SENTRY_DSN_FILE: /run/secrets/sentry_dsn
+    secrets:
+      - app_secret
+      - db_password
+      - mailer_dsn
+      - sentry_dsn
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      # L'image frankenphp embarque un HEALTHCHECK HTTP (Caddy :2019/metrics) que
+      # le worker ne passe pas (pas de serveur HTTP). On vérifie que le worker
+      # boot et joint la base, comme l'app.
+      test: ["CMD-SHELL", "php bin/console messenger:stats > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      # Doit correspondre au contenu du secret db_password (docker/e2e/secrets/db_password).
+      POSTGRES_PASSWORD: app
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "app", "-U", "app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+
+secrets:
+  app_secret:
+    file: docker/e2e/secrets/app_secret
+  db_password:
+    file: docker/e2e/secrets/db_password
+  mailer_dsn:
+    file: docker/e2e/secrets/mailer_dsn
+  sentry_dsn:
+    file: docker/e2e/secrets/sentry_dsn

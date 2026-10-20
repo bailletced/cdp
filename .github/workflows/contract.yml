@@ -62,13 +62,10 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Cache pnpm
-        uses: actions/cache@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node-${{ hashFiles('front/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: true
 
       - name: Install pnpm dependencies
         run: |
@@ -101,6 +98,7 @@ jobs:
 
       - name: Compare TypeScript types
         run: |
+          cd front
           # Comparer le fichier généré avec l'existant
           if [ -f src/api/schema.d.ts ]; then
             if ! diff src/api/schema.d.ts /tmp/schema_new.d.ts; then

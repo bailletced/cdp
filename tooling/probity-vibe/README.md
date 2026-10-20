@@ -27,7 +27,7 @@ Vibe ──post_tool─▶ hook.mjs ──▶ historique de session (JSONL au fo
 ## Tests
 
 ```bash
-npm run test:vibe
+pnpm test:vibe
 ```
 
 36 tests, sans réseau ni clé : traduction des outils (avec des payloads réels de Vibe 2.26.1, chemins anonymisés dans `test/fixtures/`), historique, réponses, validateur Mistral (faux `fetch`), hook contre le **vrai** Probity, et chaîne complète contre la vraie config du dépôt avec un faux serveur Mistral.

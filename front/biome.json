@@ -3,6 +3,7 @@
   "files": {
     "ignore": [
       "dist",
+      ".pnpm-store",
       "src/api/openapi.json",
       "src/api/schema.d.ts",
       "test-results",
