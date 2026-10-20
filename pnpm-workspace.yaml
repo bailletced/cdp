@@ -1,2 +1,7 @@
 packages:
   - 'front'
+
+# Seuls postinstall approuvés — pnpm 12 échoue l'install sinon (ERR_PNPM_IGNORED_BUILDS).
+allowBuilds:
+  '@biomejs/biome': true
+  msw: true

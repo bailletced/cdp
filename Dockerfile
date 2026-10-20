@@ -55,7 +55,8 @@ COPY front/package.json ./front/
 
 # pnpm 12 est installé via npm (binaire natif) : le corepack embarqué dans
 # node:24-alpine ne connaît pas la clé de signature des releases pnpm 12.
-RUN npm install --global pnpm@12.14.0 && pnpm install --frozen-lockfile --config.minimum-release-age=0 --config.dangerously-allow-all-builds=true
+# Les postinstall à exécuter sont approuvés dans pnpm-workspace.yaml (allowBuilds).
+RUN npm install --global pnpm@12.14.0 && pnpm install --frozen-lockfile --config.minimum-release-age=0
 
 COPY front/ ./front/
 
