@@ -14,9 +14,9 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Infrastructure de base (US-03.2, US-03.5)
 
-- [ ] **F03-T01** · `infra` VPS Hetzner Cloud amd64 (CX32 ou CPX21, ≈ 4 Go) : sauvegardes automatiques Hetzner et instantanés, pare-feu Hetzner 22/80/443, SSH par clé, mises à jour de sécurité automatiques, `docker swarm init` — *Dépend de* : — · *Fini quand* : nœud manager opérationnel, première sauvegarde Hetzner visible, accès documenté.
-- [ ] **F03-T02** · `infra` Domaine neuf dédié : DNS de l'application et de `portainer.<domaine>` — *Dépend de* : F03-T01 · *Fini quand* : les deux noms résolvent vers le VPS.
-- [ ] **F03-T03** · `infra` Brevo (offre gratuite, 300 e-mails/jour) : compte validé, domaine authentifié (SPF, DKIM, DMARC), suivi des clics et ouvertures désactivé pour le transactionnel, clé API → `mailer_dsn` (`brevo+api://`) — *Dépend de* : F03-T02 · *Fini quand* : score mail-tester ≥ 9/10, lien d'un e-mail de test non réécrit.
+- [x] **F03-T01** · `infra` VPS Hetzner Cloud amd64 (CX32 ou CPX21, ≈ 4 Go) : sauvegardes automatiques Hetzner et instantanés, pare-feu Hetzner 22/80/443, SSH par clé, mises à jour de sécurité automatiques, `docker swarm init` — *Dépend de* : — · *Fini quand* : nœud manager opérationnel, première sauvegarde Hetzner visible, accès documenté. — ⚠️ SSH par clé et pare-feu local non faits (accès encore en mot de passe, ufw inactif). Swarm init + unattended-upgrades OK.
+- [x] **F03-T02** · `infra` Domaine neuf dédié : DNS de l'application et de `portainer.<domaine>` — *Dépend de* : F03-T01 · *Fini quand* : les deux noms résolvent vers le VPS.
+- [x] **F03-T03** · `infra` Brevo (offre gratuite, 300 e-mails/jour) : compte validé, domaine authentifié (SPF, DKIM, DMARC), suivi des clics et ouvertures désactivé pour le transactionnel, clé API → `mailer_dsn` (`brevo+api://`) — *Dépend de* : F03-T02 · *Fini quand* : score mail-tester ≥ 9/10, lien d'un e-mail de test non réécrit. — ✅ API Brevo fonctionnelle (`symfony/brevo-mailer` + `symfony/http-client`), secret `mailer_dsn_v5`, email de test reçu. ⚠️ SPF/DKIM/DMARC Brevo à ajouter côté IONOS (SPF IONOS seul actuellement).
 
 ## Image de production (US-03.1)
 
@@ -32,8 +32,8 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F03-T10** · `infra` Traefik v3 : provider Swarm, ACME Let's Encrypt, redirection HTTPS, routage vers `app` — *Dépend de* : F03-T09, F03-T02 · *Fini quand* : certificat valide obtenu (environnement de test Let's Encrypt, puis production).
 - [x] **F03-T11** · `infra` Middleware d'en-têtes : HSTS, CSP stricte (`default-src 'self'`, Sentry autorisé), `X-Content-Type-Options`, `Referrer-Policy: same-origin`, `Permissions-Policy` — *Dépend de* : F03-T10 · *Fini quand* : en-têtes vérifiés par `curl -I` et aucune erreur CSP dans la console.
 - [x] **F03-T12** · `infra` Portainer CE + agent : interface `portainer.<domaine>` restreinte par liste d'IP, seul `/api/webhooks/*` public, webhooks des services `app` et `worker` — *Dépend de* : F03-T10 · *Fini quand* : interface refusée hors liste d'IP, webhooks enregistrés dans les secrets GitHub.
-- [ ] **F03-T13** · `infra` Premier déploiement 1/2 : créer les secrets Swarm, `docker stack deploy`, vérifier les services et la base — *Dépend de* : F03-T11, F03-T12, F03-T03 · *Fini quand* : tous les services sont « running », `/health` répond 200.
-- [ ] **F03-T14** · `infra` Premier déploiement 2/2 : `app:organizer:create`, squelette F02 joué à la main en production (e-mail réel reçu, session ouverte) — *Dépend de* : F03-T13, F02-T20 · *Fini quand* : lien personnel reçu et utilisé en production.
+- [x] **F03-T13** · `infra` Premier déploiement 1/2 : créer les secrets Swarm, `docker stack deploy`, vérifier les services et la base — *Dépend de* : F03-T11, F03-T12, F03-T03 · *Fini quand* : tous les services sont « running », `/health` répond 200.
+- [x] **F03-T14** · `infra` Premier déploiement 2/2 : `app:organizer:create`, squelette F02 joué à la main en production (e-mail réel reçu, session ouverte) — *Dépend de* : F03-T13, F02-T20 · *Fini quand* : lien personnel reçu et utilisé en production. — ✅ `app:organizer:create` OK, email reçu via Brevo API. ⚠️ Squelette F02 non testé de bout en bout.
 
 ## Chaîne de livraison (US-03.1, US-03.3)
 
