@@ -9,14 +9,18 @@ use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
 use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\Repository\TextRepositoryInterface;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
+use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -33,6 +37,16 @@ return static function (ContainerConfigurator $container): void {
         ->alias(EditionRepositoryInterface::class, DoctrineEditionRepository::class);
 
     $services->set(InMemoryEditionRepository::class)
+        ->tag('app.in_memory_repository');
+
+    $services->set(DoctrineTextRepository::class)
+        ->args([
+            new Reference('doctrine'),
+            Text::class,
+        ])
+        ->alias(TextRepositoryInterface::class, DoctrineTextRepository::class);
+
+    $services->set(InMemoryTextRepository::class)
         ->tag('app.in_memory_repository');
 
     $services->set(SymfonyHtmlSanitizer::class)
