@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Chain\Application\CreateEditionHandler;
 use App\Chain\Application\CreateTextHandler;
+use App\Chain\Application\DeleteTextHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\ScheduleEditionHandler;
@@ -77,6 +78,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(UpdateTextHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(DeleteTextHandler::class)
         ->autoconfigure()
         ->autowire();
 

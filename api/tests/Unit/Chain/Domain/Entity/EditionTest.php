@@ -200,4 +200,58 @@ final class EditionTest extends TestCase
         self::assertCount(48, $edition->getSlots());
         self::assertSame('2026-11-28 20:00:00', $edition->getSlots()[0]->getStartsAt()->format('Y-m-d H:i:s'));
     }
+
+    public function testHasTextAttributedReturnsTrueWhenASlotCarriesTheText(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $textId = new \App\Chain\Domain\ValueObject\TextId();
+
+        $edition->getSlots()[0]->setTextId($textId->value);
+
+        self::assertTrue($edition->hasTextAttributed($textId));
+    }
+
+    public function testHasTextAttributedReturnsFalseWhenNoSlotCarriesTheText(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        self::assertFalse($edition->hasTextAttributed(new \App\Chain\Domain\ValueObject\TextId()));
+    }
+
+    public function testRemoveTextAttributionsClearsOnlyMatchingSlots(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $textId = new \App\Chain\Domain\ValueObject\TextId();
+        $otherTextId = new \App\Chain\Domain\ValueObject\TextId();
+        $slots = $edition->getSlots();
+        $slots[0]->setTextId($textId->value);
+        $slots[1]->setTextId($textId->value);
+        $slots[2]->setTextId($otherTextId->value);
+
+        $edition->removeTextAttributions($textId);
+
+        self::assertNull($slots[0]->getTextId());
+        self::assertNull($slots[1]->getTextId());
+        self::assertSame($otherTextId->value, $slots[2]->getTextId());
+        self::assertFalse($edition->hasTextAttributed($textId));
+        self::assertTrue($edition->hasTextAttributed($otherTextId));
+    }
 }

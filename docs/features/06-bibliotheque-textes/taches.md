@@ -21,7 +21,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Cas d'usage (US-06.1 à US-06.3)
 
 - [x] **F06-T05** · `back` Commandes `CreateText` et `UpdateText` (nettoyage via le port avant construction du `RichText`) + tests fonctionnels — *Dépend de* : F06-T01, F06-T03 · *Fini quand* : corps vide après nettoyage → exception de validation.
-- [ ] **F06-T06** · `back` Commande `DeleteText` : refus si attribué à une édition programmée (RG-TX-3), sinon retrait des attributions en brouillon + tests — *Dépend de* : F06-T05, F05-T10 · *Fini quand* : les deux cas testés.
+- [x] **F06-T06** · `back` Commande `DeleteText` : refus si attribué à une édition programmée (RG-TX-3), sinon retrait des attributions en brouillon + tests — *Dépend de* : F06-T05, F05-T10 · *Fini quand* : les deux cas testés.
 
 ## API d'administration (US-06.4)
 

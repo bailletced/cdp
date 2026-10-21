@@ -9,6 +9,7 @@ use App\Chain\Domain\Event\EditionUnscheduled;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
+use App\Chain\Domain\ValueObject\TextId;
 use App\Shared\Domain\Time\ParisCalendar;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -226,6 +227,33 @@ class Edition
         $this->startsAt = $newStartsAt;
         $this->opensAt = $newOpensAt;
         $this->generateSlots($calendar);
+    }
+
+    /**
+     * Whether one of the slots carries the given text (RG-TX-3).
+     */
+    public function hasTextAttributed(TextId $textId): bool
+    {
+        foreach ($this->slots as $slot) {
+            if ($slot->getTextId()?->equals($textId->value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Withdraw the attributions of the given text from every slot (RG-TX-3,
+     * draft editions only — the DeleteText command refuses otherwise).
+     */
+    public function removeTextAttributions(TextId $textId): void
+    {
+        foreach ($this->slots as $slot) {
+            if ($slot->getTextId()?->equals($textId->value)) {
+                $slot->setTextId(null);
+            }
+        }
     }
 
     /**
