@@ -117,6 +117,16 @@ const organisationEditionEditRoute = createRoute({
   component: EditionEditPage,
 });
 
+// Edition detail (F05-T21): lazy-loaded with the back-office section
+const organisationEditionDetailRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/editions/$editionId",
+  component: lazyRouteComponent(
+    () => import("./pages/EditionDetailPage"),
+    "EditionDetailPage",
+  ),
+});
+
 // Define the routes
 export const routeTree = Root.addChildren([
   receiveMyLinkRoute,
@@ -129,6 +139,7 @@ export const routeTree = Root.addChildren([
     organisationEditionsRoute,
     organisationEditionNewRoute,
     organisationEditionEditRoute,
+    organisationEditionDetailRoute,
   ]),
 ]);
 

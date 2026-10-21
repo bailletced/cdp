@@ -75,6 +75,13 @@ describe("EditionsPage", () => {
     expect(
       await screen.findByText("24 heures de prière — novembre 2026"),
     ).toBeInTheDocument();
+    // Each row links to the edition detail (F05-T21)
+    expect(
+      screen.getByRole("link", { name: "24 heures de prière — novembre 2026" }),
+    ).toHaveAttribute(
+      "href",
+      "/organisation/editions/11111111-1111-1111-1111-111111111111",
+    );
     expect(
       screen.getByText("24 heures de prière — décembre 2026"),
     ).toBeInTheDocument();

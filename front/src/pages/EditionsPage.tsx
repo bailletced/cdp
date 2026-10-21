@@ -41,7 +41,19 @@ export function EditionsPage() {
               className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border px-4 py-3"
             >
               <div>
-                <p className="font-medium">{edition.title}</p>
+                <p className="font-medium">
+                  {edition.id ? (
+                    <Link
+                      to="/organisation/editions/$editionId"
+                      params={{ editionId: edition.id }}
+                      className="text-link underline underline-offset-4"
+                    >
+                      {edition.title}
+                    </Link>
+                  ) : (
+                    edition.title
+                  )}
+                </p>
                 <p className="text-muted">
                   Début : {formatParisDateTime(edition.startsAt)} (heure de
                   Paris)
