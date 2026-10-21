@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Chain\Infrastructure\ApiPlatform;
+namespace App\Chain\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
@@ -10,15 +10,16 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Chain\Application\ScheduleEdition;
 use App\Chain\Application\UnscheduleEdition;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Infrastructure\ApiPlatform\Resource\AdminEditionResource;
 use App\Shared\Application\Command\CommandBusInterface;
 
 /**
- * Processes schedule/unschedule operations on AdminEdition (F05-T16).
+ * Processes schedule/unschedule operations on AdminEditionResource (F05-T16).
  *
  * POST /api/admin/editions/{id}/schedule   → ScheduleEdition
  * POST /api/admin/editions/{id}/unschedule → UnscheduleEdition
  *
- * @implements ProcessorInterface<AdminEdition, AdminEdition>
+ * @implements ProcessorInterface<AdminEditionResource, AdminEditionResource>
  */
 final readonly class AdminEditionScheduleProcessor implements ProcessorInterface
 {
@@ -31,7 +32,7 @@ final readonly class AdminEditionScheduleProcessor implements ProcessorInterface
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): AdminEdition
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): AdminEditionResource
     {
         if (!isset($uriVariables['id']) || !\is_string($uriVariables['id'])) {
             throw new \LogicException('Missing edition identifier in URI variables.');
@@ -48,6 +49,6 @@ final readonly class AdminEditionScheduleProcessor implements ProcessorInterface
             $this->commandBus->dispatch(new UnscheduleEdition($editionId));
         }
 
-        return new AdminEdition(id: (string) $editionId);
+        return new AdminEditionResource(id: (string) $editionId);
     }
 }

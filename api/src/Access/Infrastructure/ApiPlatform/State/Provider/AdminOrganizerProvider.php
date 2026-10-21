@@ -2,17 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Access\Infrastructure\ApiPlatform;
+namespace App\Access\Infrastructure\ApiPlatform\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Access\Application\Dto\OrganizerView;
 use App\Access\Application\Query\OrganizerViewFinder;
+use App\Access\Infrastructure\ApiPlatform\Resource\AdminOrganizerResource;
 use App\Shared\Infrastructure\ApiPlatform\Exception\MissingModelException;
 
 /**
- * Provides AdminOrganizer resources from the OrganizerViewFinder (F04-T02).
+ * Provides AdminOrganizerResource resources from the OrganizerViewFinder (F04-T02).
  *
- * @implements ProviderInterface<AdminOrganizer>
+ * @implements ProviderInterface<AdminOrganizerResource>
  */
 final readonly class AdminOrganizerProvider implements ProviderInterface
 {
@@ -25,14 +27,14 @@ final readonly class AdminOrganizerProvider implements ProviderInterface
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      *
-     * @return AdminOrganizer|array<AdminOrganizer>
+     * @return AdminOrganizerResource|array<AdminOrganizerResource>
      */
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): AdminOrganizer|array
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): AdminOrganizerResource|array
     {
         // Collection (GET /api/admin/organizers)
         if (!isset($uriVariables['id'])) {
             return array_map(
-                fn (\App\Access\Application\Dto\OrganizerView $view): AdminOrganizer => $this->toResource($view),
+                fn (OrganizerView $view): AdminOrganizerResource => $this->toResource($view),
                 $this->finder->findAll(),
             );
         }
@@ -50,9 +52,9 @@ final readonly class AdminOrganizerProvider implements ProviderInterface
         return $this->toResource($view);
     }
 
-    private function toResource(\App\Access\Application\Dto\OrganizerView $view): AdminOrganizer
+    private function toResource(OrganizerView $view): AdminOrganizerResource
     {
-        return new AdminOrganizer(
+        return new AdminOrganizerResource(
             id: $view->id,
             email: $view->email,
             addedByEmail: $view->addedByEmail,

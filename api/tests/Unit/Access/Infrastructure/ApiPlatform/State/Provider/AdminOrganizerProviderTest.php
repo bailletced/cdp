@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Access\Infrastructure\ApiPlatform;
+namespace App\Tests\Unit\Access\Infrastructure\ApiPlatform\State\Provider;
 
-use App\Access\Infrastructure\ApiPlatform\AdminOrganizerProcessor;
-use App\Access\Infrastructure\ApiPlatform\AdminOrganizerProvider;
+use App\Access\Infrastructure\ApiPlatform\State\Processor\AdminOrganizerProcessor;
+use App\Access\Infrastructure\ApiPlatform\State\Provider\AdminOrganizerProvider;
 use PHPUnit\Framework\TestCase;
 
 final class AdminOrganizerProviderTest extends TestCase

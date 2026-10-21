@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform;
+namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform\Resource;
 
-use App\Chain\Infrastructure\ApiPlatform\AdminEdition;
+use App\Chain\Infrastructure\ApiPlatform\Resource\AdminEditionResource;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
 
-final class AdminEditionTest extends TestCase
+final class AdminEditionResourceTest extends TestCase
 {
     public function testItCanBeInstantiated(): void
     {
-        $edition = new AdminEdition(
+        $edition = new AdminEditionResource(
             id: 'abc',
             title: '24 heures',
             presentation: '',
@@ -37,7 +37,7 @@ final class AdminEditionTest extends TestCase
     {
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
-        $violations = $validator->validate(new AdminEdition(title: 'ab'));
+        $violations = $validator->validate(new AdminEditionResource(title: 'ab'));
 
         self::assertCount(1, $violations);
         self::assertSame('title', $violations[0]->getPropertyPath());
@@ -48,7 +48,7 @@ final class AdminEditionTest extends TestCase
     {
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
-        $violations = $validator->validate(new AdminEdition(presentation: str_repeat('a', 2001)));
+        $violations = $validator->validate(new AdminEditionResource(presentation: str_repeat('a', 2001)));
 
         self::assertCount(1, $violations);
         self::assertSame('presentation', $violations[0]->getPropertyPath());
@@ -59,7 +59,7 @@ final class AdminEditionTest extends TestCase
     {
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
-        $violations = $validator->validate(new AdminEdition(
+        $violations = $validator->validate(new AdminEditionResource(
             title: '24 heures de prière',
             presentation: 'Une chaîne.',
             startsAt: '2026-11-28T20:00:00+01:00',

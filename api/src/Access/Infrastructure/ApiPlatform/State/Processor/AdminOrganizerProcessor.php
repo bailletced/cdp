@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Access\Infrastructure\ApiPlatform;
+namespace App\Access\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
@@ -12,17 +12,18 @@ use App\Access\Application\AddOrganizer;
 use App\Access\Application\AddOrganizerResult;
 use App\Access\Application\Query\OrganizerViewFinder;
 use App\Access\Application\RemoveOrganizer;
+use App\Access\Infrastructure\ApiPlatform\Resource\AdminOrganizerResource;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Email;
 use InvalidArgumentException;
 
 /**
- * Processes write operations on AdminOrganizer (F04-T02).
+ * Processes write operations on AdminOrganizerResource (F04-T02).
  *
  * - POST   → dispatches AddOrganizer, returns the created organizer
  * - DELETE → dispatches RemoveOrganizer with the organizer's email
  *
- * @implements ProcessorInterface<AdminOrganizer, AdminOrganizer|null>
+ * @implements ProcessorInterface<AdminOrganizerResource, AdminOrganizerResource|null>
  */
 final readonly class AdminOrganizerProcessor implements ProcessorInterface
 {
@@ -36,7 +37,7 @@ final readonly class AdminOrganizerProcessor implements ProcessorInterface
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?AdminOrganizer
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?AdminOrganizerResource
     {
         if ($operation instanceof Post) {
             return $this->handlePost($data);
@@ -48,7 +49,7 @@ final readonly class AdminOrganizerProcessor implements ProcessorInterface
         return null;
     }
 
-    private function handlePost(AdminOrganizer $data): AdminOrganizer
+    private function handlePost(AdminOrganizerResource $data): AdminOrganizerResource
     {
         if (null === $data->email || '' === trim($data->email)) {
             throw new InvalidArgumentException("L'adresse e-mail est requise.");
@@ -66,7 +67,7 @@ final readonly class AdminOrganizerProcessor implements ProcessorInterface
             throw new \LogicException(\sprintf('Organizer "%s" was created but could not be found afterwards.', $data->email));
         }
 
-        return new AdminOrganizer(
+        return new AdminOrganizerResource(
             id: $view->id,
             email: $view->email,
             addedByEmail: $view->addedByEmail,
@@ -74,7 +75,7 @@ final readonly class AdminOrganizerProcessor implements ProcessorInterface
         );
     }
 
-    private function handleDelete(AdminOrganizer $data): void
+    private function handleDelete(AdminOrganizerResource $data): void
     {
         if (null === $data->email) {
             throw new \LogicException('Cannot delete an organizer without an email.');

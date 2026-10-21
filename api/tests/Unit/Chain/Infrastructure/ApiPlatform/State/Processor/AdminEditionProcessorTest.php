@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform;
+namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
@@ -13,8 +13,8 @@ use App\Chain\Application\UpdateEdition;
 use App\Chain\Domain\Exception\EditionNotFoundException;
 use App\Chain\Domain\Exception\EditionVersionConflictException;
 use App\Chain\Domain\ValueObject\EditionId;
-use App\Chain\Infrastructure\ApiPlatform\AdminEdition;
-use App\Chain\Infrastructure\ApiPlatform\AdminEditionProcessor;
+use App\Chain\Infrastructure\ApiPlatform\Resource\AdminEditionResource;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Command\CommandInterface;
 use PHPUnit\Framework\TestCase;
@@ -40,7 +40,7 @@ final class AdminEditionProcessorTest extends TestCase
 
         $processor = new AdminEditionProcessor($commandBus);
 
-        $data = new AdminEdition(
+        $data = new AdminEditionResource(
             title: '24 heures de prière',
             presentation: 'Une chaîne.',
             startsAt: '2026-11-28T20:00:00+01:00',
@@ -50,7 +50,7 @@ final class AdminEditionProcessorTest extends TestCase
         $operation = new Post();
         $result = $processor->process($data, $operation, [], []);
 
-        self::assertInstanceOf(AdminEdition::class, $result);
+        self::assertInstanceOf(AdminEditionResource::class, $result);
         self::assertInstanceOf(CreateEdition::class, $commandBus->lastCommand);
         self::assertSame('24 heures de prière', $commandBus->lastCommand->title->value);
         self::assertSame('2026-11-28T19:00:00+00:00', $result->resolvedStartsAtUtc);
@@ -75,7 +75,7 @@ final class AdminEditionProcessorTest extends TestCase
         $processor = new AdminEditionProcessor($commandBus);
         $editionId = new EditionId();
 
-        $data = new AdminEdition(
+        $data = new AdminEditionResource(
             title: 'Titre modifié',
             startsAt: '2026-11-28T20:00:00+01:00',
             opensAt: '2026-11-13T20:00:00+01:00',
@@ -101,7 +101,7 @@ final class AdminEditionProcessorTest extends TestCase
 
         $processor = new AdminEditionProcessor($commandBus);
 
-        $data = new AdminEdition(
+        $data = new AdminEditionResource(
             title: 'Titre modifié',
             startsAt: '2026-11-28T20:00:00+01:00',
             opensAt: '2026-11-13T20:00:00+01:00',
@@ -124,7 +124,7 @@ final class AdminEditionProcessorTest extends TestCase
 
         $processor = new AdminEditionProcessor($commandBus);
 
-        $data = new AdminEdition(
+        $data = new AdminEditionResource(
             title: 'Titre modifié',
             startsAt: '2026-11-28T20:00:00+01:00',
             opensAt: '2026-11-13T20:00:00+01:00',
@@ -141,7 +141,7 @@ final class AdminEditionProcessorTest extends TestCase
         $processor = self::processorReturningCreateResult();
 
         try {
-            $processor->process(new AdminEdition(
+            $processor->process(new AdminEditionResource(
                 title: 'ab',
                 startsAt: '2026-11-28T20:00:00+01:00',
                 opensAt: '2026-11-13T20:00:00+01:00',
@@ -160,7 +160,7 @@ final class AdminEditionProcessorTest extends TestCase
         $processor = self::processorReturningCreateResult();
 
         try {
-            $processor->process(new AdminEdition(
+            $processor->process(new AdminEditionResource(
                 startsAt: '2026-11-28T20:00:00+01:00',
                 opensAt: '2026-11-13T20:00:00+01:00',
             ), new Post(), [], []);
@@ -175,7 +175,7 @@ final class AdminEditionProcessorTest extends TestCase
         $processor = self::processorReturningCreateResult();
 
         try {
-            $processor->process(new AdminEdition(
+            $processor->process(new AdminEditionResource(
                 title: '24 heures de prière',
                 startsAt: '2026-11-28T20:15:00+01:00',
                 opensAt: '2026-11-13T20:00:00+01:00',
@@ -194,7 +194,7 @@ final class AdminEditionProcessorTest extends TestCase
         $processor = self::processorReturningCreateResult();
 
         try {
-            $processor->process(new AdminEdition(
+            $processor->process(new AdminEditionResource(
                 title: '24 heures de prière',
                 startsAt: 'pas-une-date',
                 opensAt: '2026-11-13T20:00:00+01:00',
@@ -213,7 +213,7 @@ final class AdminEditionProcessorTest extends TestCase
         $processor = self::processorReturningCreateResult();
 
         try {
-            $processor->process(new AdminEdition(
+            $processor->process(new AdminEditionResource(
                 title: '24 heures de prière',
                 startsAt: '2026-11-28T20:00:00+01:00',
                 opensAt: '2026-11-28T21:00:00+01:00',
@@ -241,7 +241,7 @@ final class AdminEditionProcessorTest extends TestCase
         $processor = new AdminEditionProcessor($commandBus);
 
         try {
-            $processor->process(new AdminEdition(
+            $processor->process(new AdminEditionResource(
                 title: 'Titre modifié',
                 startsAt: '2026-11-28T20:00:00+01:00',
                 opensAt: '2026-11-28T21:00:00+01:00',

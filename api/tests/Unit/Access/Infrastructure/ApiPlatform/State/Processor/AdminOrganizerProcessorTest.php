@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Access\Infrastructure\ApiPlatform;
+namespace App\Tests\Unit\Access\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use App\Access\Application\Query\OrganizerViewFinder;
 use App\Access\Domain\Exception\LastOrganizerException;
-use App\Access\Infrastructure\ApiPlatform\AdminOrganizer;
-use App\Access\Infrastructure\ApiPlatform\AdminOrganizerProcessor;
+use App\Access\Infrastructure\ApiPlatform\Resource\AdminOrganizerResource;
+use App\Access\Infrastructure\ApiPlatform\State\Processor\AdminOrganizerProcessor;
 use App\Shared\Application\Command\CommandBusInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -28,7 +28,7 @@ final class AdminOrganizerProcessorTest extends TestCase
 
         $processor = new AdminOrganizerProcessor($commandBus, $finder);
 
-        $data = new AdminOrganizer(id: 'id-1', email: 'anne@bailletced.org');
+        $data = new AdminOrganizerResource(id: 'id-1', email: 'anne@bailletced.org');
         $operation = $this->createStub(Operation::class);
 
         $this->expectException(LastOrganizerException::class);

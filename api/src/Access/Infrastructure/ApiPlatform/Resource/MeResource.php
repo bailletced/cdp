@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Access\Infrastructure\ApiPlatform;
+namespace App\Access\Infrastructure\ApiPlatform\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use App\Access\Infrastructure\ApiPlatform\State\Provider\MeProvider;
 
 /**
  * Minimal representation of the currently authenticated account (F02-T16).
@@ -20,7 +21,7 @@ use ApiPlatform\Metadata\Get;
         ),
     ],
 )]
-final class Me
+final class MeResource
 {
     public function __construct(
         public readonly string $email,

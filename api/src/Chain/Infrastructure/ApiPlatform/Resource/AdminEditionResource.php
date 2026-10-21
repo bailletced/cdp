@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Chain\Infrastructure\ApiPlatform;
+namespace App\Chain\Infrastructure\ApiPlatform\Resource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
@@ -12,6 +12,9 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
 
 /**
@@ -58,7 +61,7 @@ use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
         ),
     ],
 )]
-final class AdminEdition
+final class AdminEditionResource
 {
     /**
      * @param array<array{rank: int, startsAt: string, endsAt: string, label: string, partOfDay: string, textId: string|null}>|null $slots

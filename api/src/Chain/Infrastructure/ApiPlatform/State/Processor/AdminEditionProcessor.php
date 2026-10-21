@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Chain\Infrastructure\ApiPlatform;
+namespace App\Chain\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Patch;
@@ -16,19 +16,20 @@ use App\Chain\Application\UpdateEditionResult;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
+use App\Chain\Infrastructure\ApiPlatform\Resource\AdminEditionResource;
 use App\Shared\Application\Command\CommandBusInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 
 /**
- * Processes AdminEdition resources for POST (create) and PATCH (update) operations.
+ * Processes AdminEditionResource resources for POST (create) and PATCH (update) operations.
  *
  * Invalid payloads answer 422 with one violation per offending property:
  * a value object rejection is mapped to its property, and the date rules
  * (parseable, on the full or half hour, opening before start) are checked
  * before the command is dispatched.
  *
- * @implements ProcessorInterface<AdminEdition, AdminEdition>
+ * @implements ProcessorInterface<AdminEditionResource, AdminEditionResource>
  */
 final readonly class AdminEditionProcessor implements ProcessorInterface
 {
@@ -41,7 +42,7 @@ final readonly class AdminEditionProcessor implements ProcessorInterface
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): AdminEdition
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): AdminEditionResource
     {
         if ($operation instanceof Post) {
             return $this->handleCreate($data);
@@ -54,7 +55,7 @@ final readonly class AdminEditionProcessor implements ProcessorInterface
         throw new \LogicException(\sprintf('Unsupported operation %s.', $operation::class));
     }
 
-    private function handleCreate(AdminEdition $data): AdminEdition
+    private function handleCreate(AdminEditionResource $data): AdminEditionResource
     {
         [$startsAt, $opensAt] = $this->parseParisDates($data->startsAt, $data->opensAt);
 
@@ -69,7 +70,7 @@ final readonly class AdminEditionProcessor implements ProcessorInterface
             throw new \LogicException(\sprintf('Expected the command bus to return an %s, got %s.', CreateEditionResult::class, get_debug_type($result)));
         }
 
-        return new AdminEdition(
+        return new AdminEditionResource(
             id: (string) $result->editionId,
             title: $data->title,
             presentation: $data->presentation,
@@ -86,7 +87,7 @@ final readonly class AdminEditionProcessor implements ProcessorInterface
     /**
      * @param array<string, mixed> $uriVariables
      */
-    private function handleUpdate(AdminEdition $data, array $uriVariables): AdminEdition
+    private function handleUpdate(AdminEditionResource $data, array $uriVariables): AdminEditionResource
     {
         if (!isset($uriVariables['id']) || !\is_string($uriVariables['id'])) {
             throw new \LogicException('Missing edition identifier in URI variables.');
@@ -110,7 +111,7 @@ final readonly class AdminEditionProcessor implements ProcessorInterface
             throw new \LogicException(\sprintf('Expected the command bus to return an %s, got %s.', UpdateEditionResult::class, get_debug_type($result)));
         }
 
-        return new AdminEdition(
+        return new AdminEditionResource(
             id: (string) $editionId,
             title: $data->title,
             presentation: $data->presentation,

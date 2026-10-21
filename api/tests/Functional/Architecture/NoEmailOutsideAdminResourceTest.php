@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
-use App\Access\Infrastructure\ApiPlatform\Me;
+use App\Access\Infrastructure\ApiPlatform\Resource\MeResource;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -20,7 +20,7 @@ use Symfony\Component\Routing\RouterInterface;
  * serialize an email address. Emails are back-office data (the organizers
  * list); exposing one outside the admin API is a privacy regression.
  *
- * The only allowed exception is Me (GET /api/me, F02-T16), which exposes the
+ * The only allowed exception is MeResource (GET /api/me, F02-T16), which exposes the
  * currently authenticated account's own email back to that same account.
  *
  * Whether an operation is "admin" is decided from its exposed route path
@@ -34,7 +34,7 @@ final class NoEmailOutsideAdminResourceTest extends KernelTestCase
     private const ADMIN_PATH_PREFIX = '/api/admin';
 
     /** @var list<class-string> Resources allowed to serialize an email outside /api/admin. */
-    private const EMAIL_ALLOWED_RESOURCES = [Me::class];
+    private const EMAIL_ALLOWED_RESOURCES = [MeResource::class];
 
     public function testNoResourceOutsideAdminSerializesAnEmail(): void
     {

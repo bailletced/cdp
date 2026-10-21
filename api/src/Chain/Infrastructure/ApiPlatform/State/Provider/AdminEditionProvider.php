@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Chain\Infrastructure\ApiPlatform;
+namespace App\Chain\Infrastructure\ApiPlatform\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\ArrayPaginator;
@@ -11,11 +11,12 @@ use App\Chain\Application\Dto\AdminEditionView;
 use App\Chain\Application\Dto\AdminSlotView;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Infrastructure\ApiPlatform\Resource\AdminEditionResource;
 
 /**
- * Provides AdminEdition resources for GET collection and GET item operations.
+ * Provides AdminEditionResource resources for GET collection and GET item operations.
  *
- * @implements ProviderInterface<AdminEdition>
+ * @implements ProviderInterface<AdminEditionResource>
  */
 final readonly class AdminEditionProvider implements ProviderInterface
 {
@@ -28,7 +29,7 @@ final readonly class AdminEditionProvider implements ProviderInterface
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      */
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): AdminEdition|ArrayPaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): AdminEditionResource|ArrayPaginator|null
     {
         if (isset($uriVariables['id']) && \is_string($uriVariables['id'])) {
             $view = $this->finder->findOne(new EditionId($uriVariables['id']));
@@ -41,14 +42,14 @@ final readonly class AdminEditionProvider implements ProviderInterface
         }
 
         $views = $this->finder->findAll();
-        $resources = array_map(fn (AdminEditionView $view): AdminEdition => $this->toResource($view), $views);
+        $resources = array_map(fn (AdminEditionView $view): AdminEditionResource => $this->toResource($view), $views);
 
         return new ArrayPaginator($resources, 0, \count($resources));
     }
 
-    private function toResource(AdminEditionView $view): AdminEdition
+    private function toResource(AdminEditionView $view): AdminEditionResource
     {
-        return new AdminEdition(
+        return new AdminEditionResource(
             id: $view->id,
             title: $view->title,
             presentation: $view->presentation,

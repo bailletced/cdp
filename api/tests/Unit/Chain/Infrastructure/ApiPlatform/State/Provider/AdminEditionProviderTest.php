@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform;
+namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\PaginatorInterface;
@@ -10,7 +10,7 @@ use App\Chain\Application\Dto\AdminEditionView;
 use App\Chain\Application\Dto\AdminSlotView;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Domain\ValueObject\EditionId;
-use App\Chain\Infrastructure\ApiPlatform\AdminEditionProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use PHPUnit\Framework\TestCase;
 
 final class AdminEditionProviderTest extends TestCase

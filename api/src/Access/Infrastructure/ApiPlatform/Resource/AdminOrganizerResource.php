@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Access\Infrastructure\ApiPlatform;
+namespace App\Access\Infrastructure\ApiPlatform\Resource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Access\Infrastructure\ApiPlatform\State\Processor\AdminOrganizerProcessor;
+use App\Access\Infrastructure\ApiPlatform\State\Provider\AdminOrganizerProvider;
 
 /**
  * Admin resource for managing organizers (F04-T02).
@@ -40,7 +42,7 @@ use ApiPlatform\Metadata\Post;
         ),
     ],
 )]
-final class AdminOrganizer
+final class AdminOrganizerResource
 {
     public function __construct(
         #[ApiProperty(identifier: true)]

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform;
+namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Post;
 use App\Chain\Application\ScheduleEdition;
 use App\Chain\Application\UnscheduleEdition;
 use App\Chain\Domain\Exception\EditionNotFoundException;
 use App\Chain\Domain\ValueObject\EditionId;
-use App\Chain\Infrastructure\ApiPlatform\AdminEdition;
-use App\Chain\Infrastructure\ApiPlatform\AdminEditionScheduleProcessor;
+use App\Chain\Infrastructure\ApiPlatform\Resource\AdminEditionResource;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Command\CommandInterface;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +34,7 @@ final class AdminEditionScheduleProcessorTest extends TestCase
         $editionId = new EditionId();
 
         $result = $processor->process(
-            new AdminEdition(),
+            new AdminEditionResource(),
             new Post(uriTemplate: '/admin/editions/{id}/schedule'),
             ['id' => (string) $editionId],
             [],
@@ -62,7 +62,7 @@ final class AdminEditionScheduleProcessorTest extends TestCase
         $editionId = new EditionId();
 
         $processor->process(
-            new AdminEdition(),
+            new AdminEditionResource(),
             new Post(uriTemplate: '/admin/editions/{id}/unschedule'),
             ['id' => (string) $editionId],
             [],
@@ -86,7 +86,7 @@ final class AdminEditionScheduleProcessorTest extends TestCase
         $this->expectException(EditionNotFoundException::class);
 
         $processor->process(
-            new AdminEdition(),
+            new AdminEditionResource(),
             new Post(uriTemplate: '/admin/editions/{id}/schedule'),
             ['id' => (string) new EditionId()],
             [],
