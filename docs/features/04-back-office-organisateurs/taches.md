@@ -13,7 +13,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Gestion des organisateurs — back (US-04.1, US-04.2)
 
-- [ ] **F04-T01** · `back` Commandes `AddOrganizer` (crée l'`Account` si besoin) et `RemoveOrganizer` (refus s'il ne reste qu'un organisateur) + tests fonctionnels InMemory — *Dépend de* : F02-T03 · *Fini quand* : règle « au moins un » testée, ajout idempotent.
+- [x] **F04-T01** · `back` Commandes `AddOrganizer` (crée l'`Account` si besoin) et `RemoveOrganizer` (refus s'il ne reste qu'un organisateur) + tests fonctionnels InMemory — *Dépend de* : F02-T03 · *Fini quand* : règle « au moins un » testée, ajout idempotent.
 - [ ] **F04-T02** · `back` `OrganizerViewFinder` + ressource `/api/admin/organizers` (GET, POST, DELETE) ; `access_control` `/api/admin/*` réservé à `ROLE_ORGANIZER` + tests d'acceptation (visiteur 401, priant 403, organisateur 200) — *Dépend de* : F04-T01, F02-T12 · *Fini quand* : OpenAPI régénéré, tests par profil verts.
 - [ ] **F04-T03** · `back` Test de non-régression : aucune ressource hors `/api/admin` ne sérialise un e-mail (test d'architecture sur les ressources) ; retrait effectif à la requête suivante — *Dépend de* : F04-T02 · *Fini quand* : un champ `email` ajouté hors admin fait échouer le test.
 
