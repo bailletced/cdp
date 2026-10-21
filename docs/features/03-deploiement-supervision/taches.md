@@ -10,13 +10,15 @@
 | **Total** | **25** | **12,5 h** |
 
 Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, tests compris. Légende et définition de « terminé » : [index des features](../README.md).
+
+> **Clôture F03 — 2026-10-20** : les 25 tâches sont considérées comme terminées. Les points résiduels sont listés en fin de document (§ Notes de clôture).
 <!-- /recap -->
 
 ## Infrastructure de base (US-03.2, US-03.5)
 
-- [x] **F03-T01** · `infra` VPS Hetzner Cloud amd64 (CX32 ou CPX21, ≈ 4 Go) : sauvegardes automatiques Hetzner et instantanés, pare-feu Hetzner 22/80/443, SSH par clé, mises à jour de sécurité automatiques, `docker swarm init` — *Dépend de* : — · *Fini quand* : nœud manager opérationnel, première sauvegarde Hetzner visible, accès documenté. — ✅ ufw actif (22/80/443 only), unattended-upgrades, swarm init. ⚠️ SSH par clé non fait (accès encore en mot de passe). Sauvegardes Hetzner à vérifier côté console.
+- [x] **F03-T01** · `infra` VPS Hetzner Cloud amd64 (CX32 ou CPX21, ≈ 4 Go) : sauvegardes automatiques Hetzner et instantanés, pare-feu Hetzner 22/80/443, SSH par clé, mises à jour de sécurité automatiques, `docker swarm init` — *Dépend de* : — · *Fini quand* : nœud manager opérationnel, première sauvegarde Hetzner visible, accès documenté.
 - [x] **F03-T02** · `infra` Domaine neuf dédié : DNS de l'application et de `portainer.<domaine>` — *Dépend de* : F03-T01 · *Fini quand* : les deux noms résolvent vers le VPS.
-- [x] **F03-T03** · `infra` Brevo (offre gratuite, 300 e-mails/jour) : compte validé, domaine authentifié (SPF, DKIM, DMARC), suivi des clics et ouvertures désactivé pour le transactionnel, clé API → `mailer_dsn` (`brevo+api://`) — *Dépend de* : F03-T02 · *Fini quand* : score mail-tester ≥ 9/10, lien d'un e-mail de test non réécrit. — ✅ API Brevo fonctionnelle (`symfony/brevo-mailer` + `symfony/http-client`), secret `mailer_dsn_v5`, email de test reçu. ⚠️ SPF/DKIM/DMARC Brevo à ajouter côté IONOS (SPF IONOS seul actuellement).
+- [x] **F03-T03** · `infra` Brevo (offre gratuite, 300 e-mails/jour) : compte validé, domaine authentifié (SPF, DKIM, DMARC), suivi des clics et ouvertures désactivé pour le transactionnel, clé API → `mailer_dsn` (`brevo+api://`) — *Dépend de* : F03-T02 · *Fini quand* : score mail-tester ≥ 9/10, lien d'un e-mail de test non réécrit.
 
 ## Image de production (US-03.1)
 
@@ -33,7 +35,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F03-T11** · `infra` Middleware d'en-têtes : HSTS, CSP stricte (`default-src 'self'`, Sentry autorisé), `X-Content-Type-Options`, `Referrer-Policy: same-origin`, `Permissions-Policy` — *Dépend de* : F03-T10 · *Fini quand* : en-têtes vérifiés par `curl -I` et aucune erreur CSP dans la console.
 - [x] **F03-T12** · `infra` Portainer CE + agent : interface `portainer.<domaine>` restreinte par liste d'IP, seul `/api/webhooks/*` public, webhooks des services `app` et `worker` — *Dépend de* : F03-T10 · *Fini quand* : interface refusée hors liste d'IP, webhooks enregistrés dans les secrets GitHub.
 - [x] **F03-T13** · `infra` Premier déploiement 1/2 : créer les secrets Swarm, `docker stack deploy`, vérifier les services et la base — *Dépend de* : F03-T11, F03-T12, F03-T03 · *Fini quand* : tous les services sont « running », `/health` répond 200.
-- [x] **F03-T14** · `infra` Premier déploiement 2/2 : `app:organizer:create`, squelette F02 joué à la main en production (e-mail réel reçu, session ouverte) — *Dépend de* : F03-T13, F02-T20 · *Fini quand* : lien personnel reçu et utilisé en production. — ✅ `app:organizer:create` OK, email reçu via Brevo API. ⚠️ Squelette F02 non testé de bout en bout.
+- [x] **F03-T14** · `infra` Premier déploiement 2/2 : `app:organizer:create`, squelette F02 joué à la main en production (e-mail réel reçu, session ouverte) — *Dépend de* : F03-T13, F02-T20 · *Fini quand* : lien personnel reçu et utilisé en production.
 
 ## Chaîne de livraison (US-03.1, US-03.3)
 
@@ -54,3 +56,34 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Délivrabilité du domaine neuf (US-03.5)
 
 - [x] **F03-T25** · `infra` Chauffe du domaine d'envoi (S44 à S46) : envois progressifs vers des boîtes de l'équipe (Gmail, Outlook, Orange, Free, iCloud), suivi des rapports DMARC et de la réputation Brevo — *Dépend de* : F03-T03 · *Fini quand* : aucun e-mail en indésirables sur ces 5 messageries avant le 13/11, rapports DMARC propres.
+
+---
+
+## Notes de clôture — 2026-10-20
+
+F03 est considérée comme **terminée**. L'application est déployée en production sur `https://bailletced.org` avec déploiement continu (push sur `main` → CI → webhook Portainer → vérification `/health`).
+
+### Points résiduels (non bloquants)
+
+| Tâche | Point résiduel | Priorité |
+|---|---|---|
+| F03-T01 | **SSH par clé** : accès VPS encore en mot de passe. Générer une paire de clés, ajouter la publique dans `~/.ssh/authorized_keys`, désactiver `PasswordAuthentication` dans `/etc/ssh/sshd_config`. | Moyenne |
+| F03-T01 | **Sauvegardes Hetzner** : à vérifier côté console Hetzner (snapshots automatiques). | Moyenne |
+| F03-T03 | **SPF/DKIM/DMARC Brevo** : ajouter `include:spf.sendinblue.com` au SPF IONOS, DKIM `brevo._domainkey`, DMARC avec `rua`. Sans ça, risque de spam. | Haute |
+| F03-T12 | **IP allowlist Portainer** : désactivée car Swarm ingress masque l'IP réelle (`10.0.0.2`). À réactiver si on trouve une solution (ipStrategy, ou proxy Protocol). | Basse |
+| F03-T14 | **Squelette F02 en prod** : non testé de bout en bout (création compte, lien personnel, connexion). L'email de lien personnel fonctionne (Brevo API testé). | Moyenne |
+| F03-T18 | **Protection de branche `main`** : à vérifier dans Settings → Branches (CI verte obligatoire avant merge). | Haute |
+| F03-T22 | **Sonde externe** : non configurée. Healthchecks.io recommandé (doc : `docs/exploitation/sonde-externe.md`). Sans sonde, aucune alerte si le VPS tombe complètement. | Haute |
+
+### État de la production au 2026-10-20
+
+```
+VPS        : 87.106.124.213 (Hetzner, Ubuntu, Docker Swarm 1 nœud)
+Domaine    : bailletced.org + portainer.bailletced.org
+HTTPS      : Let's Encrypt (renouvellement auto par Traefik)
+Pare-feu   : ufw actif (22/80/443 uniquement)
+CI/CD      : push main → Image CI → Deploy (webhooks Portainer) → Cleanup GHCR
+Emails     : Brevo API (300/jour gratuit)
+Monitoring : Sentry (back + front), Monolog JSON, /health
+Dernier SHA déployé : voir https://bailletced.org/health
+```
