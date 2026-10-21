@@ -19,6 +19,7 @@ use App\Chain\Domain\Repository\TextRepositoryInterface;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
@@ -96,18 +97,19 @@ return static function (ContainerConfigurator $container): void {
     $services->set(InMemoryAdminEditionViewFinder::class)
         ->autowire();
 
-    // Public alias: no service consumes the port yet (the API provider lands
-    // in F06-T08); the integration tests fetch it from the test container.
     $services->set(DoctrineAdminTextViewFinder::class)
         ->autoconfigure()
         ->autowire()
-        ->alias(AdminTextViewFinder::class, DoctrineAdminTextViewFinder::class)
-        ->public();
+        ->alias(AdminTextViewFinder::class, DoctrineAdminTextViewFinder::class);
 
     $services->set(InMemoryAdminTextViewFinder::class)
         ->autowire();
 
     $services->set(AdminEditionProvider::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(AdminTextProvider::class)
         ->autoconfigure()
         ->autowire();
 

@@ -26,7 +26,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## API d'administration (US-06.4)
 
 - [x] **F06-T07** · `back` `AdminTextViewFinder` : liste paginée, recherche titre/source (insensible aux accents), nombre d'attributions + tests d'intégration — *Dépend de* : F06-T04 · *Fini quand* : « therese » trouve « Thérèse » (test).
-- [ ] **F06-T08** · `back` `GET /api/admin/texts` (collection, item) + tests d'acceptation — *Dépend de* : F06-T07, F04-T02 · *Fini quand* : pagination Hydra et JSON Schema validés.
+- [x] **F06-T08** · `back` `GET /api/admin/texts` (collection, item) + tests d'acceptation — *Dépend de* : F06-T07, F04-T02 · *Fini quand* : pagination Hydra et JSON Schema validés.
 - [ ] **F06-T09** · `back` `POST` / `PATCH` / `DELETE /api/admin/texts` : payloads, processors, 422 (corps vide), 409 (suppression refusée) + tests d'acceptation — *Dépend de* : F06-T06, F06-T08 · *Fini quand* : bornes visibles dans l'OpenAPI, codes testés.
 
 ## Écrans (US-06.1 à US-06.4)
