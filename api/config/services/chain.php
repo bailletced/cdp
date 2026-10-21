@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Chain\Application\CreateEditionHandler;
+use App\Chain\Application\CreateTextHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
+use App\Chain\Application\UpdateTextHandler;
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
@@ -67,6 +69,14 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(UnscheduleEditionHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(CreateTextHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(UpdateTextHandler::class)
         ->autoconfigure()
         ->autowire();
 
