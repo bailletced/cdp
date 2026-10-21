@@ -165,6 +165,23 @@ export function isRateLimitError(
 }
 
 /**
+ * Extrait le détail lisible d'un corps d'erreur API Platform
+ * (Error.jsonld : { title, detail, status }) tel que levé par openapi-fetch.
+ */
+export function getApiErrorDetail(error: unknown): string | null {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "detail" in error &&
+    typeof error.detail === "string"
+  ) {
+    return error.detail;
+  }
+
+  return null;
+}
+
+/**
  * Obtient le message d'erreur à afficher à l'utilisateur.
  */
 export function getErrorMessage(error: ApiError): string {

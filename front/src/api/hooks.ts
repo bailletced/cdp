@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./client";
 
 /**
@@ -46,4 +46,78 @@ export function useViewer() {
       : undefined,
     isVisitor: query.isError,
   };
+}
+
+/**
+ * Organizers list (GET /api/admin/organizers, F04-T05).
+ * Reserved to organizers: the /organisation route guard rejects other
+ * profiles before this query ever runs.
+ */
+export const organizersQueryOptions = {
+  queryKey: ["admin", "organizers"],
+  queryFn: async () => {
+    const { data, error } = await apiClient.GET("/api/admin/organizers");
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  },
+} as const;
+
+export function useOrganizers() {
+  return useQuery(organizersQueryOptions);
+}
+
+/**
+ * Adds an organizer by email (POST /api/admin/organizers, F04-T05).
+ * The organizers list is invalidated on success.
+ */
+export function useAddOrganizer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { data, error } = await apiClient.POST("/api/admin/organizers", {
+        body: { email },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: organizersQueryOptions.queryKey,
+      });
+    },
+  });
+}
+
+/**
+ * Removes an organizer (DELETE /api/admin/organizers/{id}, F04-T05).
+ * The organizers list is invalidated on success.
+ */
+export function useRemoveOrganizer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await apiClient.DELETE("/api/admin/organizers/{id}", {
+        params: { path: { id } },
+      });
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: organizersQueryOptions.queryKey,
+      });
+    },
+  });
 }
