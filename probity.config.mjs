@@ -23,6 +23,7 @@ export default defineConfig({
         enforceTdd({
           instructions: (defaults) => `${defaults}\n${projectAddendum}`,
           maxEvents: 20,
+          fastPath: true,
         }),
       ],
     },
