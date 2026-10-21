@@ -277,4 +277,20 @@ final class EditionTest extends TestCase
         self::assertSame(2, $edition->countTextAttributions($textId));
         self::assertSame(1, $edition->countTextAttributions($otherTextId));
     }
+
+    public function testItUpdatesItsTitleAndPresentation(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('Ancien titre'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        $edition->updateDetails(new EditionTitle('Nouveau titre'), new Presentation('Nouvelle présentation'));
+
+        self::assertSame('Nouveau titre', $edition->getTitle()->value);
+        self::assertSame('Nouvelle présentation', $edition->getPresentation()->value);
+    }
 }

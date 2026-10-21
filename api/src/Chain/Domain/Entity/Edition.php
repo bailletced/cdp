@@ -230,6 +230,18 @@ class Edition
     }
 
     /**
+     * Update the edition's title and presentation.
+     *
+     * The aggregate is mutated only through its own methods: application
+     * code must never write its state through reflection.
+     */
+    public function updateDetails(EditionTitle $title, Presentation $presentation): void
+    {
+        $this->title = $title;
+        $this->presentation = $presentation;
+    }
+
+    /**
      * Whether one of the slots carries the given text (RG-TX-3).
      */
     public function hasTextAttributed(TextId $textId): bool

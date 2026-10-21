@@ -339,3 +339,30 @@ default:
 - BC-aligned contexts mirror the domain and are easier to navigate
 - New features add a new context file instead of growing an existing one
 - Shared state is explicit (BehatState) rather than hidden in a monolith
+
+## 11. Reflection
+
+### Rule: No reflection in domain or application code
+
+Reflection (`ReflectionClass`, `ReflectionProperty`, `ReflectionMethod`, `ReflectionFunction`, `ReflectionAttribute`) is **FORBIDDEN** in domain and application code. It is only allowed in infrastructure adapters under `src/Shared/Infrastructure/`, where metadata is inspected to plug into a framework (object mappers, Doctrine mapping drivers, validators).
+
+**Never use reflection to read or modify an object's state.** In particular, never call `ReflectionProperty::setValue()` on an aggregate: an aggregate is mutated exclusively through its own domain methods.
+
+**DO:**
+```php
+// The aggregate exposes a domain method
+$edition->updateDetails($title, $presentation);
+```
+
+**DON'T:**
+```php
+// ❌ Forbidden: mutating an aggregate through reflection
+$reflection = new \ReflectionProperty(Edition::class, 'title');
+$reflection->setValue($edition, $title);
+```
+
+**Why:**
+- Reflection bypasses encapsulation: invariants enforced by the aggregate's methods are silently skipped
+- It couples application code to private property names and breaks on any rename
+- It hides mutations that belong in the domain API
+- Enforced by the architecture test `NoReflectionOutsideInfrastructureTest` (`api/tests/Functional/Architecture/`)
