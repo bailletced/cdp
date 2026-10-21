@@ -10,9 +10,18 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Chain\Domain\ValueObject\EditionTitle;
+use App\Chain\Domain\ValueObject\Presentation;
+use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
 
 /**
  * Admin resource for managing editions (F05-T14, F05-T15, F05-T16).
+ *
+ * The payload is validated on write: title and presentation carry the value
+ * object bounds as AssertValueObject constraints, so API Platform answers 422
+ * with one violation per offending property. The date rules (full/half hour,
+ * opening before start) are enforced by the processor, which raises the same
+ * kind of violation.
  */
 #[ApiResource(
     shortName: 'AdminEdition',
@@ -57,7 +66,9 @@ final class AdminEdition
     public function __construct(
         #[ApiProperty(identifier: true)]
         public readonly ?string $id = null,
+        #[AssertValueObject(EditionTitle::class)]
         public readonly ?string $title = null,
+        #[AssertValueObject(Presentation::class)]
         public readonly ?string $presentation = null,
         public readonly ?string $startsAt = null,
         public readonly ?string $opensAt = null,
