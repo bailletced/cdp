@@ -58,6 +58,30 @@ Feature: Admin organizers API (F04-T02)
         And I make a DELETE request to "/api/admin/organizers/" with the captured organizer id
         Then the response should be "204 No Content"
 
+    Scenario: A removed organizer no longer appears in the next list request
+        Given an account exists with email "anne@bailletced.org"
+        And this account is an organizer
+        And an account exists with email "bob@bailletced.org"
+        And this account is an organizer
+        And I am logged in as this account
+        When I get the organizer id for "anne@bailletced.org"
+        And I make a DELETE request to "/api/admin/organizers/" with the captured organizer id
+        And I make a GET request to "/api/admin/organizers"
+        Then the response should be "200 OK"
+        And the response should contain a JSON array with 1 member
+        And the response should contain JSON with "member.0.email" equal to "bob@bailletced.org"
+
+    Scenario: A removed organizer loses admin access on the next request
+        Given an account exists with email "bob@bailletced.org"
+        And this account is an organizer
+        And an account exists with email "anne@bailletced.org"
+        And this account is an organizer
+        And I am logged in as this account
+        When I get the organizer id for "anne@bailletced.org"
+        And I make a DELETE request to "/api/admin/organizers/" with the captured organizer id
+        And I make a GET request to "/api/admin/organizers"
+        Then the response should be "403 Forbidden"
+
     Scenario: Removing the last organizer is refused
         Given an account exists with email "anne@bailletced.org"
         And this account is an organizer
