@@ -1,4 +1,9 @@
-import { createRoute, createRouter, redirect } from "@tanstack/react-router";
+import {
+  createRoute,
+  createRouter,
+  lazyRouteComponent,
+  redirect,
+} from "@tanstack/react-router";
 import { meQueryOptions } from "./api/hooks";
 import { queryClient } from "./api/queryClient";
 import { Root } from "./components/Root";
@@ -50,6 +55,41 @@ const mySpaceRoute = createRoute({
   component: MySpacePage,
 });
 
+// Back-office section (F04-T04): lazy-loaded so the back-office bundle is
+// never fetched on public pages. Reserved to organizers: visitors (401 on
+// /api/me) are redirected to /receive-my-link, authenticated priants to
+// /my-space.
+const organisationRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/organisation",
+  beforeLoad: async ({ context }) => {
+    const me = await context.queryClient
+      .ensureQueryData(meQueryOptions)
+      .catch(() => null);
+
+    if (null === me) {
+      throw redirect({ to: "/receive-my-link" });
+    }
+
+    if (!me.isOrganizer) {
+      throw redirect({ to: "/my-space" });
+    }
+  },
+  component: lazyRouteComponent(
+    () => import("./components/OrganisationLayout"),
+    "OrganisationLayout",
+  ),
+});
+
+const organisationIndexRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/",
+  component: lazyRouteComponent(
+    () => import("./pages/OrganisationPage"),
+    "OrganisationPage",
+  ),
+});
+
 // Define the routes
 export const routeTree = Root.addChildren([
   receiveMyLinkRoute,
@@ -57,6 +97,7 @@ export const routeTree = Root.addChildren([
   demoRoute,
   loginRoute,
   mySpaceRoute,
+  organisationRoute.addChildren([organisationIndexRoute]),
 ]);
 
 export const router = createRouter({
