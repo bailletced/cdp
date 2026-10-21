@@ -11,9 +11,9 @@ namespace App\Shared\Domain\ValueObject;
 interface StringConstraintsInterface
 {
     /**
-     * Returns the minimum allowed length.
+     * Returns the minimum allowed length (0 when the value is optional).
      *
-     * @return int<1, max>
+     * @return int<0, max>
      */
     public static function getMinLength(): int;
 

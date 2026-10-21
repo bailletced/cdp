@@ -1,0 +1,203 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\Chain\Domain\Entity;
+
+use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Slot;
+use App\Chain\Domain\ValueObject\EditionTitle;
+use App\Chain\Domain\ValueObject\Presentation;
+use App\Shared\Domain\Time\ParisCalendar;
+use PHPUnit\Framework\TestCase;
+
+final class EditionTest extends TestCase
+{
+    public function testCreateEditionGenerates48Slots(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        self::assertCount(48, $edition->getSlots());
+        self::assertContainsOnlyInstancesOf(Slot::class, $edition->getSlots());
+    }
+
+    public function testNewEditionIsInDraftLifecycle(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        self::assertSame('draft', $edition->getLifecycle());
+    }
+
+    public function testStatusAtReturnsDraftWhenLifecycleIsDraft(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $now = new \DateTimeImmutable('2026-11-20 12:00:00', new \DateTimeZone('UTC'));
+
+        self::assertSame('draft', $edition->statusAt($now));
+    }
+
+    public function testScheduleChangesLifecycleToScheduled(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $at = new \DateTimeImmutable('2026-11-01 10:00:00', new \DateTimeZone('UTC'));
+
+        $events = $edition->schedule($at);
+
+        self::assertSame('scheduled', $edition->getLifecycle());
+        self::assertSame($at, $edition->getScheduledAt());
+        self::assertCount(1, $events);
+    }
+
+    public function testUnscheduleReturnsToDraft(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $edition->schedule(new \DateTimeImmutable('2026-11-01 10:00:00', new \DateTimeZone('UTC')));
+        $at = new \DateTimeImmutable('2026-11-02 10:00:00', new \DateTimeZone('UTC'));
+
+        $events = $edition->unschedule($at);
+
+        self::assertSame('draft', $edition->getLifecycle());
+        self::assertNull($edition->getScheduledAt());
+        self::assertCount(1, $events);
+    }
+
+    public function testScheduleThrowsWhenAlreadyScheduled(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $edition->schedule(new \DateTimeImmutable('2026-11-01 10:00:00', new \DateTimeZone('UTC')));
+
+        $this->expectException(\LogicException::class);
+
+        $edition->schedule(new \DateTimeImmutable('2026-11-02 10:00:00', new \DateTimeZone('UTC')));
+    }
+
+    public function testUnscheduleThrowsWhenAlreadyDraft(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        $this->expectException(\LogicException::class);
+
+        $edition->unschedule(new \DateTimeImmutable('2026-11-02 10:00:00', new \DateTimeZone('UTC')));
+    }
+
+    public function testStatusAtReturnsScheduledBeforeOpensAt(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $edition->schedule(new \DateTimeImmutable('2026-11-01 10:00:00', new \DateTimeZone('UTC')));
+        $now = new \DateTimeImmutable('2026-11-10 12:00:00', new \DateTimeZone('UTC'));
+
+        self::assertSame('scheduled', $edition->statusAt($now));
+    }
+
+    public function testStatusAtReturnsOpenBetweenOpensAtAndStartsAt(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $edition->schedule(new \DateTimeImmutable('2026-11-01 10:00:00', new \DateTimeZone('UTC')));
+        $now = new \DateTimeImmutable('2026-11-20 12:00:00', new \DateTimeZone('UTC'));
+
+        self::assertSame('open', $edition->statusAt($now));
+    }
+
+    public function testStatusAtReturnsRunningBetweenStartsAtAndEndsAt(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $edition->schedule(new \DateTimeImmutable('2026-11-01 10:00:00', new \DateTimeZone('UTC')));
+        $now = new \DateTimeImmutable('2026-11-29 00:00:00', new \DateTimeZone('UTC'));
+
+        self::assertSame('running', $edition->statusAt($now));
+    }
+
+    public function testStatusAtReturnsFinishedAfterEndsAt(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $edition->schedule(new \DateTimeImmutable('2026-11-01 10:00:00', new \DateTimeZone('UTC')));
+        $now = new \DateTimeImmutable('2026-11-29 19:00:00', new \DateTimeZone('UTC'));
+
+        self::assertSame('finished', $edition->statusAt($now));
+    }
+
+    public function testRescheduleRegenerates48Slots(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $newStartsAt = new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('UTC'));
+        $newOpensAt = new \DateTimeImmutable('2026-11-13 20:00:00', new \DateTimeZone('UTC'));
+
+        $edition->reschedule($newStartsAt, $newOpensAt, new ParisCalendar(), hasInscriptions: false);
+
+        self::assertSame('2026-11-28 20:00:00', $edition->getStartsAt()->format('Y-m-d H:i:s'));
+        self::assertCount(48, $edition->getSlots());
+        self::assertSame('2026-11-28 20:00:00', $edition->getSlots()[0]->getStartsAt()->format('Y-m-d H:i:s'));
+    }
+}

@@ -21,6 +21,12 @@ doctrine:
                 is_bundle: false
                 dir: '%kernel.project_dir%/src/Access/Domain'
                 prefix: App\Access\Domain
+            # Context Chain (éditions, créneaux, inscriptions)
+            Chain:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Chain/Domain'
+                prefix: App\Chain\Domain
 
 when@dev:
     doctrine:
