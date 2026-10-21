@@ -9,6 +9,7 @@ import { queryClient } from "./api/queryClient";
 import { Root } from "./components/Root";
 import { ConfidentialitePage } from "./pages/ConfidentialitePage";
 import { DemoPage } from "./pages/DemoPage";
+import { EditionEditPage, EditionFormPage } from "./pages/EditionFormPage";
 import { ErrorPage } from "./pages/ErrorPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
@@ -100,6 +101,22 @@ const organisationEditionsRoute = createRoute({
   ),
 });
 
+// Edition creation form (F05-T20): eagerly loaded (not lazy like the rest of
+// the back-office) so the form renders on the first paint — its tests query
+// the fields synchronously after render.
+const organisationEditionNewRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/editions/new",
+  component: EditionFormPage,
+});
+
+// Edition edit form (F05-T20)
+const organisationEditionEditRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/editions/$editionId/edit",
+  component: EditionEditPage,
+});
+
 // Define the routes
 export const routeTree = Root.addChildren([
   receiveMyLinkRoute,
@@ -110,6 +127,8 @@ export const routeTree = Root.addChildren([
   organisationRoute.addChildren([
     organisationIndexRoute,
     organisationEditionsRoute,
+    organisationEditionNewRoute,
+    organisationEditionEditRoute,
   ]),
 ]);
 

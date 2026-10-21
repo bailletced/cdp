@@ -162,8 +162,15 @@ export const editionQueryOptions = (id: string) =>
     },
   }) as const;
 
-export function useEdition(id: string) {
-  return useQuery(editionQueryOptions(id));
+/**
+ * Single edition (GET /api/admin/editions/{id}). A null id disables the query
+ * (creation form): no request is ever sent for it.
+ */
+export function useEdition(id: string | null) {
+  return useQuery({
+    ...editionQueryOptions(id ?? ""),
+    enabled: null !== id,
+  });
 }
 
 /** Form values of the edition form (F05-T20): instants are ISO 8601 with an explicit offset. */

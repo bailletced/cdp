@@ -165,6 +165,24 @@ export function isRateLimitError(
 }
 
 /**
+ * Extrait le statut HTTP d'un corps d'erreur API Platform
+ * (Error.jsonld / ConstraintViolation : { status }) tel que levé par
+ * openapi-fetch.
+ */
+export function getApiErrorStatus(error: unknown): number | null {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof error.status === "number"
+  ) {
+    return error.status;
+  }
+
+  return null;
+}
+
+/**
  * Extrait le détail lisible d'un corps d'erreur API Platform
  * (Error.jsonld : { title, detail, status }) tel que levé par openapi-fetch.
  */

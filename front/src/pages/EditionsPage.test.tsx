@@ -68,6 +68,10 @@ describe("EditionsPage", () => {
     ).toBeInTheDocument();
     // The back-office navigation exposes the editions section
     expect(screen.getByRole("link", { name: "Éditions" })).toBeInTheDocument();
+    // The header links to the creation form (F05-T20)
+    expect(
+      screen.getByRole("link", { name: "Nouvelle édition" }),
+    ).toHaveAttribute("href", "/organisation/editions/new");
     expect(
       await screen.findByText("24 heures de prière — novembre 2026"),
     ).toBeInTheDocument();

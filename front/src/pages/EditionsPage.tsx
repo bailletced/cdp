@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEditions } from "../api/hooks";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorState } from "../components/ErrorState";
@@ -14,7 +15,15 @@ export function EditionsPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <PageTitle>Éditions</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <PageTitle>Éditions</PageTitle>
+        <Link
+          to="/organisation/editions/new"
+          className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 text-accent-foreground no-underline"
+        >
+          Nouvelle édition
+        </Link>
+      </div>
       {isLoading ? (
         <LoadingState />
       ) : isError ? (
