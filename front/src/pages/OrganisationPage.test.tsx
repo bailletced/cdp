@@ -101,6 +101,7 @@ describe("OrganisationPage", () => {
   });
 
   it("adds an organizer by email", async () => {
+    let postedContentType: string | null = null;
     let organizers = [
       {
         "@id": "/api/admin/organizers/11111111-1111-1111-1111-111111111111",
@@ -131,6 +132,7 @@ describe("OrganisationPage", () => {
       http.post(
         "http://localhost:8080/api/admin/organizers",
         async ({ request }) => {
+          postedContentType = request.headers.get("content-type");
           const body = (await request.json()) as { email?: string };
           const created = {
             "@id": "/api/admin/organizers/22222222-2222-2222-2222-222222222222",
@@ -158,6 +160,8 @@ describe("OrganisationPage", () => {
 
     // After the POST, the list is refetched and shows the new organizer
     expect(await screen.findByText("bob@bailletced.org")).toBeInTheDocument();
+    // API Platform only accepts JSON-LD bodies on this endpoint
+    expect(postedContentType).toContain("application/ld+json");
   });
 
   it("removes an organizer after confirmation", async () => {

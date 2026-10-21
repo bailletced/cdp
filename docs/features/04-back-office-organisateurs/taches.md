@@ -21,4 +21,4 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F04-T04** · `front` Section `/organisation` chargée à la demande (route lazy), garde `isOrganizer`, layout et navigation du back-office — *Dépend de* : F02-T19 · *Fini quand* : le bundle back-office n'est pas chargé sur `/` (vérifié au build), priant redirigé.
 - [x] **F04-T05** · `front` Écran « Organisateurs » : liste, ajout par e-mail, retrait avec `ConfirmDialog`, message si dernier organisateur + tests — *Dépend de* : F04-T02, F04-T04 · *Fini quand* : tests Vitest/MSW (succès, 422, refus « dernier »).
-- [ ] **F04-T06** · `test` E2E : organisateur → `/organisation` ; priant → refus ; ajout puis retrait d'un organisateur — *Dépend de* : F04-T05 · *Fini quand* : parcours vert avec axe-core.
+- [x] **F04-T06** · `test` E2E : organisateur → `/organisation` ; priant → refus ; ajout puis retrait d'un organisateur — *Dépend de* : F04-T05 · *Fini quand* : parcours vert avec axe-core.

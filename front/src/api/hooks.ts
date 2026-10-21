@@ -81,6 +81,8 @@ export function useAddOrganizer() {
     mutationFn: async (email: string) => {
       const { data, error } = await apiClient.POST("/api/admin/organizers", {
         body: { email },
+        // API Platform only accepts JSON-LD bodies on this resource
+        headers: { "Content-Type": "application/ld+json" },
       });
 
       if (error) {
