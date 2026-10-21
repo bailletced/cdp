@@ -8,29 +8,32 @@ use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Tests\Unit\Chain\Domain\Repository\EditionRepositoryTestCase;
+use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineEditionRepositoryTest extends EditionRepositoryTestCase
 {
+    private EntityManagerInterface $em;
+
     protected function getRepository(): EditionRepositoryInterface
     {
+        self::bootKernel();
+
         $registry = self::getContainer()->get('doctrine');
+        $this->em = $registry->getManager();
         $repository = new DoctrineEditionRepository($registry, Edition::class);
 
         // Clean slate for each test
-        $em = $registry->getManager();
-        foreach ($em->getConnection()->fetchAllAssociative('SELECT id FROM edition') as $row) {
-            $em->getConnection()->executeStatement('DELETE FROM slot WHERE edition_id = ?', [$row['id']]);
-            $em->getConnection()->executeStatement('DELETE FROM edition WHERE id = ?', [$row['id']]);
+        foreach ($this->em->getConnection()->fetchAllAssociative('SELECT id FROM edition') as $row) {
+            $this->em->getConnection()->executeStatement('DELETE FROM slot WHERE edition_id = ?', [$row['id']]);
+            $this->em->getConnection()->executeStatement('DELETE FROM edition WHERE id = ?', [$row['id']]);
         }
-        $em->clear();
+        $this->em->clear();
 
         return $repository;
     }
 
-    protected function setUp(): void
+    protected function flush(): void
     {
-        parent::setUp();
-        // Persist and flush after each add so that the repository can find the entity
-        $this->repository = $this->getRepository();
+        $this->em->flush();
     }
 }

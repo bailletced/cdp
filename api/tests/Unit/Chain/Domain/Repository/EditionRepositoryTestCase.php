@@ -9,9 +9,14 @@ use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
 use App\Shared\Domain\Time\ParisCalendar;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-abstract class EditionRepositoryTestCase extends TestCase
+/**
+ * Shared repository contract (in-memory unit test and Doctrine integration
+ * test). The base is a KernelTestCase so the Doctrine subclass can boot the
+ * kernel from getRepository(); the in-memory subclass never boots it.
+ */
+abstract class EditionRepositoryTestCase extends KernelTestCase
 {
     protected EditionRepositoryInterface $repository;
 
@@ -22,11 +27,20 @@ abstract class EditionRepositoryTestCase extends TestCase
         $this->repository = $this->getRepository();
     }
 
+    /**
+     * Hook for Doctrine-backed subclasses: persist (and remove) must reach
+     * the database before find* is called. No-op for in-memory repositories.
+     */
+    protected function flush(): void
+    {
+    }
+
     public function testAddAndFind(): void
     {
         $edition = $this->createEdition();
 
         $this->repository->add($edition);
+        $this->flush();
 
         $found = $this->repository->findById($edition->getId());
         self::assertNotNull($found);
@@ -46,6 +60,7 @@ abstract class EditionRepositoryTestCase extends TestCase
 
         $this->repository->add($edition1);
         $this->repository->add($edition2);
+        $this->flush();
 
         $all = $this->repository->findAll();
         self::assertCount(2, $all);
@@ -56,9 +71,11 @@ abstract class EditionRepositoryTestCase extends TestCase
         $edition = $this->createEdition();
 
         $this->repository->add($edition);
+        $this->flush();
         self::assertNotNull($this->repository->findById($edition->getId()));
 
         $this->repository->remove($edition);
+        $this->flush();
         self::assertNull($this->repository->findById($edition->getId()));
     }
 

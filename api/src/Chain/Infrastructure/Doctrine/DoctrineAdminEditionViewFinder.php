@@ -54,7 +54,7 @@ final readonly class DoctrineAdminEditionViewFinder implements AdminEditionViewF
             'SELECT id, title, presentation, starts_at, opens_at, lifecycle, scheduled_at, version
              FROM edition
              WHERE id = ?',
-            [$id->value->toBinary()]
+            [$id->value->toRfc4122()]
         );
 
         if (false === $row) {
@@ -69,7 +69,8 @@ final readonly class DoctrineAdminEditionViewFinder implements AdminEditionViewF
      */
     private function hydrateView(array $row): AdminEditionView
     {
-        $editionId = Uuid::fromBinary($row['id']);
+        // The driver returns Postgres uuid columns as RFC 4122 strings
+        $editionId = Uuid::fromString($row['id']);
         $startsAt = new \DateTimeImmutable($row['starts_at']);
         $opensAt = new \DateTimeImmutable($row['opens_at']);
 
@@ -111,7 +112,7 @@ final readonly class DoctrineAdminEditionViewFinder implements AdminEditionViewF
                 endsAtUtc: $slotEndsAt->format(\DateTimeInterface::ATOM),
                 label: SlotLabel::for($timeSlot),
                 partOfDay: PartOfDay::forSlot($timeSlot)->value,
-                textId: null !== $slotRow['text_id'] ? Uuid::fromBinary($slotRow['text_id'])->toRfc4122() : null,
+                textId: null !== $slotRow['text_id'] ? Uuid::fromString($slotRow['text_id'])->toRfc4122() : null,
             );
         }
 
