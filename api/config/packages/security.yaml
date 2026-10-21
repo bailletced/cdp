@@ -19,6 +19,9 @@ security:
             provider: app_user_provider
             stateless: false
 
+            # 401 JSON-LD (not a 302 to /login) when access_control rejects a visitor.
+            entry_point: App\Access\Infrastructure\Security\ApiAuthenticationEntryPoint
+
             # Login link authentication (F02-T07, F02-T08)
             login_link:
                 check_route: _security_login_link
@@ -53,9 +56,15 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # F04-T02: /api/admin/* est gardé par AdminAccessListener (401 visiteur, 403 priant)
-    # plutôt que par access_control, car le remember-me n'est pas « fully authenticated »
-    # et access_control renverrait 401 au lieu de 403 pour un priant authentifié.
+    # F04-T02: /api/admin/* is reserved to organizers.
+    # - Visitor (no token): access_control denies and the firewall entry point
+    #   (ApiAuthenticationEntryPoint) answers 401 JSON-LD.
+    # - Authenticated priant: access_control only requires
+    #   IS_AUTHENTICATED_REMEMBERED — with ROLE_ORGANIZER, a remember-me token
+    #   (not "fully authenticated") would get a 401 instead of a 403.
+    #   AdminAccessListener then rejects non-organizers with a 403.
+    access_control:
+        - { path: ^/api/admin, roles: IS_AUTHENTICATED_REMEMBERED }
 
 when@test:
     security:

@@ -24,13 +24,13 @@ use Symfony\Component\Routing\RouterInterface;
  * currently authenticated account's own email back to that same account.
  *
  * Whether an operation is "admin" is decided from its exposed route path
- * (resolved through the router), using the same /api/admin prefix as
- * AdminAccessListener: API Platform generates format-suffix variants whose
- * uriTemplate no longer starts with /admin/ (e.g. /admin_organizers/{id}).
+ * (resolved through the router), using the same /api/admin prefix as the
+ * access_control rule in security.yaml: API Platform generates format-suffix
+ * variants whose uriTemplate no longer starts with /admin/ (e.g. /admin_organizers/{id}).
  */
 final class NoEmailOutsideAdminResourceTest extends KernelTestCase
 {
-    /** Same prefix as AdminAccessListener: routes below it may expose emails. */
+    /** Same prefix as the access_control rule on /api/admin: routes below it may expose emails. */
     private const ADMIN_PATH_PREFIX = '/api/admin';
 
     /** @var list<class-string> Resources allowed to serialize an email outside /api/admin. */

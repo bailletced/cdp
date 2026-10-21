@@ -115,3 +115,20 @@ Feature: Admin organizers API (F04-T02)
         And I am logged in as this account
         When I make a DELETE request to "/api/admin/organizers/00000000-0000-0000-0000-000000000000"
         Then the response should be "403 Forbidden"
+
+    Scenario: Priant authenticated by remember-me cookie gets a 403 on the organizers list
+        Given an account exists with email "thomas@bailletced.org"
+        And I am logged in as this account
+        When I delete all sessions from the database
+        And I make a GET request to "/api/admin/organizers" with only the cookie "REMEMBERME"
+        Then the response should be "403 Forbidden"
+
+    Scenario: Organizer authenticated by remember-me cookie gets the list of organizers
+        Given an account exists with email "anne@bailletced.org"
+        And this account is an organizer
+        And I am logged in as this account
+        When I delete all sessions from the database
+        And I make a GET request to "/api/admin/organizers" with only the cookie "REMEMBERME"
+        Then the response should be "200 OK"
+        And the response should contain a JSON array with 1 member
+        And the response should contain JSON with "member.0.email" equal to "anne@bailletced.org"

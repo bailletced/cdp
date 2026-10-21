@@ -23,6 +23,7 @@ use App\Access\Infrastructure\Doctrine\Repository\DoctrineOrganizerRepository;
 use App\Access\Infrastructure\Repository\InMemoryAccountRepository;
 use App\Access\Infrastructure\Repository\InMemoryOrganizerRepository;
 use App\Access\Infrastructure\Security\AdminAccessListener;
+use App\Access\Infrastructure\Security\ApiAuthenticationEntryPoint;
 use App\Access\Infrastructure\Security\LoginLinkFailureHandler;
 use App\Access\Infrastructure\Security\LoginLinkPersonalLinkIssuer;
 use App\Access\Infrastructure\Security\LoginLinkSuccessHandler;
@@ -125,6 +126,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
 
         ->set(AdminAccessListener::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(ApiAuthenticationEntryPoint::class)
         ->autoconfigure()
         ->autowire()
 

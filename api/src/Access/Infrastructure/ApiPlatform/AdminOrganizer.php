@@ -12,7 +12,8 @@ use ApiPlatform\Metadata\Post;
 
 /**
  * Admin resource for managing organizers (F04-T02).
- * Reserved to ROLE_ORGANIZER via access_control on /api/admin/*.
+ * Reserved to organizers: access_control on /api/admin/* (security.yaml)
+ * answers 401 to visitors, AdminAccessListener answers 403 to non-organizers.
  *
  * - GET  /api/admin/organizers        → list all organizers
  * - POST /api/admin/organizers        → add an organizer by email

@@ -7,7 +7,6 @@ namespace App\Tests\Unit\Access\Infrastructure\Security;
 use App\Access\Infrastructure\Security\AdminAccessListener;
 use App\Access\Infrastructure\Security\SecurityUser;
 use App\Shared\Infrastructure\ApiPlatform\Exception\AccessDeniedException;
-use App\Shared\Infrastructure\ApiPlatform\Exception\UnauthenticatedException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -17,13 +16,17 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * F04-T02 : garde d'accès sur /api/admin/* — réservé à ROLE_ORGANIZER.
- * Visiteur (pas de session) → 401, priant (non organisateur) → 403.
+ * F04-T02 : garde d'accès sur /api/admin/* — réservé aux organisateurs.
+ * Le 401 visiteur est géré par la règle access_control de security.yaml
+ * (^/api/admin, IS_AUTHENTICATED_REMEMBERED) et l'entry point du firewall ;
+ * ce listener applique la règle métier : priant (non organisateur) → 403.
  */
 final class AdminAccessListenerTest extends TestCase
 {
-    public function testVisitorGets401OnAdminPath(): void
+    public function testVisitorIsIgnoredOnAdminPath(): void
     {
+        // No exception: a visitor never reaches this listener, the
+        // access_control rule answers 401 before (entry point of the firewall).
         $tokenStorage = $this->createStub(TokenStorageInterface::class);
         $tokenStorage->method('getToken')->willReturn(null);
 
@@ -32,9 +35,9 @@ final class AdminAccessListenerTest extends TestCase
         $request = Request::create('/api/admin/organizers', 'GET');
         $event = new RequestEvent($this->createStub(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
 
-        $this->expectException(UnauthenticatedException::class);
-
         $listener->onKernelRequest($event);
+
+        $this->addToAssertionCount(1);
     }
 
     public function testPriantGets403OnAdminPath(): void
