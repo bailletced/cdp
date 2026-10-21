@@ -42,7 +42,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Écrans (US-05.1 à US-05.5)
 
-- [ ] **F05-T18** · `front` Écran « Éditions » : liste (titre, dates en heure de Paris, statut en libellé) — *Dépend de* : F05-T14, F04-T04 · *Fini quand* : test Vitest/MSW, état vide prévu.
+- [x] **F05-T18** · `front` Écran « Éditions » : liste (titre, dates en heure de Paris, statut en libellé) — *Dépend de* : F05-T14, F04-T04 · *Fini quand* : test Vitest/MSW, état vide prévu.
 - [ ] **F05-T19** · `front` Champ réutilisable `ParisDateTimeField` (date + heure en heure de Paris via `@internationalized/date`, fuseau `Europe/Paris` explicite, indépendant du fuseau du navigateur, affichage du début retenu s'il a été ajusté) + tests — *Dépend de* : F01-T09 · *Fini quand* : même valeur envoyée quel que soit le fuseau simulé (tests Paris, Montréal).
 - [ ] **F05-T20** · `front` Formulaire de création/modification (titre, présentation, début et ouverture en heure de Paris), erreurs 422/409 + tests — *Dépend de* : F05-T15, F05-T18, F05-T19 · *Fini quand* : « heure de Paris » explicite dans les libellés, erreurs sur les bons champs.
 - [ ] **F05-T21** · `front` Détail d'une édition : statut, « Programmer » / « Repasser en brouillon » (confirmation), 48 créneaux groupés par moment — *Dépend de* : F05-T16, F05-T18 · *Fini quand* : test Vitest des actions.

@@ -90,6 +90,16 @@ const organisationIndexRoute = createRoute({
   ),
 });
 
+// Editions list (F05-T18): lazy-loaded with the back-office section
+const organisationEditionsRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/editions",
+  component: lazyRouteComponent(
+    () => import("./pages/EditionsPage"),
+    "EditionsPage",
+  ),
+});
+
 // Define the routes
 export const routeTree = Root.addChildren([
   receiveMyLinkRoute,
@@ -97,7 +107,10 @@ export const routeTree = Root.addChildren([
   demoRoute,
   loginRoute,
   mySpaceRoute,
-  organisationRoute.addChildren([organisationIndexRoute]),
+  organisationRoute.addChildren([
+    organisationIndexRoute,
+    organisationEditionsRoute,
+  ]),
 ]);
 
 export const router = createRouter({

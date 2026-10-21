@@ -19,6 +19,14 @@ export function OrganisationLayout() {
               Organisateurs
             </Link>
           </li>
+          <li>
+            <Link
+              to="/organisation/editions"
+              className="text-link underline underline-offset-4"
+            >
+              Éditions
+            </Link>
+          </li>
         </ul>
       </nav>
       <Outlet />
