@@ -1,4 +1,5 @@
 import type { components } from "../api/schema";
+import { PARIS_TIME_ZONE } from "./parisTime";
 
 /** Edition as returned by the admin API (F05-T14). */
 export type EditionView = components["schemas"]["AdminEdition.jsonld"];
@@ -33,8 +34,6 @@ export function editionStatusLabel(status: string | null | undefined): string {
 
   return status ?? "";
 }
-
-export const PARIS_TIME_ZONE = "Europe/Paris";
 
 const parisDateTimeFormat = new Intl.DateTimeFormat("fr-FR", {
   timeZone: PARIS_TIME_ZONE,
