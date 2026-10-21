@@ -28,7 +28,7 @@ En tant que **développeur**, je veux `make up` pour lancer PHP, PostgreSQL, Mai
 - **Étant donné** un poste avec Docker, **quand** je lance `make up`, **alors** l'API répond sur `/api`, la SPA sur `/` (même origine) et Mailpit sur le port 8025.
 
 ### US-00.3 — Disposer du noyau hexagonal
-En tant que **développeur**, je veux les briques Shared (Identity UUID v7, Email, bus de commandes et d'événements, `AssertValueObject`, ObjectMapper, `EmbedValueObjectsDriver`, horloge PSR-20) afin d'écrire Payload → Processor → Command → Handler et ViewFinder → Provider → Resource sans plomberie.
+En tant que **développeur**, je veux les briques Shared (Identity UUID v7, Email, bus de commandes et d'événements, `AssertValueObject`, `EmbedValueObjectsDriver`, horloge PSR-20) afin d'écrire Payload → Processor → Command → Handler et ViewFinder → Provider → Resource sans plomberie.
 
 - **Étant donné** une commande qui lève une exception, **quand** elle passe dans `command.bus`, **alors** la transaction est annulée et aucun événement n'est publié.
 - **Étant donné** un VO avec `MIN_LENGTH`/`MAX_LENGTH`, **quand** j'exporte l'OpenAPI, **alors** les bornes apparaissent dans le JSON Schema.

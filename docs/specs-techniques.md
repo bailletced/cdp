@@ -117,7 +117,7 @@ On reprend l'architecture hexagonale de [mtarld/apip-ddd](https://github.com/mta
 - Organisation `src/<BC>/{Domain,Application,Infrastructure}` + `src/Shared`. Les services sont déclarés par BC dans `config/services/<bc>.php`.
 - Agrégats `final` (`public private(set)`, property hooks), VO `final readonly` auto-validés (webmozart/assert, bornes en constantes `MIN_LENGTH`/`MAX_LENGTH`).
 - **Écriture** : Payload validé → Processor → Command `readonly` typée en VO → `CommandBusInterface` (Messenger `command.bus` avec le middleware `doctrine_transaction`) → handler `#[AsCommandHandler]`. Une commande ne renvoie rien : l'identifiant est généré par le processor.
-- **Lecture** : pas de Query bus. Les providers interrogent des `*ViewFinder`, qui sont des projections DQL ou SQL et ne chargent pas les agrégats. Les DTO `#[ApiResource]` sont remplis par ObjectMapper (`#[Map(source: …View::class)]`).
+- **Lecture** : pas de Query bus. Les providers interrogent des `*ViewFinder`, qui sont des projections DQL ou SQL et ne chargent pas les agrégats. Les DTO `#[ApiResource]` sont remplis par les providers, à partir des DTO de vue (`…View`) retournés par le finder.
 - Payloads validés par `#[AssertValueObject(VO::class)]`, qui publie les bornes des VO dans le JSON Schema.
 - Bus d'événements synchrone (`DispatchAfterCurrentBusStamp`), listeners `#[AsEventListener]` en Application, événements d'intégration dans `Shared/Domain/Event/Integration`.
 - Horloge PSR-20 injectée, autorisée dans le domaine.
@@ -155,7 +155,7 @@ api/src/
 │   │   └── Port/               CurrentViewer, PersonalLinkIssuer, DevicePassIssuer, PriantDirectory
 │   └── Infrastructure/
 │       ├── Symfony/            Kernel, Messenger, Validator (AssertValueObject)
-│       ├── ApiPlatform/        ObjectMapper, UriVariable, OpenApi
+│       ├── ApiPlatform/        UriVariable, OpenApi
 │       └── Doctrine/Mapping/   EmbedValueObjectsDriver
 │
 ├── Chain/
@@ -921,7 +921,6 @@ Chemins relatifs à la racine de [mtarld/apip-ddd](https://github.com/mtarld/api
 | Ressource DTO | `src/BookStore/Infrastructure/ApiPlatform/Resource/BookResource.php` |
 | ViewFinder (projection) | `src/BookStore/Infrastructure/Doctrine/DoctrineBookViewFinder.php` |
 | Validateur de VO | `src/Shared/Infrastructure/Symfony/Validator/` |
-| ObjectMapper | `src/Shared/Infrastructure/ApiPlatform/ObjectMapper/` |
 | Règles d'architecture | `deptrac_bc.yaml`, `deptrac_hexa.yaml` |
 | Configuration API Platform | `config/packages/api_platform.yaml` |
 | Docker | `Dockerfile`, `frankenphp/Caddyfile`, `compose*.yaml` |
