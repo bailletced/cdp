@@ -254,4 +254,27 @@ final class EditionTest extends TestCase
         self::assertFalse($edition->hasTextAttributed($textId));
         self::assertTrue($edition->hasTextAttributed($otherTextId));
     }
+
+    public function testCountTextAttributionsReturnsTheNumberOfSlotsCarryingTheText(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $textId = new \App\Chain\Domain\ValueObject\TextId();
+        $otherTextId = new \App\Chain\Domain\ValueObject\TextId();
+        $slots = $edition->getSlots();
+
+        self::assertSame(0, $edition->countTextAttributions($textId));
+
+        $slots[0]->setTextId($textId->value);
+        $slots[2]->setTextId($textId->value);
+        $slots[1]->setTextId($otherTextId->value);
+
+        self::assertSame(2, $edition->countTextAttributions($textId));
+        self::assertSame(1, $edition->countTextAttributions($otherTextId));
+    }
 }

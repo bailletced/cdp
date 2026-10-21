@@ -7,6 +7,7 @@ use App\Chain\Application\CreateTextHandler;
 use App\Chain\Application\DeleteTextHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
+use App\Chain\Application\Query\AdminTextViewFinder;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
@@ -19,9 +20,11 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
+use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminTextViewFinder;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
@@ -91,6 +94,17 @@ return static function (ContainerConfigurator $container): void {
         ->alias(AdminEditionViewFinder::class, DoctrineAdminEditionViewFinder::class);
 
     $services->set(InMemoryAdminEditionViewFinder::class)
+        ->autowire();
+
+    // Public alias: no service consumes the port yet (the API provider lands
+    // in F06-T08); the integration tests fetch it from the test container.
+    $services->set(DoctrineAdminTextViewFinder::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(AdminTextViewFinder::class, DoctrineAdminTextViewFinder::class)
+        ->public();
+
+    $services->set(InMemoryAdminTextViewFinder::class)
         ->autowire();
 
     $services->set(AdminEditionProvider::class)

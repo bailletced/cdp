@@ -244,6 +244,22 @@ class Edition
     }
 
     /**
+     * Number of slots carrying the given text (read model of the admin
+     * library, US-06.4).
+     */
+    public function countTextAttributions(TextId $textId): int
+    {
+        $count = 0;
+        foreach ($this->slots as $slot) {
+            if ($slot->getTextId()?->equals($textId->value)) {
+                ++$count;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
      * Withdraw the attributions of the given text from every slot (RG-TX-3,
      * draft editions only — the DeleteText command refuses otherwise).
      */
