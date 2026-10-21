@@ -89,3 +89,35 @@ test("sans clé d'API, le validateur refuse au lieu de laisser tout passer", asy
   assert.equal(verdict.kind, 'violation')
   assert.match(verdict.reason, /MISTRAL_API_KEY/)
 })
+
+test('un 503 est retenté avant de lire le verdict', async () => {
+  let calls = 0
+  const agent = mistral({
+    apiKey: 'key',
+    retryDelaysMs: [1, 1],
+    fetchFn: async () => (++calls < 3 ? new Response('indisponible', { status: 503 }) : reply('{"kind":"pass","reason":"ok"}')),
+  })
+
+  const verdict = await agent.reason('p')
+
+  assert.deepEqual(verdict, { kind: 'pass', reason: 'ok' })
+  assert.equal(calls, 3)
+})
+
+test('un 503 persistant épuise les retries et reste une violation', async () => {
+  let calls = 0
+  const agent = mistral({
+    apiKey: 'key',
+    retryDelaysMs: [1, 1],
+    fetchFn: async () => {
+      calls++
+      return new Response('indisponible', { status: 503 })
+    },
+  })
+
+  const verdict = await agent.reason('p')
+
+  assert.equal(verdict.kind, 'violation')
+  assert.match(verdict.reason, /503/)
+  assert.equal(calls, 3)
+})

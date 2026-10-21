@@ -24,13 +24,28 @@ Vibe ──post_tool─▶ hook.mjs ──▶ historique de session (JSONL au fo
 
 `strict = true` est indispensable sur `probity-pre` : sans lui, une panne du hook laisse passer l'action.
 
+## Panne du validateur IA (HTTP 503)
+
+**Symptôme :** toute écriture (`write_file`, `edit`, `bash`) est refusée avec « Validateur Mistral en erreur : HTTP 503. ».
+
+**Cause :** le validateur est un appel à l'API Mistral (`api.mistral.ai`) ; un 503 est une indisponibilité côté fournisseur. Le refus est volontaire (fail-closed) : une panne du validateur ne laisse jamais passer du code non relu.
+
+**Comportement :** les 503 sont retentés automatiquement (2 retries : 500 ms puis 1 s) avant de conclure à un refus.
+
+**Panne prolongée :**
+
+- Attendre la fin de l'incident : rien à changer, le validateur redevient disponible.
+- `PROBITY_MISTRAL_ENDPOINT` : pointer vers un proxy ou un endpoint alternatif.
+- `PROBITY_MISTRAL_MODEL` : changer de modèle.
+- Dernier recours : commenter le hook `probity-pre` dans `.vibe/hooks.toml`. **Les écritures ne sont alors plus relues** : à réserver à un blocage total, et à ré-activer tout de suite après. Ne pas utiliser le sandbox (`run_typescript`) pour contourner : ses écritures échappent au hook.
+
 ## Tests
 
 ```bash
 pnpm test:vibe
 ```
 
-36 tests, sans réseau ni clé : traduction des outils (avec des payloads réels de Vibe 2.26.1, chemins anonymisés dans `test/fixtures/`), historique, réponses, validateur Mistral (faux `fetch`), hook contre le **vrai** Probity, et chaîne complète contre la vraie config du dépôt avec un faux serveur Mistral.
+38 tests, sans réseau ni clé : traduction des outils (avec des payloads réels de Vibe 2.26.1, chemins anonymisés dans `test/fixtures/`), historique, réponses, validateur Mistral (faux `fetch`), hook contre le **vrai** Probity, et chaîne complète contre la vraie config du dépôt avec un faux serveur Mistral.
 
 ## Limites connues
 

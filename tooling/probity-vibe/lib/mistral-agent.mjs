@@ -3,10 +3,15 @@
 // Probity lui passe un prompt de revue TDD et attend un verdict {kind: "pass" | "violation", reason}.
 // Tout ce qui ne ressemble pas à un verdict clair devient une violation (fail-closed) :
 // une panne du validateur ne doit jamais laisser passer du code non relu.
+// Les 503 (API indisponible) sont retentés automatiquement avant de conclure à une violation.
 
 const ENDPOINT = 'https://api.mistral.ai/v1/chat/completions'
 const DEFAULT_MODEL = 'mistral-large-latest'
 const DEFAULT_TIMEOUT_MS = 45_000
+
+// Un 503 est une indisponibilité transitoire de l'API : on retente avant de refuser.
+const RETRYABLE_STATUS = new Set([503])
+const DEFAULT_RETRY_DELAYS_MS = [500, 1000]
 
 const violation = (reason) => ({ kind: 'violation', reason })
 
@@ -15,6 +20,7 @@ export function mistral({
   model = process.env.PROBITY_MISTRAL_MODEL ?? DEFAULT_MODEL,
   endpoint = process.env.PROBITY_MISTRAL_ENDPOINT ?? ENDPOINT,
   timeoutMs = DEFAULT_TIMEOUT_MS,
+  retryDelaysMs = DEFAULT_RETRY_DELAYS_MS,
   fetchFn = fetch,
 } = {}) {
   return {
@@ -23,17 +29,25 @@ export function mistral({
 
       let text
       try {
-        const response = await fetchFn(endpoint, {
-          method: 'POST',
-          headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
-          body: JSON.stringify({
-            model,
-            temperature: 0,
-            response_format: { type: 'json_object' },
-            messages: [{ role: 'user', content: prompt }],
-          }),
-          signal: AbortSignal.timeout(timeoutMs),
-        })
+        let response
+        for (let attempt = 0; ; attempt++) {
+          response = await fetchFn(endpoint, {
+            method: 'POST',
+            headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
+            body: JSON.stringify({
+              model,
+              temperature: 0,
+              response_format: { type: 'json_object' },
+              messages: [{ role: 'user', content: prompt }],
+            }),
+            signal: AbortSignal.timeout(timeoutMs),
+          })
+
+          if (response.ok || !RETRYABLE_STATUS.has(response.status) || attempt >= retryDelaysMs.length) break
+
+          await new Promise((resolve) => setTimeout(resolve, retryDelaysMs[attempt]))
+        }
+
         if (!response.ok) return violation(`Validateur Mistral en erreur : HTTP ${response.status}.`)
 
         text = (await response.json()).choices?.[0]?.message?.content
