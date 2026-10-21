@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Chain\Application\CreateEditionHandler;
+use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\UnscheduleEditionHandler;
@@ -17,6 +18,7 @@ use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
+use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -32,6 +34,11 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set(InMemoryEditionRepository::class)
         ->tag('app.in_memory_repository');
+
+    $services->set(SymfonyHtmlSanitizer::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(HtmlSanitizer::class, SymfonyHtmlSanitizer::class);
 
     $services->set(CreateEditionHandler::class)
         ->autoconfigure()

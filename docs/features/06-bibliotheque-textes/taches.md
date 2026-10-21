@@ -13,7 +13,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Domaine et persistance (US-06.1, US-06.2)
 
-- [ ] **F06-T01** · `back` Port `HtmlSanitizer` (Chain/Application/Port) + adaptateur Symfony HtmlSanitizer (`p`, `br`, `strong`, `em`, `blockquote`, aucun attribut) + tests (XSS, attributs, balises interdites) — *Dépend de* : F00-T09 · *Fini quand* : jeu de 10 entrées malveillantes nettoyé (tests).
+- [x] **F06-T01** · `back` Port `HtmlSanitizer` (Chain/Application/Port) + adaptateur Symfony HtmlSanitizer (`p`, `br`, `strong`, `em`, `blockquote`, aucun attribut) + tests (XSS, attributs, balises interdites) — *Dépend de* : F00-T09 · *Fini quand* : jeu de 10 entrées malveillantes nettoyé (tests).
 - [ ] **F06-T02** · `back` VO `RichText` (HTML déjà nettoyé, non vide une fois les balises retirées, longueur max), `TextId`, `TextTitle`, `TextSource` + tests unitaires — *Dépend de* : F00-T12 · *Fini quand* : bornes et cas vides testés.
 - [ ] **F06-T03** · `back` Agrégat `Text` (titre, source, corps, pistes facultatives) + `TextRepositoryInterface` + InMemory + suite abstraite — *Dépend de* : F06-T02 · *Fini quand* : suite verte sur InMemory.
 - [ ] **F06-T04** · `back` Mapping Doctrine, migration `text`, `DoctrineTextRepository` — *Dépend de* : F06-T03, F00-T13 · *Fini quand* : suite abstraite verte sur PostgreSQL.
