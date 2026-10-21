@@ -7,4 +7,4 @@ when@dev:
 health:
     path: /health
     methods: [GET]
-    controller: App\Shared\Infrastructure\Controller\HealthController::health
+    controller: App\Shared\Infrastructure\Symfony\Controller\HealthController::health

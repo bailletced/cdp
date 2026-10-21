@@ -12,16 +12,16 @@ _security_login_link:
 auth_login_link_get:
     path: /auth/login
     methods: [GET]
-    controller: App\Access\Infrastructure\Controller\LoginLinkController::loginLinkGet
+    controller: App\Access\Infrastructure\Symfony\Controller\LoginLinkController::loginLinkGet
 
 # GET /auth/status: authentication status (F02-T09)
 auth_status:
     path: /auth/status
     methods: [GET]
-    controller: App\Access\Infrastructure\Controller\AuthStatusController::status
+    controller: App\Access\Infrastructure\Symfony\Controller\AuthStatusController::status
 
 # POST /auth/link-request: request a personal login link by email (F02-T15)
 auth_link_request:
     path: /auth/link-request
     methods: [POST]
-    controller: App\Access\Infrastructure\Controller\LinkRequestController::requestLink
+    controller: App\Access\Infrastructure\Symfony\Controller\LinkRequestController::requestLink

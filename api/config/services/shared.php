@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Port\DatabaseHealth;
-use App\Shared\Infrastructure\Controller\HealthController;
 use App\Shared\Infrastructure\Doctrine\DoctrineDatabaseHealth;
+use App\Shared\Infrastructure\Symfony\Controller\HealthController;
 use App\Shared\Infrastructure\Symfony\Messenger\MessengerCommandBus;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;

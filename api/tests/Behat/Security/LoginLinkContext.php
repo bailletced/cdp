@@ -47,8 +47,8 @@ final class LoginLinkContext implements Context
         // Use test.service_container to access private services
         $testContainer = $container->get('test.service_container');
 
-        /** @var \App\Access\Infrastructure\Security\UserProvider $userProvider */
-        $userProvider = $testContainer->get(\App\Access\Infrastructure\Security\UserProvider::class);
+        /** @var \App\Access\Infrastructure\Symfony\Security\UserProvider $userProvider */
+        $userProvider = $testContainer->get(\App\Access\Infrastructure\Symfony\Security\UserProvider::class);
         $securityUser = $userProvider->loadUserByIdentifier($state->currentAccount->getId()->value->toRfc4122());
 
         /** @var \Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface $handler */

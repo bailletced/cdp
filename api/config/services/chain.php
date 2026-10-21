@@ -12,11 +12,11 @@ use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Infrastructure\ApiPlatform\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\AdminEditionScheduleProcessor;
-use App\Chain\Infrastructure\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
-use App\Chain\Infrastructure\Query\InMemoryAdminEditionViewFinder;
-use App\Chain\Infrastructure\Repository\InMemoryEditionRepository;
+use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
+use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 

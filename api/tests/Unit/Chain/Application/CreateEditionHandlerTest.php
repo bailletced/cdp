@@ -8,7 +8,7 @@ use App\Chain\Application\CreateEdition;
 use App\Chain\Application\CreateEditionHandler;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
-use App\Chain\Infrastructure\Repository\InMemoryEditionRepository;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
 use App\Shared\Domain\Time\ParisCalendar;
 use PHPUnit\Framework\TestCase;
 

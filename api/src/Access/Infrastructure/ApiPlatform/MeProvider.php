@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\ValueObject\AccountId;
-use App\Access\Infrastructure\Security\SecurityUser;
+use App\Access\Infrastructure\Symfony\Security\SecurityUser;
 use App\Shared\Infrastructure\ApiPlatform\Exception\UnauthenticatedException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
