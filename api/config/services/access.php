@@ -3,20 +3,26 @@
 declare(strict_types=1);
 
 use App\Access\Application\AddOrganizerHandler;
+use App\Access\Application\Query\OrganizerViewFinder;
+use App\Access\Application\RemoveOrganizerHandler;
 use App\Access\Application\RequestPersonalLinkHandler;
 use App\Access\Domain\Entity\Account;
 use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
+use App\Access\Infrastructure\ApiPlatform\AdminOrganizerProcessor;
+use App\Access\Infrastructure\ApiPlatform\AdminOrganizerProvider;
 use App\Access\Infrastructure\ApiPlatform\MeProvider;
 use App\Access\Infrastructure\Console\CreateOrganizerCliCommand;
 use App\Access\Infrastructure\Controller\AuthStatusController;
 use App\Access\Infrastructure\Controller\LinkRequestController;
 use App\Access\Infrastructure\Controller\LoginLinkController;
+use App\Access\Infrastructure\Doctrine\DoctrineOrganizerViewFinder;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineAccountRepository;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineOrganizerRepository;
 use App\Access\Infrastructure\Repository\InMemoryAccountRepository;
 use App\Access\Infrastructure\Repository\InMemoryOrganizerRepository;
+use App\Access\Infrastructure\Security\AdminAccessListener;
 use App\Access\Infrastructure\Security\LoginLinkFailureHandler;
 use App\Access\Infrastructure\Security\LoginLinkPersonalLinkIssuer;
 use App\Access\Infrastructure\Security\LoginLinkSuccessHandler;
@@ -55,11 +61,28 @@ return static function (ContainerConfigurator $container): void {
         ->autoconfigure()
         ->autowire()
 
+        ->set(RemoveOrganizerHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
         ->set(RequestPersonalLinkHandler::class)
         ->autoconfigure()
         ->autowire()
 
         ->set(MeProvider::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(DoctrineOrganizerViewFinder::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(OrganizerViewFinder::class, DoctrineOrganizerViewFinder::class)
+
+        ->set(AdminOrganizerProvider::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(AdminOrganizerProcessor::class)
         ->autoconfigure()
         ->autowire()
 
@@ -98,6 +121,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
 
         ->set(SameOriginListener::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(AdminAccessListener::class)
         ->autoconfigure()
         ->autowire()
 

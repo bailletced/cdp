@@ -4,6 +4,50 @@
  */
 
 export interface paths {
+    "/api/admin/organizers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of AdminOrganizer resources.
+         * @description Retrieves the collection of AdminOrganizer resources.
+         */
+        get: operations["api_adminorganizers_get_collection"];
+        put?: never;
+        /**
+         * Creates a AdminOrganizer resource.
+         * @description Creates a AdminOrganizer resource.
+         */
+        post: operations["api_adminorganizers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organizers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Removes the AdminOrganizer resource.
+         * @description Removes the AdminOrganizer resource.
+         */
+        delete: operations["api_adminorganizers_id_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me": {
         parameters: {
             query?: never;
@@ -28,6 +72,65 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdminOrganizer: {
+            id?: string | null;
+            email?: string | null;
+            addedByEmail?: string | null;
+            addedAt?: string | null;
+        };
+        "AdminOrganizer.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string | null;
+            email?: string | null;
+            addedByEmail?: string | null;
+            addedAt?: string | null;
+        };
+        /** @description Unprocessable entity */
+        ConstraintViolation: {
+            /** @default 422 */
+            status: number;
+            violations?: {
+                /** @description The property path of the violation */
+                propertyPath: string;
+                /** @description The message associated with the violation */
+                message: string;
+                /** @description The code of the violation */
+                code?: string;
+                /** @description An extra hint to understand the violation */
+                hint?: string;
+                /** @description The serialized payload of the violation */
+                payload?: {
+                    [key: string]: unknown;
+                };
+            }[];
+            readonly detail?: string;
+            readonly type?: string;
+            readonly title?: string | null;
+            readonly instance?: string | null;
+        };
+        /** @description Unprocessable entity */
+        "ConstraintViolation.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /** @default 422 */
+            status: number;
+            violations?: {
+                /** @description The property path of the violation */
+                propertyPath: string;
+                /** @description The message associated with the violation */
+                message: string;
+                /** @description The code of the violation */
+                code?: string;
+                /** @description An extra hint to understand the violation */
+                hint?: string;
+                /** @description The serialized payload of the violation */
+                payload?: {
+                    [key: string]: unknown;
+                };
+            }[];
+            readonly detail?: string;
+            readonly description?: string;
+            readonly type?: string;
+            readonly title?: string | null;
+            readonly instance?: string | null;
+        };
         /** @description A representation of common errors. */
         Error: {
             /** @description A short, human-readable summary of the problem. */
@@ -61,6 +164,45 @@ export interface components {
             readonly type?: string;
             readonly description?: string | null;
         };
+        HydraCollectionBaseSchema: components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+            /**
+             * @example {
+             *       "@id": "string",
+             *       "@type": "string",
+             *       "first": "string",
+             *       "last": "string",
+             *       "previous": "string",
+             *       "next": "string"
+             *     }
+             */
+            view?: {
+                /** Format: iri-reference */
+                "@id"?: string;
+                "@type"?: string;
+                /** Format: iri-reference */
+                first?: string | null;
+                /** Format: iri-reference */
+                last?: string | null;
+                /** Format: iri-reference */
+                previous?: string | null;
+                /** Format: iri-reference */
+                next?: string | null;
+            };
+        };
+        HydraCollectionBaseSchemaNoPagination: {
+            totalItems?: number;
+            search?: {
+                "@type"?: string;
+                template?: string;
+                variableRepresentation?: string;
+                mapping?: {
+                    "@type"?: string;
+                    variable?: string;
+                    property?: string | null;
+                    required?: boolean;
+                }[];
+            };
+        };
         HydraItemBaseSchema: {
             "@context"?: string | ({
                 "@vocab": string;
@@ -85,6 +227,143 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    api_adminorganizers_get_collection: {
+        parameters: {
+            query?: {
+                /** @description The collection page number */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminOrganizer collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
+                        member: components["schemas"]["AdminOrganizer.jsonld"][];
+                    };
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_adminorganizers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new AdminOrganizer resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["AdminOrganizer"];
+            };
+        };
+        responses: {
+            /** @description AdminOrganizer resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["AdminOrganizer.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_adminorganizers_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description AdminOrganizer identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminOrganizer resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     api_me_get: {
         parameters: {
             query?: never;

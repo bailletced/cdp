@@ -44,6 +44,15 @@ final class LinkRequestContext implements Context
         $this->handleRequest($request);
     }
 
+    #[When('I POST JSON-LD to :path with body:')]
+    public function postJsonLdToWithBody(string $path, PyStringNode $body): void
+    {
+        $request = Request::create($path, 'POST', content: (string) $body);
+        $request->headers->set('Content-Type', 'application/ld+json');
+
+        $this->handleRequest($request);
+    }
+
     #[Then('the response should be the generic accepted response')]
     public function responseShouldBeTheGenericAcceptedResponse(): void
     {

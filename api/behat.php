@@ -15,6 +15,7 @@ return new Config()
                     ->withContexts(
                         App\Tests\Behat\SharedContext::class,
                         App\Tests\Behat\Api\MeContext::class,
+                        App\Tests\Behat\Api\AdminOrganizerContext::class,
                         App\Tests\Behat\Controller\LinkRequestContext::class,
                         App\Tests\Behat\Security\LoginLinkContext::class,
                         App\Tests\Behat\Security\RememberMeContext::class,

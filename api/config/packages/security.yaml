@@ -53,10 +53,9 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # Note: Only the *first* matching rule is applied
-    access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+    # F04-T02: /api/admin/* est gardé par AdminAccessListener (401 visiteur, 403 priant)
+    # plutôt que par access_control, car le remember-me n'est pas « fully authenticated »
+    # et access_control renverrait 401 au lieu de 403 pour un priant authentifié.
 
 when@test:
     security:

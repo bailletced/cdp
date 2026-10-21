@@ -34,7 +34,7 @@ final class SharedContext implements Context
         // Scenarios use fixed email addresses: start each one with a clean
         // account table (same isolation strategy as the functional tests).
         $entityManager = $this->state()->entityManager;
-        $entityManager?->getConnection()->executeStatement('TRUNCATE account CASCADE');
+        $entityManager?->getConnection()->executeStatement('TRUNCATE organizer, account CASCADE');
         $entityManager?->clear();
     }
 
@@ -70,6 +70,13 @@ final class SharedContext implements Context
         $this->handleRequest($request);
     }
 
+    #[When('I make a DELETE request to :path')]
+    public function makeDeleteRequest(string $path): void
+    {
+        $request = Request::create($path, 'DELETE');
+        $this->handleRequest($request);
+    }
+
     #[Then('the response should be :expectedStatus')]
     public function responseShouldBe(string $expectedStatus): void
     {
@@ -90,19 +97,78 @@ final class SharedContext implements Context
         }
 
         $data = json_decode($state->lastResponseContent, true);
+        $actual = $this->resolveJsonPath($data, $key);
 
-        if (!isset($data[$key])) {
+        if (null === $actual && !\array_key_exists($key, $data ?? [])) {
             throw new \RuntimeException("JSON response does not contain key '$key'");
         }
 
-        $actual = $data[$key];
         if (\is_bool($actual)) {
             $actual = $actual ? 'true' : 'false';
         }
 
         if ((string) $actual !== $expectedValue) {
-            throw new \RuntimeException(\sprintf("Expected '%s' for key '$key', got '%s'", $expectedValue, $actual));
+            throw new \RuntimeException(\sprintf("Expected '%s' for key '%s', got '%s'", $expectedValue, $key, $actual));
         }
+    }
+
+    #[Then('the response should contain a JSON array with :count member')]
+    public function responseShouldContainJsonArrayWithMember(int $count): void
+    {
+        $this->assertJsonArrayCount($count);
+    }
+
+    #[Then('the response should contain a JSON array with :count members')]
+    public function responseShouldContainJsonArrayWithMembers(int $count): void
+    {
+        $this->assertJsonArrayCount($count);
+    }
+
+    private function assertJsonArrayCount(int $expectedCount): void
+    {
+        $state = $this->state();
+        if (null === $state->lastResponseContent) {
+            throw new \RuntimeException('No response content available');
+        }
+
+        $data = json_decode($state->lastResponseContent, true);
+        // API Platform 5 uses "member" (JSON-LD) or "hydra:member" (Hydra)
+        $members = $data['member'] ?? $data['hydra:member'] ?? null;
+
+        if (!\is_array($members)) {
+            throw new \RuntimeException('Response does not contain a JSON array');
+        }
+
+        $actualCount = \count($members);
+        if ($actualCount !== $expectedCount) {
+            throw new \RuntimeException(\sprintf('Expected JSON array with %d member(s), got %d', $expectedCount, $actualCount));
+        }
+    }
+
+    /**
+     * Resolve a dot-notation path (e.g. "hydra:member.0.email") in a decoded
+     * JSON array.
+     *
+     * @param array<string, mixed>|null $data
+     */
+    private function resolveJsonPath(?array $data, string $path): mixed
+    {
+        if (null === $data) {
+            return null;
+        }
+
+        $segments = explode('.', $path);
+        $current = $data;
+
+        foreach ($segments as $segment) {
+            if (\is_array($current) && \array_key_exists($segment, $current)) {
+                $current = $current[$segment];
+            } else {
+                return null;
+            }
+        }
+
+        return $current;
     }
 
     #[Then('the response should redirect to :expectedPath')]
@@ -151,6 +217,7 @@ final class SharedContext implements Context
             '401 Unauthorized' => Response::HTTP_UNAUTHORIZED,
             '403 Forbidden' => Response::HTTP_FORBIDDEN,
             '404 Not Found' => Response::HTTP_NOT_FOUND,
+            '422 Unprocessable Entity' => Response::HTTP_UNPROCESSABLE_ENTITY,
             '500 Internal Server Error' => Response::HTTP_INTERNAL_SERVER_ERROR,
         ];
 
