@@ -9,11 +9,8 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Chain\Application\ScheduleEdition;
 use App\Chain\Application\UnscheduleEdition;
-use App\Chain\Domain\Entity\Edition;
-use App\Chain\Domain\Exception\EditionNotFoundException;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Shared\Application\Command\CommandBusInterface;
-use App\Shared\Infrastructure\ApiPlatform\Exception\MissingModelException;
 
 /**
  * Processes schedule/unschedule operations on AdminEdition (F05-T16).
@@ -44,14 +41,11 @@ final readonly class AdminEditionScheduleProcessor implements ProcessorInterface
 
         $uriTemplate = $operation instanceof HttpOperation ? ($operation->getUriTemplate() ?? '') : '';
 
-        try {
-            if (str_contains($uriTemplate, '/schedule')) {
-                $this->commandBus->dispatch(new ScheduleEdition($editionId));
-            } elseif (str_contains($uriTemplate, '/unschedule')) {
-                $this->commandBus->dispatch(new UnscheduleEdition($editionId));
-            }
-        } catch (EditionNotFoundException $e) {
-            throw new MissingModelException(Edition::class, $e);
+        // EditionNotFoundException propagates: the DomainException mechanism maps it to a 404.
+        if (str_contains($uriTemplate, '/schedule')) {
+            $this->commandBus->dispatch(new ScheduleEdition($editionId));
+        } elseif (str_contains($uriTemplate, '/unschedule')) {
+            $this->commandBus->dispatch(new UnscheduleEdition($editionId));
         }
 
         return new AdminEdition(id: (string) $editionId);

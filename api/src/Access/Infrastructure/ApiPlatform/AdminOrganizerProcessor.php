@@ -12,11 +12,9 @@ use App\Access\Application\AddOrganizer;
 use App\Access\Application\AddOrganizerResult;
 use App\Access\Application\Query\OrganizerViewFinder;
 use App\Access\Application\RemoveOrganizer;
-use App\Access\Domain\Exception\LastOrganizerException;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Email;
 use InvalidArgumentException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Processes write operations on AdminOrganizer (F04-T02).
@@ -82,10 +80,7 @@ final readonly class AdminOrganizerProcessor implements ProcessorInterface
             throw new \LogicException('Cannot delete an organizer without an email.');
         }
 
-        try {
-            $this->commandBus->dispatch(new RemoveOrganizer(new Email($data->email)));
-        } catch (LastOrganizerException $e) {
-            throw new UnprocessableEntityHttpException($e->getMessage(), $e);
-        }
+        // LastOrganizerException propagates: the DomainException mechanism maps it to a 400.
+        $this->commandBus->dispatch(new RemoveOrganizer(new Email($data->email)));
     }
 }

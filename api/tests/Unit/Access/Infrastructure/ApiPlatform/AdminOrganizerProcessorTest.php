@@ -11,15 +11,15 @@ use App\Access\Infrastructure\ApiPlatform\AdminOrganizer;
 use App\Access\Infrastructure\ApiPlatform\AdminOrganizerProcessor;
 use App\Shared\Application\Command\CommandBusInterface;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * F04-T02 : le processor mappe LastOrganizerException → 422 Unprocessable Entity
- * (refus de supprimer le dernier organisateur), et non 409.
+ * F04-T02 : le processor laisse remonter LastOrganizerException (refus de
+ * supprimer le dernier organisateur) — le mécanisme DomainException la
+ * traduit en 400, sans conversion dans la couche Infrastructure.
  */
 final class AdminOrganizerProcessorTest extends TestCase
 {
-    public function testRemovingLastOrganizerThrows422(): void
+    public function testRemovingLastOrganizerThrowsLastOrganizerException(): void
     {
         $commandBus = $this->createStub(CommandBusInterface::class);
         $commandBus->method('dispatch')->willThrowException(new LastOrganizerException());
@@ -31,7 +31,7 @@ final class AdminOrganizerProcessorTest extends TestCase
         $data = new AdminOrganizer(id: 'id-1', email: 'anne@bailletced.org');
         $operation = $this->createStub(Operation::class);
 
-        $this->expectException(UnprocessableEntityHttpException::class);
+        $this->expectException(LastOrganizerException::class);
 
         $processor->process($data, $operation);
     }

@@ -88,7 +88,7 @@ Feature: Admin organizers API (F04-T02)
         And I am logged in as this account
         When I get the organizer id for "anne@bailletced.org"
         And I make a DELETE request to "/api/admin/organizers/" with the captured organizer id
-        Then the response should be "422 Unprocessable Entity"
+        Then the response should be "400 Bad Request"
 
     Scenario: Visitor gets a 401 on POST
         When I POST JSON-LD to "/api/admin/organizers" with body:

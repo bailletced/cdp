@@ -71,7 +71,7 @@ export function OrganisationPage() {
       setRemoving(null);
     } catch (error) {
       setRemoving(null);
-      // The API refuses removing the last organizer (422): show its reason
+      // The API refuses removing the last organizer (400): show its reason
       setRemoveError(
         getApiErrorDetail(error) ??
           "L'organisateur n'a pas pu être retiré. Veuillez réessayer.",

@@ -17,8 +17,6 @@ use App\Chain\Infrastructure\ApiPlatform\AdminEdition;
 use App\Chain\Infrastructure\ApiPlatform\AdminEditionProcessor;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Command\CommandInterface;
-use App\Shared\Infrastructure\ApiPlatform\Exception\ConflictException;
-use App\Shared\Infrastructure\ApiPlatform\Exception\MissingModelException;
 use PHPUnit\Framework\TestCase;
 
 final class AdminEditionProcessorTest extends TestCase
@@ -110,7 +108,7 @@ final class AdminEditionProcessorTest extends TestCase
             version: 1,
         );
 
-        $this->expectException(MissingModelException::class);
+        $this->expectException(EditionNotFoundException::class);
 
         $processor->process($data, new Patch(), ['id' => (string) new EditionId()], []);
     }
@@ -133,7 +131,7 @@ final class AdminEditionProcessorTest extends TestCase
             version: 1,
         );
 
-        $this->expectException(ConflictException::class);
+        $this->expectException(EditionVersionConflictException::class);
 
         $processor->process($data, new Patch(), ['id' => (string) new EditionId()], []);
     }

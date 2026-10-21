@@ -13,7 +13,6 @@ use App\Chain\Infrastructure\ApiPlatform\AdminEdition;
 use App\Chain\Infrastructure\ApiPlatform\AdminEditionScheduleProcessor;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Command\CommandInterface;
-use App\Shared\Infrastructure\ApiPlatform\Exception\MissingModelException;
 use PHPUnit\Framework\TestCase;
 
 final class AdminEditionScheduleProcessorTest extends TestCase
@@ -84,7 +83,7 @@ final class AdminEditionScheduleProcessorTest extends TestCase
 
         $processor = new AdminEditionScheduleProcessor($commandBus);
 
-        $this->expectException(MissingModelException::class);
+        $this->expectException(EditionNotFoundException::class);
 
         $processor->process(
             new AdminEdition(),

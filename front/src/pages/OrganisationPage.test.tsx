@@ -236,7 +236,7 @@ describe("OrganisationPage", () => {
     expect(screen.getByText("anne@bailletced.org")).toBeInTheDocument();
   });
 
-  it("refuses to remove the last organizer (422)", async () => {
+  it("refuses to remove the last organizer (400)", async () => {
     server.use(
       http.get("http://localhost:8080/api/me", () => {
         return HttpResponse.json({
@@ -267,13 +267,13 @@ describe("OrganisationPage", () => {
         return HttpResponse.json(
           {
             "@context": "/api/contexts/Error",
-            "@id": "/api/errors/422",
+            "@id": "/api/errors/400",
             "@type": "Error",
             title: "An error occurred",
             detail: "Il doit toujours rester au moins un organisateur.",
-            status: 422,
+            status: 400,
           },
-          { status: 422 },
+          { status: 400 },
         );
       }),
     );
@@ -287,7 +287,7 @@ describe("OrganisationPage", () => {
     );
     fireEvent.click(await screen.findByRole("button", { name: "Retirer" }));
 
-    // The API refuses (422): the reason is shown and the organizer stays
+    // The API refuses (400): the reason is shown and the organizer stays
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Il doit toujours rester au moins un organisateur.",
     );

@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Normalise les réponses d'erreur et ajoute les en-têtes Cache-Control.
  *
  * - 422 : violations[] avec propertyPath (déjà géré par API Platform)
- * - 409 : erreurs d'unicité et verrou optimiste (via ConflictException)
+ * - 409 : conflits métier (exceptions domaine, ex. EditionVersionConflictException)
  * - 403 : erreurs d'autorisation (via AccessDeniedException)
  * - Cache-Control: private, no-store par défaut
  */

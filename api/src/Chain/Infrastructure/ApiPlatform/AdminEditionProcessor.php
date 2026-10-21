@@ -13,15 +13,10 @@ use App\Chain\Application\CreateEdition;
 use App\Chain\Application\CreateEditionResult;
 use App\Chain\Application\UpdateEdition;
 use App\Chain\Application\UpdateEditionResult;
-use App\Chain\Domain\Entity\Edition;
-use App\Chain\Domain\Exception\EditionNotFoundException;
-use App\Chain\Domain\Exception\EditionVersionConflictException;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
 use App\Shared\Application\Command\CommandBusInterface;
-use App\Shared\Infrastructure\ApiPlatform\Exception\ConflictException;
-use App\Shared\Infrastructure\ApiPlatform\Exception\MissingModelException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 
@@ -101,20 +96,15 @@ final readonly class AdminEditionProcessor implements ProcessorInterface
         $expectedVersion = $data->version ?? 1;
         [$startsAt, $opensAt] = $this->parseParisDates($data->startsAt, $data->opensAt);
 
-        try {
-            $result = $this->commandBus->dispatch(new UpdateEdition(
-                $editionId,
-                $this->toTitle($data->title),
-                $this->toPresentation($data->presentation),
-                $startsAt,
-                $opensAt,
-                $expectedVersion,
-            ));
-        } catch (EditionNotFoundException $e) {
-            throw new MissingModelException(Edition::class, $e);
-        } catch (EditionVersionConflictException $e) {
-            throw new ConflictException($e->getMessage(), $e);
-        }
+        // Domain exceptions propagate: the DomainException mechanism maps them to 404/409.
+        $result = $this->commandBus->dispatch(new UpdateEdition(
+            $editionId,
+            $this->toTitle($data->title),
+            $this->toPresentation($data->presentation),
+            $startsAt,
+            $opensAt,
+            $expectedVersion,
+        ));
 
         if (!$result instanceof UpdateEditionResult) {
             throw new \LogicException(\sprintf('Expected the command bus to return an %s, got %s.', UpdateEditionResult::class, get_debug_type($result)));
