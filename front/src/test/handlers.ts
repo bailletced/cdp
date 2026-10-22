@@ -54,4 +54,15 @@ export const handlers = [
       { status: 404 },
     );
   }),
+  // GET /api/editions/{id}/slots: an empty grid by default (F08-T04) —
+  // tests showing slots override this handler with server.use()
+  http.get("http://localhost:8080/api/editions/:id/slots", () => {
+    return HttpResponse.json({
+      "@context": "/api/contexts/PublicEditionSlots",
+      "@id": "/api/editions/current/slots",
+      "@type": "PublicEditionSlots",
+      id: "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b",
+      slots: [],
+    });
+  }),
 ];

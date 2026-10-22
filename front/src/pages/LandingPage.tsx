@@ -5,6 +5,7 @@ import { useCurrentEdition } from "../api/hooks";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
+import { PlanningGrid } from "../components/PlanningGrid";
 import { SITE_NAME } from "../config/site";
 import { formatParisDateTime } from "../lib/editions";
 
@@ -20,7 +21,8 @@ type SubmissionState = "idle" | "submitting" | "sent" | "error";
  * The header shows the current public edition — community name, title,
  * dates and presentation (US-08.1) — or, when no edition is open, a sober
  * presentation of the Communion with « La prochaine édition sera bientôt
- * annoncée » and a « Recevoir mon lien » link (arbitrage Q18).
+ * annoncée » and a « Recevoir mon lien » link (arbitrage Q18). Below the
+ * header of an open edition, the planning grid of its slots (US-08.2).
  *
  * Below the header, a single-field registration form: submitting an email
  * creates the account (if needed) and sends a personal login link. The API
@@ -79,23 +81,28 @@ export function LandingPage() {
           />
         </>
       ) : editionQuery.data ? (
-        <header className="mb-8">
-          <p className="text-muted">{SITE_NAME}</p>
-          <PageTitle>
-            {editionQuery.data.title ?? "24 heures de prière"}
-          </PageTitle>
-          <p className="text-muted">
-            Début : {formatParisDateTime(editionQuery.data.startsAt)} (heure de
-            Paris)
-          </p>
-          <p className="text-muted">
-            Ouverture des inscriptions :{" "}
-            {formatParisDateTime(editionQuery.data.opensAt)} (heure de Paris)
-          </p>
-          {editionQuery.data.presentation ? (
-            <p className="mt-4">{editionQuery.data.presentation}</p>
+        <>
+          <header className="mb-8">
+            <p className="text-muted">{SITE_NAME}</p>
+            <PageTitle>
+              {editionQuery.data.title ?? "24 heures de prière"}
+            </PageTitle>
+            <p className="text-muted">
+              Début : {formatParisDateTime(editionQuery.data.startsAt)} (heure
+              de Paris)
+            </p>
+            <p className="text-muted">
+              Ouverture des inscriptions :{" "}
+              {formatParisDateTime(editionQuery.data.opensAt)} (heure de Paris)
+            </p>
+            {editionQuery.data.presentation ? (
+              <p className="mt-4">{editionQuery.data.presentation}</p>
+            ) : null}
+          </header>
+          {editionQuery.data.id ? (
+            <PlanningGrid editionId={editionQuery.data.id} />
           ) : null}
-        </header>
+        </>
       ) : (
         <header className="mb-8">
           <PageTitle>24 heures de prière</PageTitle>

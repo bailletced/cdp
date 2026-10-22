@@ -102,10 +102,10 @@ export const PART_OF_DAY_LABELS: Record<string, string> = {
   afternoon: "Après-midi",
 };
 
-export interface SlotGroup {
+export interface SlotGroup<T> {
   partOfDay: string;
   label: string;
-  slots: EditionSlot[];
+  slots: T[];
 }
 
 /**
@@ -113,8 +113,10 @@ export interface SlotGroup {
  * edition wraps past midnight: two separate « evening » runs stay in two
  * groups rather than merging out of order.
  */
-export function groupSlotsByPartOfDay(slots: EditionSlot[]): SlotGroup[] {
-  const groups: SlotGroup[] = [];
+export function groupSlotsByPartOfDay<T extends { partOfDay: string }>(
+  slots: T[],
+): SlotGroup<T>[] {
+  const groups: SlotGroup<T>[] = [];
 
   for (const slot of slots) {
     const last = groups.at(-1);

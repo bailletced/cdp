@@ -1,13 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SITE_NAME } from "../config/site";
 import { server } from "../test/setup";
 import { LandingPage } from "./LandingPage";
 
 const CONFIRMATION_MESSAGE =
   "Un lien de connexion vient de vous être envoyé à cette adresse.";
+
+beforeEach(() => {
+  // Deterministic local time: a Paris visitor sees no local-time suffix (RG-PL-3)
+  vi.stubEnv("TZ", "Europe/Paris");
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 // A fresh QueryClient per test so the ['public', 'editions', 'current']
 // cache never leaks between tests
@@ -29,6 +38,8 @@ function renderPage() {
 
 const CURRENT_EDITION_URL = "http://localhost:8080/api/editions/current";
 
+const EDITION_ID = "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b";
+
 function openEdition() {
   server.use(
     http.get(CURRENT_EDITION_URL, () => {
@@ -36,7 +47,7 @@ function openEdition() {
         "@context": "/api/contexts/PublicEdition",
         "@id": "/api/editions/current",
         "@type": "PublicEdition",
-        id: "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b",
+        id: EDITION_ID,
         title: "24 heures de prière — novembre 2026",
         presentation: "Une chaîne de prière continue.",
         startsAt: "2026-11-27T18:00:00+00:00",
@@ -44,6 +55,30 @@ function openEdition() {
         startsAtLabel: "19h00–19h30",
         opensAtLabel: "19h00–19h30",
         status: "open",
+      });
+    }),
+  );
+
+  server.use(
+    http.get(`http://localhost:8080/api/editions/${EDITION_ID}/slots`, () => {
+      return HttpResponse.json({
+        "@context": "/api/contexts/PublicEditionSlots",
+        "@id": `/api/editions/${EDITION_ID}/slots`,
+        "@type": "PublicEditionSlots",
+        id: EDITION_ID,
+        slots: [
+          {
+            id: "slot-1",
+            rank: 1,
+            startsAt: "2026-11-27T18:00:00+00:00",
+            endsAt: "2026-11-27T18:30:00+00:00",
+            label: "19h00–19h30",
+            partOfDay: "evening",
+            state: "future",
+            textTitle: "Oraison de Thérèse",
+            textSource: "Thérèse de Lisieux",
+          },
+        ],
       });
     }),
   );
@@ -74,6 +109,15 @@ describe("LandingPage", () => {
     expect(
       screen.getByText("Une chaîne de prière continue."),
     ).toBeInTheDocument();
+
+    // The planning grid of the edition is displayed (US-08.2)
+    expect(
+      await screen.findByRole("region", { name: "Grille des créneaux" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Soirée" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("19h00–19h30")).toBeInTheDocument();
 
     // The registration form stays available
     expect(

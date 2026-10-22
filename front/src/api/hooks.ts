@@ -79,6 +79,34 @@ export function useCurrentEdition() {
 }
 
 /**
+ * Public planning slots (GET /api/editions/{id}/slots, F08-T04).
+ * Refreshed every 60 s and on window focus: the slot states (past / current)
+ * follow the server clock (US-08.4).
+ */
+export const editionSlotsQueryOptions = (editionId: string) =>
+  ({
+    queryKey: ["public", "editions", editionId, "slots"],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET("/api/editions/{id}/slots", {
+        params: { path: { id: editionId } },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+    retry: false,
+  }) as const;
+
+export function useEditionSlots(editionId: string) {
+  return useQuery(editionSlotsQueryOptions(editionId));
+}
+
+/**
  * Organizers list (GET /api/admin/organizers, F04-T05).
  * Reserved to organizers: the /organisation route guard rejects other
  * profiles before this query ever runs.
