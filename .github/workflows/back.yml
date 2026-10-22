@@ -50,13 +50,10 @@ jobs:
           composer-options: '--prefer-dist --no-progress --no-interaction'
           working-directory: api
 
-      - name: Cache Composer
-        uses: actions/cache@v3
-        with:
-          path: api/vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('api/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
+      # Pas de actions/cache sur api/vendor ici : ramsey/composer-install gère déjà
+      # le cache (restore AVANT install, et `composer install` répare le vendor).
+      # Un restore après l'install avec restore-keys en préfixe écrasait le vendor
+      # neuf par un cache d'un lockfile antérieur (vendor incomplet → PHPStan rouge).
 
       - name: Run QA (Rector, PHP-CS-Fixer, PHPStan, deptrac)
         run: make qa-back PHP="cd api &&"
