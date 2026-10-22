@@ -48,7 +48,7 @@ final class AssignTextHandlerTest extends TestCase
         $edition = self::createEdition();
         $editionRepository->add($edition);
         $slot = $edition->getSlots()[0];
-        $slot->setTextId((new TextId())->value);
+        $slot->setTextId(new TextId()->value);
 
         $handler = new AssignTextHandler($editionRepository, $textRepository);
 

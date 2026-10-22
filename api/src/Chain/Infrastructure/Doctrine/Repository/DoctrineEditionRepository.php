@@ -37,7 +37,10 @@ final class DoctrineEditionRepository extends ServiceEntityRepository implements
             ->setParameter('slotId', $slotId->value->toRfc4122())
             ->setMaxResults(1);
 
-        return $qb->getQuery()->getOneOrNullResult();
+        /** @var Edition|null $result */
+        $result = $qb->getQuery()->getOneOrNullResult();
+
+        return $result;
     }
 
     public function findAll(): array

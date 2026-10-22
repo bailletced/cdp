@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Chain\Application\AssignTextHandler;
 use App\Chain\Application\CreateEditionHandler;
 use App\Chain\Application\CreateTextHandler;
-use App\Chain\Application\DistributeTextsHandler;
 use App\Chain\Application\DeleteTextHandler;
+use App\Chain\Application\DistributeTextsHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
@@ -18,8 +18,10 @@ use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionDistributeTextsProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminSlotProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminTextProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
@@ -133,6 +135,14 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(AdminTextProcessor::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(AdminSlotProcessor::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(AdminEditionDistributeTextsProcessor::class)
         ->autoconfigure()
         ->autowire();
 

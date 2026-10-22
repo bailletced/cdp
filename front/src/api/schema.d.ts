@@ -52,6 +52,26 @@ export interface paths {
         patch: operations["api_admineditions_id_patch"];
         trace?: never;
     };
+    "/api/admin/editions/{id}/distribute-texts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a AdminEdition resource.
+         * @description Creates a AdminEdition resource.
+         */
+        post: operations["api_admineditions_iddistribute-texts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/editions/{id}/schedule": {
         parameters: {
             query?: never;
@@ -131,6 +151,26 @@ export interface paths {
          * @description Removes the AdminOrganizer resource.
          */
         delete: operations["api_adminorganizers_id_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/slots/{id}/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replaces the AdminSlot resource.
+         * @description Replaces the AdminSlot resource.
+         */
+        put: operations["api_adminslots_idtext_put"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -225,6 +265,8 @@ export interface components {
             scheduledAt?: string | null;
             version?: number | null;
             slots?: unknown[] | null;
+            textIds?: unknown[] | null;
+            fromRank?: number | null;
         };
         "AdminEdition.jsonMergePatch": {
             id?: string | null;
@@ -239,6 +281,8 @@ export interface components {
             scheduledAt?: string | null;
             version?: number | null;
             slots?: unknown[] | null;
+            textIds?: unknown[] | null;
+            fromRank?: number | null;
         };
         "AdminEdition.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;
@@ -253,6 +297,8 @@ export interface components {
             scheduledAt?: string | null;
             version?: number | null;
             slots?: unknown[] | null;
+            textIds?: unknown[] | null;
+            fromRank?: number | null;
         };
         AdminOrganizer: {
             id?: string | null;
@@ -265,6 +311,14 @@ export interface components {
             email?: string | null;
             addedByEmail?: string | null;
             addedAt?: string | null;
+        };
+        AdminSlot: {
+            id?: string | null;
+            textId?: string | null;
+        };
+        "AdminSlot.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string | null;
+            textId?: string | null;
         };
         AdminText: {
             id?: string | null;
@@ -644,6 +698,67 @@ export interface operations {
             };
         };
     };
+    "api_admineditions_iddistribute-texts_post": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description AdminEdition identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new AdminEdition resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["AdminEdition"];
+            };
+        };
+        responses: {
+            /** @description AdminEdition resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["AdminEdition.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     api_admineditions_idschedule_post: {
         parameters: {
             query?: never;
@@ -899,6 +1014,78 @@ export interface operations {
                     "application/ld+json": components["schemas"]["Error.jsonld"];
                     "application/problem+json": components["schemas"]["Error"];
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_adminslots_idtext_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description AdminSlot identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated AdminSlot resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["AdminSlot"];
+            };
+        };
+        responses: {
+            /** @description AdminSlot resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["AdminSlot.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
                 };
             };
         };

@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionDistributeTextsProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
@@ -59,12 +60,20 @@ use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
             processor: AdminEditionScheduleProcessor::class,
             security: 'is_granted("ROLE_ORGANIZER")',
         ),
+        new Post(
+            uriTemplate: '/admin/editions/{id}/distribute-texts',
+            processor: AdminEditionDistributeTextsProcessor::class,
+            read: false,
+            status: 200,
+            security: 'is_granted("ROLE_ORGANIZER")',
+        ),
     ],
 )]
 final class AdminEditionResource
 {
     /**
      * @param array<array{rank: int, startsAt: string, endsAt: string, label: string, partOfDay: string, textId: string|null}>|null $slots
+     * @param list<string>|null                                                                                                     $textIds
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
@@ -82,6 +91,8 @@ final class AdminEditionResource
         public readonly ?string $scheduledAt = null,
         public readonly ?int $version = null,
         public readonly ?array $slots = null,
+        public readonly ?array $textIds = null,
+        public readonly ?int $fromRank = null,
     ) {
     }
 }

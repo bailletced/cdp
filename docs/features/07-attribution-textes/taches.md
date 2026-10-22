@@ -15,7 +15,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F07-T01** · `back` `Edition::assignText(SlotId, ?TextId)` et `Edition::distributeTexts(TextId[], fromRank)` (troncature au créneau 48) + tests unitaires — *Dépend de* : F05-T06, F06-T02 · *Fini quand* : répartition, troncature et retrait testés.
 - [x] **F07-T02** · `back` Commandes `AssignText` et `DistributeTexts` (textes existants vérifiés, verrou de version) + tests fonctionnels — *Dépend de* : F07-T01, F06-T03, F05-T09 · *Fini quand* : texte inconnu → erreur, conflit de version testé.
-- [ ] **F07-T03** · `back` `PUT /api/admin/slots/{id}/text` et `POST /api/admin/editions/{id}/distribute-texts` + tests d'acceptation — *Dépend de* : F07-T02, F05-T14 · *Fini quand* : OpenAPI régénéré, 404/409/422 testés.
+- [x] **F07-T03** · `back` `PUT /api/admin/slots/{id}/text` et `POST /api/admin/editions/{id}/distribute-texts` + tests d'acceptation — *Dépend de* : F07-T02, F05-T14 · *Fini quand* : OpenAPI régénéré, 404/409/422 testés.
 
 ## Avertissements (US-07.1, US-07.3)
 

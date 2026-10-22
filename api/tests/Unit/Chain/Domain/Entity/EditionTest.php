@@ -309,7 +309,7 @@ final class EditionTest extends TestCase
     {
         $edition = self::createEdition();
         $slot = $edition->getSlots()[0];
-        $slot->setTextId((new \App\Chain\Domain\ValueObject\TextId())->value);
+        $slot->setTextId(new \App\Chain\Domain\ValueObject\TextId()->value);
 
         $edition->assignText($slot->getId(), null);
 
@@ -376,7 +376,7 @@ final class EditionTest extends TestCase
     {
         $edition = self::createEdition();
         $slots = $edition->getSlots();
-        $slots[0]->setTextId((new \App\Chain\Domain\ValueObject\TextId())->value);
+        $slots[0]->setTextId(new \App\Chain\Domain\ValueObject\TextId()->value);
 
         $newTextId = new \App\Chain\Domain\ValueObject\TextId();
         $edition->distributeTexts([$newTextId], 1);
