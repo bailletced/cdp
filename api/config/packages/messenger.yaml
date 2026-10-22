@@ -48,7 +48,7 @@ framework:
                     use_notify: true
         routing:
             App\Shared\Application\Command\CommandInterface: sync
-            App\Shared\Domain\Event\EventInterface: sync
+            App\Shared\Domain\Event\DomainEvent: sync
             # Messages transactionnels (haute priorité)
             App\Shared\Application\Message\ConfirmationMessage: async_transactional
             App\Shared\Application\Message\LinkMessage: async_transactional
