@@ -6,9 +6,11 @@ namespace App\Chain\Domain\Entity;
 
 use App\Chain\Domain\Event\EditionScheduled;
 use App\Chain\Domain\Event\EditionUnscheduled;
+use App\Chain\Domain\Exception\SlotNotFoundException;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
+use App\Chain\Domain\ValueObject\SlotId;
 use App\Chain\Domain\ValueObject\TextId;
 use App\Shared\Domain\Time\ParisCalendar;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -282,6 +284,71 @@ class Edition
                 $slot->setTextId(null);
             }
         }
+    }
+
+    /**
+     * Assign (or withdraw, with null) a text to a single slot (US-07.1).
+     *
+     * @throws SlotNotFoundException if the slot does not belong to this edition
+     */
+    public function assignText(SlotId $slotId, ?TextId $textId): void
+    {
+        $slot = $this->findSlot($slotId);
+
+        $slot->setTextId($textId?->value);
+    }
+
+    /**
+     * Distribute an ordered list of texts starting at the given rank (US-07.2).
+     *
+     * The list is truncated at slot 48: texts beyond the last slot are ignored.
+     *
+     * @param list<TextId> $textIds
+     */
+    public function distributeTexts(array $textIds, int $fromRank): void
+    {
+        $rank = $fromRank;
+        foreach ($textIds as $textId) {
+            if ($rank > 48) {
+                break;
+            }
+
+            $slot = $this->findSlotByRank($rank);
+            $slot->setTextId($textId->value);
+            ++$rank;
+        }
+    }
+
+    /**
+     * Find a slot by its identifier within this edition.
+     *
+     * @throws SlotNotFoundException
+     */
+    private function findSlot(SlotId $slotId): Slot
+    {
+        foreach ($this->slots as $slot) {
+            if ($slot->getId()->equals($slotId)) {
+                return $slot;
+            }
+        }
+
+        throw new SlotNotFoundException();
+    }
+
+    /**
+     * Find a slot by its rank (1-based) within this edition.
+     *
+     * @throws SlotNotFoundException
+     */
+    private function findSlotByRank(int $rank): Slot
+    {
+        foreach ($this->slots as $slot) {
+            if ($slot->getRank() === $rank) {
+                return $slot;
+            }
+        }
+
+        throw new SlotNotFoundException();
     }
 
     /**

@@ -293,4 +293,105 @@ final class EditionTest extends TestCase
         self::assertSame('Nouveau titre', $edition->getTitle()->value);
         self::assertSame('Nouvelle présentation', $edition->getPresentation()->value);
     }
+
+    public function testAssignTextSetsTextIdOnTheMatchingSlot(): void
+    {
+        $edition = self::createEdition();
+        $slot = $edition->getSlots()[0];
+        $textId = new \App\Chain\Domain\ValueObject\TextId();
+
+        $edition->assignText($slot->getId(), $textId);
+
+        self::assertTrue($slot->getTextId()?->equals($textId->value));
+    }
+
+    public function testAssignTextWithNullRemovesTheTextId(): void
+    {
+        $edition = self::createEdition();
+        $slot = $edition->getSlots()[0];
+        $slot->setTextId((new \App\Chain\Domain\ValueObject\TextId())->value);
+
+        $edition->assignText($slot->getId(), null);
+
+        self::assertNull($slot->getTextId());
+    }
+
+    public function testAssignTextOnUnknownSlotThrowsSlotNotFound(): void
+    {
+        $edition = self::createEdition();
+
+        $this->expectException(\App\Chain\Domain\Exception\SlotNotFoundException::class);
+
+        $edition->assignText(new \App\Chain\Domain\ValueObject\SlotId(), new \App\Chain\Domain\ValueObject\TextId());
+    }
+
+    public function testDistributeTextsAssignsTextsSequentiallyFromTheGivenRank(): void
+    {
+        $edition = self::createEdition();
+        $textIds = [
+            new \App\Chain\Domain\ValueObject\TextId(),
+            new \App\Chain\Domain\ValueObject\TextId(),
+            new \App\Chain\Domain\ValueObject\TextId(),
+        ];
+
+        $edition->distributeTexts($textIds, 1);
+
+        $slots = $edition->getSlots();
+        self::assertTrue($slots[0]->getTextId()?->equals($textIds[0]->value));
+        self::assertTrue($slots[1]->getTextId()?->equals($textIds[1]->value));
+        self::assertTrue($slots[2]->getTextId()?->equals($textIds[2]->value));
+        self::assertNull($slots[3]->getTextId());
+    }
+
+    public function testDistributeTextsTruncatesAtSlot48(): void
+    {
+        $edition = self::createEdition();
+        $textIds = [];
+        for ($i = 0; $i < 10; ++$i) {
+            $textIds[] = new \App\Chain\Domain\ValueObject\TextId();
+        }
+
+        $edition->distributeTexts($textIds, 40);
+
+        $slots = $edition->getSlots();
+        // Slots 40 to 48 (ranks 40–48) are filled: 9 slots
+        self::assertTrue($slots[39]->getTextId()?->equals($textIds[0]->value));
+        self::assertTrue($slots[47]->getTextId()?->equals($textIds[8]->value));
+        // The 10th text is truncated (no slot 49)
+        self::assertCount(48, $slots);
+    }
+
+    public function testDistributeTextsWithEmptyListLeavesSlotsUntouched(): void
+    {
+        $edition = self::createEdition();
+
+        $edition->distributeTexts([], 1);
+
+        foreach ($edition->getSlots() as $slot) {
+            self::assertNull($slot->getTextId());
+        }
+    }
+
+    public function testDistributeTextsOverwritesExistingAttributions(): void
+    {
+        $edition = self::createEdition();
+        $slots = $edition->getSlots();
+        $slots[0]->setTextId((new \App\Chain\Domain\ValueObject\TextId())->value);
+
+        $newTextId = new \App\Chain\Domain\ValueObject\TextId();
+        $edition->distributeTexts([$newTextId], 1);
+
+        self::assertTrue($slots[0]->getTextId()?->equals($newTextId->value));
+    }
+
+    private static function createEdition(): Edition
+    {
+        return Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+    }
 }

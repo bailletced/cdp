@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Chain\Application\AssignTextHandler;
 use App\Chain\Application\CreateEditionHandler;
 use App\Chain\Application\CreateTextHandler;
+use App\Chain\Application\DistributeTextsHandler;
 use App\Chain\Application\DeleteTextHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
@@ -87,6 +89,14 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(DeleteTextHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(AssignTextHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(DistributeTextsHandler::class)
         ->autoconfigure()
         ->autowire();
 

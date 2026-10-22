@@ -7,6 +7,7 @@ namespace App\Chain\Infrastructure\Doctrine\Repository;
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Domain\ValueObject\SlotId;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
@@ -26,6 +27,17 @@ final class DoctrineEditionRepository extends ServiceEntityRepository implements
     public function findById(EditionId $id): ?Edition
     {
         return $this->findOneBy(['id.value' => $id->value->toRfc4122()]);
+    }
+
+    public function findBySlotId(SlotId $slotId): ?Edition
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->innerJoin('e.slots', 's')
+            ->where('s.id.value = :slotId')
+            ->setParameter('slotId', $slotId->value->toRfc4122())
+            ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function findAll(): array

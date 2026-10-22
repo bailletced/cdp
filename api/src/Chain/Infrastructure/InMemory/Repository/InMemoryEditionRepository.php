@@ -7,6 +7,7 @@ namespace App\Chain\Infrastructure\InMemory\Repository;
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Domain\ValueObject\SlotId;
 
 /**
  * In-memory implementation of EditionRepositoryInterface for testing purposes.
@@ -21,6 +22,19 @@ final class InMemoryEditionRepository implements EditionRepositoryInterface
     public function findById(EditionId $id): ?Edition
     {
         return $this->editions[(string) $id] ?? null;
+    }
+
+    public function findBySlotId(SlotId $slotId): ?Edition
+    {
+        foreach ($this->editions as $edition) {
+            foreach ($edition->getSlots() as $slot) {
+                if ($slot->getId()->equals($slotId)) {
+                    return $edition;
+                }
+            }
+        }
+
+        return null;
     }
 
     public function findAll(): array
