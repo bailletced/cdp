@@ -149,7 +149,11 @@ export interface paths {
          */
         get: operations["api_admintexts_get_collection"];
         put?: never;
-        post?: never;
+        /**
+         * Creates a AdminText resource.
+         * @description Creates a AdminText resource.
+         */
+        post: operations["api_admintexts_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -170,10 +174,18 @@ export interface paths {
         get: operations["api_admintexts_id_get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Removes the AdminText resource.
+         * @description Removes the AdminText resource.
+         */
+        delete: operations["api_admintexts_id_delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Updates the AdminText resource.
+         * @description Updates the AdminText resource.
+         */
+        patch: operations["api_admintexts_id_patch"];
         trace?: never;
     };
     "/api/me": {
@@ -253,6 +265,22 @@ export interface components {
             email?: string | null;
             addedByEmail?: string | null;
             addedAt?: string | null;
+        };
+        AdminText: {
+            id?: string | null;
+            title?: string | null;
+            source?: string | null;
+            body?: string | null;
+            hints?: string | null;
+            attributionCount?: number | null;
+        };
+        "AdminText.jsonMergePatch": {
+            id?: string | null;
+            title?: string | null;
+            source?: string | null;
+            body?: string | null;
+            hints?: string | null;
+            attributionCount?: number | null;
         };
         "AdminText.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;
@@ -913,6 +941,64 @@ export interface operations {
             };
         };
     };
+    api_admintexts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new AdminText resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["AdminText"];
+            };
+        };
+        responses: {
+            /** @description AdminText resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["AdminText.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     api_admintexts_id_get: {
         parameters: {
             query?: never;
@@ -954,6 +1040,121 @@ export interface operations {
                     "application/ld+json": components["schemas"]["Error.jsonld"];
                     "application/problem+json": components["schemas"]["Error"];
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_admintexts_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description AdminText identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminText resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_admintexts_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description AdminText identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated AdminText resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["AdminText.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description AdminText resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["AdminText.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
                 };
             };
         };

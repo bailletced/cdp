@@ -18,6 +18,7 @@ use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminTextProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
@@ -118,6 +119,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(AdminEditionScheduleProcessor::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(AdminTextProcessor::class)
         ->autoconfigure()
         ->autowire();
 

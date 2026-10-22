@@ -279,6 +279,207 @@ final class AdminTextsApiTest extends ApiTestCase
         }
     }
 
+    public function testOrganizerCanCreateAText(): void
+    {
+        $this->logInAsOrganizer();
+
+        $this->client->request('POST', '/api/admin/texts', [], [], [
+            'CONTENT_TYPE' => 'application/ld+json',
+        ], json_encode([
+            'title' => 'Oraison de Thérèse',
+            'source' => 'Thérèse de Lisieux',
+            'body' => '<p>Je voudrais aimer.</p>',
+            'hints' => 'Méditer le matin.',
+        ]));
+
+        $response = $this->client->getResponse();
+        self::assertSame(201, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertNotNull($data['id'] ?? null);
+        self::assertSame('Oraison de Thérèse', $data['title'] ?? null);
+        self::assertSame('Thérèse de Lisieux', $data['source'] ?? null);
+
+        $text = $this->textRepository->findById(new \App\Chain\Domain\ValueObject\TextId($data['id']));
+        self::assertNotNull($text);
+        self::assertSame('Oraison de Thérèse', $text->getTitle()->value);
+    }
+
+    public function testCreateTextReturns422OnTooShortTitle(): void
+    {
+        $this->logInAsOrganizer();
+
+        $this->client->request('POST', '/api/admin/texts', [], [], [
+            'CONTENT_TYPE' => 'application/ld+json',
+        ], json_encode([
+            'title' => 'ab',
+            'source' => 'Auteur',
+            'body' => '<p>Corps.</p>',
+        ]));
+
+        $response = $this->client->getResponse();
+        self::assertSame(422, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('title', $data['violations'][0]['propertyPath'] ?? null);
+    }
+
+    public function testCreateTextReturns422OnEmptySource(): void
+    {
+        $this->logInAsOrganizer();
+
+        $this->client->request('POST', '/api/admin/texts', [], [], [
+            'CONTENT_TYPE' => 'application/ld+json',
+        ], json_encode([
+            'title' => 'Titre valide',
+            'source' => '   ',
+            'body' => '<p>Corps.</p>',
+        ]));
+
+        $response = $this->client->getResponse();
+        self::assertSame(422, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('source', $data['violations'][0]['propertyPath'] ?? null);
+    }
+
+    public function testCreateTextReturns422OnEmptyBodyAfterSanitization(): void
+    {
+        $this->logInAsOrganizer();
+
+        $this->client->request('POST', '/api/admin/texts', [], [], [
+            'CONTENT_TYPE' => 'application/ld+json',
+        ], json_encode([
+            'title' => 'Titre valide',
+            'source' => 'Auteur',
+            'body' => '<p></p>',
+        ]));
+
+        $response = $this->client->getResponse();
+        self::assertSame(422, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('body', $data['violations'][0]['propertyPath'] ?? null);
+    }
+
+    public function testVisitorGets401OnTextCreation(): void
+    {
+        $this->client->request('POST', '/api/admin/texts', [], [], [
+            'CONTENT_TYPE' => 'application/ld+json',
+        ], json_encode([
+            'title' => 'Titre valide',
+            'source' => 'Auteur',
+            'body' => '<p>Corps.</p>',
+        ]));
+
+        self::assertSame(401, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testOrganizerCanUpdateAText(): void
+    {
+        $text = $this->createText('Titre original', 'Auteur original');
+        $this->logInAsOrganizer();
+
+        $this->client->request('PATCH', '/api/admin/texts/'.$text->getId()->value->toRfc4122(), [], [], [
+            'CONTENT_TYPE' => 'application/merge-patch+json',
+        ], json_encode([
+            'title' => 'Titre modifié',
+            'source' => 'Nouvel auteur',
+            'body' => '<p>Nouveau corps.</p>',
+            'hints' => 'Nouvelles pistes.',
+        ]));
+
+        $response = $this->client->getResponse();
+        self::assertSame(200, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('Titre modifié', $data['title'] ?? null);
+        self::assertSame('Nouvel auteur', $data['source'] ?? null);
+
+        $this->em->clear();
+        $updated = $this->textRepository->findById($text->getId());
+        self::assertNotNull($updated);
+        self::assertSame('Titre modifié', $updated->getTitle()->value);
+        self::assertSame('Nouvel auteur', $updated->getSource()->value);
+    }
+
+    public function testUpdateTextReturns404OnUnknownText(): void
+    {
+        $this->logInAsOrganizer();
+
+        $this->client->request('PATCH', '/api/admin/texts/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d', [], [], [
+            'CONTENT_TYPE' => 'application/merge-patch+json',
+        ], json_encode([
+            'title' => 'Titre modifié',
+            'source' => 'Auteur',
+            'body' => '<p>Corps.</p>',
+        ]));
+
+        self::assertSame(404, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testUpdateTextReturns422OnInvalidPayload(): void
+    {
+        $text = $this->createText('Titre original', 'Auteur original');
+        $this->logInAsOrganizer();
+
+        $this->client->request('PATCH', '/api/admin/texts/'.$text->getId()->value->toRfc4122(), [], [], [
+            'CONTENT_TYPE' => 'application/merge-patch+json',
+        ], json_encode([
+            'title' => 'ab',
+        ]));
+
+        $response = $this->client->getResponse();
+        self::assertSame(422, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('title', $data['violations'][0]['propertyPath'] ?? null);
+    }
+
+    public function testOrganizerCanDeleteAText(): void
+    {
+        $text = $this->createText('À supprimer', 'Auteur');
+        $this->logInAsOrganizer();
+
+        $this->client->request('DELETE', '/api/admin/texts/'.$text->getId()->value->toRfc4122());
+
+        self::assertSame(204, $this->client->getResponse()->getStatusCode());
+
+        $this->em->clear();
+        self::assertNull($this->textRepository->findById($text->getId()));
+    }
+
+    public function testDeleteTextReturns404OnUnknownText(): void
+    {
+        $this->logInAsOrganizer();
+
+        $this->client->request('DELETE', '/api/admin/texts/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
+
+        self::assertSame(404, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testDeleteTextReturns409WhenAttributedToScheduledEdition(): void
+    {
+        $text = $this->createText('Attribué', 'Auteur');
+        $edition = $this->createEdition();
+        $edition->getSlots()[0]->setTextId($text->getId()->value);
+        $edition->schedule(new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
+        $this->em->flush();
+
+        $this->logInAsOrganizer();
+
+        $this->client->request('DELETE', '/api/admin/texts/'.$text->getId()->value->toRfc4122());
+
+        self::assertSame(409, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testVisitorGets401OnTextDeletion(): void
+    {
+        $this->client->request('DELETE', '/api/admin/texts/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
+
+        self::assertSame(401, $this->client->getResponse()->getStatusCode());
+    }
+
     private function logInAsOrganizer(string $email = 'anne@bailletced.org'): void
     {
         $account = $this->createAccount($email);

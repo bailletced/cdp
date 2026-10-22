@@ -33,9 +33,13 @@ final class SharedContext implements Context
         $this->bootKernel();
 
         // Scenarios use fixed email addresses: start each one with a clean
-        // account table (same isolation strategy as the functional tests).
+        // database (same isolation strategy as the functional tests).
         $entityManager = $this->state()->entityManager;
-        $entityManager?->getConnection()->executeStatement('TRUNCATE organizer, account CASCADE');
+        $connection = $entityManager?->getConnection();
+        $connection?->executeStatement('DELETE FROM slot');
+        $connection?->executeStatement('DELETE FROM edition');
+        $connection?->executeStatement('DELETE FROM text');
+        $connection?->executeStatement('TRUNCATE organizer, account CASCADE');
         $entityManager?->clear();
 
         // Reset the in-memory mail transport so sent emails do not leak

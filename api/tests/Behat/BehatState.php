@@ -46,6 +46,8 @@ final class BehatState
 
     public ?string $capturedOrganizerId = null;
 
+    public ?string $capturedTextId = null;
+
     public function reset(): void
     {
         $this->kernel = null;
@@ -58,5 +60,6 @@ final class BehatState
         $this->lastResponseStatus = null;
         $this->lastResponseHeaders = null;
         $this->capturedOrganizerId = null;
+        $this->capturedTextId = null;
     }
 }
