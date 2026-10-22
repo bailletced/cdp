@@ -79,6 +79,7 @@ Communication, simplicité, feedback, courage et respect. Concrètement :
 
 - **Langues** : documentation et interface en français, code en anglais. Les termes métier `Priant` et `Inscription` sont gardés en français.
 - **Commandes** : passer par le `Makefile` (`make up`, `make test`, `make qa`, `make openapi`…).
+- **Environnement d'exécution** : il est **interdit de lancer des commandes dans l'environnement local** (PHP, Composer, pnpm, Node, Playwright… directement sur le poste). Tout s'exécute impérativement **dans les conteneurs Docker** (`docker compose exec <service> …`, `docker compose run …`, ou via le `Makefile` quand il wrappe compose). Les versions du poste ne correspondent pas à la CI (ex. PHP 8.4 en local contre 8.5 en CI) : un résultat obtenu en local n'est pas fiable, ni en vert ni en rouge.
 - **Commits** : petits et atomiques. Le message dit le pourquoi et cite l'identifiant de tâche (ex. `F09-T03 : VO DisplayName`).
 
 ---
