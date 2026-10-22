@@ -8,11 +8,13 @@ test.beforeEach(async () => {
   await clearMailpit();
 });
 
-test.describe("Racine / (pas encore d'accueil : la 404 s'affiche dans le layout)", () => {
-  test("answers with a 200 status and shows the 404 page inside the layout", async ({
+test.describe("Layout public", () => {
+  test("shows the 404 page inside the layout on an unknown route", async ({
     page,
   }) => {
-    const response = await page.goto("/");
+    // / itself is the landing page since F08-T07: the 404 is exercised on
+    // an unknown route, still wrapped by the public layout.
+    const response = await page.goto("/chemin-inconnu");
     expect(response?.status()).toBe(200);
     await expect(page).toHaveTitle(`Page introuvable — ${SITE_NAME}`);
     await expect(
