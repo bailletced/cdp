@@ -10,6 +10,7 @@ use App\Chain\Application\DistributeTextsHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
+use App\Chain\Application\Query\PublicEditionViewFinder;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
@@ -25,8 +26,10 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminSlotProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminTextProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrinePublicEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
@@ -118,6 +121,12 @@ return static function (ContainerConfigurator $container): void {
     $services->set(InMemoryAdminTextViewFinder::class)
         ->autowire();
 
+    $services->set(DoctrinePublicEditionViewFinder::class)
+        ->autoconfigure()
+        ->autowire()
+        ->public()
+        ->alias(PublicEditionViewFinder::class, DoctrinePublicEditionViewFinder::class);
+
     $services->set(AdminEditionProvider::class)
         ->autoconfigure()
         ->autowire();
@@ -143,6 +152,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(AdminEditionDistributeTextsProcessor::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(PublicEditionProvider::class)
         ->autoconfigure()
         ->autowire();
 

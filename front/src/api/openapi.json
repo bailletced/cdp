@@ -1610,6 +1610,50 @@
                 "description": "Retrieves a Me resource.",
                 "parameters": []
             }
+        },
+        "/api/editions/current": {
+            "get": {
+                "operationId": "api_editionscurrent_get",
+                "tags": [
+                    "PublicEdition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PublicEdition resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicEdition.jsonld"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a PublicEdition resource.",
+                "description": "Retrieves a PublicEdition resource.",
+                "parameters": []
+            }
         }
     },
     "components": {
@@ -2539,6 +2583,66 @@
                         }
                     }
                 ]
+            },
+            "PublicEdition.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "title": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "presentation": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "startsAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "opensAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "startsAtLabel": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "opensAtLabel": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "status": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ]
             }
         },
         "responses": {},
@@ -2569,6 +2673,10 @@
         {
             "name": "AdminText",
             "description": "Resource 'AdminText' operations."
+        },
+        {
+            "name": "PublicEdition",
+            "description": "Resource 'PublicEdition' operations."
         }
     ],
     "webhooks": {}

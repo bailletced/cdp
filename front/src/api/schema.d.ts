@@ -248,6 +248,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/editions/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a PublicEdition resource.
+         * @description Retrieves a PublicEdition resource.
+         */
+        get: operations["api_editionscurrent_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -477,6 +497,16 @@ export interface components {
         "Me.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             email?: string;
             isOrganizer?: boolean;
+        };
+        "PublicEdition.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string | null;
+            title?: string | null;
+            presentation?: string | null;
+            startsAt?: string | null;
+            opensAt?: string | null;
+            startsAtLabel?: string | null;
+            opensAtLabel?: string | null;
+            status?: string | null;
         };
     };
     responses: never;
@@ -1362,6 +1392,37 @@ export interface operations {
                 };
                 content: {
                     "application/ld+json": components["schemas"]["Me.jsonld"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_editionscurrent_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicEdition resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["PublicEdition.jsonld"];
                 };
             };
             /** @description Not found */
