@@ -28,6 +28,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminTextProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvider;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
@@ -164,6 +165,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(PublicEditionProvider::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(PublicEditionSlotsProvider::class)
         ->autoconfigure()
         ->autowire();
 

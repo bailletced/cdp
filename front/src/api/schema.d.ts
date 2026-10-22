@@ -268,6 +268,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/editions/{id}/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a PublicEditionSlots resource.
+         * @description Retrieves a PublicEditionSlots resource.
+         */
+        get: operations["api_editions_idslots_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -507,6 +527,10 @@ export interface components {
             startsAtLabel?: string | null;
             opensAtLabel?: string | null;
             status?: string | null;
+        };
+        "PublicEditionSlots.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string | null;
+            slots?: unknown[] | null;
         };
     };
     responses: never;
@@ -1423,6 +1447,40 @@ export interface operations {
                 };
                 content: {
                     "application/ld+json": components["schemas"]["PublicEdition.jsonld"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_editions_idslots_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description PublicEditionSlots identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicEditionSlots resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["PublicEditionSlots.jsonld"];
                 };
             };
             /** @description Not found */

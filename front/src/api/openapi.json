@@ -1654,6 +1654,63 @@
                 "description": "Retrieves a PublicEdition resource.",
                 "parameters": []
             }
+        },
+        "/api/editions/{id}/slots": {
+            "get": {
+                "operationId": "api_editions_idslots_get",
+                "tags": [
+                    "PublicEditionSlots"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PublicEditionSlots resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicEditionSlots.jsonld"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a PublicEditionSlots resource.",
+                "description": "Retrieves a PublicEditionSlots resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "PublicEditionSlots identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -2643,6 +2700,31 @@
                         }
                     }
                 ]
+            },
+            "PublicEditionSlots.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "slots": {
+                                "type": [
+                                    "array",
+                                    "null"
+                                ],
+                                "items": {}
+                            }
+                        }
+                    }
+                ]
             }
         },
         "responses": {},
@@ -2677,6 +2759,10 @@
         {
             "name": "PublicEdition",
             "description": "Resource 'PublicEdition' operations."
+        },
+        {
+            "name": "PublicEditionSlots",
+            "description": "Resource 'PublicEditionSlots' operations."
         }
     ],
     "webhooks": {}
