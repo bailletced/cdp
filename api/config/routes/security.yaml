@@ -25,3 +25,9 @@ auth_link_request:
     path: /auth/link-request
     methods: [POST]
     controller: App\Access\Infrastructure\Symfony\Controller\LinkRequestController::requestLink
+
+# POST /auth/register: register a new account and send a personal login link (F07-T01)
+auth_register:
+    path: /auth/register
+    methods: [POST]
+    controller: App\Access\Infrastructure\Symfony\Controller\RegisterController::register

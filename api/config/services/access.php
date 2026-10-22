@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Access\Application\AddOrganizerHandler;
 use App\Access\Application\Query\OrganizerViewFinder;
+use App\Access\Application\RegisterHandler;
 use App\Access\Application\RemoveOrganizerHandler;
 use App\Access\Application\RequestPersonalLinkHandler;
+use App\Access\Application\SendPersonalLinkOnAccountRegistered;
 use App\Access\Domain\Entity\Account;
 use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
@@ -22,6 +24,7 @@ use App\Access\Infrastructure\Symfony\Console\CreateOrganizerCliCommand;
 use App\Access\Infrastructure\Symfony\Controller\AuthStatusController;
 use App\Access\Infrastructure\Symfony\Controller\LinkRequestController;
 use App\Access\Infrastructure\Symfony\Controller\LoginLinkController;
+use App\Access\Infrastructure\Symfony\Controller\RegisterController;
 use App\Access\Infrastructure\Symfony\Security\AdminAccessListener;
 use App\Access\Infrastructure\Symfony\Security\ApiAuthenticationEntryPoint;
 use App\Access\Infrastructure\Symfony\Security\LoginLinkFailureHandler;
@@ -66,6 +69,14 @@ return static function (ContainerConfigurator $container): void {
         ->autoconfigure()
         ->autowire()
 
+        ->set(RegisterHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(SendPersonalLinkOnAccountRegistered::class)
+        ->autoconfigure()
+        ->autowire()
+
         ->set(RequestPersonalLinkHandler::class)
         ->autoconfigure()
         ->autowire()
@@ -104,6 +115,11 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
 
         ->set(LinkRequestController::class)
+        ->autoconfigure()
+        ->autowire()
+        ->tag('controller.service_arguments')
+
+        ->set(RegisterController::class)
         ->autoconfigure()
         ->autowire()
         ->tag('controller.service_arguments')

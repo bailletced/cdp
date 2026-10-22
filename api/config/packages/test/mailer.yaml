@@ -1,0 +1,8 @@
+# Test mail transport: pinned in config so the dev container env
+# (MAILER_DSN=smtp://mailpit) cannot leak into the test environment — the
+# config value wins over %env(MAILER_DSN)% and over real environment
+# variables. Same role as phpunit.xml <env name="MAILER_DSN" ... force="true"/>,
+# without mutating the process environment.
+framework:
+    mailer:
+        dsn: 'in-memory://default'

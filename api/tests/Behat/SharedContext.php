@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat;
 
+use App\Tests\Functional\Shared\Fixture\InMemoryMailTransport;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
@@ -36,6 +37,14 @@ final class SharedContext implements Context
         $entityManager = $this->state()->entityManager;
         $entityManager?->getConnection()->executeStatement('TRUNCATE organizer, account CASCADE');
         $entityManager?->clear();
+
+        // Reset the in-memory mail transport so sent emails do not leak
+        // from one scenario into the next.
+        $container = $this->state()->kernel?->getContainer();
+        $mailTransport = $container?->get('test.service_container')?->get(InMemoryMailTransport::class);
+        if ($mailTransport instanceof InMemoryMailTransport) {
+            $mailTransport->reset();
+        }
     }
 
     #[AfterScenario]
