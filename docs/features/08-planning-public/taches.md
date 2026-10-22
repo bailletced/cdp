@@ -15,7 +15,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F08-T01** · `back` `PublicEditionViewFinder::current()` (RG-ED-1 : `lifecycle = 'scheduled' AND opens_at <= now ORDER BY starts_at DESC LIMIT 1`) + tests d'intégration (brouillon, programmée future, deux éditions, terminée) — *Dépend de* : F05-T10 · *Fini quand* : les quatre cas sont verts.
 - [x] **F08-T02** · `back` `GET /api/editions/current` : titre, présentation, dates et libellés de Paris, statut ; 404 si aucune + tests d'acceptation — *Dépend de* : F08-T01 · *Fini quand* : JSON Schema validé, `Cache-Control: private, no-store`.
-- [ ] **F08-T03** · `back` `PlanningViewFinder` : 48 créneaux (rang, libellé, moment, passé / en cours / à venir), titre et source du texte ; champs noms et pointages prévus à `null` + tests d'intégration — *Dépend de* : F08-T01, F07-T01 · *Fini quand* : une seule requête SQL pour la grille (vérifié en test).
+- [x] **F08-T03** · `back` `PlanningViewFinder` : 48 créneaux (rang, libellé, moment, passé / en cours / à venir), titre et source du texte ; champs noms et pointages prévus à `null` + tests d'intégration — *Dépend de* : F08-T01, F07-T01 · *Fini quand* : une seule requête SQL pour la grille (vérifié en test).
 - [ ] **F08-T04** · `back` `GET /api/editions/{id}/slots` (404 si l'édition n'est pas publique) + tests d'acceptation — *Dépend de* : F08-T03 · *Fini quand* : brouillon → 404, édition publique → 48 éléments.
 
 ## Temps côté client (US-08.3, US-08.4)

@@ -10,6 +10,7 @@ use App\Chain\Application\DistributeTextsHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
+use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\UnscheduleEditionHandler;
@@ -29,6 +30,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePublicEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
@@ -126,6 +128,12 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
         ->public()
         ->alias(PublicEditionViewFinder::class, DoctrinePublicEditionViewFinder::class);
+
+    $services->set(DoctrinePlanningViewFinder::class)
+        ->autoconfigure()
+        ->autowire()
+        ->public()
+        ->alias(PlanningViewFinder::class, DoctrinePlanningViewFinder::class);
 
     $services->set(AdminEditionProvider::class)
         ->autoconfigure()
