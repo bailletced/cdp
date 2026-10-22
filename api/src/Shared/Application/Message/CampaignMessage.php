@@ -10,7 +10,7 @@ use DateTimeImmutable;
  * Message pour l'envoi d'une campagne (bulk).
  * Utilise le transport async_bulk pour un traitement en masse.
  */
-final readonly class CampaignMessage implements MessageInterface
+final readonly class CampaignMessage
 {
     /**
      * @param array<array-key, string> $recipients

@@ -7,19 +7,23 @@ namespace App\Tests\Functional\Shared\Infrastructure\Symfony\Messenger;
 use App\Shared\Application\Message\CampaignMessage;
 use App\Shared\Application\Message\ConfirmationMessage;
 use App\Shared\Application\Message\LinkMessage;
-use App\Shared\Application\Message\MessageInterface;
 use App\Shared\Application\Message\ReminderMessage;
 use App\Shared\Domain\ValueObject\Email;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 /**
  * Test pour F00-T18 : Transports Messenger Doctrine.
- * Vérifie que les messages sont routés vers les bons transports.
+ * Vérifie que les messages sont routés vers les bons transports — et
+ * uniquement ceux-là : un message routé ne doit pas être dupliqué vers le
+ * transport "failed" (qui est réservé aux messages réellement en échec).
  */
 final class MessageTransportTest extends KernelTestCase
 {
+    use InteractsWithMessenger;
+
     private MessageBusInterface $messageBus;
 
     protected function setUp(): void
@@ -37,10 +41,10 @@ final class MessageTransportTest extends KernelTestCase
             new DateTimeImmutable()
         );
 
-        // Le message doit être dispatché sans erreur
         $this->messageBus->dispatch($message);
 
-        $this->assertTrue(true, 'ConfirmationMessage dispatched successfully to async_transactional');
+        $this->transport('async_transactional')->queue()->assertContains(ConfirmationMessage::class);
+        $this->transport('failed')->queue()->assertEmpty();
     }
 
     public function testLinkMessageIsRoutedToAsyncTransactional(): void
@@ -54,7 +58,8 @@ final class MessageTransportTest extends KernelTestCase
 
         $this->messageBus->dispatch($message);
 
-        $this->assertTrue(true, 'LinkMessage dispatched successfully to async_transactional');
+        $this->transport('async_transactional')->queue()->assertContains(LinkMessage::class);
+        $this->transport('failed')->queue()->assertEmpty();
     }
 
     public function testReminderMessageIsRoutedToAsyncTransactional(): void
@@ -68,7 +73,8 @@ final class MessageTransportTest extends KernelTestCase
 
         $this->messageBus->dispatch($message);
 
-        $this->assertTrue(true, 'ReminderMessage dispatched successfully to async_transactional');
+        $this->transport('async_transactional')->queue()->assertContains(ReminderMessage::class);
+        $this->transport('failed')->queue()->assertEmpty();
     }
 
     public function testCampaignMessageIsRoutedToAsyncBulk(): void
@@ -84,14 +90,7 @@ final class MessageTransportTest extends KernelTestCase
 
         $this->messageBus->dispatch($message);
 
-        $this->assertTrue(true, 'CampaignMessage dispatched successfully to async_bulk');
-    }
-
-    public function testMessagesImplementMessageInterface(): void
-    {
-        $this->assertInstanceOf(MessageInterface::class, new ConfirmationMessage(new Email('test@bailletced.org'), 'token'));
-        $this->assertInstanceOf(MessageInterface::class, new LinkMessage(new Email('test@bailletced.org'), 'http://example.com', 'Subject'));
-        $this->assertInstanceOf(MessageInterface::class, new ReminderMessage(new Email('test@bailletced.org'), 'content', new DateTimeImmutable()));
-        $this->assertInstanceOf(MessageInterface::class, new CampaignMessage('camp-1', ['test@bailletced.org'], 'Subject', 'template', new DateTimeImmutable()));
+        $this->transport('async_bulk')->queue()->assertContains(CampaignMessage::class);
+        $this->transport('failed')->queue()->assertEmpty();
     }
 }

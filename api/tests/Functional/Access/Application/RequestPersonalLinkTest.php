@@ -70,9 +70,11 @@ final class RequestPersonalLinkTest extends KernelTestCase
 
         $this->commandBus->dispatch(new RequestPersonalLink(new Email('thomas@bailletced.org')));
 
-        // The link message is routed to the async_transactional transport
+        // The link message is routed to the async_transactional transport — and
+        // only there: "failed" is reserved for messages that actually failed.
         $this->transport('async_transactional')->queue()->assertCount(1);
         $this->transport('async_transactional')->queue()->assertContains(LinkMessage::class);
+        $this->transport('failed')->queue()->assertEmpty();
 
         $message = $this->transport('async_transactional')->queue()->first(LinkMessage::class)->getMessage();
         self::assertInstanceOf(LinkMessage::class, $message);

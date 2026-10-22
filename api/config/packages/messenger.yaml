@@ -55,5 +55,3 @@ framework:
             App\Shared\Application\Message\ReminderMessage: async_transactional
             # Messages bulk (basse priorité)
             App\Shared\Application\Message\CampaignMessage: async_bulk
-            # Messages en échec
-            App\Shared\Application\Message\MessageInterface: failed

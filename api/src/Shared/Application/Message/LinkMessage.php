@@ -11,7 +11,7 @@ use DateTimeImmutable;
  * Message pour l'envoi d'un e-mail avec un lien.
  * Utilise le transport async_transactional pour une exécution prioritaire.
  */
-final readonly class LinkMessage implements MessageInterface
+final readonly class LinkMessage
 {
     public function __construct(
         public Email $email,

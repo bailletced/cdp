@@ -11,7 +11,7 @@ use DateTimeImmutable;
  * Message pour l'envoi d'un e-mail de rappel.
  * Utilise le transport async_transactional pour une exécution prioritaire.
  */
-final readonly class ReminderMessage implements MessageInterface
+final readonly class ReminderMessage
 {
     public function __construct(
         public Email $email,

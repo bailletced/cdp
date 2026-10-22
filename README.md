@@ -68,8 +68,8 @@ cdp/
 
 | Couche | Responsabilité | Exemple |
 |---|---|---|
-| **Domain** | Règles métier, Value Objects, Entités | `Email`, `Identity` |
-| **Application** | Cas d'usage, Commandes, Queries | `CommandBus`, `MessageInterface` |
+| **Domain** | Règles métier, Value Objects, Entités, Événements de domaine | `Email`, `DomainEvent` |
+| **Application** | Cas d'usage, Commandes, Queries, Messages asynchrones | `CommandBus`, `LinkMessage` |
 | **Infrastructure** | Frameworks, Services externes | Symfony, Doctrine, API Platform |
 
 ### Conventions de nommage
