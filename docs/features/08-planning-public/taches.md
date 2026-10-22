@@ -21,7 +21,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Temps côté client (US-08.3, US-08.4)
 
 - [x] **F08-T05** · `front` `lib/localTime` : heure locale via `Intl` si le fuseau n'est pas `Europe/Paris` (« 3h00 (21h00 chez vous) ») + tests multi-fuseaux — *Dépend de* : F00-T23 · *Fini quand* : Paris, Montréal et Tokyo testés.
-- [ ] **F08-T06** · `front` `lib/serverClock` : décalage estimé depuis `X-Server-Time`, hook `useNow()` + tests (fake timers) — *Dépend de* : F00-T25 · *Fini quand* : une horloge client décalée de 10 min est corrigée (test).
+- [x] **F08-T06** · `front` `lib/serverClock` : décalage estimé depuis `X-Server-Time`, hook `useNow()` + tests (fake timers) — *Dépend de* : F00-T25 · *Fini quand* : une horloge client décalée de 10 min est corrigée (test).
 
 ## Écrans (US-08.1 à US-08.5)
 
