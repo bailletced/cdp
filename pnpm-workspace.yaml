@@ -3,5 +3,6 @@ packages:
 
 # Seuls postinstall approuvés — pnpm 12 échoue l'install sinon (ERR_PNPM_IGNORED_BUILDS).
 allowBuilds:
+  '@ast-grep/lang-php': true
   '@biomejs/biome': true
   msw: true
