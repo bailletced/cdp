@@ -23,6 +23,16 @@ export const handlers = [
       { status: 202 },
     );
   }),
+  // POST /auth/register: always 202 with the same message (F07-T01)
+  http.post("http://localhost:8080/auth/register", () => {
+    return HttpResponse.json(
+      {
+        message:
+          "Un lien de connexion vient de vous être envoyé à cette adresse.",
+      },
+      { status: 202 },
+    );
+  }),
   // POST /auth/login: opens the session and returns the target (F02-T08)
   http.post("http://localhost:8080/auth/login", () => {
     return HttpResponse.json({ target: "/my-space" });

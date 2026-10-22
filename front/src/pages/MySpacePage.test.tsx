@@ -13,6 +13,9 @@ describe("MySpacePage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("thomas@bailletced.org")).toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: "Choisissez vos créneaux" }),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("button", { name: "Me déconnecter" }),
     ).toBeInTheDocument();
   });

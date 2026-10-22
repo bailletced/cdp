@@ -11,9 +11,17 @@ import { ConfidentialitePage } from "./pages/ConfidentialitePage";
 import { DemoPage } from "./pages/DemoPage";
 import { EditionEditPage, EditionFormPage } from "./pages/EditionFormPage";
 import { ErrorPage } from "./pages/ErrorPage";
+import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
 import { ReceiveMyLinkPage } from "./pages/ReceiveMyLinkPage";
+
+// Landing page (F08-T07, F07-T01): public home page with the registration form.
+const landingRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/",
+  component: LandingPage,
+});
 
 const receiveMyLinkRoute = createRoute({
   getParentRoute: () => Root,
@@ -129,6 +137,7 @@ const organisationEditionDetailRoute = createRoute({
 
 // Define the routes
 export const routeTree = Root.addChildren([
+  landingRoute,
   receiveMyLinkRoute,
   confidentialiteRoute,
   demoRoute,

@@ -7,9 +7,13 @@ import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 
 /**
- * /my-space (F02-T19): personal space skeleton.
- * The route guard redirects visitors to /receive-my-link; this page only
- * renders for an authenticated viewer.
+ * /my-space (F02-T19, F08): personal space — slot selection for the prayer chain.
+ * After logging in via a personal link, the priant lands here to pick their
+ * 30-minute slots. The route guard redirects visitors to /receive-my-link;
+ * this page only renders for an authenticated viewer.
+ *
+ * The slot grid (F08-T08/T09) will be plugged here once the public API
+ * GET /api/editions/current and GET /api/editions/{id}/slots are available.
  */
 export function MySpacePage() {
   const { viewer, isLoading } = useViewer();
@@ -43,8 +47,22 @@ export function MySpacePage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <PageTitle>Mon espace</PageTitle>
-      <p>{viewer.email}</p>
-      <button type="button" onClick={handleLogout} disabled={loggingOut}>
+      <p className="mb-6">{viewer.email}</p>
+      <h2 className="mb-4 text-xl font-semibold">Choisissez vos créneaux</h2>
+      <p className="mb-8 text-lg">
+        Sélectionnez un ou plusieurs créneaux de 30 minutes pour participer à la
+        chaîne de prière de 24 heures.
+      </p>
+      {/* Slot grid placeholder — F08-T08/T09 will render the real grid here */}
+      <p className="rounded border border-dashed p-6 text-center text-default-500">
+        La grille des créneaux sera bientôt disponible.
+      </p>
+      <button
+        type="button"
+        onClick={handleLogout}
+        disabled={loggingOut}
+        className="mt-8"
+      >
         {loggingOut ? "Déconnexion en cours…" : "Me déconnecter"}
       </button>
     </div>
