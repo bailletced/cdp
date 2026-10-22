@@ -1,7 +1,12 @@
-import { Button, Input, Label, TextField } from "@heroui/react";
+import { Button, Input, Label, Link, TextField } from "@heroui/react";
 import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
+import { useCurrentEdition } from "../api/hooks";
+import { ErrorState } from "../components/ErrorState";
+import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
+import { SITE_NAME } from "../config/site";
+import { formatParisDateTime } from "../lib/editions";
 
 const GENERIC_ERROR_MESSAGE = "Une erreur est survenue. Veuillez réessayer.";
 const CONFIRMATION_MESSAGE =
@@ -11,12 +16,19 @@ type SubmissionState = "idle" | "submitting" | "sent" | "error";
 
 /**
  * / (F08-T07, F07-T01): landing page for the 24-hour prayer chain.
- * Presents the event and offers a single-field registration form: submitting
- * an email creates the account (if needed) and sends a personal login link.
- * The API always answers 202 with the same message, whether the account was
- * created or already existed: this page never leaks account existence.
+ *
+ * The header shows the current public edition — community name, title,
+ * dates and presentation (US-08.1) — or, when no edition is open, a sober
+ * presentation of the Communion with « La prochaine édition sera bientôt
+ * annoncée » and a « Recevoir mon lien » link (arbitrage Q18).
+ *
+ * Below the header, a single-field registration form: submitting an email
+ * creates the account (if needed) and sends a personal login link. The API
+ * always answers 202 with the same message, whether the account was created
+ * or already existed: this page never leaks account existence.
  */
 export function LandingPage() {
+  const editionQuery = useCurrentEdition();
   const [state, setState] = useState<SubmissionState>("idle");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -53,16 +65,50 @@ export function LandingPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
-      <PageTitle>24 heures de prière</PageTitle>
-      <p className="mb-6 text-lg">
-        Rejoignez la chaîne de prière ininterrompue de 24 heures de la Communion
-        de prière Notre-Dame du Mont-Carmel. Chaque priant s'engage sur un
-        créneau de 30 minutes.
-      </p>
-      <p className="mb-8">
-        Inscrivez-vous avec votre adresse e-mail : un lien de connexion
-        personnel vous sera envoyé, sans mot de passe.
-      </p>
+      {editionQuery.isPending ? (
+        <>
+          <PageTitle>24 heures de prière</PageTitle>
+          <LoadingState />
+        </>
+      ) : editionQuery.isError ? (
+        <>
+          <PageTitle>24 heures de prière</PageTitle>
+          <ErrorState
+            message="L'édition n'a pas pu être chargée."
+            onRetry={() => void editionQuery.refetch()}
+          />
+        </>
+      ) : editionQuery.data ? (
+        <header className="mb-8">
+          <p className="text-muted">{SITE_NAME}</p>
+          <PageTitle>
+            {editionQuery.data.title ?? "24 heures de prière"}
+          </PageTitle>
+          <p className="text-muted">
+            Début : {formatParisDateTime(editionQuery.data.startsAt)} (heure de
+            Paris)
+          </p>
+          <p className="text-muted">
+            Ouverture des inscriptions :{" "}
+            {formatParisDateTime(editionQuery.data.opensAt)} (heure de Paris)
+          </p>
+          {editionQuery.data.presentation ? (
+            <p className="mt-4">{editionQuery.data.presentation}</p>
+          ) : null}
+        </header>
+      ) : (
+        <header className="mb-8">
+          <PageTitle>24 heures de prière</PageTitle>
+          <p className="mb-6 text-lg">
+            Rejoignez la chaîne de prière ininterrompue de 24 heures de la{" "}
+            {SITE_NAME}. Chaque priant s'engage sur un créneau de 30 minutes.
+          </p>
+          <p className="mb-2">La prochaine édition sera bientôt annoncée.</p>
+          <p>
+            <Link href="/receive-my-link">Recevoir mon lien</Link>
+          </p>
+        </header>
+      )}
 
       {state === "sent" || state === "error" ? (
         <output>{message}</output>

@@ -41,4 +41,17 @@ export const handlers = [
   http.post("http://localhost:8080/auth/logout", () => {
     return new HttpResponse(null, { status: 200 });
   }),
+  // GET /api/editions/current: no public edition by default (F08-T02) —
+  // tests showing an open edition override this handler with server.use()
+  http.get("http://localhost:8080/api/editions/current", () => {
+    return HttpResponse.json(
+      {
+        "@context": "/api/contexts/Error",
+        "@type": "hydra:Error",
+        title: "An error occurred",
+        detail: "Le modèle est introuvable.",
+      },
+      { status: 404 },
+    );
+  }),
 ];

@@ -49,6 +49,36 @@ export function useViewer() {
 }
 
 /**
+ * Current public edition (GET /api/editions/current, F08-T02).
+ * A 404 means "no edition open yet": a normal state for the home page
+ * (arbitrage Q18), mapped to null instead of an error.
+ */
+export const currentEditionQueryOptions = {
+  queryKey: ["public", "editions", "current"],
+  queryFn: async () => {
+    const { data, error, response } = await apiClient.GET(
+      "/api/editions/current",
+    );
+
+    if (error) {
+      if (response.status === 404) {
+        return null;
+      }
+
+      throw error;
+    }
+
+    return data;
+  },
+  // A 404 is a normal state: never retry it
+  retry: false,
+} as const;
+
+export function useCurrentEdition() {
+  return useQuery(currentEditionQueryOptions);
+}
+
+/**
  * Organizers list (GET /api/admin/organizers, F04-T05).
  * Reserved to organizers: the /organisation route guard rejects other
  * profiles before this query ever runs.
