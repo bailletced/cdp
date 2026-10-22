@@ -66,6 +66,8 @@ RUN pnpm --filter cdp-front build
 FROM php-base AS prod
 
 ARG SHA=unknown
+ARG BUILD_DATE=unknown
+ARG BUILD_AUTHOR=unknown
 ENV APP_ENV=prod
 ENV APP_SHA=$SHA
 
@@ -103,6 +105,10 @@ COPY --from=front-build /app/front/dist/. ./public/
 RUN useradd -m -u 1000 -s /bin/sh appuser \
 	&& chown -R appuser:appuser /app
 USER appuser
+
+# Build manifest: SHA + date + auteur, exposé via /manifest.json (F03-T16)
+RUN printf '{"sha":"%s","builtAt":"%s","author":"%s"}\n' \
+		"$APP_SHA" "$BUILD_DATE" "$BUILD_AUTHOR" > public/manifest.json
 
 COPY --link --chmod=644 docker/frankenphp/Caddyfile.prod /etc/frankenphp/Caddyfile
 COPY --link --chmod=755 docker/frankenphp/docker-entrypoint-prod.sh /usr/local/bin/docker-entrypoint

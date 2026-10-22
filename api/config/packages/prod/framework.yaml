@@ -6,5 +6,5 @@ framework:
     # Traefik (port 80 not published): private subnets (Swarm overlay) are safe.
     # Without this, SameOriginListener compares Origin port 443 against the
     # internal port 80 and rejects same-origin POSTs with 403.
-    trusted_proxies: 'private_subnets'
+    trusted_proxies: 'private_ranges'
     trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']

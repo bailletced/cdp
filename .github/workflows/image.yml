@@ -71,6 +71,10 @@ jobs:
           flavor: |
             latest=false
 
+      - name: Build metadata
+        id: buildmeta
+        run: echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
       - name: Build and push (main)
         if: github.event_name == 'push'
         uses: docker/build-push-action@v6
@@ -83,6 +87,8 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
           build-args: |
             SHA=sha-${{ github.sha }}
+            BUILD_DATE=${{ steps.buildmeta.outputs.date }}
+            BUILD_AUTHOR=${{ github.actor }}
             VITE_APP_SHA=${{ github.sha }}
             VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
           cache-from: type=gha,mode=max
@@ -99,6 +105,8 @@ jobs:
           push: false
           build-args: |
             SHA=sha-${{ github.sha }}
+            BUILD_DATE=${{ steps.buildmeta.outputs.date }}
+            BUILD_AUTHOR=${{ github.actor }}
             VITE_APP_SHA=${{ github.sha }}
             VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
           cache-from: type=gha,mode=max
@@ -118,6 +126,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Build metadata
+        id: buildmeta
+        run: echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
       - name: Build production image (local)
         uses: docker/build-push-action@v6
         with:
@@ -128,6 +140,8 @@ jobs:
           tags: cdp-prod:ci
           build-args: |
             SHA=sha-${{ github.sha }}
+            BUILD_DATE=${{ steps.buildmeta.outputs.date }}
+            BUILD_AUTHOR=${{ github.actor }}
             VITE_APP_SHA=${{ github.sha }}
             VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
           cache-from: type=gha,mode=max
