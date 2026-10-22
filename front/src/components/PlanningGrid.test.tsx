@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { editionSlotsQueryOptions } from "../api/hooks";
@@ -26,6 +26,8 @@ function renderGrid() {
 }
 
 interface SlotOverrides {
+  startsAt?: string;
+  endsAt?: string;
   textTitle?: string | null;
   textSource?: string | null;
 }
@@ -39,8 +41,10 @@ function slot(
   return {
     id: `slot-${rank}`,
     rank,
-    startsAt: "2026-11-28T18:00:00+00:00",
-    endsAt: "2026-11-28T18:30:00+00:00",
+    // Far-future dates: the temporal state comes from the real (corrected)
+    // clock in the grid, so fixtures must stay clearly in the future
+    startsAt: "2099-11-27T18:00:00+00:00",
+    endsAt: "2099-11-27T18:30:00+00:00",
     label,
     partOfDay,
     state: "future",
@@ -167,5 +171,80 @@ describe("PlanningGrid (US-08.2)", () => {
 
     expect(options.refetchInterval).toBe(60_000);
     expect(options.refetchOnWindowFocus).toBe(true);
+  });
+});
+
+describe("PlanningGrid selection (US-08.5)", () => {
+  it("selects several slots and builds the inscription URL in chronological order", async () => {
+    serveSlots([
+      slot(1, "evening", "19h00–19h30"),
+      slot(2, "evening", "19h30–20h00"),
+      slot(3, "night", "0h00–0h30"),
+    ]);
+
+    renderGrid();
+    await screen.findByRole("region", { name: "Grille des créneaux" });
+
+    // Select out of order: the URL stays in rank (chronological) order
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: "Sélectionner le créneau de 19h30–20h00",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: "Sélectionner le créneau de 19h00–19h30",
+      }),
+    );
+
+    expect(screen.getByText("2 créneaux sélectionnés.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "M'inscrire (2)" }),
+    ).toHaveAttribute("href", "/inscription?creneaux=slot-1,slot-2");
+
+    // Deselect one
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: "Sélectionner le créneau de 19h00–19h30",
+      }),
+    );
+
+    expect(screen.getByText("1 créneau sélectionné.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "M'inscrire (1)" }),
+    ).toHaveAttribute("href", "/inscription?creneaux=slot-2");
+  });
+
+  it("offers no checkbox on past slots (créneau passé non sélectionnable)", async () => {
+    serveSlots([
+      slot(1, "evening", "19h00–19h30", {
+        startsAt: "2020-01-01T18:00:00+00:00",
+        endsAt: "2020-01-01T18:30:00+00:00",
+      }),
+      slot(2, "evening", "19h30–20h00"),
+    ]);
+
+    renderGrid();
+    await screen.findByRole("region", { name: "Grille des créneaux" });
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes).toHaveLength(1);
+    expect(checkboxes[0]).toHaveAccessibleName(
+      "Sélectionner le créneau de 19h30–20h00",
+    );
+    expect(screen.getByText("Créneau passé")).toBeInTheDocument();
+  });
+
+  it("disables the inscription button while no slot is selected", async () => {
+    serveSlots([slot(1, "evening", "19h00–19h30")]);
+
+    renderGrid();
+    await screen.findByRole("region", { name: "Grille des créneaux" });
+
+    expect(screen.getByText("Aucun créneau sélectionné.")).toBeInTheDocument();
+    const button = screen.getByRole("link", { name: "M'inscrire (0)" });
+    expect(button).toHaveAttribute("aria-disabled", "true");
+    // A disabled HeroUI Link renders a span, not a navigable anchor
+    expect(button.tagName).toBe("SPAN");
   });
 });

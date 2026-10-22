@@ -1,3 +1,4 @@
+import { Checkbox } from "@heroui/react";
 import { withLocalTime } from "../lib/localTime";
 import { type PlanningSlot, slotTemporalState } from "../lib/planning";
 import { now } from "../lib/serverClock";
@@ -12,19 +13,29 @@ import { now } from "../lib/serverClock";
  * A past slot is greyed out and labelled « Créneau passé » (US-08.4): its
  * temporal state is computed with the server-corrected clock, so a skewed
  * device clock cannot mislead.
+ *
+ * With `selectable`, a not-yet-past slot gets a checkbox (US-08.5, F08-T10):
+ * a past slot is never selectable.
  */
 export function SlotCard({
   slot,
   registrationCount = 0,
   nowMs = now(),
+  selectable = false,
+  selected = false,
+  onToggle,
 }: {
   slot: PlanningSlot;
   registrationCount?: number;
   nowMs?: number;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggle?: (slotId: string) => void;
 }) {
   const temporalState = slotTemporalState(slot, nowMs);
   const isPast = temporalState === "past";
   const isEmpty = registrationCount < 1;
+  const canSelect = selectable && !isPast;
 
   // The state is the empty/occupied one (RG-PL-2, §5.2); a past slot is
   // greyed out and labelled, so the information never rides on color alone.
@@ -47,6 +58,20 @@ export function SlotCard({
       className={`rounded-xl border border-border bg-surface p-4 ${isPast ? "text-muted" : ""}`}
       data-state={temporalState}
     >
+      {canSelect ? (
+        <Checkbox
+          aria-label={`Sélectionner le créneau de ${slot.label}`}
+          className="mb-2"
+          isSelected={selected}
+          onChange={() => onToggle?.(slot.id)}
+        >
+          <Checkbox.Content>
+            <Checkbox.Control>
+              <Checkbox.Indicator />
+            </Checkbox.Control>
+          </Checkbox.Content>
+        </Checkbox>
+      ) : null}
       <p className="text-lg font-semibold">
         {withLocalTime(slot.label, slot.startsAt)}
       </p>

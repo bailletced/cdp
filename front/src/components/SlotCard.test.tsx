@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { contrastRatio } from "../lib/contrast";
 import type { PlanningSlot } from "../lib/planning";
@@ -158,6 +158,65 @@ describe("SlotCard (US-08.2)", () => {
     // past slots and drives selection (F08-T10)
     expect(screen.getByText("À pourvoir")).toBeInTheDocument();
     expect(container.querySelector("article")?.dataset.state).toBe("current");
+  });
+});
+
+describe("SlotCard selection (F08-T10, US-08.5)", () => {
+  it("renders a checkbox that calls onToggle with the slot id", () => {
+    const slot = makeSlot();
+    const onToggle = vi.fn();
+
+    render(
+      <SlotCard
+        slot={slot}
+        selectable
+        selected={false}
+        onToggle={onToggle}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    const checkbox = screen.getByRole("checkbox", {
+      name: "Sélectionner le créneau de 19h00–19h30",
+    });
+    expect(checkbox).not.toBeChecked();
+
+    fireEvent.click(checkbox);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledWith(slot.id);
+  });
+
+  it("checks the checkbox when the slot is selected", () => {
+    render(
+      <SlotCard
+        slot={makeSlot()}
+        selectable
+        selected
+        onToggle={vi.fn()}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    expect(
+      screen.getByRole("checkbox", {
+        name: "Sélectionner le créneau de 19h00–19h30",
+      }),
+    ).toBeChecked();
+  });
+
+  it("offers no checkbox on a past slot (créneau passé non sélectionnable)", () => {
+    render(
+      <SlotCard
+        slot={makeSlot()}
+        selectable
+        selected={false}
+        onToggle={vi.fn()}
+        nowMs={Date.UTC(2026, 10, 28, 18, 30, 0)}
+      />,
+    );
+
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(screen.getByText("Créneau passé")).toBeInTheDocument();
   });
 });
 
