@@ -17,8 +17,10 @@ use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
 use App\Chain\Application\UpdateTextHandler;
 use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\Repository\PriantRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionDistributeTextsProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
@@ -34,10 +36,12 @@ use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePublicEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
+use App\Chain\Infrastructure\Doctrine\Repository\DoctrinePriantRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminTextViewFinder;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
@@ -65,6 +69,16 @@ return static function (ContainerConfigurator $container): void {
         ->alias(TextRepositoryInterface::class, DoctrineTextRepository::class);
 
     $services->set(InMemoryTextRepository::class)
+        ->tag('app.in_memory_repository');
+
+    $services->set(DoctrinePriantRepository::class)
+        ->args([
+            new Reference('doctrine'),
+            Priant::class,
+        ])
+        ->alias(PriantRepositoryInterface::class, DoctrinePriantRepository::class);
+
+    $services->set(InMemoryPriantRepository::class)
         ->tag('app.in_memory_repository');
 
     $services->set(SymfonyHtmlSanitizer::class)
