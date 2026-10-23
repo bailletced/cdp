@@ -253,7 +253,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
 
     private static function uniqueViolationOn(string $constraint): UniqueConstraintViolationException
     {
-        $driverException = new class (\sprintf('duplicate key value violates unique constraint "%s"', $constraint)) extends \Exception implements DriverException {
+        $driverException = new class(\sprintf('duplicate key value violates unique constraint "%s"', $constraint)) extends \Exception implements DriverException {
             public function getSQLState(): ?string
             {
                 return '23505';

@@ -53,10 +53,6 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): InscriptionResource
     {
-        if (!$data instanceof RegisterInscriptionsPayload) {
-            throw new \LogicException(\sprintf('Expected a %s payload, got %s.', RegisterInscriptionsPayload::class, get_debug_type($data)));
-        }
-
         // Honeypot (§6.7): filled → identical-looking success, nothing is done.
         // A random identifier keeps the JSON-LD @id generatable, exactly like
         // a real success.
@@ -96,7 +92,7 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         }
 
         return new InscriptionResource(
-            id: $result->inscriptions[0]?->getId()->value->toRfc4122(),
+            id: $result->inscriptions[0]->getId()->value->toRfc4122(),
             priantId: $result->priantId->value->toRfc4122(),
             displayName: $result->displayName->value,
             inscriptions: array_map(
@@ -111,7 +107,10 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
     }
 
     /**
-     * @param ?list<string> $slotIds
+     * The payload declares list<string>, but the JSON body is untrusted: the
+     * items are re-checked here before being turned into value objects.
+     *
+     * @param ?list<mixed> $slotIds
      *
      * @return list<SlotId>
      */

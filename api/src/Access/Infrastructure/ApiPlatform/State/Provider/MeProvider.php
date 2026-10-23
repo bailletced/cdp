@@ -55,7 +55,7 @@ final class MeProvider implements ProviderInterface
             email: $account->getEmail()->value,
             isOrganizer: $user->isOrganizer(),
             displayName: $profile?->displayName,
-            consentGiven: $profile?->consentGiven ?? false,
+            consentGiven: $profile->consentGiven ?? false,
         );
     }
 }

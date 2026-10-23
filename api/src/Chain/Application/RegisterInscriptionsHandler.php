@@ -126,7 +126,7 @@ final readonly class RegisterInscriptionsHandler
     }
 
     /**
-     * @param list<Slot> $slots
+     * @param Slot[] $slots
      */
     private function findSlot(array $slots, SlotId $slotId): Slot
     {

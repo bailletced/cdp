@@ -57,7 +57,7 @@ final class InscriptionContext implements Context
 
         $state->capturedEditionId = $edition->getId()->value->toRfc4122();
         $state->capturedSlotIds = array_map(
-            static fn ($slot): string => $slot->getId()->value->toRfc4122(),
+            static fn (\App\Chain\Domain\Entity\Slot $slot): string => $slot->getId()->value->toRfc4122(),
             $edition->getSlots(),
         );
     }

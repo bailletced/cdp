@@ -16,3 +16,15 @@ parameters:
     # Doctrine
     dynamicConstantNames:
         - Doctrine\ORM\Mapping\ClassMetadata::CUSTOM_STATE_SAVEPoint
+    ignoreErrors:
+        # F09-T02 spec'd unsubscribedAt/erasedAt as reserved columns: their
+        # writers arrive with F14 (désinscription, RG-EP-1) and F25-T01
+        # (Priant::erase(), RG-EP-3). TODO(F14/F25): remove once written.
+        -
+            identifier: property.unusedType
+            path: src/Chain/Domain/Entity/Priant.php
+            message: '#Priant::\$unsubscribedAt .* is never assigned#'
+        -
+            identifier: property.unusedType
+            path: src/Chain/Domain/Entity/Priant.php
+            message: '#Priant::\$erasedAt .* is never assigned#'

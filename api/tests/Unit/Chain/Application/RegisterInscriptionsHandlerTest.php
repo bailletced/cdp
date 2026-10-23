@@ -326,7 +326,7 @@ final class RegisterInscriptionsHandlerTest extends TestCase
 
     private static function clockAt(string $utc): ClockInterface
     {
-        return new class ($utc) implements ClockInterface {
+        return new class($utc) implements ClockInterface {
             public function __construct(
                 private readonly string $utc,
             ) {
