@@ -25,6 +25,10 @@ services:
       # l'image — surcharger APP_SHA ici figerait /health sur l'ancien SHA.
       SERVER_NAME: ${SERVER_NAME:-:80}
       COMMUNION_EMAIL: no-reply@bailletced.org
+      # Liens absolus : sans ceci, DEFAULT_URI vaut https://localhost
+      # (.env.prod embarqué) et les liens générés hors requête pointent
+      # vers localhost.
+      DEFAULT_URI: https://bailletced.org
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
@@ -99,6 +103,10 @@ services:
       # l'envoi part de no-reply@localhost (.env.prod embarqué) et l'API Brevo
       # rejette le message (sender non validé) → e-mails jamais reçus.
       COMMUNION_EMAIL: no-reply@bailletced.org
+      # Le worker génère le lien magique en CLI (AccountRegistered consommé
+      # depuis l'outbox async_transactional, hors requête HTTP) : le routeur
+      # retombe sur DEFAULT_URI → lien en https://localhost sans ceci.
+      DEFAULT_URI: https://bailletced.org
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
