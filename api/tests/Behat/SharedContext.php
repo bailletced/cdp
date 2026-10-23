@@ -36,6 +36,8 @@ final class SharedContext implements Context
         // database (same isolation strategy as the functional tests).
         $entityManager = $this->state()->entityManager;
         $connection = $entityManager?->getConnection();
+        $connection?->executeStatement('DELETE FROM inscription');
+        $connection?->executeStatement('DELETE FROM priant');
         $connection?->executeStatement('DELETE FROM slot');
         $connection?->executeStatement('DELETE FROM edition');
         $connection?->executeStatement('DELETE FROM text');
@@ -230,6 +232,7 @@ final class SharedContext implements Context
             '401 Unauthorized' => Response::HTTP_UNAUTHORIZED,
             '403 Forbidden' => Response::HTTP_FORBIDDEN,
             '404 Not Found' => Response::HTTP_NOT_FOUND,
+            '409 Conflict' => Response::HTTP_CONFLICT,
             '422 Unprocessable Entity' => Response::HTTP_UNPROCESSABLE_ENTITY,
             '500 Internal Server Error' => Response::HTTP_INTERNAL_SERVER_ERROR,
         ];

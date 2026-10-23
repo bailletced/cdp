@@ -27,3 +27,23 @@ Feature: Current account API endpoint (F02-T16)
         Then the response should be "200 OK"
         And the response should contain JSON with "email" equal to "organisateur@bailletced.org"
         And the response should contain JSON with "isOrganizer" equal to "true"
+
+    Scenario: Verified priant gets their display name and consent already given (RG-IN-7)
+        Given an account exists with email "marie@bailletced.org"
+        And a priant exists with email "marie@bailletced.org" and display name "Marie Dupont"
+        And the last created priant has given consent
+        And this account is linked to the last created priant
+        And I am logged in as this account
+        When I make a GET request to "/api/me"
+        Then the response should be "200 OK"
+        And the response should contain JSON with "email" equal to "marie@bailletced.org"
+        And the response should contain JSON with "displayName" equal to "Marie Dupont"
+        And the response should contain JSON with "consentGiven" equal to "true"
+
+    Scenario: Account without a linked priant gets no display name and no consent
+        Given an account exists with email "thomas@bailletced.org"
+        And I am logged in as this account
+        When I make a GET request to "/api/me"
+        Then the response should be "200 OK"
+        And the response JSON key "displayName" should be null
+        And the response JSON key "consentGiven" should be false

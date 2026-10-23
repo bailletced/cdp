@@ -48,6 +48,13 @@ final class BehatState
 
     public ?string $capturedTextId = null;
 
+    public ?string $capturedEditionId = null;
+
+    /** @var list<string> Slot ids of the last created edition, in rank order. */
+    public array $capturedSlotIds = [];
+
+    public ?string $capturedPriantId = null;
+
     public function reset(): void
     {
         $this->kernel = null;
@@ -61,5 +68,8 @@ final class BehatState
         $this->lastResponseHeaders = null;
         $this->capturedOrganizerId = null;
         $this->capturedTextId = null;
+        $this->capturedEditionId = null;
+        $this->capturedSlotIds = [];
+        $this->capturedPriantId = null;
     }
 }
