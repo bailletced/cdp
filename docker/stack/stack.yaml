@@ -2,8 +2,8 @@
 # Déploiement : docker stack deploy -c docker/stack/stack.yaml cdp
 #
 # Réseaux :
-#   - edge    : exposé à Traefik (app, portainer)
-#   - internal: base de données (app, worker, database)
+#   - edge    : exposé à Traefik (app, portainer) + egress Internet (app, worker)
+#   - internal: base de données (app, worker, database) — internal: true, sans egress
 #
 # Secrets (à créer avant le déploiement) :
 #   echo "..." | docker secret create app_secret -
@@ -112,6 +112,11 @@ services:
       - sentry_dsn
     networks:
       - internal
+      # Le worker joint l'API Brevo (envoi des e-mails) et Sentry : le réseau
+      # internal (internal: true) n'a aucune connectivité sortante → « Could
+      # not reach the remote Brevo server ». edge (non internal) donne l'egress.
+      # Aucun port publié, pas de labels Traefik : le worker n'est pas exposé.
+      - edge
     # Healthcheck : vérifie que supervisor tourne (sinon l'image hérite du
     # healthcheck FrankenPHP qui curl :2019/metrics → échec car pas de serveur web).
     healthcheck:
@@ -172,6 +177,9 @@ services:
 networks:
   edge:
     external: true
+  # internal: true = isolé, aucune connectivité sortante. Seule la base y
+  # reste seule ; app et worker sont aussi sur edge pour l'egress (Brevo,
+  # Sentry, Let's Encrypt côté Traefik).
   internal:
     driver: overlay
     internal: true
