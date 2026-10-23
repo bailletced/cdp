@@ -41,6 +41,9 @@ jobs:
   build:
     name: Build & Push Image
     runs-on: ubuntu-latest
+    # Anti-blocage : le job est annulé au-delà de cette durée. Calibré sur les
+    # durées observées (max 15 min 32 s sur un build sans cache GHA).
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
@@ -116,6 +119,9 @@ jobs:
   e2e-image:
     name: E2E on Production Image
     runs-on: ubuntu-latest
+    # Anti-blocage (max observé : 11 min 49 s, dont 6 min 44 s d'install
+    # Playwright chromium).
+    timeout-minutes: 15
     needs: build
     if: github.event_name == 'push' || github.event_name == 'pull_request'
 
