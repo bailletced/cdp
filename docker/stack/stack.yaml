@@ -95,6 +95,10 @@ services:
     command: ["worker"]
     environment:
       APP_ENV: prod
+      # Le worker envoie les e-mails (LinkMessageHandler) : sans cette variable,
+      # l'envoi part de no-reply@localhost (.env.prod embarqué) et l'API Brevo
+      # rejette le message (sender non validé) → e-mails jamais reçus.
+      COMMUNION_EMAIL: no-reply@bailletced.org
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
