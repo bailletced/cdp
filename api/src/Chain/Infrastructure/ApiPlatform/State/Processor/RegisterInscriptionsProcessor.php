@@ -10,6 +10,7 @@ use ApiPlatform\Validator\Exception\ValidationException;
 use App\Chain\Application\RegisterInscriptions;
 use App\Chain\Application\RegisterInscriptionsResult;
 use App\Chain\Domain\Entity\Inscription;
+use App\Chain\Domain\Exception\AlreadyRegisteredException;
 use App\Chain\Domain\Repository\PriantRepositoryInterface;
 use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\PriantId;
@@ -19,6 +20,7 @@ use App\Chain\Infrastructure\ApiPlatform\Resource\InscriptionResource;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Port\CurrentViewer;
 use App\Shared\Domain\ValueObject\Email;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -70,12 +72,24 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
             throw self::violation('consent', 'Le consentement est obligatoire pour s’inscrire.');
         }
 
-        $result = $this->commandBus->dispatch(new RegisterInscriptions(
-            $slotIds,
-            $displayName,
-            $email,
-            $data->consent ?? false,
-        ));
+        try {
+            $result = $this->commandBus->dispatch(new RegisterInscriptions(
+                $slotIds,
+                $displayName,
+                $email,
+                $data->consent ?? false,
+            ));
+        } catch (UniqueConstraintViolationException $e) {
+            // RG-IN-3: a concurrent request (double click) registered the same
+            // (slot, priant) first — the unique index rejected our flush, which
+            // happens inside dispatch() (the command bus runs in a transaction).
+            // Other unique violations (e.g. the priant email race, RG-IN-2) bubble up.
+            if (!str_contains($e->getMessage(), 'inscription_slot_priant_unique')) {
+                throw $e;
+            }
+
+            throw new AlreadyRegisteredException();
+        }
 
         if (!$result instanceof RegisterInscriptionsResult) {
             throw new \LogicException(\sprintf('Expected the command bus to return a %s, got %s.', RegisterInscriptionsResult::class, get_debug_type($result)));

@@ -10,6 +10,7 @@ use App\Chain\Application\RegisterInscriptions;
 use App\Chain\Application\RegisterInscriptionsResult;
 use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Entity\Priant;
+use App\Chain\Domain\Exception\AlreadyRegisteredException;
 use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\PriantId;
@@ -21,7 +22,10 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Shared\Domain\Security\Viewer;
 use App\Shared\Domain\ValueObject\Email;
 use App\Tests\Unit\Shared\Application\Command\Fixture\FakeCommandBus;
+use App\Tests\Unit\Shared\Application\Command\Fixture\ThrowingCommandBus;
 use App\Tests\Unit\Shared\Application\Port\Fixture\FakeCurrentViewer;
+use Doctrine\DBAL\Driver\Exception as DriverException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PHPUnit\Framework\TestCase;
 
 final class RegisterInscriptionsProcessorTest extends TestCase
@@ -198,6 +202,36 @@ final class RegisterInscriptionsProcessorTest extends TestCase
         self::assertFalse($command->consent);
     }
 
+    public function testAUniqueViolationOnTheSlotPriantIndexBecomesA409(): void
+    {
+        // RG-IN-3: a concurrent request (double click) registered the same
+        // (slot, priant) first — the unique index rejected our flush.
+        $processor = new RegisterInscriptionsProcessor(
+            new ThrowingCommandBus(self::uniqueViolationOn('inscription_slot_priant_unique')),
+            $this->priantRepository,
+            new FakeCurrentViewer(Viewer::visitor()),
+        );
+
+        $this->expectException(AlreadyRegisteredException::class);
+        $this->expectExceptionMessage('Vous êtes déjà inscrit sur ce créneau.');
+
+        $processor->process(self::validPayload(), new Post(), [], []);
+    }
+
+    public function testAnotherUniqueViolationBubblesUp(): void
+    {
+        // The priant email race (RG-IN-2) is not an inscription conflict.
+        $processor = new RegisterInscriptionsProcessor(
+            new ThrowingCommandBus(self::uniqueViolationOn('priant_email_unique')),
+            $this->priantRepository,
+            new FakeCurrentViewer(Viewer::visitor()),
+        );
+
+        $this->expectException(UniqueConstraintViolationException::class);
+
+        $processor->process(self::validPayload(), new Post(), [], []);
+    }
+
     private function processor(FakeCommandBus $commandBus, Viewer $viewer): RegisterInscriptionsProcessor
     {
         return new RegisterInscriptionsProcessor(
@@ -205,6 +239,28 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $this->priantRepository,
             new FakeCurrentViewer($viewer),
         );
+    }
+
+    private static function validPayload(): RegisterInscriptionsPayload
+    {
+        return new RegisterInscriptionsPayload(
+            slotIds: [new SlotId()->value->toRfc4122()],
+            displayName: 'Famille Martin',
+            email: 'famille.martin@bailletced.org',
+            consent: true,
+        );
+    }
+
+    private static function uniqueViolationOn(string $constraint): UniqueConstraintViolationException
+    {
+        $driverException = new class (\sprintf('duplicate key value violates unique constraint "%s"', $constraint)) extends \Exception implements DriverException {
+            public function getSQLState(): ?string
+            {
+                return '23505';
+            }
+        };
+
+        return new UniqueConstraintViolationException($driverException, null);
     }
 
     private function assertViolationOn(string $propertyPath, RegisterInscriptionsPayload $payload, ?Viewer $viewer = null): void

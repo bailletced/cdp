@@ -217,6 +217,32 @@ final class InscriptionApiTest extends ApiTestCase
         self::assertSame('Ce créneau est déjà passé.', $data['detail'] ?? null);
     }
 
+    public function testADuplicateRegistrationReturns409(): void
+    {
+        $edition = $this->createOpenEdition();
+        $payload = [
+            'slotIds' => [$edition->getSlots()[0]->getId()->value->toRfc4122()],
+            'displayName' => 'Famille Martin',
+            'email' => 'famille.martin@bailletced.org',
+            'consent' => true,
+        ];
+
+        $first = $this->postJson('/api/inscriptions', $payload);
+        self::assertSame(201, $first['status']);
+
+        // Double click / concurrent request: the unique index (slot, priant)
+        // rejects the second registration (RG-IN-3, F09-T11).
+        $second = $this->postJson('/api/inscriptions', $payload);
+        self::assertSame(409, $second['status']);
+
+        $data = json_decode($second['content'], true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('Vous êtes déjà inscrit sur ce créneau.', $data['detail'] ?? null);
+
+        // The second transaction rolled back entirely.
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM inscription'));
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM priant'));
+    }
+
     public function testAFilledHoneypotReturns201AndRegistersNothing(): void
     {
         $edition = $this->createOpenEdition();
