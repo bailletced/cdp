@@ -29,11 +29,22 @@ describe("theme stylesheet (F01-T05)", () => {
     expect(css).not.toContain("fonts.googleapis.com");
   });
 
-  it("maps the carmelite palette onto the HeroUI tokens", () => {
-    expect(css).toContain("--accent: #6b4226");
-    expect(css).toContain("--surface: #faf5ec");
-    expect(css).toContain("--foreground: #2b2118");
-    expect(css).toContain("--danger: #b3261e");
+  it("self-hosts the Alegreya display face for the headings", () => {
+    expect(css).toContain("/fonts/Alegreya-Medium.woff2");
+    expect(css).toContain("/fonts/Alegreya-Bold.woff2");
+    expect(ruleBodies("h1,\n  h2,\n  h3").join("\n")).toContain(
+      'font-family: "Alegreya"',
+    );
+  });
+
+  it("maps the dark carmelite palette (« la veille ») onto the HeroUI tokens", () => {
+    expect(css).toContain("color-scheme: dark");
+    expect(css).toContain("--background: #211913");
+    expect(css).toContain("--surface: #2d231b");
+    expect(css).toContain("--foreground: #f3ece0");
+    expect(css).toContain("--accent: #e6b762");
+    expect(css).toContain("--accent-foreground: #211913");
+    expect(css).toContain("--danger: #f2958c");
   });
 
   it("brings every HeroUI label, field and message to the 18 px body size", () => {

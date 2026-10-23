@@ -53,15 +53,23 @@ export function SlotCard({
     stateClasses = "text-success";
   }
 
+  // Card tone: a selected slot is lit by the lamp gold (the checkbox carries
+  // the state, the border only reinforces it); a past slot drops its fill.
+  const toneClasses = isPast
+    ? "border-separator bg-transparent text-muted"
+    : selected
+      ? "border-accent bg-accent-soft"
+      : "border-separator bg-surface";
+
   return (
     <article
-      className={`rounded-xl border border-border bg-surface p-4 ${isPast ? "text-muted" : ""}`}
+      className={`relative h-full rounded-2xl border p-4 sm:p-5 ${toneClasses}`}
       data-state={temporalState}
     >
       {canSelect ? (
         <Checkbox
           aria-label={`Sélectionner le créneau de ${slot.label}`}
-          className="mb-2"
+          className="absolute top-2 right-2 min-w-11 justify-center"
           isSelected={selected}
           onChange={() => onToggle?.(slot.id)}
         >
@@ -72,25 +80,29 @@ export function SlotCard({
           </Checkbox.Content>
         </Checkbox>
       ) : null}
-      <p className="text-lg font-semibold">
+      <p className="pr-12 font-display text-2xl leading-tight font-bold lining-nums tabular-nums">
         {withLocalTime(slot.label, slot.startsAt)}
       </p>
-      <p className={`mt-1 flex items-center gap-2 font-medium ${stateClasses}`}>
-        {isEmpty && !isPast ? <PlusIcon /> : null}
-        {stateLabel}
-      </p>
-      <p className="mt-1">
-        {registrationCount} priant{registrationCount > 1 ? "s" : ""}
-      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <p className={`flex items-center gap-2 font-bold ${stateClasses}`}>
+          {isEmpty && !isPast ? <PlusIcon /> : null}
+          {stateLabel}
+        </p>
+        <p className="text-muted">
+          {registrationCount} priant{registrationCount > 1 ? "s" : ""}
+        </p>
+      </div>
       {slot.textTitle ? (
-        <>
-          <p className="mt-2 font-medium">{slot.textTitle}</p>
+        <div className="mt-3 border-t border-separator pt-3">
+          <p className="font-display text-xl leading-snug font-medium">
+            {slot.textTitle}
+          </p>
           {slot.textSource ? (
             <p className="text-muted">{slot.textSource}</p>
           ) : null}
-        </>
+        </div>
       ) : (
-        <p className="mt-2 text-muted">
+        <p className="mt-3 border-t border-separator pt-3 text-muted">
           Le texte de ce créneau sera bientôt disponible
         </p>
       )}

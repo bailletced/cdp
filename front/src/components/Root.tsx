@@ -12,7 +12,7 @@ import type { AppRouterContext } from "../routerContext";
 // stylesheet only applies to HeroUI Link components). Standalone links get a
 // 44 px touch target (F01-T06).
 const NAV_LINK =
-  "flex min-h-11 items-center px-2 text-link underline underline-offset-4";
+  "flex min-h-11 items-center px-2 text-link underline decoration-1 underline-offset-4";
 
 /**
  * Public layout (F01-T07): skip link, header (community name from the single
@@ -36,13 +36,16 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
         >
           Aller au contenu
         </a>
-        <header className="border-b border-border">
-          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-3">
+        <header className="border-b border-separator">
+          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-4 py-4">
             <Link
               to="/"
-              className="max-w-64 text-lg font-bold leading-tight text-foreground no-underline"
+              className="flex min-h-11 items-center gap-3 text-foreground no-underline"
             >
-              {SITE_NAME}
+              <CarmelMark />
+              <span className="max-w-72 font-display text-xl font-medium leading-tight">
+                {SITE_NAME}
+              </span>
             </Link>
             <nav aria-label="Navigation principale">
               {isLoading ? null : !isError && data ? (
@@ -60,8 +63,8 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
         <main id="main" className="flex-1">
           <Outlet />
         </main>
-        <footer className="border-t border-border">
-          <div className="mx-auto flex max-w-3xl flex-wrap gap-x-6 gap-y-2 px-4 py-4">
+        <footer className="mt-16 border-t border-separator">
+          <div className="mx-auto flex max-w-3xl flex-wrap gap-x-6 gap-y-2 px-4 py-6">
             <Link to="/confidentialite" className={NAV_LINK}>
               Confidentialité
             </Link>
@@ -74,3 +77,35 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
     );
   },
 });
+
+/**
+ * The Carmel mark, drawn from the Order's coat of arms: Mount Carmel crowned
+ * with a cross, under two stars. Decorative: the community name next to it
+ * names the link.
+ */
+function CarmelMark() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-10 w-10 shrink-0 text-accent"
+      viewBox="0 0 40 40"
+      fill="none"
+    >
+      <path
+        d="M4 35 20 15l16 20Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M20 3v12M15.5 7.5h9"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="20" cy="28" r="2" fill="currentColor" />
+      <circle cx="8" cy="9" r="2" fill="currentColor" />
+      <circle cx="32" cy="9" r="2" fill="currentColor" />
+    </svg>
+  );
+}
