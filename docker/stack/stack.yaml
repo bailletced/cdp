@@ -195,7 +195,9 @@ services:
       - internal
       - edge
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/"]
+      # L'image adminer (Debian, serveur PHP intégré) n'a ni wget ni curl :
+      # le probe passe par PHP lui-même.
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/') === false ? 1 : 0);"]
       interval: 30s
       timeout: 5s
       retries: 3
