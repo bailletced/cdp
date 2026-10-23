@@ -6,9 +6,14 @@ namespace App\Tests\Integration\Chain\Infrastructure\Doctrine;
 
 use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Inscription;
+use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
+use App\Chain\Domain\Repository\PriantRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
+use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
@@ -16,13 +21,15 @@ use App\Chain\Domain\ValueObject\RichText;
 use App\Chain\Domain\ValueObject\TextSource;
 use App\Chain\Domain\ValueObject\TextTitle;
 use App\Shared\Domain\Time\ParisCalendar;
+use App\Shared\Domain\ValueObject\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * Integration test for DoctrinePlanningViewFinder (F08-T03):
- * the planning returns 48 slots in a single query, with text title/source
- * and temporal state, and no priant data.
+ * Integration test for DoctrinePlanningViewFinder (F08-T03, F09-T13):
+ * the planning returns 48 slots in a single query, with text title/source,
+ * temporal state and registration count (RG-PL-1), and no priant data
+ * (RG-PL-4).
  */
 final class DoctrinePlanningViewFinderTest extends KernelTestCase
 {
@@ -31,6 +38,10 @@ final class DoctrinePlanningViewFinderTest extends KernelTestCase
     private EditionRepositoryInterface $editionRepository;
 
     private TextRepositoryInterface $textRepository;
+
+    private PriantRepositoryInterface $priantRepository;
+
+    private InscriptionRepositoryInterface $inscriptionRepository;
 
     private EntityManagerInterface $em;
 
@@ -43,9 +54,13 @@ final class DoctrinePlanningViewFinderTest extends KernelTestCase
         $this->finder = $testContainer->get(PlanningViewFinder::class);
         $this->editionRepository = $container->get(EditionRepositoryInterface::class);
         $this->textRepository = $container->get(TextRepositoryInterface::class);
+        $this->priantRepository = $container->get(PriantRepositoryInterface::class);
+        $this->inscriptionRepository = $container->get(InscriptionRepositoryInterface::class);
         $this->em = $container->get('doctrine')->getManager();
 
         $connection = $this->em->getConnection();
+        $connection->executeStatement('DELETE FROM inscription');
+        $connection->executeStatement('DELETE FROM priant');
         $connection->executeStatement('DELETE FROM slot');
         $connection->executeStatement('DELETE FROM edition');
         $connection->executeStatement('DELETE FROM text');
@@ -119,13 +134,59 @@ final class DoctrinePlanningViewFinderTest extends KernelTestCase
         $view = $this->finder->findByEdition($edition->getId());
         self::assertNotNull($view);
 
-        // The view must not contain any priant-related fields (RG-PL-4)
+        // The registration count is public (RG-PL-1) but no priant
+        // identity or name ever is (RG-PL-4).
         foreach ($view->slots as $slot) {
             $data = (array) $slot;
-            self::assertArrayNotHasKey('registrationCount', $data);
             self::assertArrayNotHasKey('isMine', $data);
+            self::assertArrayNotHasKey('priantId', $data);
             self::assertArrayNotHasKey('priantName', $data);
         }
+    }
+
+    public function testEachInscriptionCountsForOneRegistration(): void
+    {
+        $edition = $this->createEdition(lifecycle: 'scheduled');
+        $priant = $this->createPriant('marie@bailletced.org', 'Marie Dupont');
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $edition->getSlots()[0]->getId(), $priant->getId()));
+        $this->em->flush();
+
+        $view = $this->finder->findByEdition($edition->getId());
+        self::assertNotNull($view);
+
+        // RG-PL-1: one inscription counts for exactly one registration.
+        self::assertSame(1, $view->slots[0]->registrationCount);
+        self::assertTrue($view->slots[0]->occupied);
+        self::assertSame(0, $view->slots[1]->registrationCount);
+        self::assertFalse($view->slots[1]->occupied);
+    }
+
+    public function testTwoPriantsOnTheSameSlotCountAsTwoRegistrations(): void
+    {
+        $edition = $this->createEdition(lifecycle: 'scheduled');
+        $marie = $this->createPriant('marie@bailletced.org', 'Marie Dupont');
+        $jean = $this->createPriant('jean@bailletced.org', 'Jean Martin');
+        $slot = $edition->getSlots()[2];
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $slot->getId(), $marie->getId()));
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $slot->getId(), $jean->getId()));
+        $this->em->flush();
+
+        $view = $this->finder->findByEdition($edition->getId());
+        self::assertNotNull($view);
+
+        self::assertSame(2, $view->slots[2]->registrationCount);
+        self::assertTrue($view->slots[2]->occupied);
+        self::assertSame(0, $view->slots[3]->registrationCount);
+        self::assertFalse($view->slots[3]->occupied);
+    }
+
+    private function createPriant(string $email, string $displayName): Priant
+    {
+        $priant = new Priant(new Email($email), new DisplayName($displayName));
+        $this->priantRepository->add($priant);
+        $this->em->flush();
+
+        return $priant;
     }
 
     private function createEdition(string $lifecycle): Edition

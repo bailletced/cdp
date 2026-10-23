@@ -5,23 +5,30 @@ declare(strict_types=1);
 namespace App\Tests\Acceptance\Chain;
 
 use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Inscription;
+use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
+use App\Chain\Domain\Repository\PriantRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
+use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
 use App\Chain\Domain\ValueObject\RichText;
 use App\Chain\Domain\ValueObject\TextSource;
 use App\Chain\Domain\ValueObject\TextTitle;
 use App\Shared\Domain\Time\ParisCalendar;
+use App\Shared\Domain\ValueObject\Email;
 use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
- * Acceptance test for GET /api/editions/{id}/slots (F08-T04, US-08.2):
- * the 48 public slots of a scheduled edition, 404 when the edition is
- * unknown or not public, no priant data (RG-PL-4).
+ * Acceptance test for GET /api/editions/{id}/slots (F08-T04, US-08.2,
+ * F09-T13): the 48 public slots of a scheduled edition with their
+ * registration count (RG-PL-1), 404 when the edition is unknown or not
+ * public, no priant data (RG-PL-4).
  */
 final class PublicEditionSlotsApiTest extends ApiTestCase
 {
@@ -33,6 +40,10 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
 
     private TextRepositoryInterface $textRepository;
 
+    private PriantRepositoryInterface $priantRepository;
+
+    private InscriptionRepositoryInterface $inscriptionRepository;
+
     protected function setUp(): void
     {
         $this->client = static::createClient();
@@ -42,8 +53,12 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
         $this->em = $container->get('doctrine')->getManager();
         $this->editionRepository = $container->get(EditionRepositoryInterface::class);
         $this->textRepository = $container->get(TextRepositoryInterface::class);
+        $this->priantRepository = $container->get(PriantRepositoryInterface::class);
+        $this->inscriptionRepository = $container->get(InscriptionRepositoryInterface::class);
 
         $connection = $this->em->getConnection();
+        $connection->executeStatement('DELETE FROM inscription');
+        $connection->executeStatement('DELETE FROM priant');
         $connection->executeStatement('DELETE FROM slot');
         $connection->executeStatement('DELETE FROM edition');
         $connection->executeStatement('DELETE FROM text');
@@ -99,6 +114,9 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
             self::assertContains($slot['state'] ?? null, ['past', 'current', 'future']);
             self::assertArrayHasKey('textTitle', $slot);
             self::assertArrayHasKey('textSource', $slot);
+            // No inscription yet: empty slots are exposed as such (RG-PL-1).
+            self::assertSame(0, $slot['registrationCount'] ?? null);
+            self::assertFalse($slot['occupied'] ?? null);
         }
     }
 
@@ -129,6 +147,33 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
         self::assertNull($slots[1]['textSource']);
     }
 
+    public function testSlotsExposeRegistrationCountAndOccupiedState(): void
+    {
+        $edition = $this->createEdition(lifecycle: 'scheduled');
+        $marie = $this->createPriant('marie@bailletced.org', 'Marie Dupont');
+        $jean = $this->createPriant('jean@bailletced.org', 'Jean Martin');
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $edition->getSlots()[0]->getId(), $marie->getId()));
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $edition->getSlots()[0]->getId(), $jean->getId()));
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $edition->getSlots()[5]->getId(), $jean->getId()));
+        $this->em->flush();
+
+        $this->client->request('GET', '/api/editions/'.$edition->getId()->value->toRfc4122().'/slots');
+
+        $response = $this->client->getResponse();
+        self::assertSame(200, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        $slots = $data['slots'];
+
+        // RG-PL-1: the registration count of a slot is its number of inscriptions.
+        self::assertSame(2, $slots[0]['registrationCount']);
+        self::assertTrue($slots[0]['occupied']);
+        self::assertSame(1, $slots[5]['registrationCount']);
+        self::assertTrue($slots[5]['occupied']);
+        self::assertSame(0, $slots[1]['registrationCount']);
+        self::assertFalse($slots[1]['occupied']);
+    }
+
     public function testSlotsExposeNoPriantData(): void
     {
         $edition = $this->createEdition(lifecycle: 'scheduled');
@@ -140,8 +185,9 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
 
         $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         foreach ($data['slots'] as $slot) {
-            self::assertArrayNotHasKey('registrationCount', $slot);
+            // Counts are public (RG-PL-1) but no priant identity or name is (RG-PL-4).
             self::assertArrayNotHasKey('isMine', $slot);
+            self::assertArrayNotHasKey('priantId', $slot);
             self::assertArrayNotHasKey('priantName', $slot);
         }
     }
@@ -165,6 +211,15 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
         $response = $this->client->getResponse();
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('no-store, private', $response->headers->get('Cache-Control'));
+    }
+
+    private function createPriant(string $email, string $displayName): Priant
+    {
+        $priant = new Priant(new Email($email), new DisplayName($displayName));
+        $this->priantRepository->add($priant);
+        $this->em->flush();
+
+        return $priant;
     }
 
     private function createEdition(string $lifecycle): Edition

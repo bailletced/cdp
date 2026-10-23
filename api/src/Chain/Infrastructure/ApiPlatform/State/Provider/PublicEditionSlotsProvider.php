@@ -63,6 +63,8 @@ final readonly class PublicEditionSlotsProvider implements ProviderInterface
                     'state' => $slot->state,
                     'textTitle' => $slot->textTitle,
                     'textSource' => $slot->textSource,
+                    'registrationCount' => $slot->registrationCount,
+                    'occupied' => $slot->occupied,
                 ],
                 $view->slots,
             ),
