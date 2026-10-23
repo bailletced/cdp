@@ -21,6 +21,18 @@ Feature: Public inscriptions API (F09-T07 to F09-T13)
         When I process the async queue
         Then the account with email "famille.martin@bailletced.org" should be linked to the priant with email "famille.martin@bailletced.org"
 
+    Scenario: The account is linked asynchronously, only when the queue is processed (transactional outbox)
+        When I register on the first slot of the last created edition with body:
+            """
+            {"displayName": "Famille Martin", "email": "famille.martin@bailletced.org", "consent": true}
+            """
+        Then the response should be "201 Created"
+        And a priant should exist with email "famille.martin@bailletced.org" and display name "Famille Martin"
+        And the account table should be empty
+        When I process the async queue
+        Then exactly one account should exist
+        And the account with email "famille.martin@bailletced.org" should be linked to the priant with email "famille.martin@bailletced.org"
+
     Scenario: The registration form never overwrites an existing display name (RG-IN-2)
         Given a priant exists with email "marie@bailletced.org" and display name "Marie Dupont"
         When I register on the first slot of the last created edition with body:

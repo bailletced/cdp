@@ -6,8 +6,12 @@ framework:
             command.bus:
                 middleware:
                     - doctrine_transaction
-            # Synchrone ; les événements publiés par une commande attendent la fin de sa transaction
-            # (DispatchAfterCurrentBusStamp, voir MessengerEventBus).
+            # Dispatch in-process, mais le routing ci-dessous envoie les DomainEvent vers
+            # l'outbox async_transactional : écrits dans la transaction de la commande
+            # (DispatchAfterCurrentBusStamp, voir MessengerEventBus), traités par le worker
+            # APRÈS le commit — jamais dans la requête. Pas de doctrine_transaction ici :
+            # les listeners n'ont aucune transaction englobante, leurs adapters flushent
+            # explicitement (voir AccountPriantDirectory).
             event.bus:
                 default_middleware:
                     enabled: true
