@@ -8,6 +8,8 @@ use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Entity\Slot;
 use App\Chain\Domain\Event\InscriptionsRegistered;
+use App\Chain\Domain\Exception\EditionClosedForInscriptionsException;
+use App\Chain\Domain\Exception\SlotAlreadyPastException;
 use App\Chain\Domain\Exception\SlotNotFoundException;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
@@ -32,10 +34,10 @@ use Psr\Clock\ClockInterface;
  * RG-IN-3: one inscription per (slot, priant) — the repository rejects a
  * duplicate (AlreadyRegisteredException, enforced up to the database).
  *
- * The temporal rules (edition open or running, slot not past) are wired in
- * F09-T08.
+ * Temporal rules (F09-T08): inscriptions are possible only while the edition
+ * is open or running, and only on the current slot or a future one.
  *
- * @see specs-fonctionnelles.md §5.4, RG-IN-1 to RG-IN-5
+ * @see specs-fonctionnelles.md §5.2, §5.4, RG-IN-1 to RG-IN-5
  */
 #[AsCommandHandler]
 final readonly class RegisterInscriptionsHandler
@@ -61,14 +63,28 @@ final readonly class RegisterInscriptionsHandler
             throw new SlotNotFoundException();
         }
 
-        // Every requested slot must belong to the edition of the first one:
-        // a registration always targets a single edition.
-        $slots = [];
-        foreach ($command->slotIds as $slotId) {
-            $slots[] = $this->findSlot($edition->getSlots(), $slotId);
+        $now = $this->clock->now();
+
+        // Temporal rule: inscriptions are open only while the edition is open
+        // or running (specs-fonctionnelles.md §5.2).
+        $status = $edition->statusAt($now);
+        if (!\in_array($status, ['open', 'running'], true)) {
+            throw new EditionClosedForInscriptionsException();
         }
 
-        $now = $this->clock->now();
+        // Every requested slot must belong to the edition of the first one:
+        // a registration always targets a single edition. A past slot is
+        // refused: only the current slot and future slots can be taken.
+        $slots = [];
+        foreach ($command->slotIds as $slotId) {
+            $slot = $this->findSlot($edition->getSlots(), $slotId);
+
+            if ($now >= $slot->getEndsAt()) {
+                throw new SlotAlreadyPastException();
+            }
+
+            $slots[] = $slot;
+        }
 
         // RG-IN-2: an existing priant keeps its display name; a null email
         // never matches and always creates a new priant.

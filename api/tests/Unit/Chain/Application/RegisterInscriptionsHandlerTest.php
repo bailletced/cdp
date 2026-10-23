@@ -9,6 +9,9 @@ use App\Chain\Application\RegisterInscriptionsHandler;
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Event\InscriptionsRegistered;
+use App\Chain\Domain\Exception\AlreadyRegisteredException;
+use App\Chain\Domain\Exception\EditionClosedForInscriptionsException;
+use App\Chain\Domain\Exception\SlotAlreadyPastException;
 use App\Chain\Domain\Exception\SlotNotFoundException;
 use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\EditionTitle;
@@ -203,16 +206,119 @@ final class RegisterInscriptionsHandlerTest extends TestCase
         ));
     }
 
-    private function createEdition(): Edition
+    public function testItAcceptsTheCurrentSlotWhileTheEditionIsRunning(): void
     {
+        // Edition running since 09:00 UTC: slot 1 (09:00-09:30) and slot 2
+        // (09:30-10:00) are past, slot 3 (10:00-10:30) is the current one.
+        $edition = $this->createEdition(startsAtUtc: '2026-11-01 09:00:00');
+
+        $result = ($this->handler)(new RegisterInscriptions(
+            [$edition->getSlots()[2]->getId()],
+            new DisplayName('Famille Martin'),
+            new Email('famille.martin@bailletced.org'),
+            consent: true,
+        ));
+
+        self::assertCount(1, $result->inscriptions);
+    }
+
+    public function testItRejectsAPastSlot(): void
+    {
+        $edition = $this->createEdition(startsAtUtc: '2026-11-01 09:00:00');
+
+        $this->expectException(SlotAlreadyPastException::class);
+
+        ($this->handler)(new RegisterInscriptions(
+            [$edition->getSlots()[0]->getId()],
+            new DisplayName('Famille Martin'),
+            new Email('famille.martin@bailletced.org'),
+            consent: true,
+        ));
+    }
+
+    public function testItRejectsARegistrationWhenTheEditionIsNotOpenYet(): void
+    {
+        $edition = $this->createEdition(startsAtUtc: '2026-11-08 20:00:00', opensAtUtc: '2026-11-07 00:00:00');
+
+        $this->expectException(EditionClosedForInscriptionsException::class);
+
+        ($this->handler)(new RegisterInscriptions(
+            [$edition->getSlots()[0]->getId()],
+            new DisplayName('Famille Martin'),
+            new Email('famille.martin@bailletced.org'),
+            consent: true,
+        ));
+    }
+
+    public function testItRejectsARegistrationOnAFinishedEdition(): void
+    {
+        // The edition started 25 hours ago: it is over.
+        $edition = $this->createEdition(startsAtUtc: '2026-10-31 09:00:00', opensAtUtc: '2026-10-30 08:00:00');
+
+        $this->expectException(EditionClosedForInscriptionsException::class);
+
+        ($this->handler)(new RegisterInscriptions(
+            [$edition->getSlots()[0]->getId()],
+            new DisplayName('Famille Martin'),
+            new Email('famille.martin@bailletced.org'),
+            consent: true,
+        ));
+    }
+
+    public function testItRejectsARegistrationOnADraftEdition(): void
+    {
+        $edition = $this->createEdition(schedule: false);
+
+        $this->expectException(EditionClosedForInscriptionsException::class);
+
+        ($this->handler)(new RegisterInscriptions(
+            [$edition->getSlots()[0]->getId()],
+            new DisplayName('Famille Martin'),
+            new Email('famille.martin@bailletced.org'),
+            consent: true,
+        ));
+    }
+
+    public function testItRejectsADuplicateRegistrationOnTheSameSlot(): void
+    {
+        $edition = $this->createEdition();
+        $slot = $edition->getSlots()[0];
+
+        ($this->handler)(new RegisterInscriptions(
+            [$slot->getId()],
+            new DisplayName('Famille Martin'),
+            new Email('famille.martin@bailletced.org'),
+            consent: true,
+        ));
+
+        // RG-IN-3: one inscription per (slot, priant).
+        $this->expectException(AlreadyRegisteredException::class);
+
+        ($this->handler)(new RegisterInscriptions(
+            [$slot->getId()],
+            new DisplayName('Famille Martin'),
+            new Email('famille.martin@bailletced.org'),
+            consent: true,
+        ));
+    }
+
+    private function createEdition(
+        string $startsAtUtc = '2026-11-28 20:00:00',
+        string $opensAtUtc = '2026-10-01 00:00:00',
+        bool $schedule = true,
+    ): Edition {
         $edition = Edition::create(
             new EditionTitle('24 heures de prière'),
             new Presentation(''),
-            new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('UTC')),
-            new \DateTimeImmutable('2026-10-01 00:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable($startsAtUtc, new \DateTimeZone('UTC')),
+            new \DateTimeImmutable($opensAtUtc, new \DateTimeZone('UTC')),
             new ParisCalendar(),
         );
-        $edition->schedule(new \DateTimeImmutable(self::NOW_UTC, new \DateTimeZone('UTC')));
+
+        if ($schedule) {
+            $edition->schedule(new \DateTimeImmutable(self::NOW_UTC, new \DateTimeZone('UTC')));
+        }
+
         $this->editionRepository->add($edition);
 
         return $edition;
