@@ -38,6 +38,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvid
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrinePriantProfileReader;
 use App\Chain\Infrastructure\Doctrine\DoctrinePublicEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineInscriptionRepository;
@@ -51,6 +52,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
+use App\Shared\Application\Port\PriantProfileReader;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -169,6 +171,11 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
         ->public()
         ->alias(PlanningViewFinder::class, DoctrinePlanningViewFinder::class);
+
+    $services->set(DoctrinePriantProfileReader::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(PriantProfileReader::class, DoctrinePriantProfileReader::class);
 
     $services->set(AdminEditionProvider::class)
         ->autoconfigure()
