@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Access\Application\AddOrganizerHandler;
+use App\Access\Application\LinkAccountOnPriantRegistered;
 use App\Access\Application\Query\OrganizerViewFinder;
 use App\Access\Application\RegisterHandler;
 use App\Access\Application\RemoveOrganizerHandler;
@@ -15,6 +16,7 @@ use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Infrastructure\ApiPlatform\State\Processor\AdminOrganizerProcessor;
 use App\Access\Infrastructure\ApiPlatform\State\Provider\AdminOrganizerProvider;
 use App\Access\Infrastructure\ApiPlatform\State\Provider\MeProvider;
+use App\Access\Infrastructure\Doctrine\AccountPriantDirectory;
 use App\Access\Infrastructure\Doctrine\DoctrineOrganizerViewFinder;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineAccountRepository;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineOrganizerRepository;
@@ -36,6 +38,7 @@ use App\Access\Infrastructure\Symfony\Security\SymfonyCurrentViewer;
 use App\Access\Infrastructure\Symfony\Security\UserProvider;
 use App\Shared\Application\Port\CurrentViewer;
 use App\Shared\Application\Port\PersonalLinkIssuer;
+use App\Shared\Application\Port\PriantDirectory;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -76,6 +79,15 @@ return static function (ContainerConfigurator $container): void {
         ->set(SendPersonalLinkOnAccountRegistered::class)
         ->autoconfigure()
         ->autowire()
+
+        ->set(LinkAccountOnPriantRegistered::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(AccountPriantDirectory::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(PriantDirectory::class, AccountPriantDirectory::class)
 
         ->set(RequestPersonalLinkHandler::class)
         ->autoconfigure()
