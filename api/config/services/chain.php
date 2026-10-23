@@ -12,14 +12,17 @@ use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
 use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
+use App\Chain\Application\RegisterInscriptionsHandler;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
 use App\Chain\Application\UpdateTextHandler;
 use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
 use App\Chain\Domain\Repository\PriantRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionDistributeTextsProcessor;
@@ -36,11 +39,13 @@ use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePublicEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
+use App\Chain\Infrastructure\Doctrine\Repository\DoctrineInscriptionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrinePriantRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminTextViewFinder;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryInscriptionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
@@ -81,6 +86,16 @@ return static function (ContainerConfigurator $container): void {
     $services->set(InMemoryPriantRepository::class)
         ->tag('app.in_memory_repository');
 
+    $services->set(DoctrineInscriptionRepository::class)
+        ->args([
+            new Reference('doctrine'),
+            Inscription::class,
+        ])
+        ->alias(InscriptionRepositoryInterface::class, DoctrineInscriptionRepository::class);
+
+    $services->set(InMemoryInscriptionRepository::class)
+        ->tag('app.in_memory_repository');
+
     $services->set(SymfonyHtmlSanitizer::class)
         ->autoconfigure()
         ->autowire()
@@ -119,6 +134,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(DistributeTextsHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(RegisterInscriptionsHandler::class)
         ->autoconfigure()
         ->autowire();
 
