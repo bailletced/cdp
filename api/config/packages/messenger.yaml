@@ -9,10 +9,13 @@ framework:
             # Dispatch in-process, mais le routing ci-dessous envoie les DomainEvent vers
             # l'outbox async_transactional : écrits dans la transaction de la commande
             # (DispatchAfterCurrentBusStamp, voir MessengerEventBus), traités par le worker
-            # APRÈS le commit — jamais dans la requête. Pas de doctrine_transaction ici :
-            # les listeners n'ont aucune transaction englobante, leurs adapters flushent
-            # explicitement (voir AccountPriantDirectory).
+            # APRÈS le commit — jamais dans la requête. Chaque événement traité par le
+            # worker s'exécute dans sa propre transaction (doctrine_transaction) : les
+            # listeners persist sans flush explicite, et un échec annule l'événement
+            # entier (rollback, puis retry par le worker).
             event.bus:
+                middleware:
+                    - doctrine_transaction
                 default_middleware:
                     enabled: true
                     allow_no_handlers: true

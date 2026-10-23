@@ -18,6 +18,13 @@ final readonly class ProbeWrittenListener
 
     public function __invoke(ProbeWrittenEvent $event): void
     {
-        $this->recorder->transactionWasActive[] = $this->entityManager->getConnection()->isTransactionActive();
+        $connection = $this->entityManager->getConnection();
+
+        // The event bus wraps the listener in its own transaction
+        // (doctrine_transaction): one is active here, but it is not the
+        // command's — the SET LOCAL marker set by the command handler is
+        // gone once that transaction has committed.
+        $this->recorder->transactionWasActive[] = $connection->isTransactionActive();
+        $this->recorder->insideCommandTransaction[] = '1' === $connection->fetchOne("SELECT current_setting('app.probe_command_tx', true)");
     }
 }

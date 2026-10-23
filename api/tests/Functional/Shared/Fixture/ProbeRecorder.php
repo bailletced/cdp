@@ -8,4 +8,7 @@ final class ProbeRecorder
 {
     /** @var list<bool> */
     public array $transactionWasActive = [];
+
+    /** @var list<bool> */
+    public array $insideCommandTransaction = [];
 }

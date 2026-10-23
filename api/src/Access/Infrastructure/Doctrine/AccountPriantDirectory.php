@@ -9,20 +9,19 @@ use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Access\Domain\ValueObject\AccountId;
 use App\Shared\Application\Port\PriantDirectory;
 use App\Shared\Domain\ValueObject\Email;
-use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * PriantDirectory implemented by the Access BC (F09-T09).
  *
- * Domain event listeners run on the event bus, which has NO surrounding
- * transaction: this adapter flushes explicitly (unlike the repositories,
- * which never flush themselves).
+ * Domain event listeners run on the event bus, wrapped in a transaction by
+ * the doctrine_transaction middleware: like the repositories, this adapter
+ * persists without flushing — the middleware flushes and commits once the
+ * listener returns.
  */
 final readonly class AccountPriantDirectory implements PriantDirectory
 {
     public function __construct(
         private AccountRepositoryInterface $accountRepository,
-        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -33,16 +32,14 @@ final readonly class AccountPriantDirectory implements PriantDirectory
 
         if (null === $account) {
             $this->accountRepository->add(new Account(new AccountId(), $email, priantId: $priantId));
-            $this->entityManager->flush();
 
             return;
         }
 
         if ($account->getPriantId() === $priantId) {
-            return; // Already linked: idempotent, nothing to flush.
+            return; // Already linked: idempotent, nothing to persist.
         }
 
         $account->updatePriantId($priantId);
-        $this->entityManager->flush();
     }
 }

@@ -41,6 +41,7 @@ final class MessengerEventBusTest extends KernelTestCase
         // when the command transaction rolls back.
         $this->transport('async_transactional')->queue()->assertEmpty();
         self::assertSame([], $this->recorder->transactionWasActive);
+        self::assertSame([], $this->recorder->insideCommandTransaction);
     }
 
     public function testAListenerIsCalledOnlyOnceTheTransactionHasBeenCommitted(): void
@@ -48,10 +49,12 @@ final class MessengerEventBusTest extends KernelTestCase
         $this->commandBus->dispatch(new WriteProbeCommand('published'));
 
         // Domain events are routed to the async_transactional outbox: consume
-        // them like the worker would. The listener must then run outside of
-        // the command transaction (no active transaction in the worker).
+        // them like the worker would. The listener runs after the command
+        // transaction has committed — never inside it — wrapped in its own
+        // transaction by doctrine_transaction on the event bus.
         $this->transport('async_transactional')->processOrFail();
 
-        self::assertSame([false], $this->recorder->transactionWasActive);
+        self::assertSame([true], $this->recorder->transactionWasActive);
+        self::assertSame([false], $this->recorder->insideCommandTransaction);
     }
 }

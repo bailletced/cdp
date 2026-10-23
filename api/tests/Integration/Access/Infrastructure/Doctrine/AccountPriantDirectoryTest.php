@@ -31,7 +31,7 @@ final class AccountPriantDirectoryTest extends KernelTestCase
 
         $this->em = $doctrine->getManager();
         $this->accountRepository = new DoctrineAccountRepository($doctrine);
-        $this->directory = new AccountPriantDirectory($this->accountRepository, $this->em);
+        $this->directory = new AccountPriantDirectory($this->accountRepository);
 
         // Clean up test data before each test
         $connection = $this->em->getConnection();
@@ -45,7 +45,11 @@ final class AccountPriantDirectoryTest extends KernelTestCase
 
         $this->directory->linkAccountToPriant($email, self::PRIANT_ID);
 
-        // The adapter flushes explicitly (event bus has no transaction).
+        // The adapter never flushes: on the event bus, the doctrine_transaction
+        // middleware flushes and commits after the listener. Called directly
+        // here, the test flushes explicitly.
+        $this->em->flush();
+
         $account = $this->accountRepository->findByEmail($email);
         self::assertNotNull($account);
         self::assertSame(self::PRIANT_ID, $account->getPriantId());
@@ -62,6 +66,7 @@ final class AccountPriantDirectoryTest extends KernelTestCase
         $this->em->clear();
 
         $this->directory->linkAccountToPriant(new Email('marie@bailletced.org'), self::PRIANT_ID);
+        $this->em->flush();
 
         $linked = $this->accountRepository->findByEmail(new Email('marie@bailletced.org'));
         self::assertNotNull($linked);
@@ -77,6 +82,7 @@ final class AccountPriantDirectoryTest extends KernelTestCase
         $this->em->clear();
 
         $this->directory->linkAccountToPriant(new Email('marie@bailletced.org'), self::PRIANT_ID);
+        $this->em->flush();
 
         self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM account'));
         $account = $this->accountRepository->findByEmail(new Email('MARIE@BAILLETCED.ORG'));
@@ -89,6 +95,7 @@ final class AccountPriantDirectoryTest extends KernelTestCase
         $email = new Email('famille.martin@bailletced.org');
 
         $this->directory->linkAccountToPriant($email, self::PRIANT_ID);
+        $this->em->flush();
         $this->directory->linkAccountToPriant($email, self::PRIANT_ID);
 
         self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM account'));
