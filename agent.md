@@ -65,13 +65,13 @@ Communication, simplicité, feedback, courage et respect. Concrètement :
 - **Propriété collective du code et standards de code** : tout le code suit les mêmes conventions (specs techniques §4 et §14 : PHP-CS-Fixer, PHPStan max, deptrac, Biome). N'importe quelle partie peut être améliorée par n'importe qui.
 - **Rythme soutenable** : on ne sacrifie ni les tests ni la qualité pour tenir une date. On réduit plutôt le périmètre (ordre de report dans l'index), et on le dit tôt.
 
-### Le TDD est imposé par Probity
+### Le TDD reste obligatoire (Probity désactivé)
 
-[Probity](https://github.com/nizos/probity) (`@nizos/probity`, dépendance de dev à la racine) est branché en hook `PreToolUse` dans `.claude/settings.json`. Il vérifie chaque écriture dans `api/src`, `api/tests`, `front/src` et `front/e2e` (configuration : `probity.config.mjs`). Toute écriture de code de production est **refusée** si l'historique récent de la session ne montre pas un test qui échoue et que ce code fait passer.
+[Probity](https://github.com/nizos/probity) (`@nizos/probity`, dépendance de dev à la racine) est **désactivé depuis le 2026-10-23** sur demande utilisateur, pour Claude Code comme pour Vibe : les écritures ne sont plus relues automatiquement. La discipline TDD reste en vigueur. Pour le réactiver sous Claude Code, rétablir dans `.claude/settings.json` le hook `PreToolUse` (matcher `Bash|Write|Edit|NotebookEdit`, commande `npx --no-install @nizos/probity --agent claude-code`). Une fois actif, il vérifie chaque écriture dans `api/src`, `api/tests`, `front/src` et `front/e2e` (configuration : `probity.config.mjs`) et refuse tout code de production que l'historique récent de la session ne justifie pas par un test qui échoue.
 
 - Un nouveau test à la fois : écris-le, **exécute-le et montre-le rouge**, puis écris le minimum de code pour le faire passer.
 - Refactore seulement quand tout est vert, sans changer le comportement.
-- En cas de refus, lis la raison et suis le cycle. Ne contourne jamais le hook : pas d'écriture par `sed`, `cat >` ou d'autres commandes shell, et pas de désactivation.
+- Quand Probity est actif et refuse une écriture, lis la raison et suis le cycle. Ne contourne jamais le hook : pas d'écriture par `sed`, `cat >` ou d'autres commandes shell.
 - Les fichiers générés (`openapi.json`, `schema.d.ts`, `routeTree.gen.ts`) sont exclus de la règle. Les migrations Doctrine (`api/migrations/`) et la configuration sont hors de son périmètre.
 - Prérequis : Node.js ≥ 22 et `pnpm install` à la racine.
 

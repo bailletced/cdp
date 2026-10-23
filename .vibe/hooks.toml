@@ -3,8 +3,8 @@
 #
 # DÉSACTIVÉ le 2026-10-21 sur demande utilisateur : les écritures ne sont plus relues sous Vibe.
 # La discipline TDD reste en vigueur dans le projet. Pour réactiver Probity, décommenter les blocs
-# ci-dessous ou recopier tooling/probity-vibe/hooks.toml.example. La configuration Claude Code
-# (.claude/settings.json) n'est pas concernée.
+# ci-dessous ou recopier tooling/probity-vibe/hooks.toml.example. Probity est aussi désactivé sous
+# Claude Code depuis le 2026-10-23 (voir agent.md).
 #
 # Prérequis lors d'une réactivation : MISTRAL_API_KEY dans l'environnement qui lance `vibe` (validateur IA de Probity).
 #
