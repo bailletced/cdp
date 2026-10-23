@@ -182,6 +182,48 @@ services:
         max-size: "10m"
         max-file: "5"
 
+  # Adminer : interface web de la base PostgreSQL, exposée sur
+  # adminer.<domaine> derrière un basic auth Traefik (obligatoire — Adminer
+  # public = porte ouverte sur la DB). Alternative sans exposition publique :
+  # tunnel SSH (voir runbook §2.6).
+  adminer:
+    image: adminer:4.8.1
+    environment:
+      # Pré-remplit le champ « serveur » : le conteneur database est sur internal.
+      ADMINER_DEFAULT_SERVER: database
+    networks:
+      - internal
+      - edge
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.adminer.rule=Host(`adminer.${DOMAIN:-localhost}`)
+        - traefik.http.routers.adminer.entrypoints=websecure
+        - traefik.http.routers.adminer.tls=true
+        - traefik.http.routers.adminer.tls.certresolver=letsencrypt
+        - traefik.http.services.adminer.loadbalancer.server.port=8080
+        # Basic auth obligatoire. User « admin », hash apr1 ($$ = $ littéral
+        # pour Swarm). Rotation du mot de passe : runbook §2.6.
+        - traefik.http.middlewares.adminer-auth.basicauth.users=admin:$$apr1$$ynpkOOfq$$HMBUnBgai8.RyxCxCpn580
+        - traefik.http.routers.adminer.middlewares=adminer-auth@swarm,security-headers@swarm
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
 networks:
   edge:
     external: true
