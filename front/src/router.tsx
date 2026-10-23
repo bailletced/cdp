@@ -11,6 +11,8 @@ import { ConfidentialitePage } from "./pages/ConfidentialitePage";
 import { DemoPage } from "./pages/DemoPage";
 import { EditionEditPage, EditionFormPage } from "./pages/EditionFormPage";
 import { ErrorPage } from "./pages/ErrorPage";
+import { InscriptionConfirmationPage } from "./pages/InscriptionConfirmationPage";
+import { InscriptionPage } from "./pages/InscriptionPage";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
@@ -21,6 +23,39 @@ const landingRoute = createRoute({
   getParentRoute: () => Root,
   path: "/",
   component: LandingPage,
+});
+
+// The inscription pages carry the selected slot ids in ?creneaux=… (built
+// by the planning grid, F08-T10): the parameter is normalized here into a
+// comma-separated string, the pages validate it against the edition's slots.
+function inscriptionSearch(search: Record<string, unknown>): {
+  creneaux: string;
+} {
+  const raw = search.creneaux;
+
+  return {
+    creneaux: Array.isArray(raw)
+      ? raw.filter((id): id is string => typeof id === "string").join(",")
+      : typeof raw === "string"
+        ? raw
+        : "",
+  };
+}
+
+// Inscription form (F09-T15 to T18)
+const inscriptionRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/inscription",
+  validateSearch: inscriptionSearch,
+  component: InscriptionPage,
+});
+
+// Inscription confirmation (F09-T19)
+const inscriptionConfirmationRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/inscription/confirmation",
+  validateSearch: inscriptionSearch,
+  component: InscriptionConfirmationPage,
 });
 
 const receiveMyLinkRoute = createRoute({
@@ -140,6 +175,8 @@ export const routeTree = Root.addChildren([
   landingRoute,
   receiveMyLinkRoute,
   confidentialiteRoute,
+  inscriptionRoute,
+  inscriptionConfirmationRoute,
   demoRoute,
   loginRoute,
   mySpaceRoute,

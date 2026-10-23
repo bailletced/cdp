@@ -36,11 +36,11 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Écrans (US-09.1 à US-09.6)
 
-- [ ] **F09-T15** · `front` `/inscription?creneaux=…` : récapitulatif des créneaux choisis (libellés, retrait), paramètre validé, créneau passé ou édition fermée signalés — *Dépend de* : F08-T10 · *Fini quand* : tests des paramètres invalides.
-- [ ] **F09-T16** · `front` Formulaire 1/2 : nom affiché (« Prénom et nom, ou nom de famille »), e-mail, validation Standard Schema bornée par l'OpenAPI + tests — *Dépend de* : F09-T15, F09-T10, F01-T09 · *Fini quand* : bornes et messages testés.
-- [ ] **F09-T17** · `front` Formulaire 2/2 : consentement toujours affiché et obligatoire hors session, masqué en session s'il est déjà donné (lien vers « Confidentialité »), champ piège `website`, état d'envoi + tests — *Dépend de* : F09-T16 · *Fini quand* : les deux cas du consentement testés, champ piège absent de l'arbre d'accessibilité.
-- [ ] **F09-T18** · `front` Envoi : erreurs 422 par champ, 409 en message métier, pré-remplissage si priant reconnu, invalidation du planning + tests MSW — *Dépend de* : F09-T17, F09-T14, F09-T11 · *Fini quand* : 201, 409, 422 testés.
-- [ ] **F09-T19** · `front` `/inscription/confirmation` : récapitulatif des créneaux, « Un e-mail de confirmation vous a été envoyé », emplacements pour le lien vers le texte (F12) et la suggestion (F13) + test — *Dépend de* : F09-T18 · *Fini quand* : rechargement de la page géré (pas d'écran vide).
+- [x] **F09-T15** · `front` `/inscription?creneaux=…` : récapitulatif des créneaux choisis (libellés, retrait), paramètre validé, créneau passé ou édition fermée signalés — *Dépend de* : F08-T10 · *Fini quand* : tests des paramètres invalides.
+- [x] **F09-T16** · `front` Formulaire 1/2 : nom affiché (« Prénom et nom, ou nom de famille »), e-mail, validation Standard Schema bornée par l'OpenAPI + tests — *Dépend de* : F09-T15, F09-T10, F01-T09 · *Fini quand* : bornes et messages testés.
+- [x] **F09-T17** · `front` Formulaire 2/2 : consentement toujours affiché et obligatoire hors session, masqué en session s'il est déjà donné (lien vers « Confidentialité »), champ piège `website`, état d'envoi + tests — *Dépend de* : F09-T16 · *Fini quand* : les deux cas du consentement testés, champ piège absent de l'arbre d'accessibilité.
+- [x] **F09-T18** · `front` Envoi : erreurs 422 par champ, 409 en message métier, pré-remplissage si priant reconnu, invalidation du planning + tests MSW — *Dépend de* : F09-T17, F09-T14, F09-T11 · *Fini quand* : 201, 409, 422 testés.
+- [x] **F09-T19** · `front` `/inscription/confirmation` : récapitulatif des créneaux, « Un e-mail de confirmation vous a été envoyé », emplacements pour le lien vers le texte (F12) et la suggestion (F13) + test — *Dépend de* : F09-T18 · *Fini quand* : rechargement de la page géré (pas d'écran vide).
 
 ## Données et parcours
 

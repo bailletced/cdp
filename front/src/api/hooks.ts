@@ -106,6 +106,43 @@ export function useEditionSlots(editionId: string) {
   return useQuery(editionSlotsQueryOptions(editionId));
 }
 
+/** Payload of POST /api/inscriptions (F09-T10), bounded by the OpenAPI contract. */
+export interface RegisterInscriptionsPayload {
+  slotIds: string[];
+  displayName: string;
+  email: string;
+  consent: boolean;
+  website: string;
+}
+
+/**
+ * Registers inscriptions on slots (POST /api/inscriptions, F09-T10).
+ * The public planning queries are invalidated on success so the grid shows
+ * the updated registration counts (RG-PL-1).
+ */
+export function useRegisterInscriptions() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: RegisterInscriptionsPayload) => {
+      const { data, error } = await apiClient.POST("/api/inscriptions", {
+        body: payload,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["public", "editions"],
+      });
+    },
+  });
+}
+
 /**
  * Organizers list (GET /api/admin/organizers, F04-T05).
  * Reserved to organizers: the /organisation route guard rejects other
