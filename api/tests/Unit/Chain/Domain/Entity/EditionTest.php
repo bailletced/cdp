@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Chain\Domain\Entity;
 
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Slot;
+use App\Chain\Domain\Exception\EditionStartLockedException;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
 use App\Shared\Domain\Time\ParisCalendar;
@@ -199,6 +200,27 @@ final class EditionTest extends TestCase
         self::assertSame('2026-11-28 20:00:00', $edition->getStartsAt()->format('Y-m-d H:i:s'));
         self::assertCount(48, $edition->getSlots());
         self::assertSame('2026-11-28 20:00:00', $edition->getSlots()[0]->getStartsAt()->format('Y-m-d H:i:s'));
+    }
+
+    public function testRescheduleThrowsWhenTheEditionHasInscriptions(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        // RG-ED-3: locked after the first inscription.
+        $this->expectException(EditionStartLockedException::class);
+
+        $edition->reschedule(
+            new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 20:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+            hasInscriptions: true,
+        );
     }
 
     public function testHasTextAttributedReturnsTrueWhenASlotCarriesTheText(): void

@@ -6,6 +6,7 @@ namespace App\Chain\Domain\Entity;
 
 use App\Chain\Domain\Event\EditionScheduled;
 use App\Chain\Domain\Event\EditionUnscheduled;
+use App\Chain\Domain\Exception\EditionStartLockedException;
 use App\Chain\Domain\Exception\SlotNotFoundException;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\EditionTitle;
@@ -207,10 +208,11 @@ class Edition
      * Reschedule the edition: change the start time and regenerate the 48 slots.
      *
      * RG-ED-3: the start time is no longer modifiable once the first inscription exists.
-     * The $hasInscriptions guard is wired in F09; for now it is passed explicitly.
+     * The $hasInscriptions flag is computed by the application layer from the
+     * inscription count (F09-T12).
      *
-     * @throws \LogicException          if the edition already has inscriptions (RG-ED-3)
-     * @throws InvalidArgumentException if opensAt is after startsAt
+     * @throws EditionStartLockedException if the edition already has inscriptions (RG-ED-3)
+     * @throws InvalidArgumentException    if opensAt is after startsAt
      */
     public function reschedule(
         \DateTimeImmutable $newStartsAt,
@@ -219,7 +221,7 @@ class Edition
         bool $hasInscriptions,
     ): void {
         if ($hasInscriptions) {
-            throw new \LogicException('L’heure de début n’est plus modifiable dès la première inscription (RG-ED-3).');
+            throw new EditionStartLockedException();
         }
 
         if ($newOpensAt > $newStartsAt) {
