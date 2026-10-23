@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Chain\Domain\Entity;
 
 use App\Chain\Domain\ValueObject\SlotId;
+use App\Shared\Domain\Time\TimeSlot;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
@@ -65,6 +66,15 @@ class Slot
     public function getEndsAt(): \DateTimeImmutable
     {
         return $this->endsAt;
+    }
+
+    /**
+     * Move the slot to a new time window (the edition start moved, RG-ED-3).
+     */
+    public function moveTo(TimeSlot $timeSlot): void
+    {
+        $this->startsAt = $timeSlot->startsAt;
+        $this->endsAt = $timeSlot->endsAt;
     }
 
     public function getTextId(): ?Uuid

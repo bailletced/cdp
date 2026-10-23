@@ -205,13 +205,15 @@ class Edition
     }
 
     /**
-     * Reschedule the edition: change the start time and regenerate the 48 slots.
+     * Reschedule the edition: change the opening date and, when it moves, the
+     * start time. A new start moves the 48 slots in place: they keep their
+     * identity and their text attributions (F07).
      *
-     * RG-ED-3: the start time is no longer modifiable once the first inscription exists.
-     * The $hasInscriptions flag is computed by the application layer from the
-     * inscription count (F09-T12).
+     * RG-ED-3: the start time is no longer modifiable once the first inscription
+     * exists; the opening date stays editable. The $hasInscriptions flag is
+     * computed by the application layer from the inscription count (F09-T12).
      *
-     * @throws EditionStartLockedException if the edition already has inscriptions (RG-ED-3)
+     * @throws EditionStartLockedException if the start moves while the edition has inscriptions (RG-ED-3)
      * @throws InvalidArgumentException    if opensAt is after startsAt
      */
     public function reschedule(
@@ -220,7 +222,9 @@ class Edition
         ParisCalendar $calendar,
         bool $hasInscriptions,
     ): void {
-        if ($hasInscriptions) {
+        $startMoves = $newStartsAt->getTimestamp() !== $this->startsAt->getTimestamp();
+
+        if ($startMoves && $hasInscriptions) {
             throw new EditionStartLockedException();
         }
 
@@ -228,9 +232,12 @@ class Edition
             throw new InvalidArgumentException('La date d’ouverture des inscriptions doit être antérieure ou égale au début de l’édition.');
         }
 
-        $this->startsAt = $newStartsAt;
         $this->opensAt = $newOpensAt;
-        $this->generateSlots($calendar);
+
+        if ($startMoves) {
+            $this->startsAt = $newStartsAt;
+            $this->moveSlots($calendar);
+        }
     }
 
     /**
@@ -351,6 +358,20 @@ class Edition
         }
 
         throw new SlotNotFoundException();
+    }
+
+    /**
+     * Move the existing slots onto the new start, rank by rank. Updating them
+     * in place (rather than recreating them) keeps their ids and texts, and
+     * never inserts a rank that is still taken in the database.
+     */
+    private function moveSlots(ParisCalendar $calendar): void
+    {
+        $timeSlots = $calendar->slice($this->startsAt);
+
+        foreach ($this->slots as $slot) {
+            $slot->moveTo($timeSlots[$slot->getRank() - 1]);
+        }
     }
 
     /**

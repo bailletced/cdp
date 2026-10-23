@@ -9,6 +9,7 @@ use App\Chain\Domain\Entity\Slot;
 use App\Chain\Domain\Exception\EditionStartLockedException;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
+use App\Chain\Domain\ValueObject\TextId;
 use App\Shared\Domain\Time\ParisCalendar;
 use PHPUnit\Framework\TestCase;
 
@@ -202,6 +203,55 @@ final class EditionTest extends TestCase
         self::assertSame('2026-11-28 20:00:00', $edition->getSlots()[0]->getStartsAt()->format('Y-m-d H:i:s'));
     }
 
+    public function testRescheduleMovesTheSlotsInPlaceAndKeepsTheirTexts(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+        $textId = new TextId();
+        $edition->distributeTexts([$textId], 1);
+        $slotIds = array_map(static fn (Slot $slot): string => (string) $slot->getId(), $edition->getSlots());
+
+        $edition->reschedule(
+            new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 20:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+            hasInscriptions: false,
+        );
+
+        // Same slots (same ids), moved by one hour, attributions kept (F07)
+        self::assertSame($slotIds, array_map(static fn (Slot $slot): string => (string) $slot->getId(), $edition->getSlots()));
+        self::assertSame('2026-11-28 20:30:00', $edition->getSlots()[1]->getStartsAt()->format('Y-m-d H:i:s'));
+        self::assertSame('2026-11-28 21:00:00', $edition->getSlots()[1]->getEndsAt()->format('Y-m-d H:i:s'));
+        self::assertTrue($edition->hasTextAttributed($textId));
+    }
+
+    public function testRescheduleAllowsChangingTheOpeningAfterTheFirstInscription(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        // RG-ED-3 locks the start time only: the opening date stays editable.
+        $edition->reschedule(
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-14 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+            hasInscriptions: true,
+        );
+
+        self::assertSame('2026-11-14 19:00:00', $edition->getOpensAt()->format('Y-m-d H:i:s'));
+        self::assertSame('2026-11-28 19:00:00', $edition->getStartsAt()->format('Y-m-d H:i:s'));
+    }
+
     public function testRescheduleThrowsWhenTheEditionHasInscriptions(): void
     {
         $edition = Edition::create(
@@ -232,7 +282,7 @@ final class EditionTest extends TestCase
             new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
             new ParisCalendar(),
         );
-        $textId = new \App\Chain\Domain\ValueObject\TextId();
+        $textId = new TextId();
 
         $edition->getSlots()[0]->setTextId($textId->value);
 
@@ -249,7 +299,7 @@ final class EditionTest extends TestCase
             new ParisCalendar(),
         );
 
-        self::assertFalse($edition->hasTextAttributed(new \App\Chain\Domain\ValueObject\TextId()));
+        self::assertFalse($edition->hasTextAttributed(new TextId()));
     }
 
     public function testRemoveTextAttributionsClearsOnlyMatchingSlots(): void
@@ -261,8 +311,8 @@ final class EditionTest extends TestCase
             new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
             new ParisCalendar(),
         );
-        $textId = new \App\Chain\Domain\ValueObject\TextId();
-        $otherTextId = new \App\Chain\Domain\ValueObject\TextId();
+        $textId = new TextId();
+        $otherTextId = new TextId();
         $slots = $edition->getSlots();
         $slots[0]->setTextId($textId->value);
         $slots[1]->setTextId($textId->value);
@@ -286,8 +336,8 @@ final class EditionTest extends TestCase
             new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
             new ParisCalendar(),
         );
-        $textId = new \App\Chain\Domain\ValueObject\TextId();
-        $otherTextId = new \App\Chain\Domain\ValueObject\TextId();
+        $textId = new TextId();
+        $otherTextId = new TextId();
         $slots = $edition->getSlots();
 
         self::assertSame(0, $edition->countTextAttributions($textId));
@@ -320,7 +370,7 @@ final class EditionTest extends TestCase
     {
         $edition = self::createEdition();
         $slot = $edition->getSlots()[0];
-        $textId = new \App\Chain\Domain\ValueObject\TextId();
+        $textId = new TextId();
 
         $edition->assignText($slot->getId(), $textId);
 
@@ -331,7 +381,7 @@ final class EditionTest extends TestCase
     {
         $edition = self::createEdition();
         $slot = $edition->getSlots()[0];
-        $slot->setTextId(new \App\Chain\Domain\ValueObject\TextId()->value);
+        $slot->setTextId(new TextId()->value);
 
         $edition->assignText($slot->getId(), null);
 
@@ -344,16 +394,16 @@ final class EditionTest extends TestCase
 
         $this->expectException(\App\Chain\Domain\Exception\SlotNotFoundException::class);
 
-        $edition->assignText(new \App\Chain\Domain\ValueObject\SlotId(), new \App\Chain\Domain\ValueObject\TextId());
+        $edition->assignText(new \App\Chain\Domain\ValueObject\SlotId(), new TextId());
     }
 
     public function testDistributeTextsAssignsTextsSequentiallyFromTheGivenRank(): void
     {
         $edition = self::createEdition();
         $textIds = [
-            new \App\Chain\Domain\ValueObject\TextId(),
-            new \App\Chain\Domain\ValueObject\TextId(),
-            new \App\Chain\Domain\ValueObject\TextId(),
+            new TextId(),
+            new TextId(),
+            new TextId(),
         ];
 
         $edition->distributeTexts($textIds, 1);
@@ -370,7 +420,7 @@ final class EditionTest extends TestCase
         $edition = self::createEdition();
         $textIds = [];
         for ($i = 0; $i < 10; ++$i) {
-            $textIds[] = new \App\Chain\Domain\ValueObject\TextId();
+            $textIds[] = new TextId();
         }
 
         $edition->distributeTexts($textIds, 40);
@@ -398,9 +448,9 @@ final class EditionTest extends TestCase
     {
         $edition = self::createEdition();
         $slots = $edition->getSlots();
-        $slots[0]->setTextId(new \App\Chain\Domain\ValueObject\TextId()->value);
+        $slots[0]->setTextId(new TextId()->value);
 
-        $newTextId = new \App\Chain\Domain\ValueObject\TextId();
+        $newTextId = new TextId();
         $edition->distributeTexts([$newTextId], 1);
 
         self::assertTrue($slots[0]->getTextId()?->equals($newTextId->value));

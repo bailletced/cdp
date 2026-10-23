@@ -79,6 +79,30 @@ abstract class EditionRepositoryTestCase extends KernelTestCase
         self::assertNull($this->repository->findById($edition->getId()));
     }
 
+    public function testRescheduledEditionIsSavedWithItsMovedSlots(): void
+    {
+        $edition = $this->createEdition();
+        $this->repository->add($edition);
+        $this->flush();
+
+        // Moving the start must update the 48 slots in place: recreating them
+        // would insert the new ranks before deleting the old ones and break
+        // the (edition_id, rank) unique index.
+        $edition->reschedule(
+            new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-14 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+            hasInscriptions: false,
+        );
+        $this->flush();
+
+        $found = $this->repository->findById($edition->getId());
+        self::assertNotNull($found);
+        self::assertCount(48, $found->getSlots());
+        self::assertSame('2026-11-28 20:00:00', $found->getSlots()[0]->getStartsAt()->format('Y-m-d H:i:s'));
+        self::assertSame('2026-11-14 19:00:00', $found->getOpensAt()->format('Y-m-d H:i:s'));
+    }
+
     private function createEdition(): Edition
     {
         return Edition::create(

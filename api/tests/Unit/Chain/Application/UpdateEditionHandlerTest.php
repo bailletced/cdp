@@ -105,6 +105,32 @@ final class UpdateEditionHandlerTest extends TestCase
         ));
     }
 
+    public function testItStillUpdatesTitleAndOpeningAfterTheFirstInscription(): void
+    {
+        $createResult = ($this->createHandler)(new CreateEdition(
+            new EditionTitle('Titre'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('Europe/Paris')),
+            new \DateTimeImmutable('2026-11-13 20:00:00', new \DateTimeZone('Europe/Paris')),
+        ));
+        $this->inscriptionRepository->add(new Inscription($createResult->editionId, new SlotId(), new PriantId()));
+
+        // Same start: RG-ED-3 does not apply, the opening date and the title change.
+        ($this->updateHandler)(new UpdateEdition(
+            $createResult->editionId,
+            new EditionTitle('Nouveau titre'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('Europe/Paris')),
+            new \DateTimeImmutable('2026-11-14 20:00:00', new \DateTimeZone('Europe/Paris')),
+            1,
+        ));
+
+        $edition = $this->repository->findById($createResult->editionId);
+        self::assertNotNull($edition);
+        self::assertSame('Nouveau titre', $edition->getTitle()->value);
+        self::assertSame('2026-11-14 19:00:00', $edition->getOpensAt()->format('Y-m-d H:i:s'));
+    }
+
     public function testItLocksTheStartTimeAfterTheFirstInscription(): void
     {
         $createResult = ($this->createHandler)(new CreateEdition(
