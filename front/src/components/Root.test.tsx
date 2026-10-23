@@ -1,7 +1,9 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { SITE_NAME } from "../config/site";
 import { renderApp } from "../test/renderApp";
+import { server } from "../test/setup";
 
 describe("public layout (F01-T07)", () => {
   it("renders the skip link and the landmarks", async () => {
@@ -57,6 +59,37 @@ describe("public layout (F01-T07)", () => {
     expect(
       await screen.findByRole("link", { name: "Mon espace" }),
     ).toHaveAttribute("href", "/my-space");
+  });
+
+  it("offers Organisation in the nav to an organizer (F04)", async () => {
+    server.use(
+      http.get("http://localhost:8080/api/me", () =>
+        HttpResponse.json({
+          "@context": "/api/contexts/Me",
+          "@id": "/api/me",
+          "@type": "Me",
+          email: "anne@exemple.fr",
+          isOrganizer: true,
+        }),
+      ),
+    );
+
+    renderApp("/receive-my-link");
+
+    const nav = await screen.findByRole("navigation", {
+      name: "Navigation principale",
+    });
+    const link = await within(nav).findByRole("link", { name: "Organisation" });
+    expect(link).toHaveAttribute("href", "/organisation");
+  });
+
+  it("does not offer Organisation to a priant", async () => {
+    renderApp("/receive-my-link");
+
+    await screen.findByRole("link", { name: "Mon espace" });
+    expect(
+      screen.queryByRole("link", { name: "Organisation" }),
+    ).not.toBeInTheDocument();
   });
 });
 

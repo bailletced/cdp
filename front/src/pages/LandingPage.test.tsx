@@ -9,9 +9,13 @@ import { LandingPage } from "./LandingPage";
 const CONFIRMATION_MESSAGE =
   "Un lien de connexion vient de vous être envoyé à cette adresse.";
 
+const ME_URL = "http://localhost:8080/api/me";
+
 beforeEach(() => {
   // Deterministic local time: a Paris visitor sees no local-time suffix (RG-PL-3)
   vi.stubEnv("TZ", "Europe/Paris");
+  // A visitor by default: the email form is only offered without a session
+  server.use(http.get(ME_URL, () => new HttpResponse(null, { status: 401 })));
 });
 
 afterEach(() => {
@@ -140,6 +144,30 @@ describe("LandingPage", () => {
     expect(
       screen.getByRole("button", { name: "S'inscrire" }),
     ).toBeInTheDocument();
+  });
+
+  it("offers « Mon espace » instead of the email form when a session is open (§5.2-5)", async () => {
+    server.use(
+      http.get(ME_URL, () =>
+        HttpResponse.json({
+          "@context": "/api/contexts/Me",
+          "@id": "/api/me",
+          "@type": "Me",
+          email: "thomas@bailletced.org",
+          isOrganizer: false,
+        }),
+      ),
+    );
+
+    renderPage();
+
+    expect(
+      await screen.findByRole("link", { name: "Mon espace" }),
+    ).toHaveAttribute("href", "/my-space");
+    expect(screen.queryByLabelText("Adresse e-mail")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "S'inscrire" }),
+    ).not.toBeInTheDocument();
   });
 
   it("renders the presentation and the email registration form", () => {

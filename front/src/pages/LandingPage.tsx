@@ -1,7 +1,7 @@
 import { Button, Input, Label, Link, TextField } from "@heroui/react";
 import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
-import { useCurrentEdition } from "../api/hooks";
+import { useCurrentEdition, useMe } from "../api/hooks";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
@@ -31,6 +31,9 @@ type SubmissionState = "idle" | "submitting" | "sent" | "error";
  */
 export function LandingPage() {
   const editionQuery = useCurrentEdition();
+  // An open session already has its personal link: the email form is only
+  // offered to visitors, a signed-in priant is sent to « Mon espace » (§5.2-5)
+  const { data: me } = useMe();
   const [state, setState] = useState<SubmissionState>("idle");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -123,7 +126,12 @@ export function LandingPage() {
       )}
 
       <div className="rounded-2xl border border-separator bg-surface p-6 sm:p-8">
-        {state === "sent" || state === "error" ? (
+        {me ? (
+          <p>
+            Retrouvez vos créneaux dans <Link href="/my-space">Mon espace</Link>
+            .
+          </p>
+        ) : state === "sent" || state === "error" ? (
           <output>{message}</output>
         ) : (
           <form

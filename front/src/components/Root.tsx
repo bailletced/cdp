@@ -49,9 +49,21 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
             </Link>
             <nav aria-label="Navigation principale">
               {isLoading ? null : !isError && data ? (
-                <Link to="/my-space" className={NAV_LINK}>
-                  Mon espace
-                </Link>
+                <ul className="flex flex-wrap gap-x-4">
+                  {/* The back-office entry, for organizers only (F04) */}
+                  {data.isOrganizer ? (
+                    <li>
+                      <Link to="/organisation" className={NAV_LINK}>
+                        Organisation
+                      </Link>
+                    </li>
+                  ) : null}
+                  <li>
+                    <Link to="/my-space" className={NAV_LINK}>
+                      Mon espace
+                    </Link>
+                  </li>
+                </ul>
               ) : (
                 <Link to="/receive-my-link" className={NAV_LINK}>
                   Recevoir mon lien
