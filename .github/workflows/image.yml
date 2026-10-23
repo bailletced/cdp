@@ -94,8 +94,15 @@ jobs:
             BUILD_AUTHOR=${{ github.actor }}
             VITE_APP_SHA=${{ github.sha }}
             VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
-          cache-from: type=gha,mode=max
-          cache-to: type=gha,mode=max
+          # Cache double : GHA (rapide quand chaud) + registry GHCR (persistant,
+          # immune à l'éviction — c'est ce qui a coûté 15 min de build sur
+          # 238b6ce). Le tag buildcache est protégé dans cleanup-ghcr.yml.
+          cache-from: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
           platforms: linux/amd64
           provenance: false
 
@@ -112,7 +119,11 @@ jobs:
             BUILD_AUTHOR=${{ github.actor }}
             VITE_APP_SHA=${{ github.sha }}
             VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
-          cache-from: type=gha,mode=max
+          # Pas de cache-to registry sur PR : pas de login GHCR (le package est
+          # public, le cache-from registry fonctionne sans login).
+          cache-from: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
@@ -150,7 +161,11 @@ jobs:
             BUILD_AUTHOR=${{ github.actor }}
             VITE_APP_SHA=${{ github.sha }}
             VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONT }}
-          cache-from: type=gha,mode=max
+          # cache-from registry : le job build (needs) vient de pousser le
+          # cache ; pas de cache-to registry ici (pas de login GHCR dans ce job).
+          cache-from: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=gha,mode=max
 
       - name: Start test stack (image + PostgreSQL + Mailpit)

@@ -2,7 +2,8 @@ name: Cleanup GHCR
 
 # F03-T18 : nettoyage des anciennes versions d'images GHCR.
 # Garde les N dernières versions (tags sha-*), supprime le reste.
-# Le tag "main" est toujours conservé.
+# Les tags "main" et "buildcache" (cache registry du build Docker, image.yml)
+# sont toujours conservés.
 # S'exécute hebdomadairement, après chaque push sur main, et manuellement.
 
 on:
@@ -85,7 +86,7 @@ jobs:
           # --- Calculer les IDs à conserver ---
           # Stratégie : garder "main"/"master"/"develop" + les N plus récentes
           KEEP_IDS=$(echo "$VERSIONS_JSON" | jq -r --argjson min_keep "$MIN_KEEP" '
-            def is_protected: ((.metadata.container.tags // []) | any(. == "main" or . == "master" or . == "develop"));
+            def is_protected: ((.metadata.container.tags // []) | any(. == "main" or . == "master" or . == "develop" or . == "buildcache"));
             [.[] | select(is_protected)] as $protected
             |
             ([.[] | select(is_protected | not)] | sort_by(.created_at) | reverse) as $others
