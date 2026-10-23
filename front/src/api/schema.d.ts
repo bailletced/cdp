@@ -228,6 +228,26 @@ export interface paths {
         patch: operations["api_admintexts_id_patch"];
         trace?: never;
     };
+    "/api/inscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Inscription resource.
+         * @description Creates a Inscription resource.
+         */
+        post: operations["api_inscriptions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me": {
         parameters: {
             query?: never;
@@ -514,9 +534,32 @@ export interface components {
             "@id": string;
             "@type": string;
         };
+        "Inscription.RegisterInscriptionsPayload": {
+            slotIds?: string[] | null;
+            displayName?: string | null;
+            /** Format: email */
+            email?: string | null;
+            consent?: boolean | null;
+            website?: string | null;
+        };
+        "Inscription.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string | null;
+            priantId?: string | null;
+            displayName?: string | null;
+            inscriptions?: {
+                /** Format: uuid */
+                id?: string;
+                /** Format: uuid */
+                slotId?: string;
+                /** Format: uuid */
+                editionId?: string;
+            }[];
+        };
         "Me.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             email?: string;
             isOrganizer?: boolean;
+            displayName?: string | null;
+            consentGiven?: boolean;
         };
         "PublicEdition.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;
@@ -1378,6 +1421,53 @@ export interface operations {
             };
             /** @description Not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_inscriptions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Inscription resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Inscription.RegisterInscriptionsPayload"];
+            };
+        };
+        responses: {
+            /** @description Inscription resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Inscription.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

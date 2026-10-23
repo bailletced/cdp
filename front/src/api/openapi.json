@@ -1567,6 +1567,83 @@
                 }
             }
         },
+        "/api/inscriptions": {
+            "post": {
+                "operationId": "api_inscriptions_post",
+                "tags": [
+                    "Inscription"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Inscription resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Inscription.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Inscription resource.",
+                "description": "Creates a Inscription resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new Inscription resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Inscription.RegisterInscriptionsPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/me": {
             "get": {
                 "operationId": "api_me_get",
@@ -2623,6 +2700,102 @@
                     "@type"
                 ]
             },
+            "Inscription.RegisterInscriptionsPayload": {
+                "type": "object",
+                "properties": {
+                    "slotIds": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    "displayName": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 1,
+                        "maxLength": 80
+                    },
+                    "email": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 3,
+                        "maxLength": 254,
+                        "format": "email"
+                    },
+                    "consent": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    },
+                    "website": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "Inscription.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "priantId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "displayName": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "inscriptions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "slotId": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "editionId": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
             "Me.jsonld": {
                 "allOf": [
                     {
@@ -2635,6 +2808,15 @@
                                 "type": "string"
                             },
                             "isOrganizer": {
+                                "type": "boolean"
+                            },
+                            "displayName": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "consentGiven": {
                                 "type": "boolean"
                             }
                         }
@@ -2755,6 +2937,10 @@
         {
             "name": "AdminText",
             "description": "Resource 'AdminText' operations."
+        },
+        {
+            "name": "Inscription",
+            "description": "Resource 'Inscription' operations."
         },
         {
             "name": "PublicEdition",
