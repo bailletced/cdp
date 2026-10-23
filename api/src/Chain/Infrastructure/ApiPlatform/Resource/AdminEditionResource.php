@@ -48,6 +48,7 @@ use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
         new Patch(
             uriTemplate: '/admin/editions/{id}',
             processor: AdminEditionProcessor::class,
+            read: false,
             security: 'is_granted("ROLE_ORGANIZER")',
         ),
         new Post(
