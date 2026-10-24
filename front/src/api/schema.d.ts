@@ -329,6 +329,7 @@ export interface components {
             fromRank?: number | null;
             slotsWithoutText?: number | null;
             duplicatedTextIds?: unknown[] | null;
+            warning?: string | null;
         };
         "AdminEdition.jsonMergePatch": {
             id?: string | null;
@@ -347,6 +348,7 @@ export interface components {
             fromRank?: number | null;
             slotsWithoutText?: number | null;
             duplicatedTextIds?: unknown[] | null;
+            warning?: string | null;
         };
         "AdminEdition.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;
@@ -365,6 +367,7 @@ export interface components {
             fromRank?: number | null;
             slotsWithoutText?: number | null;
             duplicatedTextIds?: unknown[] | null;
+            warning?: string | null;
         };
         AdminOrganizer: {
             id?: string | null;

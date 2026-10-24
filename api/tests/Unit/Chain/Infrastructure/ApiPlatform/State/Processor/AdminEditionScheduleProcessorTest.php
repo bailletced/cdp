@@ -11,9 +11,13 @@ use App\Chain\Domain\Exception\EditionNotFoundException;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Infrastructure\ApiPlatform\Resource\AdminEditionResource;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
+use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Command\CommandInterface;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Clock\MockClock;
 
 final class AdminEditionScheduleProcessorTest extends TestCase
 {
@@ -30,7 +34,7 @@ final class AdminEditionScheduleProcessorTest extends TestCase
             }
         };
 
-        $processor = new AdminEditionScheduleProcessor($commandBus);
+        $processor = new AdminEditionScheduleProcessor($commandBus, self::emptyFinder());
         $editionId = new EditionId();
 
         $result = $processor->process(
@@ -58,7 +62,7 @@ final class AdminEditionScheduleProcessorTest extends TestCase
             }
         };
 
-        $processor = new AdminEditionScheduleProcessor($commandBus);
+        $processor = new AdminEditionScheduleProcessor($commandBus, self::emptyFinder());
         $editionId = new EditionId();
 
         $processor->process(
@@ -81,7 +85,7 @@ final class AdminEditionScheduleProcessorTest extends TestCase
             }
         };
 
-        $processor = new AdminEditionScheduleProcessor($commandBus);
+        $processor = new AdminEditionScheduleProcessor($commandBus, self::emptyFinder());
 
         $this->expectException(EditionNotFoundException::class);
 
@@ -91,5 +95,10 @@ final class AdminEditionScheduleProcessorTest extends TestCase
             ['id' => (string) new EditionId()],
             [],
         );
+    }
+
+    private static function emptyFinder(): InMemoryAdminEditionViewFinder
+    {
+        return new InMemoryAdminEditionViewFinder(new InMemoryEditionRepository(), new InMemoryTextRepository(), new MockClock());
     }
 }

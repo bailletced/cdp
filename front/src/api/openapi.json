@@ -1893,6 +1893,12 @@
                             "null"
                         ],
                         "items": {}
+                    },
+                    "warning": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -1997,6 +2003,12 @@
                             "null"
                         ],
                         "items": {}
+                    },
+                    "warning": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -2106,6 +2118,12 @@
                                     "null"
                                 ],
                                 "items": {}
+                            },
+                            "warning": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     }

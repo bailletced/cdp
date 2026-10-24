@@ -25,7 +25,8 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
  * Acceptance test for the text attribution endpoints (F07-T03):
- * PUT /api/admin/slots/{id}/text and POST /api/admin/editions/{id}/distribute-texts.
+ * PUT /api/admin/slots/{id}/text and POST /api/admin/editions/{id}/distribute-texts,
+ * and the RG-ED-4 warning returned when scheduling (F07-T05).
  */
 final class AdminAttributionApiTest extends ApiTestCase
 {
@@ -194,6 +195,45 @@ final class AdminAttributionApiTest extends ApiTestCase
         ]));
 
         self::assertSame(401, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testSchedulingWarnsAboutTheSlotsWithoutTextWithoutBlocking(): void
+    {
+        $edition = $this->createEdition();
+        $text = $this->createText('Oraison');
+        $edition->distributeTexts(array_fill(0, 45, $text->getId()), 1);
+        $this->em->flush();
+        $this->logInAsOrganizer();
+
+        $this->client->request('POST', '/api/admin/editions/'.$edition->getId()->value->toRfc4122().'/schedule', [], [], [
+            'CONTENT_TYPE' => 'application/ld+json',
+        ], '{}');
+
+        $response = $this->client->getResponse();
+        self::assertSame(201, $response->getStatusCode());
+        $data = json_decode((string) $response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('scheduled', $data['lifecycle']);
+        self::assertSame(3, $data['slotsWithoutText']);
+        self::assertSame('3 créneaux n’ont pas encore de texte.', $data['warning']);
+    }
+
+    public function testSchedulingACompleteEditionRaisesNoWarning(): void
+    {
+        $edition = $this->createEdition();
+        $text = $this->createText('Oraison');
+        $edition->distributeTexts(array_fill(0, 48, $text->getId()), 1);
+        $this->em->flush();
+        $this->logInAsOrganizer();
+
+        $this->client->request('POST', '/api/admin/editions/'.$edition->getId()->value->toRfc4122().'/schedule', [], [], [
+            'CONTENT_TYPE' => 'application/ld+json',
+        ], '{}');
+
+        $response = $this->client->getResponse();
+        self::assertSame(201, $response->getStatusCode());
+        $data = json_decode((string) $response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame(0, $data['slotsWithoutText']);
+        self::assertNull($data['warning'] ?? null);
     }
 
     private function logInAsOrganizer(string $email = 'anne@bailletced.org'): void
