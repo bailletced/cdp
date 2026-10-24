@@ -1,4 +1,5 @@
 import { type PlanningSlot, slotTemporalState } from "../lib/planning";
+import { EmptySlotDraw } from "./EmptySlotDraw";
 
 /** The id of the card of a slot in the grid: the banner scrolls to it. */
 export function slotCardId(slotId: string): string {
@@ -28,11 +29,14 @@ export function emptySlotsToCome(
  *
  * Computed from the grid, so it follows its refresh: a slot freed by a
  * cancellation comes back here (RG-EP-1). The count is a polite live region.
+ * « Prendre un créneau vide » (F13-T06) is offered while one is left.
  */
 export function EmptySlotsBanner({
+  editionId,
   slots,
   nowMs,
 }: {
+  editionId: string;
   slots: PlanningSlot[];
   nowMs: number;
 }) {
@@ -72,6 +76,11 @@ export function EmptySlotsBanner({
             </li>
           ))}
         </ul>
+      ) : null}
+      {empty.length > 0 ? (
+        <div className="mt-4">
+          <EmptySlotDraw editionId={editionId} />
+        </div>
       ) : null}
     </section>
   );

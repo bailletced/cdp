@@ -76,7 +76,7 @@ export function PlanningGrid({ editionId }: { editionId: string }) {
 
   return (
     <div>
-      <EmptySlotsBanner slots={slots} nowMs={nowMs} />
+      <EmptySlotsBanner editionId={editionId} slots={slots} nowMs={nowMs} />
       <section aria-label="Grille des créneaux" className="grid gap-12">
         {groups.map((group, index) => {
           const titleId = `planning-${group.partOfDay}-${group.slots[0]?.rank ?? index}`;

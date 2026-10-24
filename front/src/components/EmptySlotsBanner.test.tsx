@@ -38,6 +38,7 @@ describe("EmptySlotsBanner (F13-T05, US-13.1)", () => {
   it("counts the empty slots and lists their schedules", () => {
     render(
       <EmptySlotsBanner
+        editionId="edition-1"
         slots={edition(2, 5, 9, 30, 47)}
         nowMs={START_MS - 3600_000}
       />,
@@ -61,7 +62,13 @@ describe("EmptySlotsBanner (F13-T05, US-13.1)", () => {
   });
 
   it("uses the singular for the last empty slot", () => {
-    render(<EmptySlotsBanner slots={edition(9)} nowMs={START_MS - 1} />);
+    render(
+      <EmptySlotsBanner
+        editionId="edition-1"
+        slots={edition(9)}
+        nowMs={START_MS - 1}
+      />,
+    );
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "Il reste 1 créneau vide sur 48",
@@ -72,6 +79,7 @@ describe("EmptySlotsBanner (F13-T05, US-13.1)", () => {
     // 21h10 in Paris: slots n° 1 and 2 are over, n° 3 (21h00–21h30) is running
     render(
       <EmptySlotsBanner
+        editionId="edition-1"
         slots={edition(1, 3, 4, 10)}
         nowMs={START_MS + 70 * 60_000}
       />,
@@ -83,7 +91,13 @@ describe("EmptySlotsBanner (F13-T05, US-13.1)", () => {
   });
 
   it("thanks everyone once the chain is complete", () => {
-    render(<EmptySlotsBanner slots={edition()} nowMs={START_MS - 1} />);
+    render(
+      <EmptySlotsBanner
+        editionId="edition-1"
+        slots={edition()}
+        nowMs={START_MS - 1}
+      />,
+    );
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "La chaîne est complète. Merci !",
@@ -91,11 +105,33 @@ describe("EmptySlotsBanner (F13-T05, US-13.1)", () => {
     expect(
       screen.queryByRole("list", { name: "Créneaux vides" }),
     ).not.toBeInTheDocument();
+    // US-13.2: no empty slot, no draw
+    expect(
+      screen.queryByRole("button", { name: "Prendre un créneau vide" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers to take an empty slot while one is left (F13-T06)", () => {
+    render(
+      <EmptySlotsBanner
+        editionId="edition-1"
+        slots={edition(9)}
+        nowMs={START_MS - 1}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Prendre un créneau vide" }),
+    ).toBeInTheDocument();
   });
 
   it("is not shown once every slot is over", () => {
     const { container } = render(
-      <EmptySlotsBanner slots={edition(5)} nowMs={START_MS + 25 * 3600_000} />,
+      <EmptySlotsBanner
+        editionId="edition-1"
+        slots={edition(5)}
+        nowMs={START_MS + 25 * 3600_000}
+      />,
     );
 
     expect(container).toBeEmptyDOMElement();
@@ -108,7 +144,13 @@ describe("EmptySlotsBanner (F13-T05, US-13.1)", () => {
     card.scrollIntoView = vi.fn();
     document.body.append(card);
 
-    render(<EmptySlotsBanner slots={edition(9)} nowMs={START_MS - 1} />);
+    render(
+      <EmptySlotsBanner
+        editionId="edition-1"
+        slots={edition(9)}
+        nowMs={START_MS - 1}
+      />,
+    );
     fireEvent.click(screen.getByRole("button", { name: "0h00–0h30" }));
 
     expect(card.scrollIntoView).toHaveBeenCalled();

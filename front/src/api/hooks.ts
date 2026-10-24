@@ -141,6 +141,44 @@ export const slotTextQueryOptions = (slotId: string) =>
     retry: false,
   }) as const;
 
+/**
+ * Draw of an empty slot (GET /api/editions/{id}/slot-suggestion, F13-T06).
+ * The excluded slots are skipped as long as another one is left. A 404
+ * means the chain is complete: a normal state, mapped to null.
+ */
+export const slotSuggestionQueryOptions = (
+  editionId: string,
+  excluded: string[],
+) =>
+  ({
+    queryKey: ["public", "editions", editionId, "slot-suggestion", excluded],
+    queryFn: async () => {
+      const { data, error, response } = await apiClient.GET(
+        "/api/editions/{id}/slot-suggestion",
+        {
+          params: {
+            path: { id: editionId },
+            query: excluded.length > 0 ? { exclude: excluded.join(",") } : {},
+          },
+        },
+      );
+
+      if (error) {
+        if (response.status === 404) {
+          return null;
+        }
+
+        throw error;
+      }
+
+      return data;
+    },
+    // A new draw each time the dialog opens
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  }) as const;
+
 /** Payload of POST /api/inscriptions (F09-T10), bounded by the OpenAPI contract. */
 export interface RegisterInscriptionsPayload {
   slotIds: string[];
