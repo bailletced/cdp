@@ -21,6 +21,7 @@ use App\Chain\Application\Query\SlotTextViewFinder;
 use App\Chain\Application\RegisterInscriptionsHandler;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\SendConfirmationOnInscriptionsRegistered;
+use App\Chain\Application\SuggestEmptySlot;
 use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
 use App\Chain\Application\UpdateTextHandler;
@@ -43,6 +44,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\SlotSuggestionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\SlotTextProvider;
 use App\Chain\Infrastructure\Calendar\EluceoCalendarFile;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
@@ -286,6 +288,13 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(PublicEditionSlotsProvider::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(SuggestEmptySlot::class)
+        ->autowire();
+
+    $services->set(SlotSuggestionProvider::class)
         ->autoconfigure()
         ->autowire();
 

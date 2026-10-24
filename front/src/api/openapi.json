@@ -1789,6 +1789,87 @@
                 ]
             }
         },
+        "/api/editions/{id}/slot-suggestion": {
+            "get": {
+                "operationId": "api_editions_idslot-suggestion_get",
+                "tags": [
+                    "SlotSuggestion"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SlotSuggestion resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SlotSuggestion.jsonld"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a SlotSuggestion resource.",
+                "description": "Retrieves a SlotSuggestion resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "SlotSuggestion identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "near",
+                        "in": "query",
+                        "description": "Cr\u00e9neau pr\u00e8s duquel chercher : le suivant puis le pr\u00e9c\u00e9dent, s\u2019ils sont vides.",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "form",
+                        "explode": true
+                    },
+                    {
+                        "name": "exclude",
+                        "in": "query",
+                        "description": "Cr\u00e9neaux d\u00e9j\u00e0 propos\u00e9s, s\u00e9par\u00e9s par des virgules : \u00e9cart\u00e9s tant qu\u2019un autre reste.",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            }
+        },
         "/api/slots/{id}/text": {
             "get": {
                 "operationId": "api_slots_idtext_get",
@@ -3034,6 +3115,60 @@
                     }
                 ]
             },
+            "SlotSuggestion.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "slotId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "startsAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "endsAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "label": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "textTitle": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "textSource": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
             "SlotText.jsonld": {
                 "allOf": [
                     {
@@ -3136,6 +3271,10 @@
         {
             "name": "PublicEditionSlots",
             "description": "Resource 'PublicEditionSlots' operations."
+        },
+        {
+            "name": "SlotSuggestion",
+            "description": "Resource 'SlotSuggestion' operations."
         },
         {
             "name": "SlotText",
