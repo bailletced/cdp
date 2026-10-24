@@ -10,7 +10,7 @@
 #   echo "..." | docker secret create db_password -
 #   echo "brevo+api://BREVO_API_KEY@default" | docker secret create mailer_dsn_v5 -
 #   echo "..." | docker secret create mercure_publisher_jwt_key -
-#   echo "..." | docker secret create sentry_dsn -
+#   echo "https://<cle>@o<id>.ingest.de.sentry.io/<projet>" | docker secret create sentry_dsn_v2 -  # remplacer <cle>, <id>, <projet> par le vrai DSN (ne PAS copier le placeholder)
 
 version: "3.8"
 
@@ -40,7 +40,10 @@ services:
       - source: mailer_dsn_v5
         target: mailer_dsn
       - mercure_publisher_jwt_key
-      - sentry_dsn
+      # Rotation (runbook §5.2, pattern _v2) : le secret s'appelle sentry_dsn_v2,
+      # la cible /run/secrets/sentry_dsn est conservée (SENTRY_DSN_FILE inchangé).
+      - source: sentry_dsn_v2
+        target: sentry_dsn
     networks:
       - edge
       - internal
@@ -80,7 +83,9 @@ services:
         - traefik.http.middlewares.security-headers.headers.referrerPolicy=same-origin
         - traefik.http.middlewares.security-headers.headers.permissionsPolicy=geolocation=(), microphone=(), camera=()
         - traefik.http.middlewares.security-headers.headers.customResponseHeaders.X-Frame-Options=DENY
-        - "traefik.http.middlewares.security-headers.headers.customResponseHeaders.Content-Security-Policy=default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        # connect-src autorise l'ingest Sentry (F03-T11 « Sentry autorisé ») :
+        # sans cela, le navigateur bloque les événements du SDK front.
+        - "traefik.http.middlewares.security-headers.headers.customResponseHeaders.Content-Security-Policy=default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://*.ingest.de.sentry.io https://*.ingest.sentry.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         - traefik.http.routers.app.middlewares=security-headers@swarm
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/health"]
@@ -117,7 +122,8 @@ services:
       - db_password
       - source: mailer_dsn_v5
         target: mailer_dsn
-      - sentry_dsn
+      - source: sentry_dsn_v2
+        target: sentry_dsn
     networks:
       - internal
       # Le worker joint l'API Brevo (envoi des e-mails) et Sentry : le réseau
@@ -249,5 +255,5 @@ secrets:
     external: true
   mercure_publisher_jwt_key:
     external: true
-  sentry_dsn:
+  sentry_dsn_v2:
     external: true
