@@ -6,8 +6,10 @@ namespace App\Chain\Infrastructure\ApiPlatform\Resource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
 use App\Chain\Infrastructure\ApiPlatform\Payload\RegisterInscriptionsPayload;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\CancelInscriptionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsProcessor;
 
 /**
@@ -24,6 +26,10 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsPro
  *
  * F13-T04: `suggestion` is an empty slot next to the latest one taken, or
  * null once the chain is complete (US-13.3).
+ *
+ * - DELETE /api/inscriptions/{id} → 204 (F14-T06, US-14.3): the priant of the
+ *   inscription, in session, until the slot starts (RG-EP-1); 401 without
+ *   session, 403 for anyone else or once the slot has started, 404 unknown.
  */
 #[ApiResource(
     shortName: 'Inscription',
@@ -34,6 +40,11 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsPro
             processor: RegisterInscriptionsProcessor::class,
             // A complete chain answers `suggestion: null`, never omits it
             normalizationContext: ['skip_null_values' => false],
+        ),
+        new Delete(
+            uriTemplate: '/inscriptions/{id}',
+            processor: CancelInscriptionProcessor::class,
+            read: false,
         ),
     ],
 )]

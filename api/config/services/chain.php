@@ -42,6 +42,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionScheduleProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminSlotProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminTextProcessor;
+use App\Chain\Infrastructure\ApiPlatform\State\Processor\CancelInscriptionProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\RenameMeProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
@@ -298,6 +299,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(RegisterInscriptionsProcessor::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(CancelInscriptionProcessor::class)
         ->autoconfigure()
         ->autowire();
 
