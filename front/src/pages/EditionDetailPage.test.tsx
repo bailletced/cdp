@@ -139,6 +139,45 @@ describe("EditionDetailPage", () => {
     expect(scheduleContentType).toContain("application/ld+json");
   });
 
+  it("asks for a confirmation when slots have no text yet (US-07.3, RG-ED-4)", async () => {
+    let scheduleCalled = false;
+    server.use(
+      organizerMe(),
+      http.get(editionUrl, () =>
+        HttpResponse.json(
+          scheduleCalled
+            ? scheduledEdition
+            : editionItem({ slotsWithoutText: 3 }),
+        ),
+      ),
+      http.post(`${editionUrl}/schedule`, () => {
+        scheduleCalled = true;
+
+        return HttpResponse.json(scheduledEdition, { status: 201 });
+      }),
+    );
+
+    renderApp(`/organisation/editions/${EDITION_ID}`);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Programmer" }));
+
+    const dialog = await screen.findByRole("alertdialog", {
+      name: "Programmer l’édition",
+    });
+    expect(
+      within(dialog).getByText("3 créneaux n’ont pas encore de texte."),
+    ).toBeInTheDocument();
+    // Nothing is sent before the confirmation
+    expect(scheduleCalled).toBe(false);
+
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Programmer quand même" }),
+    );
+
+    expect(await screen.findByText("Programmée")).toBeInTheDocument();
+    expect(scheduleCalled).toBe(true);
+  });
+
   it("returns a scheduled edition to draft after confirmation", async () => {
     let unscheduled = false;
     let unscheduleCalled = false;

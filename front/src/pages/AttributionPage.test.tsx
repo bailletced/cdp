@@ -110,6 +110,38 @@ describe("AttributionPage (F07-T06)", () => {
     ).toBeInTheDocument();
   });
 
+  it("flags a text used by several slots (« Texte déjà utilisé », F07-T10)", async () => {
+    server.use(
+      organizerMe(),
+      http.get(editionUrl, () =>
+        HttpResponse.json(
+          attributionEdition({
+            slots: [
+              attributionSlot(1, "20h00–20h30", "evening", therese, true),
+              attributionSlot(2, "20h30–21h00", "evening", therese, true),
+              attributionSlot(3, "2h00–2h30", "night"),
+            ],
+            slotsWithoutText: 1,
+            duplicatedTextIds: [therese.id],
+          }),
+        ),
+      ),
+    );
+
+    renderApp(`/organisation/editions/${EDITION_ID}/texts`);
+
+    const first = (await screen.findByText("20h00–20h30")).closest("li");
+    expect(
+      within(first as HTMLElement).getByText("Texte déjà utilisé"),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Texte déjà utilisé")).toHaveLength(2);
+    expect(
+      within(
+        screen.getByText("2h00–2h30").closest("li") as HTMLElement,
+      ).queryByText("Texte déjà utilisé"),
+    ).not.toBeInTheDocument();
+  });
+
   it("says when every slot has its text", async () => {
     server.use(
       organizerMe(),

@@ -133,6 +133,12 @@ export function AttributionPage() {
                     <div>
                       <p className="font-medium">{slot.textTitle}</p>
                       <p className="text-muted">{slot.textSource}</p>
+                      {slot.textAlreadyUsed ? (
+                        // A warning, never a block (US-07.1)
+                        <p className="mt-1 inline-block rounded-full border border-warning px-3 text-warning">
+                          Texte déjà utilisé
+                        </p>
+                      ) : null}
                     </div>
                   ) : (
                     <p className="text-muted italic">Sans texte</p>

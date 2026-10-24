@@ -24,6 +24,9 @@ import {
  * lifecycle actions: « Programmer » (draft → scheduled) and « Repasser en
  * brouillon » (scheduled → draft, with a confirmation). The API computes the
  * hybrid status (RG-ED-1); the actions follow the lifecycle.
+ *
+ * Slots without text never block the scheduling: they only ask for a
+ * confirmation that names how many are missing (RG-ED-4, F07-T10).
  */
 export function EditionDetailPage() {
   const { editionId } = useParams({
@@ -33,11 +36,13 @@ export function EditionDetailPage() {
   const scheduleEdition = useScheduleEdition();
   const unscheduleEdition = useUnscheduleEdition();
   const [confirmingUnschedule, setConfirmingUnschedule] = useState(false);
+  const [confirmingSchedule, setConfirmingSchedule] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const isPending = scheduleEdition.isPending || unscheduleEdition.isPending;
 
   async function handleSchedule() {
+    setConfirmingSchedule(false);
     setActionError(null);
 
     try {
@@ -88,6 +93,7 @@ export function EditionDetailPage() {
   const slots = parseEditionSlots(edition.slots);
   const slotGroups = groupSlotsByPartOfDay(slots);
   const isScheduled = "scheduled" === edition.lifecycle;
+  const missingTexts = edition.slotsWithoutText ?? 0;
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -147,7 +153,11 @@ export function EditionDetailPage() {
           ) : (
             <Button
               variant="primary"
-              onClick={() => void handleSchedule()}
+              onClick={() =>
+                missingTexts > 0
+                  ? setConfirmingSchedule(true)
+                  : void handleSchedule()
+              }
               isDisabled={isPending}
             >
               {scheduleEdition.isPending ? "Programmation…" : "Programmer"}
@@ -193,6 +203,23 @@ export function EditionDetailPage() {
           )}
         </section>
       </div>
+      <ConfirmDialog
+        isOpen={confirmingSchedule}
+        onClose={() => setConfirmingSchedule(false)}
+        onConfirm={() => void handleSchedule()}
+        title="Programmer l’édition"
+        confirmLabel="Programmer quand même"
+      >
+        <p>
+          {missingTexts === 1
+            ? "1 créneau n’a pas encore de texte."
+            : `${missingTexts} créneaux n’ont pas encore de texte.`}
+        </p>
+        <p className="mt-2">
+          Vous pourrez les compléter ensuite : d’ici là, les priants liront « Le
+          texte de ce créneau sera bientôt disponible ».
+        </p>
+      </ConfirmDialog>
       <ConfirmDialog
         isOpen={confirmingUnschedule}
         onClose={() => setConfirmingUnschedule(false)}
