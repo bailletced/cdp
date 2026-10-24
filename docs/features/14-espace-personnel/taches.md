@@ -32,4 +32,4 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Parcours
 
-- [ ] **F14-T11** · `test` E2E §14.1 n° 1 : inscription → e-mail → lien → espace → changer mon nom (visible dans la grille) → se désinscrire → créneau « À pourvoir » — *Dépend de* : F14-T08, F14-T09, F11-T08 · *Fini quand* : parcours vert avec axe-core.
+- [x] **F14-T11** · `test` E2E §14.1 n° 1 : inscription → e-mail → lien → espace → changer mon nom (visible dans la grille) → se désinscrire → créneau « À pourvoir » — *Dépend de* : F14-T08, F14-T09, F11-T08 · *Fini quand* : parcours vert avec axe-core.

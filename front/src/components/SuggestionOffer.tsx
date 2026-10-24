@@ -101,12 +101,17 @@ export function SuggestionOffer({
             <p className="mt-1">{suggestion.textTitle}</p>
           ) : null}
           <div className="mt-4 flex flex-wrap gap-3">
+            {/* Not isPending: the offer unmounts once taken, and React Aria
+                would announce the pending state by reference to a button
+                that no longer exists */}
             <Button
               variant="primary"
               onClick={() => void takeIt()}
-              isPending={registerInscriptions.isPending}
+              isDisabled={registerInscriptions.isPending}
             >
-              Le prendre aussi
+              {registerInscriptions.isPending
+                ? "Inscription en cours…"
+                : "Le prendre aussi"}
             </Button>
             <Button variant="outline" onClick={decline}>
               Non merci

@@ -96,12 +96,15 @@ export function RenameDialog({ currentName }: { currentName: string }) {
                   <Button variant="tertiary" onClick={() => setIsOpen(false)}>
                     Annuler
                   </Button>
+                  {/* Not isPending: React Aria announces it by reference to
+                      this button, which unmounts with the dialog — the
+                      announcement would point to nothing (axe role-img-alt) */}
                   <Button
                     type="submit"
                     variant="primary"
-                    isPending={renameMe.isPending}
+                    isDisabled={renameMe.isPending}
                   >
-                    Enregistrer
+                    {renameMe.isPending ? "Enregistrement…" : "Enregistrer"}
                   </Button>
                 </Modal.Footer>
               </form>

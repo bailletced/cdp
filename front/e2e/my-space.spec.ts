@@ -6,6 +6,7 @@ import {
   test,
 } from "@playwright/test";
 import { E2E_ORGANIZER_EMAIL } from "./globalSetup";
+import { expectNoA11yViolations } from "./helpers/a11y";
 import { createOpenEdition } from "./helpers/edition";
 import { extractLinkFromEmail, waitForEmail } from "./helpers/mailpit";
 
@@ -127,6 +128,68 @@ test.describe("Mon espace (F14)", () => {
     const { readFile } = await import("node:fs/promises");
     const calendar = await readFile(path, "utf8");
     expect(calendar.match(/BEGIN:VEVENT/g)).toHaveLength(2);
+    await page.context().close();
+  });
+
+  test("parcours n° 1: rename myself, then cancel a slot (F14-T11)", async ({
+    browser,
+    request,
+  }) => {
+    test.setTimeout(90_000);
+    const slots = await fetchCurrentSlots(request);
+    const [kept, freed] = [slots[30], slots[31]];
+    const stamp = Date.now();
+    const page = await registerThenOpenMySpace(
+      browser,
+      [kept, freed],
+      `Famille Martin ${stamp}`,
+    );
+
+    // 1. « Mon espace »: my name, then my two slots
+    // The name heads the page, before the grid lists it again
+    await expect(
+      page.getByText(`Famille Martin ${stamp}`, { exact: true }).first(),
+    ).toBeVisible();
+    const mine = page.getByRole("region", { name: "Mes créneaux" });
+    await expect(mine.getByRole("listitem")).toHaveCount(2);
+    await expectNoA11yViolations(page);
+
+    // 2. Change my name: it shows in the grid at once
+    await page.getByRole("button", { name: "Changer mon nom" }).click();
+    const rename = page.getByRole("dialog", { name: "Changer mon nom" });
+    await expectNoA11yViolations(page);
+    await rename
+      .getByLabel("Nom affiché")
+      .fill(`Famille Martin-Dubois ${stamp}`);
+    await rename.getByRole("button", { name: "Enregistrer" }).click();
+    await expect(rename).toBeHidden();
+    await expect(
+      page.getByText(`Famille Martin-Dubois ${stamp}`, { exact: true }).first(),
+    ).toBeVisible();
+    const grid = page.getByRole("region", { name: "Grille des créneaux" });
+    const keptCard = grid.getByRole("article").filter({ hasText: kept.label });
+    await expect(
+      keptCard.getByRole("list", { name: "Priants du créneau" }),
+    ).toContainText(`Famille Martin-Dubois ${stamp}`);
+
+    // 3. Cancel the second slot: announced on screen, « À pourvoir » again
+    await mine
+      .getByRole("button", {
+        name: `Me désinscrire du créneau de ${freed.label}`,
+      })
+      .click();
+    const confirm = page.getByRole("alertdialog", { name: "Me désinscrire" });
+    await expectNoA11yViolations(page);
+    await confirm.getByRole("button", { name: "Me désinscrire" }).click();
+    await expect(
+      page.getByText(`Vous êtes désinscrit du créneau de ${freed.label}.`),
+    ).toBeVisible();
+    await expect(mine.getByRole("listitem")).toHaveCount(1);
+    const freedCard = grid
+      .getByRole("article")
+      .filter({ hasText: freed.label });
+    await expect(freedCard).toContainText("À pourvoir");
+    await expect(freedCard).toContainText("0 priant");
     await page.context().close();
   });
 });
