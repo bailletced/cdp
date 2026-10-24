@@ -23,6 +23,7 @@ function slot(id: string, rank: number): PlanningSlot {
     state: "future",
     textTitle: null,
     textSource: null,
+    registrationCount: 0,
   };
 }
 

@@ -145,11 +145,15 @@ function inscriptionItem() {
 
 /** Captures the POST /api/inscriptions body; answers 201. */
 function captureRegistrations() {
-  const captured: { body: unknown } = { body: null };
+  const captured: { body: unknown; contentType: string | null } = {
+    body: null,
+    contentType: null,
+  };
 
   server.use(
     http.post(INSCRIPTIONS_URL, async ({ request }) => {
       captured.body = await request.json();
+      captured.contentType = request.headers.get("content-type");
 
       return HttpResponse.json(inscriptionItem(), { status: 201 });
     }),
@@ -541,6 +545,8 @@ describe("InscriptionPage — envoi (F09-T18)", () => {
       consent: true,
       website: "",
     });
+    // API Platform only accepts JSON-LD bodies on this resource
+    expect(captured.contentType).toContain("application/ld+json");
     // The public planning queries are invalidated on success: the slots
     // are re-fetched so the grid shows the updated counts (RG-PL-1)
     await waitFor(() => {

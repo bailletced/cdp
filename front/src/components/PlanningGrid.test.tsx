@@ -26,6 +26,7 @@ function renderGrid() {
 }
 
 interface SlotOverrides {
+  registrationCount?: number;
   startsAt?: string;
   endsAt?: string;
   textTitle?: string | null;
@@ -115,6 +116,22 @@ describe("PlanningGrid (US-08.2)", () => {
     expect(titles).toEqual(["Soirée", "Nuit", "Matin", "Après-midi", "Soirée"]);
   });
 
+  it("shows the priants of each slot from the API count (RG-PL-1, F09-T13)", async () => {
+    serveSlots([
+      slot(1, "evening", "19h00–19h30", { registrationCount: 2 }),
+      slot(2, "evening", "19h30–20h00", { registrationCount: 0 }),
+    ]);
+
+    renderGrid();
+
+    await screen.findByRole("region", { name: "Grille des créneaux" });
+
+    expect(screen.getByText("Occupé")).toBeInTheDocument();
+    expect(screen.getByText("2 priants")).toBeInTheDocument();
+    expect(screen.getByText("À pourvoir")).toBeInTheDocument();
+    expect(screen.getByText("0 priant")).toBeInTheDocument();
+  });
+
   it("renders a SlotCard per slot, with its state and its text (or RG-TX-2)", async () => {
     serveSlots([
       slot(1, "evening", "19h00–19h30", {
@@ -128,8 +145,7 @@ describe("PlanningGrid (US-08.2)", () => {
 
     await screen.findByRole("region", { name: "Grille des créneaux" });
 
-    // The registration count is not part of the payload yet (F09-T13):
-    // slots show as empty
+    // Without a registration count in the payload, a slot shows as empty
     expect(screen.getAllByText("À pourvoir")).toHaveLength(2);
     expect(screen.getAllByText("0 priant")).toHaveLength(2);
     expect(screen.getByText("Oraison de Thérèse")).toBeInTheDocument();

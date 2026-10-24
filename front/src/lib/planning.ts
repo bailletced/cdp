@@ -2,7 +2,8 @@
  * Public planning slot (F08-T04, US-08.2): one entry of the payload of
  * GET /api/editions/{id}/slots. Instants are UTC ISO 8601 strings, the
  * label is the Paris wall-clock range (« 19h00–19h30 »), the state is
- * computed by the API against the server clock.
+ * computed by the API against the server clock. registrationCount is the
+ * number of priants on the slot (RG-PL-1, F09-T13).
  */
 export interface PlanningSlot {
   id: string;
@@ -14,6 +15,7 @@ export interface PlanningSlot {
   state: string;
   textTitle: string | null;
   textSource: string | null;
+  registrationCount: number;
 }
 
 /** Temporal state of a slot: past, current (running now) or future. */
@@ -42,7 +44,9 @@ export function slotTemporalState(
   return "future";
 }
 
-function isPlanningSlot(slot: unknown): slot is PlanningSlot {
+function isPlanningSlot(
+  slot: unknown,
+): slot is Omit<PlanningSlot, "registrationCount"> & Record<string, unknown> {
   if (typeof slot !== "object" || slot === null) {
     return false;
   }
@@ -75,5 +79,17 @@ export function parsePlanningSlots(slots: unknown): PlanningSlot[] {
     return [];
   }
 
-  return slots.filter(isPlanningSlot);
+  return slots.filter(isPlanningSlot).map((slot) => ({
+    id: slot.id,
+    rank: slot.rank,
+    startsAt: slot.startsAt,
+    endsAt: slot.endsAt,
+    label: slot.label,
+    partOfDay: slot.partOfDay,
+    state: slot.state,
+    textTitle: slot.textTitle ?? null,
+    textSource: slot.textSource ?? null,
+    registrationCount:
+      typeof slot.registrationCount === "number" ? slot.registrationCount : 0,
+  }));
 }

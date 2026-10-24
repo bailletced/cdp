@@ -35,6 +35,7 @@ function makeSlot(overrides: Partial<PlanningSlot> = {}): PlanningSlot {
     state: "future",
     textTitle: "Oraison de Thérèse",
     textSource: "Thérèse de Lisieux",
+    registrationCount: 0,
     ...overrides,
   };
 }

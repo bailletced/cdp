@@ -89,6 +89,7 @@ export function PlanningGrid({ editionId }: { editionId: string }) {
                     <SlotCard
                       nowMs={nowMs}
                       onToggle={toggleSlot}
+                      registrationCount={slot.registrationCount}
                       selectable
                       selected={selectedIds.includes(slot.id)}
                       slot={slot}

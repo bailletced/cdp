@@ -135,6 +135,8 @@ export function useRegisterInscriptions() {
     mutationFn: async (payload: RegisterInscriptionsPayload) => {
       const { data, error } = await apiClient.POST("/api/inscriptions", {
         body: payload,
+        // API Platform only accepts JSON-LD bodies on this resource
+        headers: { "Content-Type": "application/ld+json" },
       });
 
       if (error) {

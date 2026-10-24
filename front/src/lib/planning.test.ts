@@ -16,6 +16,7 @@ function makeSlot(overrides: Partial<PlanningSlot> = {}): PlanningSlot {
     state: "future",
     textTitle: null,
     textSource: null,
+    registrationCount: 0,
     ...overrides,
   };
 }
@@ -47,6 +48,16 @@ describe("slotTemporalState (US-08.4)", () => {
 });
 
 describe("parsePlanningSlots", () => {
+  it("keeps the registration count of each slot, 0 when missing", () => {
+    const [counted, uncounted] = parsePlanningSlots([
+      { ...makeSlot(), registrationCount: 3 },
+      { ...makeSlot({ rank: 2 }), registrationCount: undefined },
+    ]);
+
+    expect(counted.registrationCount).toBe(3);
+    expect(uncounted.registrationCount).toBe(0);
+  });
+
   it("keeps well-formed slots", () => {
     const slots = parsePlanningSlots([makeSlot(), makeSlot({ rank: 2 })]);
 
