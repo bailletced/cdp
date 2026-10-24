@@ -114,6 +114,33 @@ export function useEditionSlots(editionId: string) {
   return useQuery(editionSlotsQueryOptions(editionId));
 }
 
+/**
+ * Full text of a slot (GET /api/slots/{id}/text, F12-T04). A 404 means the
+ * viewer is not a priant of the slot (RG-TX-1): a normal state, mapped to
+ * null instead of an error.
+ */
+export const slotTextQueryOptions = (slotId: string) =>
+  ({
+    queryKey: ["slots", slotId, "text"],
+    queryFn: async () => {
+      const { data, error, response } = await apiClient.GET(
+        "/api/slots/{id}/text",
+        { params: { path: { id: slotId } } },
+      );
+
+      if (error) {
+        if (response.status === 404) {
+          return null;
+        }
+
+        throw error;
+      }
+
+      return data;
+    },
+    retry: false,
+  }) as const;
+
 /** Payload of POST /api/inscriptions (F09-T10), bounded by the OpenAPI contract. */
 export interface RegisterInscriptionsPayload {
   slotIds: string[];

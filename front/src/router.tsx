@@ -17,6 +17,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
 import { ReceiveMyLinkPage } from "./pages/ReceiveMyLinkPage";
+import { SlotTextPage } from "./pages/SlotTextPage";
 
 // Landing page (F08-T07, F07-T01): public home page with the registration
 // form. Reserved to visitors: a signed-in priant goes straight to /my-space.
@@ -66,6 +67,14 @@ const inscriptionConfirmationRoute = createRoute({
   path: "/inscription/confirmation",
   validateSearch: inscriptionSearch,
   component: InscriptionConfirmationPage,
+});
+
+// Reading page of a slot (F12-T04): reserved by the API to the priants of
+// the slot and the organizers, the page explains it to anyone else
+const slotTextRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/textes/$slotId",
+  component: SlotTextPage,
 });
 
 const receiveMyLinkRoute = createRoute({
@@ -234,6 +243,7 @@ export const routeTree = Root.addChildren([
   confidentialiteRoute,
   inscriptionRoute,
   inscriptionConfirmationRoute,
+  slotTextRoute,
   demoRoute,
   loginRoute,
   mySpaceRoute,
