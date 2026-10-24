@@ -26,4 +26,4 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Parcours
 
-- [ ] **F13-T08** · `test` E2E §14.1 : « Prendre un créneau vide » → inscription → suggestion acceptée → bandeau diminué de 2 — *Dépend de* : F13-T05, F13-T06, F13-T07 · *Fini quand* : parcours vert avec axe-core.
+- [x] **F13-T08** · `test` E2E §14.1 : « Prendre un créneau vide » → inscription → suggestion acceptée → bandeau diminué de 2 — *Dépend de* : F13-T05, F13-T06, F13-T07 · *Fini quand* : parcours vert avec axe-core.
