@@ -10,8 +10,10 @@ use App\Access\Application\RemoveOrganizerHandler;
 use App\Access\Application\RequestPersonalLinkHandler;
 use App\Access\Application\SendPersonalLinkOnAccountRegistered;
 use App\Access\Domain\Entity\Account;
+use App\Access\Domain\Entity\DevicePass;
 use App\Access\Domain\Entity\Organizer;
 use App\Access\Domain\Repository\AccountRepositoryInterface;
+use App\Access\Domain\Repository\DevicePassRepositoryInterface;
 use App\Access\Domain\Repository\OrganizerRepositoryInterface;
 use App\Access\Infrastructure\ApiPlatform\State\Processor\AdminOrganizerProcessor;
 use App\Access\Infrastructure\ApiPlatform\State\Provider\AdminOrganizerProvider;
@@ -19,8 +21,10 @@ use App\Access\Infrastructure\ApiPlatform\State\Provider\MeProvider;
 use App\Access\Infrastructure\Doctrine\AccountPriantDirectory;
 use App\Access\Infrastructure\Doctrine\DoctrineOrganizerViewFinder;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineAccountRepository;
+use App\Access\Infrastructure\Doctrine\Repository\DoctrineDevicePassRepository;
 use App\Access\Infrastructure\Doctrine\Repository\DoctrineOrganizerRepository;
 use App\Access\Infrastructure\InMemory\Repository\InMemoryAccountRepository;
+use App\Access\Infrastructure\InMemory\Repository\InMemoryDevicePassRepository;
 use App\Access\Infrastructure\InMemory\Repository\InMemoryOrganizerRepository;
 use App\Access\Infrastructure\Symfony\Console\CreateOrganizerCliCommand;
 use App\Access\Infrastructure\Symfony\Controller\AuthStatusController;
@@ -58,10 +62,20 @@ return static function (ContainerConfigurator $container): void {
         ])
         ->alias(OrganizerRepositoryInterface::class, DoctrineOrganizerRepository::class)
 
+        ->set(DoctrineDevicePassRepository::class)
+        ->args([
+            new Symfony\Component\DependencyInjection\Reference('doctrine'),
+            DevicePass::class,
+        ])
+        ->alias(DevicePassRepositoryInterface::class, DoctrineDevicePassRepository::class)
+
         ->set(InMemoryAccountRepository::class)
         ->tag('app.in_memory_repository')
 
         ->set(InMemoryOrganizerRepository::class)
+        ->tag('app.in_memory_repository')
+
+        ->set(InMemoryDevicePassRepository::class)
         ->tag('app.in_memory_repository')
 
         ->set(AddOrganizerHandler::class)

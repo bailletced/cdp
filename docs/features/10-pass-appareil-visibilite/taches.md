@@ -13,7 +13,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Pass appareil (US-10.1)
 
-- [ ] **F10-T01** · `back` Agrégat `DevicePass` (Access : hash SHA-256, `InscriptionId[]`, `expiresAt`, `lastSeenAt`) + repository InMemory/Doctrine + migration + tests — *Dépend de* : F09-T04, F02-T02 · *Fini quand* : suite abstraite verte, jeton jamais stocké en clair.
+- [x] **F10-T01** · `back` Agrégat `DevicePass` (Access : hash SHA-256, `InscriptionId[]`, `expiresAt`, `lastSeenAt`) + repository InMemory/Doctrine + migration + tests — *Dépend de* : F09-T04, F02-T02 · *Fini quand* : suite abstraite verte, jeton jamais stocké en clair.
 - [ ] **F10-T02** · `back` Port `DevicePassIssuer::grant()` (Shared) + adaptateur `DevicePassCookie` : jeton 256 bits, cookie `cdp_pass` (`HttpOnly`, `Secure`, `SameSite=Lax`), ajout au pass existant, expiration fin d'édition + 7 j + tests — *Dépend de* : F10-T01 · *Fini quand* : deux inscriptions successives enrichissent le même pass (test).
 - [ ] **F10-T03** · `back` `RegisterInscriptionsProcessor` appelle `DevicePassIssuer::grant()` (`Set-Cookie`) + test d'acceptation — *Dépend de* : F10-T02, F09-T10 · *Fini quand* : cookie présent après inscription, absent sur une 422.
 - [ ] **F10-T04** · `back` `SymfonyCurrentViewer` lit `cdp_pass`, met à jour `lastSeenAt`, ne garde dans `coveredInscriptionIds` que les inscriptions encore actives + tests — *Dépend de* : F10-T02, F02-T12 · *Fini quand* : pass expiré ou inscription annulée → plus aucun droit (test).
