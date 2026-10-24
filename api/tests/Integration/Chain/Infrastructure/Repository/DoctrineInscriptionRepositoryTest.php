@@ -109,6 +109,27 @@ final class DoctrineInscriptionRepositoryTest extends KernelTestCase
         self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM inscription'));
     }
 
+    public function testItFindsTheInscriptionsOfAPriantAndThoseCoveredByAPass(): void
+    {
+        $edition = $this->createEdition();
+        $priant = $this->createPriant();
+        $someoneElse = $this->createPriant('jean@bailletced.org');
+        $owned = new Inscription($edition->getId(), $edition->getSlots()[0]->getId(), $priant->getId());
+        $covered = new Inscription($edition->getId(), $edition->getSlots()[1]->getId(), $someoneElse->getId());
+        $other = new Inscription($edition->getId(), $edition->getSlots()[2]->getId(), $someoneElse->getId());
+        foreach ([$owned, $covered, $other] as $inscription) {
+            $this->repository->add($inscription);
+        }
+        $this->em->flush();
+        $this->em->clear();
+
+        $ids = static fn (array $inscriptions): array => array_map(static fn (Inscription $inscription): string => (string) $inscription->getId(), $inscriptions);
+
+        self::assertEqualsCanonicalizing($ids([$owned, $covered]), $ids($this->repository->findOwnedOrCovered($priant->getId(), [$covered->getId()])));
+        self::assertSame($ids([$covered]), $ids($this->repository->findOwnedOrCovered(null, [$covered->getId()])));
+        self::assertSame([], $this->repository->findOwnedOrCovered(null, []));
+    }
+
     private function createEdition(): Edition
     {
         $edition = Edition::create(
@@ -125,9 +146,9 @@ final class DoctrineInscriptionRepositoryTest extends KernelTestCase
         return $edition;
     }
 
-    private function createPriant(): Priant
+    private function createPriant(string $email = 'marie@bailletced.org'): Priant
     {
-        $priant = new Priant(new Email('marie@bailletced.org'), new DisplayName('Marie Dupont'));
+        $priant = new Priant(new Email($email), new DisplayName('Marie Dupont'));
 
         $this->em->persist($priant);
         $this->em->flush();

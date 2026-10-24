@@ -78,4 +78,22 @@ abstract class InscriptionRepositoryTestCase extends TestCase
 
         $this->assertSame(2, $this->repository->countByEdition($editionId));
     }
+
+    public function testItFindsTheInscriptionsOfAPriantAndThoseCoveredByAPass(): void
+    {
+        $editionId = new EditionId();
+        $priantId = new PriantId();
+        $owned = new Inscription($editionId, new SlotId(), $priantId);
+        $covered = new Inscription($editionId, new SlotId(), new PriantId());
+        $other = new Inscription($editionId, new SlotId(), new PriantId());
+        foreach ([$owned, $covered, $other] as $inscription) {
+            $this->repository->add($inscription);
+        }
+
+        $found = $this->repository->findOwnedOrCovered($priantId, [$covered->getId(), $owned->getId()]);
+
+        self::assertEqualsCanonicalizing([$owned, $covered], $found);
+        self::assertSame([$covered], $this->repository->findOwnedOrCovered(null, [$covered->getId()]));
+        self::assertSame([], $this->repository->findOwnedOrCovered(null, []));
+    }
 }

@@ -8,6 +8,7 @@ use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Exception\AlreadyRegisteredException;
 use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Domain\ValueObject\InscriptionId;
 use App\Chain\Domain\ValueObject\PriantId;
 use App\Chain\Domain\ValueObject\SlotId;
 
@@ -46,6 +47,22 @@ final class InMemoryInscriptionRepository implements InscriptionRepositoryInterf
         }
 
         return $count;
+    }
+
+    #[\Override]
+    public function findOwnedOrCovered(?PriantId $priantId, array $inscriptionIds): array
+    {
+        $found = [];
+        foreach ($this->inscriptions as $inscription) {
+            $owned = null !== $priantId && $inscription->getPriantId()->equals($priantId);
+            $covered = array_any($inscriptionIds, static fn (InscriptionId $id): bool => $id->equals($inscription->getId()));
+
+            if ($owned || $covered) {
+                $found[] = $inscription;
+            }
+        }
+
+        return $found;
     }
 
     private function key(SlotId $slotId, PriantId $priantId): string

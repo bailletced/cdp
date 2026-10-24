@@ -21,6 +21,7 @@ use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Entity\Text;
+use App\Chain\Domain\Policy\VisibilityPolicy;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
 use App\Chain\Domain\Repository\PriantRepositoryInterface;
@@ -179,6 +180,9 @@ return static function (ContainerConfigurator $container): void {
         ->autoconfigure()
         ->autowire()
         ->alias(PriantProfileReader::class, DoctrinePriantProfileReader::class);
+
+    $services->set(VisibilityPolicy::class)
+        ->autowire();
 
     $services->set(DoctrineInscriptionDirectory::class)
         ->autowire()

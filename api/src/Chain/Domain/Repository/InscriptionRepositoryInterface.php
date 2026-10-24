@@ -6,6 +6,8 @@ namespace App\Chain\Domain\Repository;
 
 use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Domain\ValueObject\InscriptionId;
+use App\Chain\Domain\ValueObject\PriantId;
 
 interface InscriptionRepositoryInterface
 {
@@ -24,4 +26,14 @@ interface InscriptionRepositoryInterface
      * is locked as soon as the first inscription exists).
      */
     public function countByEdition(EditionId $editionId): int;
+
+    /**
+     * The inscriptions of a priant, plus the given ones (those covered by a
+     * device pass), whatever their edition (F10-T05).
+     *
+     * @param list<InscriptionId> $inscriptionIds
+     *
+     * @return list<Inscription>
+     */
+    public function findOwnedOrCovered(?PriantId $priantId, array $inscriptionIds): array;
 }
