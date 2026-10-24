@@ -67,15 +67,14 @@ test.describe.configure({ mode: "serial" });
 test.describe("Planning public (F08-T11, US-08.2/08.3/08.5)", () => {
   // The login roundtrip (email) plus the creation flow exceed the 30 s test
   // timeout on a loaded machine
-  test.beforeAll(
-    async ({ browser, request }) => {
-      const page = await browser.newPage();
-      const title = `24 heures de prière — planning E2E ${Date.now()}`;
-      await createOpenEdition(page, request, E2E_ORGANIZER_EMAIL, title);
-      await page.close();
-    },
-    { timeout: 120_000 },
-  );
+  test.beforeAll(async ({ browser, request }) => {
+    // A hook ignores the timeout option: it is set from inside
+    test.setTimeout(120_000);
+    const page = await browser.newPage();
+    const title = `24 heures de prière — planning E2E ${Date.now()}`;
+    await createOpenEdition(page, request, E2E_ORGANIZER_EMAIL, title);
+    await page.close();
+  });
 
   test("shows the 48 slots of the open edition, grouped by part of day", async ({
     browser,

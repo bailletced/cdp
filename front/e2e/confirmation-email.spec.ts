@@ -31,19 +31,18 @@ test.describe.configure({ mode: "serial" });
  * personal space.
  */
 test.describe("E-mail de confirmation (F11-T08)", () => {
-  test.beforeAll(
-    async ({ browser, request }) => {
-      const page = await browser.newPage();
-      await createOpenEdition(
-        page,
-        request,
-        E2E_ORGANIZER_EMAIL,
-        `24 heures de prière — confirmation E2E ${Date.now()}`,
-      );
-      await page.close();
-    },
-    { timeout: 120_000 },
-  );
+  test.beforeAll(async ({ browser, request }) => {
+    // A hook ignores the timeout option: it is set from inside
+    test.setTimeout(120_000);
+    const page = await browser.newPage();
+    await createOpenEdition(
+      page,
+      request,
+      E2E_ORGANIZER_EMAIL,
+      `24 heures de prière — confirmation E2E ${Date.now()}`,
+    );
+    await page.close();
+  });
 
   test("one email with both slots, the .ics and a personal link to the personal space", async ({
     browser,

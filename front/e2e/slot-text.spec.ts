@@ -32,37 +32,36 @@ test.describe("Lecture du texte (F12-T06)", () => {
   const textTitle = `Que rien ne te trouble E2E ${Date.now()}`;
   let slot: ApiSlot;
 
-  test.beforeAll(
-    async ({ browser, request }) => {
-      const page = await browser.newPage();
-      await createOpenEdition(
-        page,
-        request,
-        E2E_ORGANIZER_EMAIL,
-        `24 heures de prière — lecture E2E ${Date.now()}`,
-      );
+  test.beforeAll(async ({ browser, request }) => {
+    // A hook ignores the timeout option: it is set from inside
+    test.setTimeout(120_000);
+    const page = await browser.newPage();
+    await createOpenEdition(
+      page,
+      request,
+      E2E_ORGANIZER_EMAIL,
+      `24 heures de prière — lecture E2E ${Date.now()}`,
+    );
 
-      // Attribute a text to one slot, with the organizer's session
-      slot = (await fetchCurrentSlots(request))[5];
-      const text = await page.request.post("/api/admin/texts", {
-        headers: JSON_LD,
-        data: {
-          title: textTitle,
-          source: "Thérèse d’Avila",
-          body: "<p>Que rien ne te trouble, que rien ne t’effraie.</p>",
-          hints: "Relire lentement chaque vers.",
-        },
-      });
-      expect(text.status()).toBe(201);
-      const assigned = await page.request.put(
-        `/api/admin/slots/${slot.id}/text`,
-        { headers: JSON_LD, data: { textId: (await text.json()).id } },
-      );
-      expect(assigned.ok()).toBe(true);
-      await page.close();
-    },
-    { timeout: 120_000 },
-  );
+    // Attribute a text to one slot, with the organizer's session
+    slot = (await fetchCurrentSlots(request))[5];
+    const text = await page.request.post("/api/admin/texts", {
+      headers: JSON_LD,
+      data: {
+        title: textTitle,
+        source: "Thérèse d’Avila",
+        body: "<p>Que rien ne te trouble, que rien ne t’effraie.</p>",
+        hints: "Relire lentement chaque vers.",
+      },
+    });
+    expect(text.status()).toBe(201);
+    const assigned = await page.request.put(
+      `/api/admin/slots/${slot.id}/text`,
+      { headers: JSON_LD, data: { textId: (await text.json()).id } },
+    );
+    expect(assigned.ok()).toBe(true);
+    await page.close();
+  });
 
   test("the registered device reads the text, another browser is told it is reserved", async ({
     browser,

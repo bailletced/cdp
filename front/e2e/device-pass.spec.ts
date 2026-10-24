@@ -26,19 +26,18 @@ test.describe.configure({ mode: "serial" });
  * email; a second browser, with no pass, sees the count but never a name.
  */
 test.describe("Pass appareil (F10-T11)", () => {
-  test.beforeAll(
-    async ({ browser, request }) => {
-      const page = await browser.newPage();
-      await createOpenEdition(
-        page,
-        request,
-        E2E_ORGANIZER_EMAIL,
-        `24 heures de prière — pass appareil E2E ${Date.now()}`,
-      );
-      await page.close();
-    },
-    { timeout: 120_000 },
-  );
+  test.beforeAll(async ({ browser, request }) => {
+    // A hook ignores the timeout option: it is set from inside
+    test.setTimeout(120_000);
+    const page = await browser.newPage();
+    await createOpenEdition(
+      page,
+      request,
+      E2E_ORGANIZER_EMAIL,
+      `24 heures de prière — pass appareil E2E ${Date.now()}`,
+    );
+    await page.close();
+  });
 
   test("the device that registered sees the names, another browser does not", async ({
     browser,

@@ -12,19 +12,18 @@ test.describe.configure({ mode: "serial" });
  * with axe-core.
  */
 test.describe("Créneaux vides (F13-T08)", () => {
-  test.beforeAll(
-    async ({ browser, request }) => {
-      const page = await browser.newPage();
-      await createOpenEdition(
-        page,
-        request,
-        E2E_ORGANIZER_EMAIL,
-        `24 heures de prière — créneaux vides E2E ${Date.now()}`,
-      );
-      await page.close();
-    },
-    { timeout: 120_000 },
-  );
+  test.beforeAll(async ({ browser, request }) => {
+    // A hook ignores the timeout option: it is set from inside
+    test.setTimeout(120_000);
+    const page = await browser.newPage();
+    await createOpenEdition(
+      page,
+      request,
+      E2E_ORGANIZER_EMAIL,
+      `24 heures de prière — créneaux vides E2E ${Date.now()}`,
+    );
+    await page.close();
+  });
 
   test("take an empty slot, then the suggested one: two empty slots less", async ({
     browser,

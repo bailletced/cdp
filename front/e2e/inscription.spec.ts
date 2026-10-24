@@ -61,19 +61,18 @@ test.describe.configure({ mode: "serial" });
  * RG-IN-3 message (409). Each screen is audited with axe-core.
  */
 test.describe("Inscription (F09-T21)", () => {
-  test.beforeAll(
-    async ({ browser, request }) => {
-      const page = await browser.newPage();
-      await createOpenEdition(
-        page,
-        request,
-        E2E_ORGANIZER_EMAIL,
-        `24 heures de prière — inscription E2E ${Date.now()}`,
-      );
-      await page.close();
-    },
-    { timeout: 120_000 },
-  );
+  test.beforeAll(async ({ browser, request }) => {
+    // A hook ignores the timeout option: it is set from inside
+    test.setTimeout(120_000);
+    const page = await browser.newPage();
+    await createOpenEdition(
+      page,
+      request,
+      E2E_ORGANIZER_EMAIL,
+      `24 heures de prière — inscription E2E ${Date.now()}`,
+    );
+    await page.close();
+  });
 
   test("registers on two slots, then is refused a second time on one of them", async ({
     browser,
