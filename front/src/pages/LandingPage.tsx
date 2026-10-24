@@ -1,13 +1,13 @@
 import { Button, Input, Label, Link, TextField } from "@heroui/react";
 import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
-import { useCurrentEdition, useMe } from "../api/hooks";
+import { useCurrentEdition } from "../api/hooks";
+import { EditionDates } from "../components/EditionDates";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { PlanningGrid } from "../components/PlanningGrid";
 import { SITE_NAME } from "../config/site";
-import { formatParisDateTime } from "../lib/editions";
 
 const GENERIC_ERROR_MESSAGE = "Une erreur est survenue. Veuillez réessayer.";
 const CONFIRMATION_MESSAGE =
@@ -28,12 +28,11 @@ type SubmissionState = "idle" | "submitting" | "sent" | "error";
  * creates the account (if needed) and sends a personal login link. The API
  * always answers 202 with the same message, whether the account was created
  * or already existed: this page never leaks account existence.
+ *
+ * Visitors only: the route sends a signed-in priant to « Mon espace ».
  */
 export function LandingPage() {
   const editionQuery = useCurrentEdition();
-  // An open session already has its personal link: the email form is only
-  // offered to visitors, a signed-in priant is sent to « Mon espace » (§5.2-5)
-  const { data: me } = useMe();
   const [state, setState] = useState<SubmissionState>("idle");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -90,16 +89,11 @@ export function LandingPage() {
             <PageTitle>
               {editionQuery.data.title ?? "24 heures de prière"}
             </PageTitle>
-            <div className="mt-8 border-l-2 border-accent pl-5">
-              <p className="text-xl">
-                Début : {formatParisDateTime(editionQuery.data.startsAt)} (heure
-                de Paris)
-              </p>
-              <p className="mt-1 text-muted">
-                Ouverture des inscriptions :{" "}
-                {formatParisDateTime(editionQuery.data.opensAt)} (heure de
-                Paris)
-              </p>
+            <div className="mt-8">
+              <EditionDates
+                startsAt={editionQuery.data.startsAt}
+                opensAt={editionQuery.data.opensAt}
+              />
             </div>
             {editionQuery.data.presentation ? (
               <p className="mt-8 max-w-prose text-xl leading-relaxed">
@@ -126,12 +120,7 @@ export function LandingPage() {
       )}
 
       <div className="rounded-2xl border border-separator bg-surface p-6 sm:p-8">
-        {me ? (
-          <p>
-            Retrouvez vos créneaux dans <Link href="/my-space">Mon espace</Link>
-            .
-          </p>
-        ) : state === "sent" || state === "error" ? (
+        {state === "sent" || state === "error" ? (
           <output>{message}</output>
         ) : (
           <form

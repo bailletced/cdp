@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SITE_NAME } from "../config/site";
+import { renderApp } from "../test/renderApp";
 import { server } from "../test/setup";
 import { LandingPage } from "./LandingPage";
 
@@ -146,30 +147,6 @@ describe("LandingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("offers « Mon espace » instead of the email form when a session is open (§5.2-5)", async () => {
-    server.use(
-      http.get(ME_URL, () =>
-        HttpResponse.json({
-          "@context": "/api/contexts/Me",
-          "@id": "/api/me",
-          "@type": "Me",
-          email: "thomas@bailletced.org",
-          isOrganizer: false,
-        }),
-      ),
-    );
-
-    renderPage();
-
-    expect(
-      await screen.findByRole("link", { name: "Mon espace" }),
-    ).toHaveAttribute("href", "/my-space");
-    expect(screen.queryByLabelText("Adresse e-mail")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "S'inscrire" }),
-    ).not.toBeInTheDocument();
-  });
-
   it("renders the presentation and the email registration form", () => {
     const { container } = renderPage();
 
@@ -255,5 +232,29 @@ describe("LandingPage", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Une erreur est survenue. Veuillez réessayer.",
     );
+  });
+});
+
+describe("Route /", () => {
+  it("sends a signed-in priant straight to « Mon espace »", async () => {
+    // The default MSW handler answers /api/me with an authenticated priant
+    server.resetHandlers();
+
+    renderApp("/");
+
+    expect(
+      await screen.findByRole("heading", { name: "Mon espace" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "S'inscrire" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the landing page to a visitor", async () => {
+    renderApp("/");
+
+    expect(
+      await screen.findByRole("button", { name: "S'inscrire" }),
+    ).toBeInTheDocument();
   });
 });

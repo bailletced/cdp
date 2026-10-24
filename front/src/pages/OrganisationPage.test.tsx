@@ -25,7 +25,7 @@ describe("OrganisationPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("redirects a visitor to /receive-my-link", async () => {
+  it("redirects a visitor to the landing page", async () => {
     server.use(
       http.get("http://localhost:8080/api/me", () => {
         return new HttpResponse(null, { status: 401 });
@@ -34,8 +34,10 @@ describe("OrganisationPage", () => {
 
     renderApp("/organisation");
 
-    // The guard redirects before the page mounts: the link request form shows up
-    expect(await screen.findByLabelText("Adresse e-mail")).toBeInTheDocument();
+    // The guard redirects before the page mounts: the landing form shows up
+    expect(
+      await screen.findByRole("button", { name: "S'inscrire" }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Organisateurs" }),
     ).not.toBeInTheDocument();

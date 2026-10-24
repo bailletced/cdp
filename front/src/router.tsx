@@ -18,10 +18,20 @@ import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
 import { ReceiveMyLinkPage } from "./pages/ReceiveMyLinkPage";
 
-// Landing page (F08-T07, F07-T01): public home page with the registration form.
+// Landing page (F08-T07, F07-T01): public home page with the registration
+// form. Reserved to visitors: a signed-in priant goes straight to /my-space.
 const landingRoute = createRoute({
   getParentRoute: () => Root,
   path: "/",
+  beforeLoad: async ({ context }) => {
+    const me = await context.queryClient
+      .ensureQueryData(meQueryOptions)
+      .catch(() => null);
+
+    if (null !== me) {
+      throw redirect({ to: "/my-space" });
+    }
+  },
   component: LandingPage,
 });
 
@@ -85,7 +95,7 @@ const loginRoute = createRoute({
 });
 
 // Route guard (F02-T19): a visitor (401 on /api/me) is redirected
-// to /receive-my-link before the page mounts.
+// to the landing page before the page mounts.
 const mySpaceRoute = createRoute({
   getParentRoute: () => Root,
   path: "/my-space",
@@ -93,7 +103,7 @@ const mySpaceRoute = createRoute({
     try {
       await context.queryClient.ensureQueryData(meQueryOptions);
     } catch {
-      throw redirect({ to: "/receive-my-link" });
+      throw redirect({ to: "/" });
     }
   },
   component: MySpacePage,
@@ -101,7 +111,7 @@ const mySpaceRoute = createRoute({
 
 // Back-office section (F04-T04): lazy-loaded so the back-office bundle is
 // never fetched on public pages. Reserved to organizers: visitors (401 on
-// /api/me) are redirected to /receive-my-link, authenticated priants to
+// /api/me) are redirected to the landing page, authenticated priants to
 // /my-space.
 const organisationRoute = createRoute({
   getParentRoute: () => Root,
@@ -112,7 +122,7 @@ const organisationRoute = createRoute({
       .catch(() => null);
 
     if (null === me) {
-      throw redirect({ to: "/receive-my-link" });
+      throw redirect({ to: "/" });
     }
 
     if (!me.isOrganizer) {

@@ -3,17 +3,16 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { baseUrl } from "../api/client";
 import { useViewer } from "../api/hooks";
+import { CurrentEditionPlanning } from "../components/CurrentEditionPlanning";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 
 /**
  * /my-space (F02-T19, F08): personal space — slot selection for the prayer chain.
  * After logging in via a personal link, the priant lands here to pick their
- * 30-minute slots. The route guard redirects visitors to /receive-my-link;
- * this page only renders for an authenticated viewer.
- *
- * The slot grid (F08-T08/T09) will be plugged here once the public API
- * GET /api/editions/current and GET /api/editions/{id}/slots are available.
+ * 30-minute slots in the planning of the current edition. The route guard
+ * redirects visitors to the landing page; this page only renders for an
+ * authenticated viewer, who is sent here from / as well.
  */
 export function MySpacePage() {
   const { viewer, isLoading } = useViewer();
@@ -31,7 +30,7 @@ export function MySpacePage() {
     } finally {
       // Drop the cached identity: the next GET /api/me answers 401 (visitor)
       queryClient.removeQueries({ queryKey: ["me"] });
-      navigate({ to: "/receive-my-link", replace: true });
+      navigate({ to: "/", replace: true });
     }
   }
 
@@ -53,10 +52,7 @@ export function MySpacePage() {
         Sélectionnez un ou plusieurs créneaux de 30 minutes pour participer à la
         chaîne de prière de 24 heures.
       </p>
-      {/* Slot grid placeholder — F08-T08/T09 will render the real grid here */}
-      <p className="rounded border border-dashed p-6 text-center text-default-500">
-        La grille des créneaux sera bientôt disponible.
-      </p>
+      <CurrentEditionPlanning />
       <button
         type="button"
         onClick={handleLogout}
