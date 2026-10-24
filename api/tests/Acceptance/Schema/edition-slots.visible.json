@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Grille vue par un inscrit ou un organisateur",
+  "description": "GET /api/editions/{id}/slots — inscrit de l'édition (pass ou session) ou organisateur : noms et pointages (RG-PL-4, RG-LV-2), jamais d'e-mail (RG-EP-2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "@context",
+    "@id",
+    "@type",
+    "id",
+    "slots"
+  ],
+  "properties": {
+    "@context": {
+      "const": "/api/contexts/PublicEditionSlots"
+    },
+    "@id": {
+      "type": "string"
+    },
+    "@type": {
+      "const": "PublicEditionSlots"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "slots": {
+      "type": "array",
+      "minItems": 48,
+      "maxItems": 48,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "rank",
+          "startsAt",
+          "endsAt",
+          "label",
+          "partOfDay",
+          "state",
+          "textTitle",
+          "textSource",
+          "registrationCount",
+          "occupied",
+          "participants",
+          "mine"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 48
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "label": {
+            "type": "string"
+          },
+          "partOfDay": {
+            "enum": [
+              "evening",
+              "night",
+              "morning",
+              "afternoon"
+            ]
+          },
+          "state": {
+            "enum": [
+              "past",
+              "current",
+              "future"
+            ]
+          },
+          "textTitle": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "textSource": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "registrationCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "occupied": {
+            "type": "boolean"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "prayed"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "prayed": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "mine": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

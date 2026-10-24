@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Édition publique",
+  "description": "GET /api/editions/current — identique pour tous les profils : aucune donnée de priant.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "@context",
+    "@id",
+    "@type",
+    "id",
+    "title",
+    "presentation",
+    "startsAt",
+    "opensAt",
+    "startsAtLabel",
+    "opensAtLabel",
+    "status"
+  ],
+  "properties": {
+    "@context": {
+      "const": "/api/contexts/PublicEdition"
+    },
+    "@id": {
+      "const": "/api/editions/current"
+    },
+    "@type": {
+      "const": "PublicEdition"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string"
+    },
+    "presentation": {
+      "type": "string"
+    },
+    "startsAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "opensAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "startsAtLabel": {
+      "type": "string"
+    },
+    "opensAtLabel": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "scheduled",
+        "open",
+        "running",
+        "finished"
+      ]
+    }
+  }
+}

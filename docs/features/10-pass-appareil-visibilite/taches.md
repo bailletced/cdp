@@ -27,6 +27,6 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Grille selon le profil (US-10.1, US-10.2, US-10.4)
 
 - [x] **F10-T08** · `back` `PlanningViewFinder` : noms, pointages et marque `mine` ; le provider masque à `null` selon la politique + tests d'intégration — *Dépend de* : F10-T04, F10-T05, F09-T13 · *Fini quand* : champ masqué toujours présent et `null`, jamais absent.
-- [ ] **F10-T09** · `test` Matrice d'acceptation de `GET /api/editions/{id}/slots` et `GET /api/editions/current` × 5 profils (visiteur, pass, priant vérifié, autre priant, organisateur), JSON Schema validé — *Dépend de* : F10-T08 · *Fini quand* : 10 cas verts, réutilisable par les features suivantes (trait de test).
+- [x] **F10-T09** · `test` Matrice d'acceptation de `GET /api/editions/{id}/slots` et `GET /api/editions/current` × 5 profils (visiteur, pass, priant vérifié, autre priant, organisateur), JSON Schema validé — *Dépend de* : F10-T08 · *Fini quand* : 10 cas verts, réutilisable par les features suivantes (trait de test).
 - [ ] **F10-T10** · `front` Grille : noms des priants, coche « a prié » avec libellé accessible, mention « vous » + tests — *Dépend de* : F10-T08, F08-T08 · *Fini quand* : rendu avec et sans noms testé.
 - [ ] **F10-T11** · `test` E2E : inscription → noms visibles sur cet appareil ; second navigateur sans pass → aucun nom — *Dépend de* : F10-T10, F09-T21 · *Fini quand* : parcours vert.
