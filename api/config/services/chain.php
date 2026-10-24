@@ -7,6 +7,7 @@ use App\Chain\Application\CreateEditionHandler;
 use App\Chain\Application\CreateTextHandler;
 use App\Chain\Application\DeleteTextHandler;
 use App\Chain\Application\DistributeTextsHandler;
+use App\Chain\Application\Port\CalendarFile;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Port\Notifier;
 use App\Chain\Application\Query\AdminEditionViewFinder;
@@ -37,6 +38,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvider;
+use App\Chain\Infrastructure\Calendar\EluceoCalendarFile;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineInscriptionDirectory;
@@ -183,6 +185,10 @@ return static function (ContainerConfigurator $container): void {
         ->autoconfigure()
         ->autowire()
         ->alias(PriantProfileReader::class, DoctrinePriantProfileReader::class);
+
+    $services->set(EluceoCalendarFile::class)
+        ->autowire()
+        ->alias(CalendarFile::class, EluceoCalendarFile::class);
 
     $services->set(MailerNotifier::class)
         ->autowire()
