@@ -13,7 +13,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Mes créneaux — back (US-14.1)
 
-- [ ] **F14-T01** · `back` `MySpaceViewFinder` : mon nom, mes inscriptions d'une édition (libellés, titre du texte, passé / en cours / à venir, actions possibles) + tests d'intégration — *Dépend de* : F09-T06, F10-T06 · *Fini quand* : actions calculées avec `MockClock` (avant, pendant, après le créneau).
+- [x] **F14-T01** · `back` `MySpaceViewFinder` : mon nom, mes inscriptions d'une édition (libellés, titre du texte, passé / en cours / à venir, actions possibles) + tests d'intégration — *Dépend de* : F09-T06, F10-T06 · *Fini quand* : actions calculées avec `MockClock` (avant, pendant, après le créneau).
 - [ ] **F14-T02** · `back` `GET /api/me/inscriptions?edition=` (édition publique par défaut) ; pass seul ou visiteur → 401 + tests d'acceptation — *Dépend de* : F14-T01 · *Fini quand* : OpenAPI régénéré, profils testés.
 
 ## Changer mon nom et se désinscrire — back (US-14.2, US-14.3)
