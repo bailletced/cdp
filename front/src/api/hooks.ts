@@ -5,6 +5,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import type { EditionView, SlotText } from "../lib/editions";
+import { withSlotText } from "../lib/editions";
 import { apiClient } from "./client";
 
 /**
@@ -563,6 +565,58 @@ export function useDeleteText() {
       // The deleted text must not be refetched by the form still mounted
       queryClient.removeQueries({ queryKey: textQueryOptions(id).queryKey });
       void queryClient.invalidateQueries({ queryKey: textsQueryKey });
+    },
+  });
+}
+
+/**
+ * Puts a text on a slot, or withdraws it with null (PUT
+ * /api/admin/slots/{id}/text, F07-T07). The edition is updated at once
+ * (optimistic) and put back as it was if the API refuses — a 409 when the
+ * edition changed meanwhile.
+ */
+export function useAssignText(editionId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = editionQueryOptions(editionId).queryKey;
+
+  return useMutation({
+    mutationFn: async ({
+      slotId,
+      text,
+    }: {
+      slotId: string;
+      text: SlotText | null;
+    }) => {
+      const { error } = await apiClient.PUT("/api/admin/slots/{id}/text", {
+        params: { path: { id: slotId } },
+        body: { textId: text?.id ?? null },
+        headers: { "Content-Type": "application/ld+json" },
+      });
+
+      if (error) {
+        throw error;
+      }
+    },
+    onMutate: async ({ slotId, text }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<EditionView>(queryKey);
+
+      if (previous) {
+        queryClient.setQueryData<EditionView>(
+          queryKey,
+          withSlotText(previous, slotId, text),
+        );
+      }
+
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData<EditionView>(queryKey, context.previous);
+      }
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
     },
   });
 }

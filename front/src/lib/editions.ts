@@ -161,3 +161,51 @@ export function groupSlotsByPartOfDay<T extends { partOfDay: string }>(
 
   return groups;
 }
+
+/** The text put on a slot: what the attribution screen shows at once. */
+export interface SlotText {
+  id: string;
+  title: string;
+  source: string;
+}
+
+/**
+ * The edition with one slot carrying a new text (or none): the optimistic
+ * state of an attribution (F07-T07), with the warnings recomputed — texts
+ * used twice and slots without text — until the server answers back.
+ */
+export function withSlotText(
+  edition: EditionView,
+  slotId: string,
+  text: SlotText | null,
+): EditionView {
+  const slots = parseEditionSlots(edition.slots).map((slot) =>
+    slot.id === slotId
+      ? {
+          ...slot,
+          textId: text?.id ?? null,
+          textTitle: text?.title ?? null,
+          textSource: text?.source ?? null,
+        }
+      : slot,
+  );
+
+  const uses = new Map<string, number>();
+  for (const slot of slots) {
+    if (slot.textId) {
+      uses.set(slot.textId, (uses.get(slot.textId) ?? 0) + 1);
+    }
+  }
+
+  return {
+    ...edition,
+    slots: slots.map((slot) => ({
+      ...slot,
+      textAlreadyUsed: null !== slot.textId && (uses.get(slot.textId) ?? 0) > 1,
+    })),
+    slotsWithoutText: slots.filter((slot) => null === slot.textId).length,
+    duplicatedTextIds: [...uses]
+      .filter(([, count]) => count > 1)
+      .map(([id]) => id),
+  };
+}

@@ -5,6 +5,7 @@ import {
   formatParisDateTime,
   groupSlotsByPartOfDay,
   parseEditionSlots,
+  withSlotText,
 } from "./editions";
 
 describe("editionStatusLabel", () => {
@@ -174,5 +175,62 @@ describe("groupSlotsByPartOfDay", () => {
     const groups = groupSlotsByPartOfDay([slot(0, "twilight")]);
 
     expect(groups[0].label).toBe("twilight");
+  });
+});
+
+describe("withSlotText (F07-T07)", () => {
+  const serialized = (rank: number, textId: string | null) => ({
+    id: `slot-${rank}`,
+    rank,
+    startsAt: "2026-11-28T19:00:00+00:00",
+    endsAt: "2026-11-28T19:30:00+00:00",
+    label: `slot ${rank}`,
+    partOfDay: "evening",
+    textId,
+    textTitle: textId ? "Titre" : null,
+    textSource: textId ? "Source" : null,
+    textAlreadyUsed: false,
+  });
+
+  it("puts the text on the slot and recomputes the warnings", () => {
+    const edition = withSlotText(
+      {
+        "@id": "/api/admin/editions/1",
+        "@type": "AdminEdition",
+        slots: [serialized(1, "a"), serialized(2, null), serialized(3, null)],
+      },
+      "slot-2",
+      { id: "a", title: "Psaume 23", source: "Psautier" },
+    );
+    const slots = parseEditionSlots(edition.slots);
+
+    expect(slots[1]).toMatchObject({
+      textId: "a",
+      textTitle: "Psaume 23",
+      textSource: "Psautier",
+      textAlreadyUsed: true,
+    });
+    expect(slots[0].textAlreadyUsed).toBe(true);
+    expect(edition.slotsWithoutText).toBe(1);
+    expect(edition.duplicatedTextIds).toEqual(["a"]);
+  });
+
+  it("withdraws the text with null", () => {
+    const edition = withSlotText(
+      {
+        "@id": "/api/admin/editions/1",
+        "@type": "AdminEdition",
+        slots: [serialized(1, "a")],
+      },
+      "slot-1",
+      null,
+    );
+
+    expect(parseEditionSlots(edition.slots)[0]).toMatchObject({
+      textId: null,
+      textTitle: null,
+      textAlreadyUsed: false,
+    });
+    expect(edition.slotsWithoutText).toBe(1);
   });
 });

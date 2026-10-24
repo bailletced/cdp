@@ -1,14 +1,12 @@
 import { Button, Label, SearchField } from "@heroui/react";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTexts } from "../api/hooks";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
-
-// Wait for a pause in the typing before querying the API
-const SEARCH_DELAY_MS = 300;
+import { useDebouncedValue } from "../lib/useDebouncedValue";
 
 function attributionLabel(count: number | null | undefined): string {
   if (!count) {
@@ -24,13 +22,7 @@ function attributionLabel(count: number | null | undefined): string {
  */
 export function TextsPage() {
   const [input, setInput] = useState("");
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setSearch(input.trim()), SEARCH_DELAY_MS);
-
-    return () => clearTimeout(timeout);
-  }, [input]);
+  const search = useDebouncedValue(input.trim());
 
   const textsQuery = useTexts(search);
   const texts = textsQuery.data?.pages.flatMap((page) => page?.member ?? []);
