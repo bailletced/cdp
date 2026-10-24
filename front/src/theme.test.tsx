@@ -22,6 +22,12 @@ describe("theme stylesheet (F01-T05)", () => {
     expect(ruleBodies("body").join("\n")).toContain("font-size: 1.125rem");
   });
 
+  it("sets the meditation texts in a reading size above the body (F06-T11)", () => {
+    const body = ruleBodies(".rich-text").join("\n");
+    expect(body).toContain("font-size: 1.25rem");
+    expect(body).toContain("line-height: 1.75");
+  });
+
   it("self-hosts the Atkinson Hyperlegible font (CSP font-src 'self')", () => {
     expect(css).toContain("@font-face");
     expect(css).toContain("/fonts/AtkinsonHyperlegible-Regular.woff2");

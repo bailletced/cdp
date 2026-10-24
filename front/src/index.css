@@ -160,6 +160,32 @@
   font-size: 1.125rem;
 }
 
+/* Meditation texts (F06-T11): one reading typography for the editor and the
+ * rendered text. A size above the body, generous leading, and psalm verses
+ * kept on their own lines by the <br> of the editor. */
+.rich-text {
+  font-size: 1.25rem; /* 20 px */
+  line-height: 1.75;
+  max-width: 65ch;
+}
+
+.rich-text :is(p, blockquote) + :is(p, blockquote) {
+  margin-top: 1em;
+}
+
+.rich-text blockquote {
+  border-left: 2px solid var(--accent);
+  padding-left: 1.25rem;
+}
+
+.rich-text strong {
+  font-weight: 700;
+}
+
+.rich-text em {
+  font-style: italic;
+}
+
 /* Links are underlined at rest: never distinguished by color alone (§5.3-1) */
 .link {
   text-decoration: underline;
