@@ -36,6 +36,17 @@ final class VisibilityMatrixApiTest extends ApiTestCase
         'organisateur' => ['schema' => 'edition-slots.visible', 'mine' => false],
     ];
 
+    /**
+     * Who reads the full text (RG-TX-1): of Marie's slot, of another slot.
+     */
+    private const array TEXT = [
+        'visiteur' => ['mine' => 404, 'other' => 404],
+        'pass' => ['mine' => 200, 'other' => 404],
+        'priant vérifié' => ['mine' => 200, 'other' => 404],
+        'autre priant' => ['mine' => 404, 'other' => 404],
+        'organisateur' => ['mine' => 200, 'other' => 200],
+    ];
+
     private KernelBrowser $client;
 
     private EntityManagerInterface $em;
@@ -97,5 +108,31 @@ final class VisibilityMatrixApiTest extends ApiTestCase
         $response = $this->client->getResponse();
         self::assertSame(200, $response->getStatusCode());
         self::assertMatchesJsonSchema((string) $response->getContent(), 'edition-current');
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function viewerProfilesAndSlots(): iterable
+    {
+        foreach (self::viewerProfiles() as $name => [$profile]) {
+            yield $name.' × mon créneau' => [$profile, 'mine'];
+            yield $name.' × autre créneau' => [$profile, 'other'];
+        }
+    }
+
+    #[DataProvider('viewerProfilesAndSlots')]
+    public function testTheFullTextIsReadOnlyByThePriantsOfTheSlotAndTheOrganizers(string $profile, string $slot): void
+    {
+        $this->actAs($profile);
+        $slotId = $this->edition->getSlots()['mine' === $slot ? 0 : 1]->getId();
+
+        $this->client->request('GET', \sprintf('/api/slots/%s/text', $slotId));
+
+        $response = $this->client->getResponse();
+        self::assertSame(self::TEXT[$profile][$slot], $response->getStatusCode());
+        if (200 === $response->getStatusCode()) {
+            self::assertMatchesJsonSchema((string) $response->getContent(), 'slot-text');
+        }
     }
 }

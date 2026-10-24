@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Texte d'un créneau",
+  "description": "GET /api/slots/{id}/text — réservé aux priants du créneau et aux organisateurs (RG-TX-1) ; texte null tant qu'aucun n'est attribué (RG-TX-2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["@context", "@id", "@type", "id", "editionId", "editionTitle", "startsAt", "endsAt", "label", "dayLabel", "text"],
+  "properties": {
+    "@context": { "const": "/api/contexts/SlotText" },
+    "@id": { "type": "string", "pattern": "^/api/slots/[0-9a-f-]{36}/text$" },
+    "@type": { "const": "SlotText" },
+    "id": { "type": "string", "format": "uuid" },
+    "editionId": { "type": "string", "format": "uuid" },
+    "editionTitle": { "type": "string", "minLength": 1 },
+    "startsAt": { "type": "string", "format": "date-time" },
+    "endsAt": { "type": "string", "format": "date-time" },
+    "label": { "type": "string", "pattern": "^\\d{1,2}h\\d{2}–\\d{1,2}h\\d{2}$" },
+    "dayLabel": { "type": "string", "minLength": 1 },
+    "text": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["title", "source", "body", "hints"],
+          "properties": {
+            "title": { "type": "string", "minLength": 1 },
+            "source": { "type": "string", "minLength": 1 },
+            "body": { "type": "string", "minLength": 1 },
+            "hints": { "type": ["string", "null"] }
+          }
+        }
+      ]
+    }
+  }
+}
