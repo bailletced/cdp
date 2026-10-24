@@ -7,8 +7,8 @@
 #   - DNS pointant vers le VPS (F03-T02)
 #   - Docker 29.x : nécessite Traefik >= v3.6.1 (fix API version, issue #12253)
 #
-# Certificats : Let's Encrypt staging d'abord (ACME_CA_SERVER par défaut),
-# puis production : ACME_CA_SERVER=https://acme-v02.api.letsencrypt.org/directory
+# Certificats : Let's Encrypt production par défaut (ACME_CA_SERVER
+# surchargeable, ex. staging pour tester hors rate limits).
 
 version: "3.8"
 
@@ -32,8 +32,8 @@ services:
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-      # Staging par défaut (rate limits) ; prod : ACME_CA_SERVER=https://acme-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.letsencrypt.acme.caserver=${ACME_CA_SERVER:-https://acme-staging-v02.api.letsencrypt.org/directory}
+      # Production par défaut ; staging (rate limits) : ACME_CA_SERVER=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.letsencrypt.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}
       # Logs
       - --log.level=INFO
       - --accesslog=true
