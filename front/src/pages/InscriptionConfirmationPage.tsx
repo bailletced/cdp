@@ -3,6 +3,7 @@ import { Link, useSearch } from "@tanstack/react-router";
 import { editionSlotsQueryOptions, useCurrentEdition } from "../api/hooks";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
+import { ReadTextLink } from "../components/ReadTextLink";
 import { parseCreneauxParam, selectSlotsByIds } from "../lib/inscription";
 import { withLocalTime } from "../lib/localTime";
 import { parsePlanningSlots } from "../lib/planning";
@@ -17,9 +18,10 @@ const LINK_CLASS = "text-link underline underline-offset-4";
  *
  * The slot ids ride in the URL, so a reload re-fetches the récapitulatif
  * instead of showing an empty screen. Without the parameter (direct visit),
- * the confirmation message still shows. The placeholders for the link to
- * the text (F12) and the suggestion (F13) are marked as such until those
- * features land.
+ * the confirmation message still shows. Each slot links to its text once
+ * one is attributed and the device may read it — the pass it just received
+ * covers it (F12-T05). The placeholder for the suggestion (F13) is marked
+ * as such until that feature lands.
  */
 export function InscriptionConfirmationPage() {
   const { creneaux } = useSearch({ from: "/inscription/confirmation" });
@@ -51,21 +53,33 @@ export function InscriptionConfirmationPage() {
               {selected.map((slot) => (
                 <li
                   key={slot.id}
-                  className="rounded-lg border border-border bg-surface p-3"
+                  className="grid gap-1 rounded-lg border border-border bg-surface p-3"
                 >
-                  {withLocalTime(slot.label, slot.startsAt)}
+                  <span className="font-bold">
+                    {withLocalTime(slot.label, slot.startsAt)}
+                  </span>
+                  {slot.textTitle ? (
+                    <span>
+                      {slot.textTitle}
+                      {slot.mine ? (
+                        <>
+                          {" "}
+                          <ReadTextLink slotId={slot.id} label={slot.label} />
+                        </>
+                      ) : null}
+                    </span>
+                  ) : (
+                    <span className="text-muted">
+                      Le texte de ce créneau sera bientôt disponible
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
           </section>
         ) : null
       ) : null}
-      {/* Placeholders: lien vers le texte (F12) et suggestion (F13) */}
-      <section aria-label="Le texte de votre créneau" className="mb-4">
-        <p className="rounded border border-dashed p-6 text-center text-default-500">
-          Le texte à méditer pendant votre créneau sera bientôt disponible.
-        </p>
-      </section>
+      {/* Placeholder: suggestion (F13) */}
       <section aria-label="Suggérer un texte" className="mb-8">
         <p className="rounded border border-dashed p-6 text-center text-default-500">
           Vous pourrez bientôt suggérer un texte pour votre créneau.

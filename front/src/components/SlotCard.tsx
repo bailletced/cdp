@@ -2,6 +2,7 @@ import { Checkbox } from "@heroui/react";
 import { withLocalTime } from "../lib/localTime";
 import { type PlanningSlot, slotTemporalState } from "../lib/planning";
 import { now } from "../lib/serverClock";
+import { ReadTextLink } from "./ReadTextLink";
 
 /**
  * Card of one slot in the public planning grid (F08-T08, US-08.2).
@@ -20,6 +21,9 @@ import { now } from "../lib/serverClock";
  * For an inscrit of the edition or an organizer (F10-T10, US-10.1), the card
  * lists the priants with a « a prié » check (RG-LV-2), and says « Vous » on
  * the viewer's own slot. A visitor never gets the names (RG-PL-4).
+ *
+ * The viewer's own slots link to their full text once one is attributed
+ * (F12-T05): nobody else may read it (RG-TX-1).
  */
 export function SlotCard({
   slot,
@@ -125,6 +129,11 @@ export function SlotCard({
           </p>
           {slot.textSource ? (
             <p className="text-muted">{slot.textSource}</p>
+          ) : null}
+          {slot.mine ? (
+            <p className="mt-2">
+              <ReadTextLink slotId={slot.id} label={slot.label} />
+            </p>
           ) : null}
         </div>
       ) : (

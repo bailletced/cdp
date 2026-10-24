@@ -315,3 +315,33 @@ describe("SlotCard — vue inscrit (F10-T10, US-10.1)", () => {
     expect(screen.queryByText("Vous")).not.toBeInTheDocument();
   });
 });
+
+describe("SlotCard — lien vers le texte (F12-T05, US-12.1)", () => {
+  it("links the viewer's slot to its text", () => {
+    render(<SlotCard slot={makeSlot({ mine: true })} nowMs={NOW_BEFORE_MS} />);
+
+    // The visible label starts the accessible name (WCAG 2.5.3)
+    expect(
+      screen.getByRole("link", {
+        name: "Lire le texte du créneau de 19h00–19h30",
+      }),
+    ).toHaveAttribute("href", "/textes/01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b");
+  });
+
+  it("offers no link on a slot of someone else, whose text is not readable (RG-TX-1)", () => {
+    render(<SlotCard slot={makeSlot()} nowMs={NOW_BEFORE_MS} />);
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  it("offers no link while no text is attributed (RG-TX-2)", () => {
+    render(
+      <SlotCard
+        slot={makeSlot({ mine: true, textTitle: null, textSource: null })}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+});

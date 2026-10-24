@@ -20,5 +20,5 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Écrans (US-12.1, US-12.2)
 
 - [x] **F12-T04** · `front` Route `/textes/$slotId` : horaire (+ heure locale), titre, source, corps (`RichTextView`), pistes, RG-TX-2, page « réservé aux priants de ce créneau » avec lien vers l'inscription — *Dépend de* : F12-T02, F06-T11 · *Fini quand* : tests Vitest/MSW des trois états.
-- [ ] **F12-T05** · `front` Liens « Lire le texte » depuis la confirmation d'inscription et depuis mes créneaux dans la grille + test — *Dépend de* : F12-T04, F09-T19, F10-T10 · *Fini quand* : liens présents uniquement quand le texte est lisible.
+- [x] **F12-T05** · `front` Liens « Lire le texte » depuis la confirmation d'inscription et depuis mes créneaux dans la grille + test — *Dépend de* : F12-T04, F09-T19, F10-T10 · *Fini quand* : liens présents uniquement quand le texte est lisible.
 - [ ] **F12-T06** · `test` E2E : inscription → texte lu depuis la confirmation ; second navigateur → page « réservé » — *Dépend de* : F12-T05 · *Fini quand* : parcours vert avec axe-core.

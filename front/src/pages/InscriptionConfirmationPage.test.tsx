@@ -89,12 +89,7 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
     expect(items[0].textContent).toContain("19h00–19h30");
     expect(items[1].textContent).toContain("19h30–20h00");
 
-    // Placeholders for the text link (F12) and the suggestion (F13)
-    expect(
-      screen.getByText(
-        "Le texte à méditer pendant votre créneau sera bientôt disponible.",
-      ),
-    ).toBeInTheDocument();
+    // Placeholder for the suggestion (F13)
     expect(
       screen.getByText(
         "Vous pourrez bientôt suggérer un texte pour votre créneau.",
@@ -104,6 +99,50 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
     expect(
       screen.getByRole("link", { name: "Retour à l'accueil" }),
     ).toHaveAttribute("href", "/");
+  });
+
+  it("mène au texte de chaque créneau inscrit qui en a un (F12-T05)", async () => {
+    openEditionWithSlots([
+      {
+        ...planningSlot(SLOT_FUTURE_1, 1, "19h00–19h30"),
+        textTitle: "Que rien ne te trouble",
+        textSource: "Thérèse d’Avila",
+        mine: true,
+      },
+      { ...planningSlot(SLOT_FUTURE_2, 2, "19h30–20h00"), mine: true },
+    ]);
+
+    renderApp(
+      `/inscription/confirmation?creneaux=${SLOT_FUTURE_1},${SLOT_FUTURE_2}`,
+    );
+
+    const recap = await screen.findByRole("region", { name: "Vos créneaux" });
+    const [withText, withoutText] = within(recap).getAllByRole("listitem");
+    expect(
+      within(withText).getByRole("link", {
+        name: "Lire le texte du créneau de 19h00–19h30",
+      }),
+    ).toHaveAttribute("href", `/textes/${SLOT_FUTURE_1}`);
+    // No text attributed yet (RG-TX-2): nothing to read
+    expect(within(withoutText).queryByRole("link")).not.toBeInTheDocument();
+    expect(withoutText).toHaveTextContent(
+      "Le texte de ce créneau sera bientôt disponible",
+    );
+  });
+
+  it("ne propose aucun lien vers un texte que l'appareil ne peut pas lire", async () => {
+    openEditionWithSlots([
+      {
+        ...planningSlot(SLOT_FUTURE_1, 1, "19h00–19h30"),
+        textTitle: "Que rien ne te trouble",
+        mine: false,
+      },
+    ]);
+
+    renderApp(`/inscription/confirmation?creneaux=${SLOT_FUTURE_1}`);
+
+    const recap = await screen.findByRole("region", { name: "Vos créneaux" });
+    expect(within(recap).queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("affiche la confirmation même sans paramètre (visite directe)", async () => {
