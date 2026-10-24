@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Access\Application\AddOrganizerHandler;
 use App\Access\Application\GrantDevicePassHandler;
 use App\Access\Application\LinkAccountOnPriantRegistered;
+use App\Access\Application\PresentDevicePassHandler;
 use App\Access\Application\Query\OrganizerViewFinder;
 use App\Access\Application\RegisterHandler;
 use App\Access\Application\RemoveOrganizerHandler;
@@ -86,6 +87,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
 
         ->set(GrantDevicePassHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(PresentDevicePassHandler::class)
         ->autoconfigure()
         ->autowire()
 

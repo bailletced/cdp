@@ -7,14 +7,16 @@ namespace App\Shared\Domain\Security;
 /**
  * The viewer of the current request (F02-T12).
  *
- * - visitor: not authenticated
+ * - visitor: not authenticated, no device pass
+ * - pass bearer: the device made inscriptions (F10, RG-IN-6) — read-only
+ *   « inscrit » view, never an action on behalf of the priant
  * - verified priant: authenticated through a personal link, acts as priantId
  * - organizer: authenticated account with the organizer role (may also be a priant)
  */
 final readonly class Viewer
 {
     /**
-     * @param string[] $coveredInscriptionIds Inscriptions covered by a device pass (F10); empty until then
+     * @param string[] $coveredInscriptionIds Active inscriptions covered by the device pass (F10)
      */
     public function __construct(
         public ?string $priantId,
@@ -31,6 +33,6 @@ final readonly class Viewer
 
     public function isVisitor(): bool
     {
-        return !$this->verified && !$this->isOrganizer;
+        return !$this->verified && !$this->isOrganizer && [] === $this->coveredInscriptionIds;
     }
 }
