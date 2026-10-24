@@ -5,10 +5,12 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { render } from "@testing-library/react";
+import { Notifications } from "../components/Notifications";
 import { ErrorPage } from "../pages/ErrorPage";
 import { routeTree } from "../router";
 
-// Renders the app at the given path with an in-memory history
+// Renders the app at the given path with an in-memory history, with the same
+// shell as main.tsx (router and toast region)
 export function renderApp(initialPath: string) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -28,6 +30,7 @@ export function renderApp(initialPath: string) {
   return render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={testRouter} />
+      <Notifications />
     </QueryClientProvider>,
   );
 }

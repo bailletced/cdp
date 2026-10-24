@@ -1,4 +1,5 @@
 import { Button, Label, SearchField } from "@heroui/react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useTexts } from "../api/hooks";
 import { EmptyState } from "../components/EmptyState";
@@ -36,7 +37,15 @@ export function TextsPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <PageTitle>Textes</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <PageTitle>Textes</PageTitle>
+        <Link
+          to="/organisation/texts/new"
+          className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 text-accent-foreground no-underline"
+        >
+          Nouveau texte
+        </Link>
+      </div>
       <SearchField
         value={input}
         onChange={setInput}
@@ -73,7 +82,19 @@ export function TextsPage() {
                 className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 rounded-lg border border-border px-4 py-3"
               >
                 <div>
-                  <p className="font-medium">{text.title}</p>
+                  <p className="font-medium">
+                    {text.id ? (
+                      <Link
+                        to="/organisation/texts/$textId/edit"
+                        params={{ textId: text.id }}
+                        className="text-link underline underline-offset-4"
+                      >
+                        {text.title}
+                      </Link>
+                    ) : (
+                      text.title
+                    )}
+                  </p>
                   <p className="text-muted">{text.source}</p>
                 </div>
                 <p className="text-muted">

@@ -452,3 +452,117 @@ export function useTexts(search: string) {
     placeholderData: keepPreviousData,
   });
 }
+
+export const textQueryOptions = (id: string) =>
+  ({
+    queryKey: [...textsQueryKey, "item", id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET("/api/admin/texts/{id}", {
+        params: { path: { id } },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+  }) as const;
+
+/**
+ * Single text with its body and hints (GET /api/admin/texts/{id}). A null id
+ * disables the query (creation form).
+ */
+export function useText(id: string | null) {
+  return useQuery({
+    ...textQueryOptions(id ?? ""),
+    enabled: null !== id,
+  });
+}
+
+/** Form values of the text form (F06-T13): the body is HTML from the editor. */
+export interface TextFormValues {
+  title: string;
+  source: string;
+  body: string;
+  hints: string;
+}
+
+/**
+ * Creates a text (POST /api/admin/texts, F06-T09). The library is
+ * invalidated on success.
+ */
+export function useCreateText() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (values: TextFormValues) => {
+      const { data, error } = await apiClient.POST("/api/admin/texts", {
+        body: values,
+        // API Platform only accepts JSON-LD bodies on this resource
+        headers: { "Content-Type": "application/ld+json" },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: textsQueryKey });
+    },
+  });
+}
+
+/**
+ * Updates a text (PATCH /api/admin/texts/{id}, F06-T09): the correction
+ * applies to every slot carrying it (RG-TX-3).
+ */
+export function useUpdateText() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...values }: TextFormValues & { id: string }) => {
+      const { data, error } = await apiClient.PATCH("/api/admin/texts/{id}", {
+        params: { path: { id } },
+        body: values,
+        headers: { "Content-Type": "application/merge-patch+json" },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: textsQueryKey });
+    },
+  });
+}
+
+/**
+ * Deletes a text (DELETE /api/admin/texts/{id}, F06-T09): refused with 409
+ * when the text belongs to a scheduled edition (RG-TX-3).
+ */
+export function useDeleteText() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await apiClient.DELETE("/api/admin/texts/{id}", {
+        params: { path: { id } },
+      });
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: (_data, id) => {
+      // The deleted text must not be refetched by the form still mounted
+      queryClient.removeQueries({ queryKey: textQueryOptions(id).queryKey });
+      void queryClient.invalidateQueries({ queryKey: textsQueryKey });
+    },
+  });
+}

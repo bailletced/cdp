@@ -187,6 +187,26 @@ const organisationTextsRoute = createRoute({
   component: lazyRouteComponent(() => import("./pages/TextsPage"), "TextsPage"),
 });
 
+// Text forms (F06-T13): lazy-loaded with the back-office section (Tiptap
+// stays out of the public bundle)
+const organisationTextNewRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/texts/new",
+  component: lazyRouteComponent(
+    () => import("./pages/TextFormPage"),
+    "TextFormPage",
+  ),
+});
+
+const organisationTextEditRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/texts/$textId/edit",
+  component: lazyRouteComponent(
+    () => import("./pages/TextFormPage"),
+    "TextEditPage",
+  ),
+});
+
 // Define the routes
 export const routeTree = Root.addChildren([
   landingRoute,
@@ -204,6 +224,8 @@ export const routeTree = Root.addChildren([
     organisationEditionEditRoute,
     organisationEditionDetailRoute,
     organisationTextsRoute,
+    organisationTextNewRoute,
+    organisationTextEditRoute,
   ]),
 ]);
 
