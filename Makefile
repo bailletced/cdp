@@ -35,8 +35,9 @@ migrate: ## Joue les migrations Doctrine
 migration: ## Génère une migration Doctrine à partir du mapping
 	$(PHP) bin/console doctrine:migrations:diff
 
-fixtures: ## Charge le jeu de données de démonstration
-	$(PHP) bin/console doctrine:fixtures:load --no-interaction
+fixtures: ## Charge le jeu de données de démonstration (textes, puis éditions)
+	$(PHP) bin/console app:chain:load-text-fixtures
+	$(PHP) bin/console app:chain:load-edition-fixtures
 
 openapi: ## Exporte l'OpenAPI et génère les types du front
 	$(PHP) bin/console api:openapi:export > front/src/api/openapi.json

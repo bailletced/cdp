@@ -39,5 +39,5 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Données et parcours
 
-- [ ] **F06-T15** · `back` Fixtures : 48 textes du domaine public (Thérèse d'Avila, Jean de la Croix, psaumes…) — *Dépend de* : F06-T05, F05-T17 · *Fini quand* : `make fixtures` crée la bibliothèque.
+- [x] **F06-T15** · `back` Fixtures : 48 textes du domaine public (Thérèse d'Avila, Jean de la Croix, psaumes…) — *Dépend de* : F06-T05, F05-T17 · *Fini quand* : `make fixtures` crée la bibliothèque.
 - [ ] **F06-T16** · `test` E2E organisateur : créer un texte mis en forme, le modifier, le supprimer — *Dépend de* : F06-T14 · *Fini quand* : mise en forme conservée après rechargement, axe-core vert.

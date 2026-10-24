@@ -51,6 +51,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryInscriptionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
+use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
 use App\Shared\Application\Port\PriantProfileReader;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -218,6 +219,11 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(LoadEditionFixturesCommand::class)
+        ->autoconfigure()
+        ->autowire()
+        ->tag('console.command');
+
+    $services->set(LoadTextFixturesCommand::class)
         ->autoconfigure()
         ->autowire()
         ->tag('console.command');
