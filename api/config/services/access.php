@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Access\Application\AddOrganizerHandler;
+use App\Access\Application\GrantDevicePassHandler;
 use App\Access\Application\LinkAccountOnPriantRegistered;
 use App\Access\Application\Query\OrganizerViewFinder;
 use App\Access\Application\RegisterHandler;
@@ -33,6 +34,7 @@ use App\Access\Infrastructure\Symfony\Controller\LoginLinkController;
 use App\Access\Infrastructure\Symfony\Controller\RegisterController;
 use App\Access\Infrastructure\Symfony\Security\AdminAccessListener;
 use App\Access\Infrastructure\Symfony\Security\ApiAuthenticationEntryPoint;
+use App\Access\Infrastructure\Symfony\Security\DevicePassCookie;
 use App\Access\Infrastructure\Symfony\Security\LoginLinkFailureHandler;
 use App\Access\Infrastructure\Symfony\Security\LoginLinkPersonalLinkIssuer;
 use App\Access\Infrastructure\Symfony\Security\LoginLinkSuccessHandler;
@@ -41,6 +43,7 @@ use App\Access\Infrastructure\Symfony\Security\SecurityUser;
 use App\Access\Infrastructure\Symfony\Security\SymfonyCurrentViewer;
 use App\Access\Infrastructure\Symfony\Security\UserProvider;
 use App\Shared\Application\Port\CurrentViewer;
+use App\Shared\Application\Port\DevicePassIssuer;
 use App\Shared\Application\Port\PersonalLinkIssuer;
 use App\Shared\Application\Port\PriantDirectory;
 use Psr\Clock\ClockInterface;
@@ -79,6 +82,10 @@ return static function (ContainerConfigurator $container): void {
         ->tag('app.in_memory_repository')
 
         ->set(AddOrganizerHandler::class)
+        ->autoconfigure()
+        ->autowire()
+
+        ->set(GrantDevicePassHandler::class)
         ->autoconfigure()
         ->autowire()
 
@@ -184,6 +191,11 @@ return static function (ContainerConfigurator $container): void {
             new Symfony\Component\DependencyInjection\Reference(ClockInterface::class),
         ])
         ->alias(PersonalLinkIssuer::class, LoginLinkPersonalLinkIssuer::class)
+
+        ->set(DevicePassCookie::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(DevicePassIssuer::class, DevicePassCookie::class)
 
         ->set(SymfonyCurrentViewer::class)
         ->autoconfigure()
