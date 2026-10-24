@@ -12,6 +12,7 @@ use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Port\Notifier;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
+use App\Chain\Application\Query\InscriptionDigestFinder;
 use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
 use App\Chain\Application\RegisterInscriptionsHandler;
@@ -41,6 +42,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvid
 use App\Chain\Infrastructure\Calendar\EluceoCalendarFile;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrineInscriptionDigestFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineInscriptionDirectory;
 use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePriantProfileReader;
@@ -180,6 +182,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
         ->public()
         ->alias(PlanningViewFinder::class, DoctrinePlanningViewFinder::class);
+
+    $services->set(DoctrineInscriptionDigestFinder::class)
+        ->autowire()
+        ->alias(InscriptionDigestFinder::class, DoctrineInscriptionDigestFinder::class);
 
     $services->set(DoctrinePriantProfileReader::class)
         ->autoconfigure()

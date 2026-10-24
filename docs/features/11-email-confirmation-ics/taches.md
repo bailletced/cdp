@@ -14,7 +14,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F11-T01** · `back` Port `Notifier` (Chain/Application/Port) + adaptateur `MailerNotifier` (`TemplatedEmail`, transport `async_transactional`) + test avec transport en mémoire — *Dépend de* : F02-T13 · *Fini quand* : un e-mail de test est mis en file puis envoyé par le worker.
 - [x] **F11-T02** · `back` Port `CalendarFile` + `EluceoCalendarFile` : un `VEVENT` par inscription (UID `inscription-{uuid}@<domaine>`, `SEQUENCE` = version, DTSTART/DTEND UTC, SUMMARY, DESCRIPTION, `VALARM -PT10M`) + tests — *Dépend de* : F09-T04 · *Fini quand* : fichier valide (validateur iCalendar), cas du changement d'heure testé.
-- [ ] **F11-T03** · `back` `InscriptionDigestFinder` (ReadModel) : créneaux d'un priant pour une édition (libellés « heure de Paris », titres, textes complets, pistes) + tests d'intégration — *Dépend de* : F09-T06, F06-T04 · *Fini quand* : une seule requête par priant, créneau sans texte géré.
+- [x] **F11-T03** · `back` `InscriptionDigestFinder` (ReadModel) : créneaux d'un priant pour une édition (libellés « heure de Paris », titres, textes complets, pistes) + tests d'intégration — *Dépend de* : F09-T06, F06-T04 · *Fini quand* : une seule requête par priant, créneau sans texte géré.
 
 ## E-mail de confirmation (US-11.1, US-11.3)
 
