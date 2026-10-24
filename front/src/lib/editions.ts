@@ -7,15 +7,21 @@ export type EditionView = components["schemas"]["AdminEdition.jsonld"];
 /**
  * Slot of an edition, as serialized by the API: instants are UTC ISO 8601
  * strings, the label is the Paris wall-clock range (« 20h00–20h30 », with a
- * disambiguation on DST nights, RG-ED-5).
+ * disambiguation on DST nights, RG-ED-5). The text fields come with the
+ * admin detail (F07-T04): textAlreadyUsed flags a text carried by another
+ * slot of the edition too.
  */
 export interface EditionSlot {
+  id: string | null;
   rank: number;
   startsAt: string;
   endsAt: string;
   label: string;
   partOfDay: string;
   textId: string | null;
+  textTitle: string | null;
+  textSource: string | null;
+  textAlreadyUsed: boolean;
 }
 
 /** Status labels (spec §5.1): the API computes the hybrid status (§4.7). */
@@ -63,7 +69,13 @@ export function formatParisDateTime(
     : parisDateTimeFormat.format(date);
 }
 
-function isEditionSlot(slot: unknown): slot is EditionSlot {
+type SerializedSlot = Pick<
+  EditionSlot,
+  "rank" | "startsAt" | "endsAt" | "label" | "partOfDay"
+> &
+  Record<string, unknown>;
+
+function isEditionSlot(slot: unknown): slot is SerializedSlot {
   if (typeof slot !== "object" || slot === null) {
     return false;
   }
@@ -82,6 +94,10 @@ function isEditionSlot(slot: unknown): slot is EditionSlot {
   );
 }
 
+function stringOrNull(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
 /**
  * The OpenAPI schema types slots as unknown[]: narrow them to EditionSlot,
  * dropping malformed entries instead of failing the whole page.
@@ -91,7 +107,18 @@ export function parseEditionSlots(slots: EditionView["slots"]): EditionSlot[] {
     return [];
   }
 
-  return slots.filter(isEditionSlot);
+  return slots.filter(isEditionSlot).map((slot) => ({
+    id: stringOrNull(slot.id),
+    rank: slot.rank,
+    startsAt: slot.startsAt,
+    endsAt: slot.endsAt,
+    label: slot.label,
+    partOfDay: slot.partOfDay,
+    textId: stringOrNull(slot.textId),
+    textTitle: stringOrNull(slot.textTitle),
+    textSource: stringOrNull(slot.textSource),
+    textAlreadyUsed: slot.textAlreadyUsed === true,
+  }));
 }
 
 /** Part-of-day labels (spec §5.2: soirée, nuit, matin, après-midi). */

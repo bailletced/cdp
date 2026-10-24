@@ -180,6 +180,16 @@ const organisationEditionDetailRoute = createRoute({
   ),
 });
 
+// Text attribution (F07-T06): lazy-loaded with the back-office section
+const organisationEditionTextsRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/editions/$editionId/texts",
+  component: lazyRouteComponent(
+    () => import("./pages/AttributionPage"),
+    "AttributionPage",
+  ),
+});
+
 // Text library (F06-T12): lazy-loaded with the back-office section
 const organisationTextsRoute = createRoute({
   getParentRoute: () => organisationRoute,
@@ -223,6 +233,7 @@ export const routeTree = Root.addChildren([
     organisationEditionNewRoute,
     organisationEditionEditRoute,
     organisationEditionDetailRoute,
+    organisationEditionTextsRoute,
     organisationTextsRoute,
     organisationTextNewRoute,
     organisationTextEditRoute,

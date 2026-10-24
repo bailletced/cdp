@@ -49,6 +49,51 @@ describe("formatParisDateTime", () => {
 });
 
 describe("parseEditionSlots", () => {
+  it("normalizes the text of each slot (F07-T04)", () => {
+    const [withText, withoutText] = parseEditionSlots([
+      {
+        id: "slot-1",
+        rank: 1,
+        startsAt: "2026-11-28T19:00:00+00:00",
+        endsAt: "2026-11-28T19:30:00+00:00",
+        label: "20h00–20h30",
+        partOfDay: "evening",
+        textId: "text-1",
+        textTitle: "Que rien ne te trouble",
+        textSource: "Thérèse d’Avila",
+        textAlreadyUsed: true,
+      },
+      {
+        rank: 2,
+        startsAt: "2026-11-28T19:30:00+00:00",
+        endsAt: "2026-11-28T20:00:00+00:00",
+        label: "20h30–21h00",
+        partOfDay: "evening",
+        textId: null,
+      },
+    ]);
+
+    expect(withText).toEqual({
+      id: "slot-1",
+      rank: 1,
+      startsAt: "2026-11-28T19:00:00+00:00",
+      endsAt: "2026-11-28T19:30:00+00:00",
+      label: "20h00–20h30",
+      partOfDay: "evening",
+      textId: "text-1",
+      textTitle: "Que rien ne te trouble",
+      textSource: "Thérèse d’Avila",
+      textAlreadyUsed: true,
+    });
+    expect(withoutText).toMatchObject({
+      id: null,
+      textId: null,
+      textTitle: null,
+      textSource: null,
+      textAlreadyUsed: false,
+    });
+  });
+
   it("keeps well-formed slots and drops malformed ones", () => {
     const slots = parseEditionSlots([
       {
@@ -80,12 +125,16 @@ describe("parseEditionSlots", () => {
 
 describe("groupSlotsByPartOfDay", () => {
   const slot = (rank: number, partOfDay: string): EditionSlot => ({
+    id: `slot-${rank}`,
     rank,
     startsAt: "2026-11-28T19:00:00+00:00",
     endsAt: "2026-11-28T19:30:00+00:00",
     label: `slot ${rank}`,
     partOfDay,
     textId: null,
+    textTitle: null,
+    textSource: null,
+    textAlreadyUsed: false,
   });
 
   it("groups consecutive slots by part of day, in chronological order", () => {

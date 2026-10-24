@@ -104,6 +104,13 @@ export function EditionDetailPage() {
           >
             Modifier
           </Link>
+          <Link
+            to="/organisation/editions/$editionId/texts"
+            params={{ editionId }}
+            className="text-link underline underline-offset-4"
+          >
+            Attribuer les textes
+          </Link>
         </div>
         <div>
           <p className="text-muted">
