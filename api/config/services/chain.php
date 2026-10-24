@@ -41,6 +41,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\SlotTextProvider;
 use App\Chain\Infrastructure\Calendar\EluceoCalendarFile;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
@@ -269,6 +270,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(PublicEditionSlotsProvider::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(SlotTextProvider::class)
         ->autoconfigure()
         ->autowire();
 

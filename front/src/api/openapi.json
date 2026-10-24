@@ -1788,6 +1788,63 @@
                     }
                 ]
             }
+        },
+        "/api/slots/{id}/text": {
+            "get": {
+                "operationId": "api_slots_idtext_get",
+                "tags": [
+                    "SlotText"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SlotText resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SlotText.jsonld"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a SlotText resource.",
+                "description": "Retrieves a SlotText resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "SlotText identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -2964,6 +3021,67 @@
                         }
                     }
                 ]
+            },
+            "SlotText.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "editionId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "editionTitle": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "startsAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "endsAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "label": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "dayLabel": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "text": {
+                                "type": [
+                                    "array",
+                                    "null"
+                                ],
+                                "items": {}
+                            }
+                        }
+                    }
+                ]
             }
         },
         "responses": {},
@@ -3006,6 +3124,10 @@
         {
             "name": "PublicEditionSlots",
             "description": "Resource 'PublicEditionSlots' operations."
+        },
+        {
+            "name": "SlotText",
+            "description": "Resource 'SlotText' operations."
         }
     ],
     "webhooks": {}
