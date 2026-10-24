@@ -45,11 +45,9 @@ final readonly class SlotSuggestionProvider implements ProviderInterface
 
         $request = $context['request'] ?? null;
         $query = $request instanceof Request ? $request->query : null;
-        $near = self::slotIds($query?->getString('near') ?? '');
-
         $suggestion = ($this->suggestEmptySlot)(
             $editionId,
-            $near[0] ?? null,
+            \array_slice(self::slotIds($query?->getString('near') ?? ''), 0, 1),
             self::slotIds($query?->getString('exclude') ?? ''),
         );
 

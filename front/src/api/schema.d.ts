@@ -603,6 +603,17 @@ export interface components {
                 /** Format: uuid */
                 editionId?: string;
             }[];
+            suggestion?: {
+                /** Format: uuid */
+                slotId?: string;
+                /** Format: date-time */
+                startsAt?: string;
+                /** Format: date-time */
+                endsAt?: string;
+                label?: string;
+                textTitle?: string | null;
+                textSource?: string | null;
+            } | null;
         };
         "Me.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             email?: string;

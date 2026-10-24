@@ -16,7 +16,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F13-T01** · `back` Port `SlotPicker` + implémentation : adjacent à `near` en priorité (suivant puis précédent), sinon au hasard, exclusions, aléa à graine injectable + tests unitaires — *Dépend de* : F05-T06 · *Fini quand* : tirages déterministes avec graine fixe, priorité d'adjacence testée.
 - [x] **F13-T02** · `back` `EmptySlotsFinder` : créneaux vides à venir (pendant l'édition, seulement à venir) et compteur exposé dans `GET /api/editions/current` + tests d'intégration — *Dépend de* : F09-T13 · *Fini quand* : comptage avant et pendant l'édition testé avec `MockClock`.
 - [x] **F13-T03** · `back` `GET /api/editions/{id}/slot-suggestion?near=&exclude=` (404 s'il n'y a plus de créneau vide) + tests d'acceptation — *Dépend de* : F13-T01, F13-T02 · *Fini quand* : OpenAPI régénéré, cas « plus de vide » testé.
-- [ ] **F13-T04** · `back` Réponse de `POST /api/inscriptions` enrichie d'une suggestion adjacente au dernier créneau pris + test — *Dépend de* : F13-T03, F09-T10 · *Fini quand* : suggestion `null` quand la chaîne est complète.
+- [x] **F13-T04** · `back` Réponse de `POST /api/inscriptions` enrichie d'une suggestion adjacente au dernier créneau pris + test — *Dépend de* : F13-T03, F09-T10 · *Fini quand* : suggestion `null` quand la chaîne est complète.
 
 ## Front (US-13.1 à US-13.3)
 

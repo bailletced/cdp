@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Acceptance\Chain;
 
 use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Inscription;
+use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
 use App\Shared\Domain\Time\ParisCalendar;
+use App\Shared\Domain\ValueObject\Email;
 use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -74,6 +78,43 @@ final class InscriptionApiTest extends ApiTestCase
         // Persisted: one priant, two inscriptions (RG-PL-1: one inscription counts for one).
         self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM priant'));
         self::assertSame(2, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM inscription'));
+    }
+
+    public function testTheResponseSuggestsTheEmptySlotRightAfterTheLastOneTaken(): void
+    {
+        $edition = $this->createOpenEdition();
+
+        $response = $this->postJson('/api/inscriptions', $this->validBody($edition, 6, 2));
+
+        self::assertSame(201, $response['status']);
+        $data = json_decode($response['content'], true, 512, \JSON_THROW_ON_ERROR);
+        // US-13.3: slot n° 7 (index 6) is the latest taken, n° 8 follows it
+        self::assertSame([
+            'slotId' => $edition->getSlots()[7]->getId()->value->toRfc4122(),
+            'startsAt' => '2099-01-01T22:30:00+00:00',
+            'endsAt' => '2099-01-01T23:00:00+00:00',
+            'label' => '23h30–0h00',
+            'textTitle' => null,
+            'textSource' => null,
+        ], $data['suggestion'] ?? 'absent');
+    }
+
+    public function testTheResponseSuggestsNothingOnceTheChainIsComplete(): void
+    {
+        $edition = $this->createOpenEdition();
+        $jean = new Priant(new Email('jean@bailletced.org'), new DisplayName('Jean Martin'));
+        $this->em->persist($jean);
+        foreach (range(0, 45) as $index) {
+            $this->em->persist(new Inscription($edition->getId(), $edition->getSlots()[$index]->getId(), $jean->getId()));
+        }
+        $this->em->flush();
+
+        $response = $this->postJson('/api/inscriptions', $this->validBody($edition, 46, 47));
+
+        self::assertSame(201, $response['status']);
+        $data = json_decode($response['content'], true, 512, \JSON_THROW_ON_ERROR);
+        self::assertArrayHasKey('suggestion', $data);
+        self::assertNull($data['suggestion']);
     }
 
     public function testTheDeviceGetsAPassCoveringItsNewInscriptions(): void

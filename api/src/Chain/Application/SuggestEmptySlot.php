@@ -27,26 +27,39 @@ final readonly class SuggestEmptySlot
     }
 
     /**
-     * Null when the chain is complete, or for a draft or unknown edition.
+     * The adjacent slots are looked for around the latest of $near (the
+     * last slot taken, US-13.3). Null when the chain is complete, or for a
+     * draft or unknown edition.
      *
+     * @param list<SlotId> $near
      * @param list<SlotId> $excluded
      */
-    public function __invoke(EditionId $editionId, ?SlotId $near = null, array $excluded = []): ?EmptySlotView
+    public function __invoke(EditionId $editionId, array $near = [], array $excluded = []): ?EmptySlotView
     {
         return $this->slotPicker->pick(
             $this->emptySlotsFinder->findByEdition($editionId),
-            null === $near ? null : $this->rankOf($editionId, $near),
+            $this->latestRankOf($editionId, $near),
             array_map(static fn (SlotId $slotId): string => (string) $slotId, $excluded),
         );
     }
 
-    private function rankOf(EditionId $editionId, SlotId $slotId): ?int
+    /**
+     * @param list<SlotId> $slotIds
+     */
+    private function latestRankOf(EditionId $editionId, array $slotIds): ?int
     {
-        $slot = array_find(
-            $this->editionRepository->findById($editionId)?->getSlots() ?? [],
-            static fn (Slot $slot): bool => $slot->getId()->equals($slotId),
+        if ([] === $slotIds) {
+            return null;
+        }
+
+        $ranks = array_map(
+            static fn (Slot $slot): int => $slot->getRank(),
+            array_filter(
+                $this->editionRepository->findById($editionId)?->getSlots() ?? [],
+                static fn (Slot $slot): bool => array_any($slotIds, static fn (SlotId $slotId): bool => $slot->getId()->equals($slotId)),
+            ),
         );
 
-        return $slot?->getRank();
+        return [] === $ranks ? null : max($ranks);
     }
 }

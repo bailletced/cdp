@@ -9,6 +9,7 @@ use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Chain\Application\RegisterInscriptions;
 use App\Chain\Application\RegisterInscriptionsResult;
+use App\Chain\Application\SuggestEmptySlot;
 use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Exception\AlreadyRegisteredException;
 use App\Chain\Domain\Repository\PriantRepositoryInterface;
@@ -36,7 +37,9 @@ use Symfony\Component\Validator\ConstraintViolationList;
  * priant never consented), and the command is dispatched. Domain exceptions
  * propagate to API Platform's error handling (404 unknown slot, 409 already
  * registered, edition closed or slot past). Once registered, the device is
- * granted its pass (cdp_pass cookie, RG-IN-6).
+ * granted its pass (cdp_pass cookie, RG-IN-6), and the response suggests an
+ * empty slot next to the latest one taken — null once the chain is complete
+ * (F13-T04, US-13.3).
  *
  * @implements ProcessorInterface<RegisterInscriptionsPayload, InscriptionResource>
  */
@@ -47,6 +50,7 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         private PriantRepositoryInterface $priantRepository,
         private CurrentViewer $currentViewer,
         private DevicePassIssuer $devicePassIssuer,
+        private SuggestEmptySlot $suggestEmptySlot,
     ) {
     }
 
@@ -100,6 +104,11 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
             $result->editionEndsAt,
         );
 
+        $suggestion = ($this->suggestEmptySlot)(
+            $result->inscriptions[0]->getEditionId(),
+            array_map(static fn (Inscription $inscription): SlotId => $inscription->getSlotId(), $result->inscriptions),
+        );
+
         return new InscriptionResource(
             id: $result->inscriptions[0]->getId()->value->toRfc4122(),
             priantId: $result->priantId->value->toRfc4122(),
@@ -112,6 +121,14 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
                 ],
                 $result->inscriptions,
             ),
+            suggestion: null === $suggestion ? null : [
+                'slotId' => $suggestion->id,
+                'startsAt' => $suggestion->startsAt->format(\DATE_ATOM),
+                'endsAt' => $suggestion->endsAt->format(\DATE_ATOM),
+                'label' => $suggestion->label,
+                'textTitle' => $suggestion->textTitle,
+                'textSource' => $suggestion->textSource,
+            ],
         );
     }
 

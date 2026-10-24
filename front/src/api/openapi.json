@@ -2986,6 +2986,41 @@
                                         }
                                     }
                                 }
+                            },
+                            "suggestion": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "slotId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "startsAt": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "endsAt": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "label": {
+                                        "type": "string"
+                                    },
+                                    "textTitle": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "textSource": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                }
                             }
                         }
                     }

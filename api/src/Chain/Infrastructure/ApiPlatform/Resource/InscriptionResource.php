@@ -21,6 +21,9 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsPro
  *
  * No authentication required: the registration form is public (the device
  * pass cookie is granted in F10). SameOriginListener covers the unsafe method.
+ *
+ * F13-T04: `suggestion` is an empty slot next to the latest one taken, or
+ * null once the chain is complete (US-13.3).
  */
 #[ApiResource(
     shortName: 'Inscription',
@@ -29,13 +32,16 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsPro
             uriTemplate: '/inscriptions',
             input: RegisterInscriptionsPayload::class,
             processor: RegisterInscriptionsProcessor::class,
+            // A complete chain answers `suggestion: null`, never omits it
+            normalizationContext: ['skip_null_values' => false],
         ),
     ],
 )]
 final class InscriptionResource
 {
     /**
-     * @param array<array{id: string, slotId: string, editionId: string}> $inscriptions
+     * @param array<array{id: string, slotId: string, editionId: string}>                                                                  $inscriptions
+     * @param array{slotId: string, startsAt: string, endsAt: string, label: string, textTitle: string|null, textSource: string|null}|null $suggestion
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
@@ -54,6 +60,18 @@ final class InscriptionResource
             ],
         ])]
         public readonly array $inscriptions = [],
+        #[ApiProperty(schema: [
+            'type' => ['object', 'null'],
+            'properties' => [
+                'slotId' => ['type' => 'string', 'format' => 'uuid'],
+                'startsAt' => ['type' => 'string', 'format' => 'date-time'],
+                'endsAt' => ['type' => 'string', 'format' => 'date-time'],
+                'label' => ['type' => 'string'],
+                'textTitle' => ['type' => ['string', 'null']],
+                'textSource' => ['type' => ['string', 'null']],
+            ],
+        ])]
+        public readonly ?array $suggestion = null,
     ) {
     }
 }

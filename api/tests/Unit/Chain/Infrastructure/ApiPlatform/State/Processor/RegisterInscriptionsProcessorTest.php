@@ -6,8 +6,10 @@ namespace App\Tests\Unit\Chain\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Validator\Exception\ValidationException;
+use App\Chain\Application\Query\EmptySlotsFinder;
 use App\Chain\Application\RegisterInscriptions;
 use App\Chain\Application\RegisterInscriptionsResult;
+use App\Chain\Application\SuggestEmptySlot;
 use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Exception\AlreadyRegisteredException;
@@ -18,7 +20,9 @@ use App\Chain\Domain\ValueObject\SlotId;
 use App\Chain\Infrastructure\ApiPlatform\Payload\RegisterInscriptionsPayload;
 use App\Chain\Infrastructure\ApiPlatform\Resource\InscriptionResource;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsProcessor;
+use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
+use App\Chain\Infrastructure\Random\RandomizerSlotPicker;
 use App\Shared\Domain\Security\Viewer;
 use App\Shared\Domain\ValueObject\Email;
 use App\Tests\Unit\Shared\Application\Command\Fixture\FakeCommandBus;
@@ -28,6 +32,8 @@ use App\Tests\Unit\Shared\Application\Port\Fixture\FakeCurrentViewer;
 use Doctrine\DBAL\Driver\Exception as DriverException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PHPUnit\Framework\TestCase;
+use Random\Engine\Mt19937;
+use Random\Randomizer;
 
 final class RegisterInscriptionsProcessorTest extends TestCase
 {
@@ -234,6 +240,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $this->priantRepository,
             new FakeCurrentViewer(Viewer::visitor()),
             $this->devicePassIssuer,
+            self::noSuggestion(),
         );
 
         $this->expectException(AlreadyRegisteredException::class);
@@ -250,6 +257,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $this->priantRepository,
             new FakeCurrentViewer(Viewer::visitor()),
             $this->devicePassIssuer,
+            self::noSuggestion(),
         );
 
         $this->expectException(UniqueConstraintViolationException::class);
@@ -264,6 +272,25 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $this->priantRepository,
             new FakeCurrentViewer($viewer),
             $this->devicePassIssuer,
+            self::noSuggestion(),
+        );
+    }
+
+    /**
+     * The suggestion (F13-T04) is covered by the acceptance tests: here, the
+     * chain is complete.
+     */
+    private static function noSuggestion(): SuggestEmptySlot
+    {
+        return new SuggestEmptySlot(
+            new class implements EmptySlotsFinder {
+                public function findByEdition(EditionId $editionId): array
+                {
+                    return [];
+                }
+            },
+            new InMemoryEditionRepository(),
+            new RandomizerSlotPicker(new Randomizer(new Mt19937(1))),
         );
     }
 
