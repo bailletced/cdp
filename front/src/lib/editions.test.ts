@@ -4,6 +4,7 @@ import {
   editionStatusLabel,
   formatParisDateTime,
   groupSlotsByPartOfDay,
+  moveItems,
   parseEditionSlots,
   withSlotText,
 } from "./editions";
@@ -232,5 +233,34 @@ describe("withSlotText (F07-T07)", () => {
       textAlreadyUsed: false,
     });
     expect(edition.slotsWithoutText).toBe(1);
+  });
+});
+
+describe("moveItems (F07-T08)", () => {
+  const items = ["a", "b", "c", "d"].map((key) => ({ key }));
+  const keys = (list: { key: string }[]) => list.map((item) => item.key);
+
+  it("drops the dragged items before or after the target, in their order", () => {
+    expect(keys(moveItems(items, new Set(["d"]), "a", "before"))).toEqual([
+      "d",
+      "a",
+      "b",
+      "c",
+    ]);
+    expect(keys(moveItems(items, new Set(["a", "b"]), "c", "after"))).toEqual([
+      "c",
+      "a",
+      "b",
+      "d",
+    ]);
+  });
+
+  it("leaves the list as it is when the target is unknown", () => {
+    expect(keys(moveItems(items, new Set(["a"]), "z", "after"))).toEqual([
+      "a",
+      "b",
+      "c",
+      "d",
+    ]);
   });
 });

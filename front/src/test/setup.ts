@@ -1,7 +1,12 @@
 import "@testing-library/jest-dom/vitest";
+import { configure } from "@testing-library/react";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { handlers } from "./handlers";
+
+// The back-office pages are lazy-loaded routes: under a full parallel run,
+// importing one can take longer than the default 1 s of findBy/waitFor
+configure({ asyncUtilTimeout: 3000 });
 
 // jsdom does not implement scrollTo (used by TanStack Router on navigation)
 window.scrollTo = () => undefined;

@@ -1,35 +1,21 @@
-import { Button, Label, Modal, SearchField } from "@heroui/react";
-import { useState } from "react";
-import { useTexts } from "../api/hooks";
+import { Button, Modal } from "@heroui/react";
 import type { SlotText } from "../lib/editions";
-import { useDebouncedValue } from "../lib/useDebouncedValue";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
+import {
+  LibrarySearchField,
+  MoreTextsButton,
+  useLibrarySearch,
+} from "./LibrarySearch";
 import { LoadingState } from "./LoadingState";
 
 /** Search results of the library, mounted only while the dialog is open. */
 function TextResults({ onSelect }: { onSelect: (text: SlotText) => void }) {
-  const [input, setInput] = useState("");
-  const search = useDebouncedValue(input.trim());
-  const textsQuery = useTexts(search);
-  const texts = (
-    textsQuery.data?.pages.flatMap((page) => page?.member ?? []) ?? []
-  ).flatMap((text) =>
-    text.id && text.title && text.source
-      ? [{ id: text.id, title: text.title, source: text.source }]
-      : [],
-  );
+  const { input, setInput, search, textsQuery, texts } = useLibrarySearch();
 
   return (
     <div className="flex flex-col gap-4">
-      <SearchField value={input} onChange={setInput} autoFocus>
-        <Label>Rechercher un texte</Label>
-        <SearchField.Group>
-          <SearchField.SearchIcon />
-          <SearchField.Input placeholder="Titre ou source, ex. Psaume" />
-          <SearchField.ClearButton />
-        </SearchField.Group>
-      </SearchField>
+      <LibrarySearchField value={input} onChange={setInput} autoFocus />
       {textsQuery.isPending ? (
         <LoadingState />
       ) : textsQuery.isError ? (
@@ -61,6 +47,7 @@ function TextResults({ onSelect }: { onSelect: (text: SlotText) => void }) {
           ))}
         </ul>
       )}
+      <MoreTextsButton textsQuery={textsQuery} />
     </div>
   );
 }

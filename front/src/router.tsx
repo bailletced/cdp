@@ -190,6 +190,16 @@ const organisationEditionTextsRoute = createRoute({
   ),
 });
 
+// « Répartir dans l'ordre » (F07-T08, F07-T09)
+const organisationEditionDistributeRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/editions/$editionId/distribute",
+  component: lazyRouteComponent(
+    () => import("./pages/DistributePage"),
+    "DistributePage",
+  ),
+});
+
 // Text library (F06-T12): lazy-loaded with the back-office section
 const organisationTextsRoute = createRoute({
   getParentRoute: () => organisationRoute,
@@ -234,6 +244,7 @@ export const routeTree = Root.addChildren([
     organisationEditionEditRoute,
     organisationEditionDetailRoute,
     organisationEditionTextsRoute,
+    organisationEditionDistributeRoute,
     organisationTextsRoute,
     organisationTextNewRoute,
     organisationTextEditRoute,

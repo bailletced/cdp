@@ -209,3 +209,26 @@ export function withSlotText(
       .map(([id]) => id),
   };
 }
+
+/**
+ * Moves the items with the given keys before or after the target item (drag
+ * and drop of « Répartir dans l'ordre », F07-T08), keeping their order.
+ */
+export function moveItems<T extends { key: string }>(
+  items: T[],
+  keys: Set<string>,
+  targetKey: string,
+  position: "before" | "after",
+): T[] {
+  const moving = items.filter((item) => keys.has(item.key));
+  const rest = items.filter((item) => !keys.has(item.key));
+  const targetIndex = rest.findIndex((item) => item.key === targetKey);
+
+  if (targetIndex === -1) {
+    return items;
+  }
+
+  const insertAt = position === "before" ? targetIndex : targetIndex + 1;
+
+  return [...rest.slice(0, insertAt), ...moving, ...rest.slice(insertAt)];
+}
