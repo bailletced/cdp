@@ -20,6 +20,7 @@ use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
 use App\Chain\Application\Query\SlotTextViewFinder;
 use App\Chain\Application\RegisterInscriptionsHandler;
+use App\Chain\Application\RenamePriantHandler;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\SendConfirmationOnInscriptionsRegistered;
 use App\Chain\Application\SuggestEmptySlot;
@@ -170,6 +171,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(RegisterInscriptionsHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(RenamePriantHandler::class)
         ->autoconfigure()
         ->autowire();
 

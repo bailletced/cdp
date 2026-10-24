@@ -18,7 +18,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Changer mon nom et se désinscrire — back (US-14.2, US-14.3)
 
-- [ ] **F14-T03** · `back` Commande `RenamePriant` (à tout moment, par le priant ou un organisateur) + événement `PriantRenamed` + tests fonctionnels — *Dépend de* : F09-T03 · *Fini quand* : nom refusé s'il est invalide, événement émis (test `EventBusSpy`).
+- [x] **F14-T03** · `back` Commande `RenamePriant` (à tout moment, par le priant ou un organisateur) + événement `PriantRenamed` + tests fonctionnels — *Dépend de* : F09-T03 · *Fini quand* : nom refusé s'il est invalide, événement émis (test `EventBusSpy`).
 - [ ] **F14-T04** · `back` `PATCH /api/me` (merge-patch : `displayName`, priant vérifié seulement) + tests d'acceptation par profil — *Dépend de* : F14-T03, F09-T14 · *Fini quand* : pass seul et visiteur refusés, 422 sur nom vide, nouveau nom visible dans la grille (test).
 - [ ] **F14-T05** · `back` Commande `CancelInscription` (RG-EP-1 : avant le début du créneau) + événement `InscriptionCancelled` + tests fonctionnels — *Dépend de* : F09-T05 · *Fini quand* : aucun e-mail ni alerte déclenchés (test `EventBusSpy`).
 - [ ] **F14-T06** · `back` `DELETE /api/inscriptions/{id}` (403 une fois le créneau commencé) + tests d'acceptation par profil — *Dépend de* : F14-T05, F10-T07 · *Fini quand* : créneau redevenu vide visible dans `editions/current` (test).
