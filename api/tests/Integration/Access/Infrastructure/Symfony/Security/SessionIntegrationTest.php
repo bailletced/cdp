@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Access\Infrastructure\Symfony\Security;
 
+use App\Shared\Infrastructure\Symfony\Session\ReconnectingPdoSessionHandler;
+use App\Shared\Infrastructure\Symfony\Session\SessionPdoFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
 use Symfony\Component\Uid\Uuid;
 
 /**
  * Integration test for the PostgreSQL session storage (F02-T06).
- * Done when: the session is shared between two PHP processes, and the
- * handler persists the binary data of a serialized security token.
+ * Done when: the session is shared between two PHP processes, the handler
+ * reconnects when its database connection is lost, and it persists the binary
+ * data of a serialized security token.
  */
 final class SessionIntegrationTest extends KernelTestCase
 {
@@ -21,28 +23,30 @@ final class SessionIntegrationTest extends KernelTestCase
         self::bootKernel();
     }
 
-    public function testSessionHandlerIsPdo(): void
+    public function testSessionHandlerReconnectsOnLostConnection(): void
     {
         $handler = self::getContainer()->get('session.handler.pdo');
 
-        $this->assertInstanceOf(PdoSessionHandler::class, $handler);
+        $this->assertInstanceOf(ReconnectingPdoSessionHandler::class, $handler);
+        $this->assertInstanceOf(\SessionHandlerInterface::class, $handler);
     }
 
-    public function testPdoConnectionServiceExists(): void
+    public function testSessionPdoFactoryServiceExists(): void
     {
         $container = self::getContainer();
 
-        $this->assertTrue($container->has('session.pdo_connection'));
+        $this->assertTrue($container->has('session.pdo_factory'));
 
-        $pdo = $container->get('session.pdo_connection');
-        $this->assertInstanceOf(\PDO::class, $pdo);
+        $factory = $container->get('session.pdo_factory');
+        $this->assertInstanceOf(SessionPdoFactory::class, $factory);
+        $this->assertInstanceOf(\PDO::class, $factory->create());
     }
 
     public function testSessionHandlerConfiguration(): void
     {
         $handler = self::getContainer()->get('session.handler.pdo');
 
-        $this->assertInstanceOf(PdoSessionHandler::class, $handler);
+        $this->assertInstanceOf(ReconnectingPdoSessionHandler::class, $handler);
     }
 
     /**
@@ -54,7 +58,7 @@ final class SessionIntegrationTest extends KernelTestCase
     public function testSessionHandlerPersistsBinarySessionData(): void
     {
         $handler = self::getContainer()->get('session.handler.pdo');
-        \assert($handler instanceof PdoSessionHandler);
+        \assert($handler instanceof ReconnectingPdoSessionHandler);
 
         $sessionId = 'regression-'.Uuid::v7()->toRfc4122();
         $data = serialize(new SessionDataWithPrivateProperty('token'));

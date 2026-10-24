@@ -1,6 +1,6 @@
 framework:
     session:
-        # Use PdoSessionHandler for PostgreSQL session storage
+        # Use the reconnecting PdoSessionHandler decorator for PostgreSQL session storage
         handler_id: session.handler.pdo
         # Session cookie configuration
         name: __Host-Session
@@ -11,14 +11,20 @@ framework:
         cookie_samesite: lax
 
 services:
-    # Custom service to get PDO from Doctrine DBAL connection
-    session.pdo_connection:
-        factory: ['@doctrine.dbal.default_connection', 'getNativeConnection']
-        class: PDO
+    # Dedicated PDO factory for the session handler. The handler must never
+    # share the PDO captured from the Doctrine connection: DBAL closes and
+    # replaces that instance when it reconnects, which would leave the session
+    # handler with a dead connection (the production incident of 2026-10-24).
+    session.pdo_factory:
+        class: App\Shared\Infrastructure\Symfony\Session\DoctrineSessionPdoFactory
+        arguments: ['@doctrine.dbal.default_connection']
 
+    # PdoSessionHandler decorator: rebuilds the handler on a fresh PDO and
+    # retries once when its connection was lost. FrankenPHP worker mode keeps
+    # the handler alive across requests, so its connection can die while idle.
     session.handler.pdo:
-        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
+        class: App\Shared\Infrastructure\Symfony\Session\ReconnectingPdoSessionHandler
         arguments:
-            - '@session.pdo_connection'
-            - lock_mode: 0
-              table_name: sessions
+            - '@session.pdo_factory'
+            - db_table: sessions
+              lock_mode: 0

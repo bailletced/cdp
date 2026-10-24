@@ -28,3 +28,11 @@ parameters:
             identifier: property.unusedType
             path: src/Chain/Domain/Entity/Priant.php
             message: '#Priant::\$erasedAt .* is never assigned#'
+        # The session handler needs its own PDO connections: DBAL's
+        # Connection::getParams() is the only way to rebuild an equivalent
+        # connection (resolved params include the password and the test dbname
+        # suffix). DBAL marks it internal, but it is stable across DBAL 3/4.
+        -
+            identifier: method.internal
+            path: src/Shared/Infrastructure/Symfony/Session/DoctrineSessionPdoFactory.php
+            message: '#getParams\(\) from outside its root namespace Doctrine#'

@@ -22,6 +22,7 @@ return new Config()
                         App\Tests\Behat\Controller\RegisterContext::class,
                         App\Tests\Behat\Security\LoginLinkContext::class,
                         App\Tests\Behat\Security\RememberMeContext::class,
+                        App\Tests\Behat\Session\SessionContext::class,
                     )
             )
             ->withExtension(
