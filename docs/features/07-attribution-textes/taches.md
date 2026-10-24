@@ -32,5 +32,5 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Données et parcours
 
-- [ ] **F07-T11** · `back` Fixtures : attribution des 48 textes à l'édition de démonstration — *Dépend de* : F07-T02, F06-T15 · *Fini quand* : `make fixtures` produit une édition complète.
+- [x] **F07-T11** · `back` Fixtures : attribution des 48 textes à l'édition de démonstration — *Dépend de* : F07-T02, F06-T15 · *Fini quand* : `make fixtures` produit une édition complète.
 - [ ] **F07-T12** · `test` E2E : répartir 48 textes puis programmer sans avertissement ; vider un créneau puis reprogrammer → avertissement — *Dépend de* : F07-T10 · *Fini quand* : parcours vert avec axe-core.
