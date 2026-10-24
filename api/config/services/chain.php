@@ -55,6 +55,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
+use App\Chain\Infrastructure\Symfony\Security\InscriptionVoter;
 use App\Shared\Application\Port\InscriptionDirectory;
 use App\Shared\Application\Port\PriantProfileReader;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -182,6 +183,10 @@ return static function (ContainerConfigurator $container): void {
         ->alias(PriantProfileReader::class, DoctrinePriantProfileReader::class);
 
     $services->set(VisibilityPolicy::class)
+        ->autowire();
+
+    $services->set(InscriptionVoter::class)
+        ->autoconfigure()
         ->autowire();
 
     $services->set(DoctrineInscriptionDirectory::class)

@@ -22,7 +22,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F10-T05** · `back` `VisibilityPolicy` (Chain/Domain/Policy) 1/2 : `canSeeParticipantNames(Viewer, Edition)` et `canSeeIntentions(Viewer, Edition)` (« inscrit de l'édition », organisateur) + tests unitaires — *Dépend de* : F02-T12, F09-T04 · *Fini quand* : table de cas exhaustive par profil.
 - [x] **F10-T06** · `back` `VisibilityPolicy` 2/2 : `canReadText(Viewer, Slot)` (y compris éditions passées pour le propriétaire) et `canActOn(Viewer, Inscription)` (priant vérifié propriétaire uniquement) + tests unitaires — *Dépend de* : F10-T05 · *Fini quand* : pass seul → lecture oui, action non (test).
-- [ ] **F10-T07** · `back` Voter `INSCRIPTION_ACT` déléguant à `canActOn` + tests — *Dépend de* : F10-T06 · *Fini quand* : utilisable via `security: "is_granted('INSCRIPTION_ACT', object)"`.
+- [x] **F10-T07** · `back` Voter `INSCRIPTION_ACT` déléguant à `canActOn` + tests — *Dépend de* : F10-T06 · *Fini quand* : utilisable via `security: "is_granted('INSCRIPTION_ACT', object)"`.
 
 ## Grille selon le profil (US-10.1, US-10.2, US-10.4)
 
