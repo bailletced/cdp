@@ -9,6 +9,7 @@ use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\InscriptionId;
 use App\Chain\Domain\ValueObject\PriantId;
+use App\Chain\Domain\ValueObject\SlotId;
 use App\Shared\Domain\Security\Viewer;
 
 /**
@@ -43,6 +44,30 @@ final readonly class VisibilityPolicy
     public function canSeeIntentions(Viewer $viewer, EditionId $editionId): bool
     {
         return $viewer->isOrganizer || $this->isRegisteredIn($viewer, $editionId);
+    }
+
+    /**
+     * RG-TX-1: the full text of a slot is read by the priants registered on
+     * it, past editions included, and by the organizers.
+     */
+    public function canReadText(Viewer $viewer, SlotId $slotId): bool
+    {
+        return $viewer->isOrganizer || array_any(
+            $this->inscriptionsOf($viewer),
+            static fn (Inscription $inscription): bool => $inscription->getSlotId()->equals($slotId),
+        );
+    }
+
+    /**
+     * RG-IN-6: acting on an inscription (cancel, pointer, relay message…)
+     * takes the session of its priant. A device pass only gives the read-only
+     * view, and an organizer acts through the back-office.
+     */
+    public function canActOn(Viewer $viewer, Inscription $inscription): bool
+    {
+        return $viewer->verified
+            && null !== $viewer->priantId
+            && $inscription->getPriantId()->equals(new PriantId($viewer->priantId));
     }
 
     /**

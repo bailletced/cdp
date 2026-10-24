@@ -74,11 +74,53 @@ final class VisibilityPolicyTest extends TestCase
         self::assertSame($expected, $this->policy->canSeeIntentions($this->viewer($profile), $this->edition));
     }
 
+    /**
+     * @return iterable<string, array{string, bool}>
+     */
+    public static function textReaders(): iterable
+    {
+        // RG-TX-1: the full text of a slot is for the priants registered on it
+        // (past editions included) and the organizers
+        yield 'visitor' => ['visitor', false];
+        yield 'pass of the device that registered on the slot' => ['pass', true];
+        yield 'pass of a device that registered on another slot' => ['pass of another edition', false];
+        yield 'verified priant registered on the slot' => ['verified priant', true];
+        yield 'verified priant registered elsewhere' => ['other priant', false];
+        yield 'organizer' => ['organizer', true];
+    }
+
+    #[DataProvider('textReaders')]
+    public function testTheTextOfASlotIsReadByItsPriantsAndTheOrganizers(string $profile, bool $expected): void
+    {
+        self::assertSame($expected, $this->policy->canReadText($this->viewer($profile), $this->mariesInscription->getSlotId()));
+    }
+
+    /**
+     * @return iterable<string, array{string, bool}>
+     */
+    public static function actors(): iterable
+    {
+        // RG-IN-6: acting on an inscription takes the session of its priant
+        yield 'visitor' => ['visitor', false];
+        yield 'pass alone: read yes, act no' => ['pass', false];
+        yield 'verified priant, owner' => ['verified priant', true];
+        yield 'verified priant, someone else' => ['other priant', false];
+        yield 'organizer' => ['organizer', false];
+    }
+
+    #[DataProvider('actors')]
+    public function testOnlyTheVerifiedOwnerActsOnAnInscription(string $profile, bool $expected): void
+    {
+        self::assertSame($expected, $this->policy->canActOn($this->viewer($profile), $this->mariesInscription));
+    }
+
     public function testAPriantIdIsOnlyTrustedOnceVerified(): void
     {
         $unverified = new Viewer($this->marie->value->toRfc4122(), false, [], false);
 
         self::assertFalse($this->policy->canSeeParticipantNames($unverified, $this->edition));
+        self::assertFalse($this->policy->canReadText($unverified, $this->mariesInscription->getSlotId()));
+        self::assertFalse($this->policy->canActOn($unverified, $this->mariesInscription));
     }
 
     private function viewer(string $profile): Viewer
