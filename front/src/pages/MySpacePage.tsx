@@ -1,18 +1,150 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { baseUrl } from "../api/client";
-import { useViewer } from "../api/hooks";
+import { myInscriptionsQueryOptions, useViewer } from "../api/hooks";
 import { CurrentEditionPlanning } from "../components/CurrentEditionPlanning";
+import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
+import { ReadTextLink } from "../components/ReadTextLink";
+import { withLocalTime } from "../lib/localTime";
+
+const LINK_CLASS = "text-link underline underline-offset-4";
+
+/** One of my slots, as GET /api/me/inscriptions describes it. */
+interface MySlot {
+  id: string;
+  slotId: string;
+  startsAt: string;
+  label: string;
+  dayLabel: string;
+  textTitle: string | null;
+}
+
+/** The OpenAPI schema types the list as unknown[]: keep the well-formed ones. */
+function parseMySlots(inscriptions: unknown): MySlot[] {
+  if (!Array.isArray(inscriptions)) {
+    return [];
+  }
+
+  return inscriptions.flatMap((item: Record<string, unknown>) =>
+    typeof item?.id === "string" &&
+    typeof item.slotId === "string" &&
+    typeof item.startsAt === "string" &&
+    typeof item.label === "string" &&
+    typeof item.dayLabel === "string"
+      ? [
+          {
+            id: item.id,
+            slotId: item.slotId,
+            startsAt: item.startsAt,
+            label: item.label,
+            dayLabel: item.dayLabel,
+            textTitle:
+              typeof item.textTitle === "string" ? item.textTitle : null,
+          },
+        ]
+      : [],
+  );
+}
+
+/** « samedi 28 novembre » → « Samedi 28 novembre » */
+function capitalized(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
 
 /**
- * /my-space (F02-T19, F08): personal space — slot selection for the prayer chain.
- * After logging in via a personal link, the priant lands here to pick their
- * 30-minute slots in the planning of the current edition. The route guard
- * redirects visitors to the landing page; this page only renders for an
- * authenticated viewer, who is sent here from / as well.
+ * « Mes créneaux » (F14-T07, US-14.1): my slots of the public edition, each
+ * with its day, its schedule (and my local time abroad) and its text.
+ */
+function MySlots() {
+  const query = useQuery(myInscriptionsQueryOptions);
+
+  if (query.isPending) {
+    return <LoadingState label="Chargement de vos créneaux…" />;
+  }
+
+  if (query.isError) {
+    return (
+      <ErrorState
+        message="Vos créneaux n'ont pas pu être chargés."
+        onRetry={() => void query.refetch()}
+      />
+    );
+  }
+
+  if (query.data.status === "expired") {
+    return (
+      <p className="text-lg">
+        Votre session a expiré : recevez votre lien personnel pour retrouver vos
+        créneaux.{" "}
+        <Link to="/receive-my-link" className={LINK_CLASS}>
+          Recevoir mon lien personnel
+        </Link>
+      </p>
+    );
+  }
+
+  if (query.data.status === "no-edition") {
+    return null;
+  }
+
+  const { space } = query.data;
+  const slots = parseMySlots(space.inscriptions);
+
+  return (
+    <>
+      <p className="mb-8 font-display text-3xl font-bold">
+        {space.displayName}
+      </p>
+      <section aria-labelledby="mes-creneaux" className="mb-12">
+        <h2 id="mes-creneaux" className="mb-4">
+          Mes créneaux
+        </h2>
+        {slots.length === 0 ? (
+          <p className="text-lg">
+            Vous n'avez pas encore de créneau.{" "}
+            <a href="#ajouter-des-creneaux" className={LINK_CLASS}>
+              Choisir un créneau
+            </a>
+          </p>
+        ) : (
+          <ul className="grid gap-3">
+            {slots.map((slot) => (
+              <li
+                key={slot.id}
+                className="rounded-2xl border border-separator bg-surface p-4 sm:p-5"
+              >
+                <p className="text-muted">{capitalized(slot.dayLabel)}</p>
+                <p className="font-display text-2xl font-bold lining-nums tabular-nums">
+                  {withLocalTime(slot.label, slot.startsAt)}
+                </p>
+                {slot.textTitle ? (
+                  <p className="mt-2">
+                    {slot.textTitle}{" "}
+                    <ReadTextLink slotId={slot.slotId} label={slot.label} />
+                  </p>
+                ) : (
+                  <p className="mt-2 text-muted">
+                    Le texte de ce créneau sera bientôt disponible
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  );
+}
+
+/**
+ * /my-space (F02-T19, F14-T07): « Mon espace » — my name, my slots of the
+ * current edition, then the planning to add slots. The route guard
+ * redirects visitors (and a device pass without session) to the landing
+ * page; should the session expire while the page is open, it invites to
+ * receive the personal link again.
  */
 export function MySpacePage() {
   const { viewer, isLoading } = useViewer();
@@ -46,13 +178,16 @@ export function MySpacePage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <PageTitle>Mon espace</PageTitle>
-      <p className="mb-6">{viewer.email}</p>
-      <h2 className="mb-4 text-xl font-semibold">Choisissez vos créneaux</h2>
-      <p className="mb-8 text-lg">
-        Sélectionnez un ou plusieurs créneaux de 30 minutes pour participer à la
-        chaîne de prière de 24 heures.
-      </p>
-      <CurrentEditionPlanning />
+      <p className="mb-6 text-muted">{viewer.email}</p>
+      <MySlots />
+      <section aria-labelledby="ajouter-des-creneaux-titre">
+        <h2 id="ajouter-des-creneaux-titre" className="mb-4 scroll-mt-24">
+          Ajouter des créneaux
+        </h2>
+        <div id="ajouter-des-creneaux" className="scroll-mt-24">
+          <CurrentEditionPlanning />
+        </div>
+      </section>
       <button
         type="button"
         onClick={handleLogout}

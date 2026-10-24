@@ -13,6 +13,11 @@ export const handlers = [
       isOrganizer: false,
     });
   }),
+  // GET /api/me/inscriptions: no public edition by default (F14-T02) —
+  // tests showing « Mes créneaux » override this handler with server.use()
+  http.get("http://localhost:8080/api/me/inscriptions", () => {
+    return HttpResponse.json({ title: "Not Found" }, { status: 404 });
+  }),
   // POST /auth/link-request: always 202 with the same message (F02-T15)
   http.post("http://localhost:8080/auth/link-request", () => {
     return HttpResponse.json(

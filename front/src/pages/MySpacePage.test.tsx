@@ -1,8 +1,131 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderApp } from "../test/renderApp";
 import { server } from "../test/setup";
+
+const MY_INSCRIPTIONS_URL = "http://localhost:8080/api/me/inscriptions";
+
+beforeEach(() => {
+  vi.stubEnv("TZ", "Europe/Paris");
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+function myInscription(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "inscription-1",
+    slotId: "slot-1",
+    startsAt: "2099-11-28T19:00:00+00:00",
+    endsAt: "2099-11-28T19:30:00+00:00",
+    label: "20h00–20h30",
+    dayLabel: "samedi 28 novembre",
+    textTitle: null,
+    textSource: null,
+    state: "future",
+    actions: ["cancel"],
+    ...overrides,
+  };
+}
+
+function mySpace(inscriptions: unknown[], displayName = "Famille Martin") {
+  server.use(
+    http.get(MY_INSCRIPTIONS_URL, () =>
+      HttpResponse.json({
+        "@context": "/api/contexts/MyInscriptions",
+        "@id": "/api/me/inscriptions",
+        "@type": "MyInscriptions",
+        editionId: "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b",
+        editionTitle: "24 heures de prière",
+        displayName,
+        inscriptions,
+      }),
+    ),
+  );
+}
+
+describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
+  it("shows my name, then my slots with their schedule and their text", async () => {
+    mySpace([
+      myInscription(),
+      myInscription({
+        id: "inscription-2",
+        slotId: "slot-5",
+        startsAt: "2099-11-28T21:00:00+00:00",
+        endsAt: "2099-11-28T21:30:00+00:00",
+        label: "22h00–22h30",
+        textTitle: "Que rien ne te trouble",
+        textSource: "Thérèse d’Avila",
+      }),
+    ]);
+
+    renderApp("/my-space");
+
+    expect(await screen.findByText("Famille Martin")).toBeInTheDocument();
+    const mine = screen.getByRole("region", { name: "Mes créneaux" });
+    const [first, second] = within(mine).getAllByRole("listitem");
+    expect(first).toHaveTextContent("Samedi 28 novembre");
+    expect(first).toHaveTextContent("20h00–20h30");
+    expect(first).toHaveTextContent(
+      "Le texte de ce créneau sera bientôt disponible",
+    );
+    expect(
+      within(first).queryByRole("link", { name: /Lire le texte/ }),
+    ).toBeNull();
+    expect(second).toHaveTextContent("Que rien ne te trouble");
+    expect(
+      within(second).getByRole("link", {
+        name: "Lire le texte du créneau de 22h00–22h30",
+      }),
+    ).toHaveAttribute("href", "/textes/slot-5");
+  });
+
+  it("adds the local time for a priant outside Europe/Paris (RG-PL-3)", async () => {
+    vi.stubEnv("TZ", "America/Montreal");
+    mySpace([myInscription()]);
+
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByText("20h00–20h30 (14h00 chez vous)"),
+    ).toBeInTheDocument();
+  });
+
+  it("invites to choose a slot when I have none yet", async () => {
+    mySpace([]);
+
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByText("Vous n'avez pas encore de créneau."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Choisir un créneau" }),
+    ).toHaveAttribute("href", "#ajouter-des-creneaux");
+  });
+
+  it("invites to receive the personal link again once the session is gone", async () => {
+    server.use(
+      http.get(
+        MY_INSCRIPTIONS_URL,
+        () => new HttpResponse(null, { status: 401 }),
+      ),
+    );
+
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByText(
+        "Votre session a expiré : recevez votre lien personnel pour retrouver vos créneaux.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Recevoir mon lien personnel" }),
+    ).toHaveAttribute("href", "/receive-my-link");
+  });
+});
 
 describe("MySpacePage", () => {
   it("shows the viewer email and a logout button for an authenticated viewer", async () => {
@@ -11,9 +134,11 @@ describe("MySpacePage", () => {
     expect(
       await screen.findByRole("heading", { name: "Mon espace" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("thomas@bailletced.org")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Choisissez vos créneaux" }),
+      await screen.findByText("thomas@bailletced.org"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Ajouter des créneaux" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Me déconnecter" }),

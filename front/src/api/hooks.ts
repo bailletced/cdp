@@ -179,6 +179,35 @@ export const slotSuggestionQueryOptions = (
     retry: false,
   }) as const;
 
+/**
+ * « Mon espace » (GET /api/me/inscriptions, F14-T07): my name and my slots
+ * of the public edition. A 404 means no edition is public; a 401 means the
+ * session is gone (expired, or a device pass only) — both normal states.
+ */
+export const myInscriptionsQueryOptions = {
+  queryKey: ["me", "inscriptions"],
+  queryFn: async () => {
+    const { data, error, response } = await apiClient.GET(
+      "/api/me/inscriptions",
+    );
+
+    if (response.status === 401) {
+      return { status: "expired" } as const;
+    }
+
+    if (response.status === 404) {
+      return { status: "no-edition" } as const;
+    }
+
+    if (error || !data) {
+      throw error;
+    }
+
+    return { status: "ready", space: data } as const;
+  },
+  retry: false,
+} as const;
+
 /** Payload of POST /api/inscriptions (F09-T10), bounded by the OpenAPI contract. */
 export interface RegisterInscriptionsPayload {
   slotIds: string[];
