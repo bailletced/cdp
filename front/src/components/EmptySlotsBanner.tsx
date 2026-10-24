@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { type PlanningSlot, slotTemporalState } from "../lib/planning";
 import { EmptySlotDraw } from "./EmptySlotDraw";
+
+/** Beyond this many schedules, the others are shown on demand. */
+const SHOWN_SCHEDULES = 12;
 
 /** The id of the card of a slot in the grid: the banner scrolls to it. */
 export function slotCardId(slotId: string): string {
@@ -30,6 +34,8 @@ export function emptySlotsToCome(
  * Computed from the grid, so it follows its refresh: a slot freed by a
  * cancellation comes back here (RG-EP-1). The count is a polite live region.
  * « Prendre un créneau vide » (F13-T06) is offered while one is left.
+ * Before a campaign, up to 48 schedules: the first twelve are listed, the
+ * others on demand.
  */
 export function EmptySlotsBanner({
   editionId,
@@ -40,11 +46,15 @@ export function EmptySlotsBanner({
   slots: PlanningSlot[];
   nowMs: number;
 }) {
+  const [showAll, setShowAll] = useState(false);
+
   if (!slots.some((slot) => slotTemporalState(slot, nowMs) !== "past")) {
     return null;
   }
 
   const empty = emptySlotsToCome(slots, nowMs);
+  const hidden = empty.length - SHOWN_SCHEDULES;
+  const shown = showAll ? empty : empty.slice(0, SHOWN_SCHEDULES);
 
   function goTo(slotId: string) {
     const card = document.getElementById(slotCardId(slotId));
@@ -57,25 +67,42 @@ export function EmptySlotsBanner({
       aria-label="Créneaux à pourvoir"
       className="mb-10 rounded-2xl border border-accent bg-accent-soft p-4 sm:p-5"
     >
-      <output className="block font-display text-xl font-bold">
+      <output className="block font-display text-2xl font-bold">
         {empty.length === 0
           ? "La chaîne est complète. Merci !"
           : `Il reste ${empty.length} créneau${empty.length > 1 ? "x" : ""} vide${empty.length > 1 ? "s" : ""} sur ${slots.length}`}
       </output>
       {empty.length > 0 ? (
-        <ul aria-label="Créneaux vides" className="mt-3 flex flex-wrap gap-2">
-          {empty.map((slot) => (
+        <ul
+          id="empty-schedules"
+          aria-label="Créneaux vides"
+          className="mt-3 flex flex-wrap gap-2"
+        >
+          {shown.map((slot) => (
             <li key={slot.id}>
               <button
                 type="button"
                 onClick={() => goTo(slot.id)}
-                className="min-h-11 rounded-full border border-border bg-surface px-3 font-bold lining-nums tabular-nums hover:border-accent"
+                className="min-h-11 rounded-full border border-border bg-surface px-3 font-medium hover:border-accent"
               >
                 {slot.label}
               </button>
             </li>
           ))}
         </ul>
+      ) : null}
+      {hidden > 0 ? (
+        <button
+          type="button"
+          aria-expanded={showAll}
+          aria-controls="empty-schedules"
+          onClick={() => setShowAll((value) => !value)}
+          className="link mt-3 min-h-11 text-link"
+        >
+          {showAll
+            ? "Afficher moins d'horaires"
+            : `Afficher les ${hidden} autres horaires`}
+        </button>
       ) : null}
       {empty.length > 0 ? (
         <div className="mt-4">

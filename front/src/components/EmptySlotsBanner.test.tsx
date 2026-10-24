@@ -158,3 +158,30 @@ describe("EmptySlotsBanner (F13-T05, US-13.1)", () => {
     card.remove();
   });
 });
+
+describe("EmptySlotsBanner — longue liste (F13-T05)", () => {
+  it("shows the first twelve schedules, the others on demand", () => {
+    const all = Array.from({ length: 48 }, (_, index) => index + 1);
+    render(
+      <EmptySlotsBanner
+        editionId="edition-1"
+        slots={edition(...all)}
+        nowMs={START_MS - 1}
+      />,
+    );
+
+    const list = screen.getByRole("list", { name: "Créneaux vides" });
+    expect(within(list).getAllByRole("button")).toHaveLength(12);
+
+    const toggle = screen.getByRole("button", {
+      name: "Afficher les 36 autres horaires",
+    });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(toggle);
+
+    expect(within(list).getAllByRole("button")).toHaveLength(48);
+    expect(
+      screen.getByRole("button", { name: "Afficher moins d'horaires" }),
+    ).toHaveAttribute("aria-expanded", "true");
+  });
+});

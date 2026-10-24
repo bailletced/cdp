@@ -1,4 +1,4 @@
-import { Button, Link, Modal } from "@heroui/react";
+import { Button, Modal } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { slotSuggestionQueryOptions } from "../api/hooks";
@@ -53,12 +53,12 @@ function Draw({ editionId }: { editionId: string }) {
         ) : null}
       </div>
       <div className="flex flex-wrap gap-3">
-        <Link
+        <a
           href={`/inscription?creneaux=${slotId}`}
-          className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] bg-accent px-5 font-bold text-accent-foreground no-underline"
+          className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] bg-accent px-5 font-medium text-accent-foreground"
         >
           Je le prends
-        </Link>
+        </a>
         <Button
           variant="outline"
           onClick={() => setExcluded((ids) => [...new Set([...ids, slotId])])}
