@@ -442,3 +442,38 @@ describe("MySpacePage — me désinscrire (F14-T09, US-14.3)", () => {
     ).toHaveAttribute("role", "alert");
   });
 });
+
+describe("MySpacePage — ajouter des créneaux et mon agenda (F14-T10, US-14.4)", () => {
+  it("leads to the planning and offers a single agenda file for all my slots", async () => {
+    mySpace([myInscription(), myInscription({ id: "inscription-2" })]);
+
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByRole("link", { name: "Ajouter des créneaux" }),
+    ).toHaveAttribute("href", "#ajouter-des-creneaux");
+    // Arbitrage Q15: one button for the whole edition, none per slot
+    const agenda = screen.getAllByRole("link", {
+      name: "Ajouter mes créneaux à mon agenda",
+    });
+    expect(agenda).toHaveLength(1);
+    expect(agenda[0]).toHaveAttribute(
+      "href",
+      "http://localhost:8080/api/me/calendar.ics",
+    );
+    expect(agenda[0]).toHaveAttribute("download", "mes-creneaux.ics");
+  });
+
+  it("offers no agenda file while I have no slot", async () => {
+    mySpace([]);
+
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByText("Vous n'avez pas encore de créneau."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Ajouter mes créneaux à mon agenda" }),
+    ).toBeNull();
+  });
+});

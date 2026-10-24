@@ -69,6 +69,11 @@ function capitalized(value: string): string {
  * « Mes créneaux » (F14-T07, US-14.1): my slots of the public edition, each
  * with its day, its schedule (and my local time abroad) and its text.
  *
+ * « Ajouter des créneaux » leads to the planning below — the inscription
+ * form is pre-filled from the session (RG-IN-7) — and a single « Ajouter mes
+ * créneaux à mon agenda » downloads the file of all my slots (F14-T10,
+ * arbitrage Q15: no button per slot).
+ *
  * « Me désinscrire » (F14-T09, US-14.3) until the slot starts: after a
  * confirmation, the outcome is announced politely on the screen — no e-mail
  * is sent — and the focus moves to the list heading, the button being gone.
@@ -202,6 +207,23 @@ function MySlots() {
             ))}
           </ul>
         )}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href="#ajouter-des-creneaux"
+            className="inline-flex min-h-11 items-center rounded-[var(--radius)] border border-border px-5 font-medium"
+          >
+            Ajouter des créneaux
+          </a>
+          {slots.length > 0 ? (
+            <a
+              href={`${baseUrl}/api/me/calendar.ics`}
+              download="mes-creneaux.ics"
+              className="inline-flex min-h-11 items-center rounded-[var(--radius)] bg-accent px-5 font-medium text-accent-foreground"
+            >
+              Ajouter mes créneaux à mon agenda
+            </a>
+          ) : null}
+        </div>
       </section>
       <ConfirmDialog
         isOpen={toCancel !== null}
