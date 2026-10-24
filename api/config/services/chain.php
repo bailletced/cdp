@@ -15,6 +15,7 @@ use App\Chain\Application\Query\AdminTextViewFinder;
 use App\Chain\Application\Query\InscriptionDigestFinder;
 use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
+use App\Chain\Application\Query\SlotTextViewFinder;
 use App\Chain\Application\RegisterInscriptionsHandler;
 use App\Chain\Application\ScheduleEditionHandler;
 use App\Chain\Application\SendConfirmationOnInscriptionsRegistered;
@@ -48,6 +49,7 @@ use App\Chain\Infrastructure\Doctrine\DoctrineInscriptionDirectory;
 use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePriantProfileReader;
 use App\Chain\Infrastructure\Doctrine\DoctrinePublicEditionViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrineSlotTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineInscriptionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrinePriantRepository;
@@ -189,6 +191,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set(DoctrineInscriptionDigestFinder::class)
         ->autowire()
         ->alias(InscriptionDigestFinder::class, DoctrineInscriptionDigestFinder::class);
+
+    $services->set(DoctrineSlotTextViewFinder::class)
+        ->autowire()
+        ->alias(SlotTextViewFinder::class, DoctrineSlotTextViewFinder::class);
 
     $services->set(DoctrinePriantProfileReader::class)
         ->autoconfigure()
