@@ -12,7 +12,14 @@ import {
   useEditor,
   useEditorState,
 } from "@tiptap/react";
-import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface RichTextEditorProps {
   label: string;
@@ -122,8 +129,10 @@ export function RichTextEditor({
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   // A value set from outside (form pre-fill) replaces the content without
-  // being reported as a user edit
-  useEffect(() => {
+  // being reported as a user edit. A layout effect, not a passive one: a
+  // passive effect could run after the next keystroke and put back the
+  // previous value, swallowing what was just typed.
+  useLayoutEffect(() => {
     if (editor && value !== htmlOf(editor)) {
       editor.commands.setContent(value, { emitUpdate: false });
     }
@@ -209,6 +218,9 @@ export function RichTextEditor({
                 action.run(editor);
               }
             }}
+            // A mouse click keeps the focus and the selection in the
+            // editor: the next keystrokes go to the text, not the button
+            onMouseDown={(event) => event.preventDefault()}
             onFocus={() => setFocusedIndex(index)}
             className="min-h-11 min-w-11 rounded-lg border border-border px-3 aria-pressed:border-accent aria-pressed:bg-accent-soft"
           >
