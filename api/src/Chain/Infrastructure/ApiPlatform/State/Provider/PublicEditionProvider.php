@@ -6,15 +6,19 @@ namespace App\Chain\Infrastructure\ApiPlatform\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Chain\Application\Query\EmptySlotsFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
+use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Infrastructure\ApiPlatform\Resource\PublicEditionResource;
+use App\Shared\Domain\Time\ParisCalendar;
 use App\Shared\Infrastructure\ApiPlatform\Exception\MissingModelException;
 
 /**
  * Provides the current public edition for GET /api/editions/current (F08-T02).
  *
  * Returns 404 (MissingModelException) when no edition is open, so the front
- * can display the "no edition yet" state (arbitrage Q18).
+ * can display the "no edition yet" state (arbitrage Q18). The number of
+ * empty slots still to come feeds the banner (F13-T02, US-13.1).
  *
  * @implements ProviderInterface<PublicEditionResource>
  */
@@ -22,6 +26,7 @@ final readonly class PublicEditionProvider implements ProviderInterface
 {
     public function __construct(
         private PublicEditionViewFinder $finder,
+        private EmptySlotsFinder $emptySlotsFinder,
     ) {
     }
 
@@ -46,6 +51,8 @@ final readonly class PublicEditionProvider implements ProviderInterface
             startsAtLabel: $view->startsAtLabel,
             opensAtLabel: $view->opensAtLabel,
             status: $view->status,
+            slotCount: ParisCalendar::SLOT_COUNT,
+            emptySlotCount: \count($this->emptySlotsFinder->findByEdition(new EditionId($view->id))),
         );
     }
 }

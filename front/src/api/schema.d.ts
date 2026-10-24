@@ -599,6 +599,8 @@ export interface components {
             startsAtLabel?: string | null;
             opensAtLabel?: string | null;
             status?: string | null;
+            slotCount?: number | null;
+            emptySlotCount?: number | null;
         };
         "PublicEditionSlots.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;

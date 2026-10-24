@@ -15,7 +15,9 @@
     "opensAt",
     "startsAtLabel",
     "opensAtLabel",
-    "status"
+    "status",
+    "slotCount",
+    "emptySlotCount"
   ],
   "properties": {
     "@context": {
@@ -58,6 +60,14 @@
         "running",
         "finished"
       ]
+    },
+    "slotCount": {
+      "const": 48
+    },
+    "emptySlotCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 48
     }
   }
 }

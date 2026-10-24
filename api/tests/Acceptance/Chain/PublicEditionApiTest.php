@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Acceptance\Chain;
 
 use App\Chain\Domain\Entity\Edition;
+use App\Chain\Domain\Entity\Inscription;
+use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
 use App\Shared\Domain\Time\ParisCalendar;
+use App\Shared\Domain\ValueObject\Email;
 use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -35,6 +39,8 @@ final class PublicEditionApiTest extends ApiTestCase
         $this->editionRepository = $container->get(EditionRepositoryInterface::class);
 
         $connection = $this->em->getConnection();
+        $connection->executeStatement('DELETE FROM inscription');
+        $connection->executeStatement('DELETE FROM priant');
         $connection->executeStatement('DELETE FROM slot');
         $connection->executeStatement('DELETE FROM edition');
         $connection->executeStatement('TRUNCATE organizer, account CASCADE');
@@ -81,6 +87,24 @@ final class PublicEditionApiTest extends ApiTestCase
         self::assertNotEmpty($data['opensAt'] ?? null);
         self::assertNotEmpty($data['startsAtLabel'] ?? null);
         self::assertNotEmpty($data['opensAtLabel'] ?? null);
+    }
+
+    public function testCurrentCountsTheEmptySlotsStillToFill(): void
+    {
+        $edition = $this->createEdition(lifecycle: 'scheduled', opensAt: '2020-01-01 00:00:00', startsAt: '2099-01-01 00:00:00');
+        $priant = new Priant(new Email('marie@bailletced.org'), new DisplayName('Marie Dupont'));
+        $this->em->persist($priant);
+        foreach ([0, 7] as $index) {
+            $this->em->persist(new Inscription($edition->getId(), $edition->getSlots()[$index]->getId(), $priant->getId()));
+        }
+        $this->em->flush();
+
+        $this->client->request('GET', '/api/editions/current');
+
+        // « Il reste 46 créneaux vides sur 48 » (US-13.1)
+        $data = json_decode((string) $this->client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame(48, $data['slotCount'] ?? null);
+        self::assertSame(46, $data['emptySlotCount'] ?? null);
     }
 
     public function testCurrentIsPubliclyAccessibleWithoutAuthentication(): void

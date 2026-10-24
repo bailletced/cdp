@@ -14,6 +14,8 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
  * - GET /api/editions/current → the current public edition, or 404 when none is open
  *
  * No authentication required: this is the public planning page entry point.
+ * F13-T02: the counters of the banner — « Il reste emptySlotCount créneaux
+ * vides sur slotCount » — count only the empty slots still to come (§5.3).
  * Cache-Control is set to private, no-store by the global ExceptionSubscriber.
  */
 #[ApiResource(
@@ -36,6 +38,8 @@ final class PublicEditionResource
         public readonly ?string $startsAtLabel = null,
         public readonly ?string $opensAtLabel = null,
         public readonly ?string $status = null,
+        public readonly ?int $slotCount = null,
+        public readonly ?int $emptySlotCount = null,
     ) {
     }
 }

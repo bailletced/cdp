@@ -2992,6 +2992,18 @@
                                     "string",
                                     "null"
                                 ]
+                            },
+                            "slotCount": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "emptySlotCount": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
                             }
                         }
                     }
