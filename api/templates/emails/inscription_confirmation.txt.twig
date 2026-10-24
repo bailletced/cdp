@@ -1,0 +1,37 @@
+{# Inscription confirmation email, plain-text version (F11-T04). #}
+{% extends 'emails/layout.txt.twig' %}
+
+{% block title %}Votre inscription : {{ editionTitle }}{% endblock %}
+
+{% block content %}
+
+Bonjour {{ displayName }},
+
+Votre inscription à la chaîne de prière « {{ editionTitle }} » est enregistrée. Merci de prier avec nous.
+
+{% if slots|length > 1 %}Vos {{ slots|length }} créneaux{% else %}Votre créneau{% endif %}, en heure de Paris :
+{% for slot in slots %}
+
+{{ slot.dayLabel|capitalize }}, {{ slot.label }} (heure de Paris)
+--------------------------------
+{% if slot.textTitle %}
+{{ slot.textTitle }} — {{ slot.textSource }}
+
+{{ slot.textBody|plain_text }}
+{% if slot.textHints %}
+
+Pistes de méditation :
+{{ slot.textHints }}
+{% endif %}
+{% else %}
+Le texte de ce créneau sera bientôt disponible.
+{% endif %}
+{% endfor %}
+
+Le fichier joint « mes-creneaux.ics » ajoute vos créneaux à votre agenda, avec un rappel 10 minutes avant chacun.
+
+Ouvrir mon espace :
+{{ link }}
+
+Ce lien est personnel : ne le partagez pas. Il vous permet de retrouver vos créneaux et leurs textes.
+{% endblock %}

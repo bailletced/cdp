@@ -9,6 +9,7 @@ use App\Chain\Application\Dto\InscriptionDigestSlot;
 use App\Chain\Application\Query\InscriptionDigestFinder;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\PriantId;
+use App\Shared\Domain\Time\DayLabel;
 use App\Shared\Domain\Time\SlotLabel;
 use App\Shared\Domain\Time\TimeSlot;
 use Doctrine\DBAL\Connection;
@@ -58,6 +59,7 @@ final readonly class DoctrineInscriptionDigestFinder implements InscriptionDiges
                     $startsAt,
                     $endsAt,
                     SlotLabel::for(new TimeSlot($startsAt, $endsAt)),
+                    DayLabel::for($startsAt),
                     $row['text_title'],
                     $row['text_source'],
                     $row['text_body'],

@@ -1,0 +1,38 @@
+{# Inscription confirmation email (F11-T04, US-11.1): the slots taken at once,
+   in Paris time, with their full texts (sanitized rich text, T27), and the
+   personal link. The agenda file is attached by the MailerNotifier. #}
+{% extends 'emails/layout.html.twig' %}
+
+{% block title %}Votre inscription : {{ editionTitle }}{% endblock %}
+
+{% block content %}
+    <p>Bonjour {{ displayName }},</p>
+    <p>Votre inscription à la chaîne de prière « {{ editionTitle }} » est enregistrée. Merci de prier avec nous.</p>
+    <p>{% if slots|length > 1 %}Vos {{ slots|length }} créneaux{% else %}Votre créneau{% endif %}, en heure de Paris :</p>
+    {% for slot in slots %}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0; border-top: 1px solid #E8DCC8;">
+            <tr>
+                <td style="padding-top: 16px;">
+                    <h2 style="margin: 0 0 8px; font-size: 20px; color: #6F4526;">{{ slot.dayLabel|capitalize }}, {{ slot.label }} <span style="font-size: 14px; font-weight: normal;">(heure de Paris)</span></h2>
+                    {% if slot.textTitle %}
+                        <p style="margin: 0; font-size: 18px; font-weight: bold;">{{ slot.textTitle }}</p>
+                        <p style="margin: 0 0 12px; color: #6F4526;">{{ slot.textSource }}</p>
+                        <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 17px; line-height: 1.7;">{{ slot.textBody|raw }}</div>
+                        {% if slot.textHints %}
+                            <p style="margin-top: 12px; padding: 12px; background-color: #FAF4E8;"><strong>Pistes de méditation</strong><br>{{ slot.textHints|nl2br }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p style="color: #6F4526;">Le texte de ce créneau sera bientôt disponible.</p>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    {% endfor %}
+    <p>Le fichier joint « mes-creneaux.ics » ajoute vos créneaux à votre agenda, avec un rappel 10 minutes avant chacun.</p>
+    <p style="text-align: center;">
+        <a href="{{ link }}" style="display: inline-block; padding: 12px 24px; background-color: #6F4526; color: #FFFFFF; text-decoration: none; border-radius: 4px;">Ouvrir mon espace</a>
+    </p>
+    <p>Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
+        <a href="{{ link }}">{{ link }}</a></p>
+    <p>Ce lien est personnel : ne le partagez pas. Il vous permet de retrouver vos créneaux et leurs textes.</p>
+{% endblock %}

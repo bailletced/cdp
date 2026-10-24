@@ -62,6 +62,7 @@ use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
 use App\Chain\Infrastructure\Symfony\Security\InscriptionVoter;
+use App\Chain\Infrastructure\Twig\RichTextExtension;
 use App\Shared\Application\Port\InscriptionDirectory;
 use App\Shared\Application\Port\PriantProfileReader;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -195,6 +196,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set(EluceoCalendarFile::class)
         ->autowire()
         ->alias(CalendarFile::class, EluceoCalendarFile::class);
+
+    $services->set(RichTextExtension::class)
+        ->autoconfigure();
 
     $services->set(MailerNotifier::class)
         ->autowire()

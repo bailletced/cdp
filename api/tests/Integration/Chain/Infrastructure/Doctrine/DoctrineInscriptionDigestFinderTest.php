@@ -67,6 +67,7 @@ final class DoctrineInscriptionDigestFinderTest extends KernelTestCase
         self::assertSame((string) $earlier->getId(), $first->inscriptionId);
         self::assertSame(1, $first->inscriptionVersion);
         self::assertSame('21h00–21h30', $first->label);
+        self::assertSame('samedi 28 novembre', $first->dayLabel);
         self::assertEquals(new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('UTC')), $first->startsAt);
         self::assertEquals(new \DateTimeImmutable('2026-11-28 20:30:00', new \DateTimeZone('UTC')), $first->endsAt);
         // A slot without text yet

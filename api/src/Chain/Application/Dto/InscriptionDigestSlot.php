@@ -6,7 +6,7 @@ namespace App\Chain\Application\Dto;
 
 /**
  * One slot of a priant, as recalled in the confirmation email and its
- * agenda file (F11): the Paris label, the full text when attributed
+ * agenda file (F11): the Paris day and label, the full text when attributed
  * (RG-TX-1) and what the .ics needs (instants in UTC, inscription version).
  */
 final readonly class InscriptionDigestSlot
@@ -17,6 +17,7 @@ final readonly class InscriptionDigestSlot
         public \DateTimeImmutable $startsAt,
         public \DateTimeImmutable $endsAt,
         public string $label,
+        public string $dayLabel,
         public ?string $textTitle,
         public ?string $textSource,
         public ?string $textBody,

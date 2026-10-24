@@ -18,7 +18,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## E-mail de confirmation (US-11.1, US-11.3)
 
-- [ ] **F11-T04** · `back` Gabarit `emails/inscription_confirmation` (HTML + texte) : récapitulatif, textes complets, lien personnel, mention « heure de Paris » + test de rendu — *Dépend de* : F11-T03, F02-T13 · *Fini quand* : rendu figé en test (snapshot HTML et texte).
+- [x] **F11-T04** · `back` Gabarit `emails/inscription_confirmation` (HTML + texte) : récapitulatif, textes complets, lien personnel, mention « heure de Paris » + test de rendu — *Dépend de* : F11-T03, F02-T13 · *Fini quand* : rendu figé en test (snapshot HTML et texte).
 - [ ] **F11-T05** · `back` Listener `InscriptionsRegistered` → un seul e-mail par lot, `.ics` joint, lien via `PersonalLinkIssuer` ; rien sans e-mail (RG-NO-3) + tests fonctionnels — *Dépend de* : F11-T01, F11-T02, F11-T04, F02-T11 · *Fini quand* : 3 créneaux → 1 e-mail ; inscription sans e-mail → 0 (tests).
 
 ## Téléchargement (US-11.2)

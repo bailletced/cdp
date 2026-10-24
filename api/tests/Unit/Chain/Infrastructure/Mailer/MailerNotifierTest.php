@@ -28,7 +28,7 @@ final class MailerNotifierTest extends TestCase
                 $this->sent[] = $message;
             }
         };
-        $slot = new InscriptionDigestSlot('0193', 1, new \DateTimeImmutable('2026-11-28 19:00:00 UTC'), new \DateTimeImmutable('2026-11-28 19:30:00 UTC'), '20h00–20h30', null, null, null, null);
+        $slot = new InscriptionDigestSlot('0193', 1, new \DateTimeImmutable('2026-11-28 19:00:00 UTC'), new \DateTimeImmutable('2026-11-28 19:30:00 UTC'), '20h00–20h30', 'samedi 28 novembre', null, null, null, null);
 
         new MailerNotifier($mailer, 'no-reply@communion.test', 'Communion de prière')->confirmInscriptions(new InscriptionConfirmation(
             new Email('marie@bailletced.org'),
