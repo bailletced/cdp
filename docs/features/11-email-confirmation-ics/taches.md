@@ -23,7 +23,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Téléchargement (US-11.2)
 
-- [ ] **F11-T06** · `back` `GET /api/me/calendar.ics` (priant vérifié, édition publique, `Content-Type: text/calendar`) + tests d'acceptation — *Dépend de* : F11-T02, F10-T04 · *Fini quand* : visiteur et pass seul → refus, priant vérifié → fichier.
+- [x] **F11-T06** · `back` `GET /api/me/calendar.ics` (priant vérifié, édition publique, `Content-Type: text/calendar`) + tests d'acceptation — *Dépend de* : F11-T02, F10-T04 · *Fini quand* : visiteur et pass seul → refus, priant vérifié → fichier.
 
 ## Vérifications
 

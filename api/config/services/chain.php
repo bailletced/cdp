@@ -61,6 +61,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Mailer\MailerNotifier;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
+use App\Chain\Infrastructure\Symfony\Controller\MyCalendarController;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
 use App\Chain\Infrastructure\Symfony\Security\InscriptionVoter;
 use App\Chain\Infrastructure\Twig\RichTextExtension;
@@ -197,6 +198,11 @@ return static function (ContainerConfigurator $container): void {
     $services->set(EluceoCalendarFile::class)
         ->autowire()
         ->alias(CalendarFile::class, EluceoCalendarFile::class);
+
+    $services->set(MyCalendarController::class)
+        ->autoconfigure()
+        ->autowire()
+        ->tag('controller.service_arguments');
 
     $services->set(RichTextExtension::class)
         ->autoconfigure();
