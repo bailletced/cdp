@@ -4,6 +4,7 @@ import { useEditionSlots } from "../api/hooks";
 import { groupSlotsByPartOfDay } from "../lib/editions";
 import { parsePlanningSlots, slotTemporalState } from "../lib/planning";
 import { useNow } from "../lib/serverClock";
+import { EmptySlotsBanner } from "./EmptySlotsBanner";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
 import { LoadingState } from "./LoadingState";
@@ -20,6 +21,8 @@ import { SlotCard } from "./SlotCard";
  * and a « M'inscrire (n) » button above the grid lead to the inscription
  * page with the selected slot ids, in chronological (rank) order. Past slots
  * carry no checkbox and never enter the URL.
+ *
+ * The banner of the empty slots heads the grid (F13-T05, US-13.1).
  */
 export function PlanningGrid({ editionId }: { editionId: string }) {
   const slotsQuery = useEditionSlots(editionId);
@@ -73,6 +76,7 @@ export function PlanningGrid({ editionId }: { editionId: string }) {
 
   return (
     <div>
+      <EmptySlotsBanner slots={slots} nowMs={nowMs} />
       <section aria-label="Grille des créneaux" className="grid gap-12">
         {groups.map((group, index) => {
           const titleId = `planning-${group.partOfDay}-${group.slots[0]?.rank ?? index}`;

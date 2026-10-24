@@ -2,6 +2,7 @@ import { Checkbox } from "@heroui/react";
 import { withLocalTime } from "../lib/localTime";
 import { type PlanningSlot, slotTemporalState } from "../lib/planning";
 import { now } from "../lib/serverClock";
+import { slotCardId } from "./EmptySlotsBanner";
 import { ReadTextLink } from "./ReadTextLink";
 
 /**
@@ -70,8 +71,12 @@ export function SlotCard({
       : "border-separator bg-surface";
 
   return (
+    // The banner of the empty slots scrolls to the card and focuses it
+    // (F13-T05): an anchor, never a tab stop
     <article
-      className={`relative h-full rounded-2xl border p-4 sm:p-5 ${toneClasses}`}
+      id={slotCardId(slot.id)}
+      tabIndex={-1}
+      className={`relative h-full scroll-mt-24 rounded-2xl border p-4 outline-accent focus:outline-2 focus:outline-offset-2 sm:p-5 ${toneClasses}`}
       data-state={temporalState}
     >
       {canSelect ? (

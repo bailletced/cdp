@@ -11,6 +11,9 @@ configure({ asyncUtilTimeout: 3000 });
 // jsdom does not implement scrollTo (used by TanStack Router on navigation)
 window.scrollTo = () => undefined;
 
+// Nor scrollIntoView (the banner of the empty slots scrolls to a card, F13)
+Element.prototype.scrollIntoView = () => undefined;
+
 // jsdom does not implement matchMedia (used by HeroUI ToastProvider)
 if (!window.matchMedia) {
   window.matchMedia = (query: string): MediaQueryList => ({

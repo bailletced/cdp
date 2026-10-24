@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SITE_NAME } from "../config/site";
@@ -116,13 +116,13 @@ describe("LandingPage", () => {
     ).toBeInTheDocument();
 
     // The planning grid of the edition is displayed (US-08.2)
-    expect(
-      await screen.findByRole("region", { name: "Grille des créneaux" }),
-    ).toBeInTheDocument();
+    const grid = await screen.findByRole("region", {
+      name: "Grille des créneaux",
+    });
     expect(
       screen.getByRole("heading", { level: 2, name: "Soirée" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("19h00–19h30")).toBeInTheDocument();
+    expect(within(grid).getByText("19h00–19h30")).toBeInTheDocument();
 
     // The registration form stays available
     expect(

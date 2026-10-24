@@ -20,7 +20,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Front (US-13.1 à US-13.3)
 
-- [ ] **F13-T05** · `front` Bandeau « Il reste X créneaux vides sur 48 » + horaires cliquables (défilement, focus), « La chaîne est complète. Merci ! » + tests — *Dépend de* : F13-T02, F08-T09 · *Fini quand* : les deux états testés, annonce accessible.
+- [x] **F13-T05** · `front` Bandeau « Il reste X créneaux vides sur 48 » + horaires cliquables (défilement, focus), « La chaîne est complète. Merci ! » + tests — *Dépend de* : F13-T02, F08-T09 · *Fini quand* : les deux états testés, annonce accessible.
 - [ ] **F13-T06** · `front` Bouton « Prendre un créneau vide » : dialogue (horaire, titre du texte), « Je le prends » → `/inscription?creneaux=…`, « Un autre » (exclusion du précédent), masqué sans vide + tests — *Dépend de* : F13-T03, F01-T09 · *Fini quand* : focus géré à l'ouverture et à la fermeture du dialogue.
 - [ ] **F13-T07** · `front` Suggestion sur la confirmation : « Le prendre aussi » (un clic, mêmes informations conservées en mémoire) / « Non merci » + tests — *Dépend de* : F13-T04, F09-T19 · *Fini quand* : seconde inscription sans ressaisie (test MSW).
 

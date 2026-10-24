@@ -264,3 +264,27 @@ describe("PlanningGrid selection (US-08.5)", () => {
     expect(button.tagName).toBe("SPAN");
   });
 });
+
+describe("PlanningGrid — bandeau des créneaux vides (F13-T05)", () => {
+  it("heads the grid with the banner, whose schedules lead to the cards", async () => {
+    serveSlots([
+      slot(1, "evening", "19h00–19h30", { registrationCount: 1 }),
+      slot(2, "evening", "19h30–20h00"),
+    ]);
+
+    renderGrid();
+
+    const banner = await screen.findByRole("region", {
+      name: "Créneaux à pourvoir",
+    });
+    expect(within(banner).getByRole("status")).toHaveTextContent(
+      "Il reste 1 créneau vide sur 2",
+    );
+    within(banner).getByRole("button", { name: "19h30–20h00" }).click();
+    expect(
+      screen
+        .getByRole("region", { name: "Grille des créneaux" })
+        .querySelector("#creneau-slot-2"),
+    ).toHaveFocus();
+  });
+});
