@@ -17,6 +17,7 @@ final readonly class RegisterInscriptionsResult
         public PriantId $priantId,
         public DisplayName $displayName,
         public array $inscriptions,
+        public \DateTimeImmutable $editionEndsAt,
     ) {
     }
 }

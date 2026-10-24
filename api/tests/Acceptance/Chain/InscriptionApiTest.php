@@ -12,6 +12,7 @@ use App\Shared\Domain\Time\ParisCalendar;
 use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * Acceptance test for POST /api/inscriptions (F09-T10): the public
@@ -38,6 +39,7 @@ final class InscriptionApiTest extends ApiTestCase
 
         // Clean slate for each test (same isolation strategy as the Behat scenarios)
         $connection = $this->em->getConnection();
+        $connection->executeStatement('DELETE FROM device_pass');
         $connection->executeStatement('DELETE FROM inscription');
         $connection->executeStatement('DELETE FROM priant');
         $connection->executeStatement('DELETE FROM slot');
@@ -72,6 +74,51 @@ final class InscriptionApiTest extends ApiTestCase
         // Persisted: one priant, two inscriptions (RG-PL-1: one inscription counts for one).
         self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM priant'));
         self::assertSame(2, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM inscription'));
+    }
+
+    public function testTheDeviceGetsAPassCoveringItsNewInscriptions(): void
+    {
+        $edition = $this->createOpenEdition();
+
+        $response = $this->postJson('/api/inscriptions', $this->validBody($edition, 0, 1));
+
+        self::assertSame(201, $response['status']);
+        $cookie = $this->passCookie();
+        self::assertNotNull($cookie, 'RG-IN-6: the device that registered gets the cdp_pass cookie.');
+        self::assertTrue($cookie->isHttpOnly());
+        self::assertTrue($cookie->isSecure());
+        self::assertSame('lax', $cookie->getSameSite());
+        // The pass lasts until the end of the edition + 7 days
+        self::assertSame($edition->getStartsAt()->modify('+24 hours +7 days')->getTimestamp(), $cookie->getExpiresTime());
+
+        $data = json_decode($response['content'], true, 512, \JSON_THROW_ON_ERROR);
+        self::assertEqualsCanonicalizing(array_column($data['inscriptions'], 'id'), $this->coveredInscriptionIds());
+    }
+
+    public function testASecondInscriptionFromTheSameDeviceEnrichesItsPass(): void
+    {
+        $edition = $this->createOpenEdition();
+        // The cdp_pass cookie is Secure: the browser only sends it back over HTTPS
+        $this->client->setServerParameter('HTTPS', 'on');
+
+        $this->postJson('/api/inscriptions', $this->validBody($edition, 0));
+        $token = $this->passCookie()?->getValue();
+        $this->postJson('/api/inscriptions', $this->validBody($edition, 1));
+
+        self::assertSame($token, $this->passCookie()?->getValue());
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM device_pass'));
+        self::assertCount(2, $this->coveredInscriptionIds());
+    }
+
+    public function testAnInvalidRegistrationGrantsNoPass(): void
+    {
+        $edition = $this->createOpenEdition();
+
+        $response = $this->postJson('/api/inscriptions', [...$this->validBody($edition, 0), 'email' => 'not-an-email']);
+
+        self::assertSame(422, $response['status']);
+        self::assertNull($this->passCookie());
+        self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM device_pass'));
     }
 
     public function testMissingEmailReturns422OnEmail(): void
@@ -259,6 +306,42 @@ final class InscriptionApiTest extends ApiTestCase
         self::assertSame(201, $response['status']);
         self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM priant'));
         self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM inscription'));
+        self::assertNull($this->passCookie());
+    }
+
+    /**
+     * @return array{slotIds: list<string>, displayName: string, email: string, consent: bool}
+     */
+    private function validBody(Edition $edition, int ...$slotIndexes): array
+    {
+        return [
+            'slotIds' => array_map(static fn (int $index): string => $edition->getSlots()[$index]->getId()->value->toRfc4122(), $slotIndexes),
+            'displayName' => 'Famille Martin',
+            'email' => 'famille.martin@bailletced.org',
+            'consent' => true,
+        ];
+    }
+
+    private function passCookie(): ?Cookie
+    {
+        foreach ($this->client->getResponse()->headers->getCookies() as $cookie) {
+            if ('cdp_pass' === $cookie->getName()) {
+                return $cookie;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function coveredInscriptionIds(): array
+    {
+        $json = $this->em->getConnection()->fetchOne('SELECT inscription_ids FROM device_pass');
+        \assert(\is_string($json));
+
+        return json_decode($json, true, 512, \JSON_THROW_ON_ERROR);
     }
 
     /**

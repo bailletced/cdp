@@ -80,6 +80,8 @@ final class RegisterInscriptionsHandlerTest extends TestCase
 
         self::assertCount(2, $result->inscriptions);
         self::assertSame(2, $this->inscriptionRepository->countByEdition($edition->getId()));
+        // The device pass lasts until the end of the edition (+ 7 days)
+        self::assertEquals($edition->getEndsAt(), $result->editionEndsAt);
 
         self::assertCount(2, $this->eventBus->dispatched);
         $registered = $this->eventBus->dispatched[0];

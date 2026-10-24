@@ -124,6 +124,14 @@ class Edition
         return $this->opensAt;
     }
 
+    /**
+     * The edition lasts 24 real hours from its start (RG-ED-2).
+     */
+    public function getEndsAt(): \DateTimeImmutable
+    {
+        return $this->startsAt->modify('+24 hours');
+    }
+
     public function getLifecycle(): string
     {
         return $this->lifecycle;
@@ -160,12 +168,10 @@ class Edition
             return 'draft';
         }
 
-        $endsAt = $this->startsAt->modify('+24 hours');
-
         return match (true) {
             $now < $this->opensAt => 'scheduled',
             $now < $this->startsAt => 'open',
-            $now < $endsAt => 'running',
+            $now < $this->getEndsAt() => 'running',
             default => 'finished',
         };
     }

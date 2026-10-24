@@ -29,6 +29,19 @@ final class EditionTest extends TestCase
         self::assertContainsOnlyInstancesOf(Slot::class, $edition->getSlots());
     }
 
+    public function testItEndsTwentyFourHoursAfterItsStart(): void
+    {
+        $edition = Edition::create(
+            new EditionTitle('24 heures de prière'),
+            new Presentation(''),
+            new \DateTimeImmutable('2026-11-28 19:00:00', new \DateTimeZone('UTC')),
+            new \DateTimeImmutable('2026-11-13 19:00:00', new \DateTimeZone('UTC')),
+            new ParisCalendar(),
+        );
+
+        self::assertEquals(new \DateTimeImmutable('2026-11-29 19:00:00', new \DateTimeZone('UTC')), $edition->getEndsAt());
+    }
+
     public function testNewEditionIsInDraftLifecycle(): void
     {
         $edition = Edition::create(

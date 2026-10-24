@@ -122,7 +122,7 @@ final readonly class RegisterInscriptionsHandler
             $this->eventBus->dispatch(new PriantRegistered($priant->getId()->value->toRfc4122(), $command->email));
         }
 
-        return new RegisterInscriptionsResult($priant->getId(), $priant->getDisplayName(), $inscriptions);
+        return new RegisterInscriptionsResult($priant->getId(), $priant->getDisplayName(), $inscriptions, $edition->getEndsAt());
     }
 
     /**

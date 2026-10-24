@@ -19,6 +19,7 @@ use App\Chain\Infrastructure\ApiPlatform\Payload\RegisterInscriptionsPayload;
 use App\Chain\Infrastructure\ApiPlatform\Resource\InscriptionResource;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Port\CurrentViewer;
+use App\Shared\Application\Port\DevicePassIssuer;
 use App\Shared\Domain\ValueObject\Email;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Uid\Uuid;
@@ -34,7 +35,8 @@ use Symfony\Component\Validator\ConstraintViolationList;
  * is enforced (RG-IN-5: mandatory off-session, or when the authenticated
  * priant never consented), and the command is dispatched. Domain exceptions
  * propagate to API Platform's error handling (404 unknown slot, 409 already
- * registered, edition closed or slot past).
+ * registered, edition closed or slot past). Once registered, the device is
+ * granted its pass (cdp_pass cookie, RG-IN-6).
  *
  * @implements ProcessorInterface<RegisterInscriptionsPayload, InscriptionResource>
  */
@@ -44,6 +46,7 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         private CommandBusInterface $commandBus,
         private PriantRepositoryInterface $priantRepository,
         private CurrentViewer $currentViewer,
+        private DevicePassIssuer $devicePassIssuer,
     ) {
     }
 
@@ -90,6 +93,12 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         if (!$result instanceof RegisterInscriptionsResult) {
             throw new \LogicException(\sprintf('Expected the command bus to return a %s, got %s.', RegisterInscriptionsResult::class, get_debug_type($result)));
         }
+
+        // RG-IN-6: the device that registered gets the read-only « inscrit » view
+        $this->devicePassIssuer->grant(
+            array_map(static fn (Inscription $inscription): string => $inscription->getId()->value->toRfc4122(), $result->inscriptions),
+            $result->editionEndsAt,
+        );
 
         return new InscriptionResource(
             id: $result->inscriptions[0]->getId()->value->toRfc4122(),

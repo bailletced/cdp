@@ -23,6 +23,7 @@ use App\Shared\Domain\Security\Viewer;
 use App\Shared\Domain\ValueObject\Email;
 use App\Tests\Unit\Shared\Application\Command\Fixture\FakeCommandBus;
 use App\Tests\Unit\Shared\Application\Command\Fixture\ThrowingCommandBus;
+use App\Tests\Unit\Shared\Application\Port\Fixture\DevicePassIssuerSpy;
 use App\Tests\Unit\Shared\Application\Port\Fixture\FakeCurrentViewer;
 use Doctrine\DBAL\Driver\Exception as DriverException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -30,11 +31,32 @@ use PHPUnit\Framework\TestCase;
 
 final class RegisterInscriptionsProcessorTest extends TestCase
 {
+    private const string EDITION_ENDS_AT = '2026-11-29 19:00:00';
+
     private InMemoryPriantRepository $priantRepository;
+
+    private DevicePassIssuerSpy $devicePassIssuer;
 
     protected function setUp(): void
     {
         $this->priantRepository = new InMemoryPriantRepository();
+        $this->devicePassIssuer = new DevicePassIssuerSpy();
+    }
+
+    public function testTheDeviceIsGrantedAPassCoveringTheCreatedInscriptions(): void
+    {
+        $result = self::successfulResult();
+        $processor = $this->processor(new FakeCommandBus($result), Viewer::visitor());
+
+        $processor->process(self::validPayload(), new Post(), [], []);
+
+        self::assertSame([[
+            'inscriptionIds' => [
+                $result->inscriptions[0]->getId()->value->toRfc4122(),
+                $result->inscriptions[1]->getId()->value->toRfc4122(),
+            ],
+            'editionEndsAt' => $result->editionEndsAt,
+        ]], $this->devicePassIssuer->granted);
     }
 
     public function testItDispatchesRegisterInscriptionsAndReturnsTheCreatedInscriptions(): void
@@ -88,6 +110,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
         self::assertNotNull($resource->id);
         self::assertNull($resource->priantId);
         self::assertSame([], $resource->inscriptions);
+        self::assertSame([], $this->devicePassIssuer->granted);
     }
 
     public function testMissingSlotIdsThrowsViolationOnSlotIds(): void
@@ -210,6 +233,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             new ThrowingCommandBus(self::uniqueViolationOn('inscription_slot_priant_unique')),
             $this->priantRepository,
             new FakeCurrentViewer(Viewer::visitor()),
+            $this->devicePassIssuer,
         );
 
         $this->expectException(AlreadyRegisteredException::class);
@@ -225,6 +249,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             new ThrowingCommandBus(self::uniqueViolationOn('priant_email_unique')),
             $this->priantRepository,
             new FakeCurrentViewer(Viewer::visitor()),
+            $this->devicePassIssuer,
         );
 
         $this->expectException(UniqueConstraintViolationException::class);
@@ -238,6 +263,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $commandBus,
             $this->priantRepository,
             new FakeCurrentViewer($viewer),
+            $this->devicePassIssuer,
         );
     }
 
@@ -291,6 +317,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
                 new Inscription($editionId, $slot1, $priantId),
                 new Inscription($editionId, $slot2, $priantId),
             ],
+            new \DateTimeImmutable(self::EDITION_ENDS_AT, new \DateTimeZone('UTC')),
         );
     }
 }
