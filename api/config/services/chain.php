@@ -43,6 +43,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminTextProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\MyInscriptionsProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\SlotSuggestionProvider;
@@ -294,6 +295,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(PublicEditionSlotsProvider::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(MyInscriptionsProvider::class)
         ->autoconfigure()
         ->autowire();
 

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mes créneaux",
+  "description": "GET /api/me/inscriptions — réservé au priant vérifié : son nom et ses créneaux d'une édition, jamais ceux des autres.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["@context", "@id", "@type", "editionId", "editionTitle", "displayName", "inscriptions"],
+  "properties": {
+    "@context": { "const": "/api/contexts/MyInscriptions" },
+    "@id": { "const": "/api/me/inscriptions" },
+    "@type": { "const": "MyInscriptions" },
+    "editionId": { "type": "string", "format": "uuid" },
+    "editionTitle": { "type": "string", "minLength": 1 },
+    "displayName": { "type": "string", "minLength": 1 },
+    "inscriptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "slotId", "startsAt", "endsAt", "label", "dayLabel", "textTitle", "textSource", "state", "actions"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "slotId": { "type": "string", "format": "uuid" },
+          "startsAt": { "type": "string", "format": "date-time" },
+          "endsAt": { "type": "string", "format": "date-time" },
+          "label": { "type": "string", "minLength": 1 },
+          "dayLabel": { "type": "string", "minLength": 1 },
+          "textTitle": { "type": ["string", "null"] },
+          "textSource": { "type": ["string", "null"] },
+          "state": { "enum": ["past", "current", "future"] },
+          "actions": { "type": "array", "items": { "enum": ["cancel"] } }
+        }
+      }
+    }
+  }
+}

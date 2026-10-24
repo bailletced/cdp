@@ -1688,6 +1688,63 @@
                 "parameters": []
             }
         },
+        "/api/me/inscriptions": {
+            "get": {
+                "operationId": "api_meinscriptions_get",
+                "tags": [
+                    "MyInscriptions"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MyInscriptions resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MyInscriptions.jsonld"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a MyInscriptions resource.",
+                "description": "Retrieves a MyInscriptions resource.",
+                "parameters": [
+                    {
+                        "name": "edition",
+                        "in": "query",
+                        "description": "\u00c9dition \u00e0 afficher ; l\u2019\u00e9dition publique par d\u00e9faut.",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            }
+        },
         "/api/editions/current": {
             "get": {
                 "operationId": "api_editionscurrent_get",
@@ -3053,6 +3110,95 @@
                     }
                 ]
             },
+            "MyInscriptions.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "editionId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "editionTitle": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "displayName": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "inscriptions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "slotId": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "startsAt": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "endsAt": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "label": {
+                                            "type": "string"
+                                        },
+                                        "dayLabel": {
+                                            "type": "string"
+                                        },
+                                        "textTitle": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "textSource": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "state": {
+                                            "type": "string",
+                                            "enum": [
+                                                "past",
+                                                "current",
+                                                "future"
+                                            ]
+                                        },
+                                        "actions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "cancel"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
             "PublicEdition.jsonld": {
                 "allOf": [
                     {
@@ -3298,6 +3444,10 @@
         {
             "name": "Inscription",
             "description": "Resource 'Inscription' operations."
+        },
+        {
+            "name": "MyInscriptions",
+            "description": "Resource 'MyInscriptions' operations."
         },
         {
             "name": "PublicEdition",

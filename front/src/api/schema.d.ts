@@ -268,6 +268,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/inscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a MyInscriptions resource.
+         * @description Retrieves a MyInscriptions resource.
+         */
+        get: operations["api_meinscriptions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/editions/current": {
         parameters: {
             query?: never;
@@ -620,6 +640,28 @@ export interface components {
             isOrganizer?: boolean;
             displayName?: string | null;
             consentGiven?: boolean;
+        };
+        "MyInscriptions.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            editionId?: string | null;
+            editionTitle?: string | null;
+            displayName?: string | null;
+            inscriptions?: {
+                /** Format: uuid */
+                id?: string;
+                /** Format: uuid */
+                slotId?: string;
+                /** Format: date-time */
+                startsAt?: string;
+                /** Format: date-time */
+                endsAt?: string;
+                label?: string;
+                dayLabel?: string;
+                textTitle?: string | null;
+                textSource?: string | null;
+                /** @enum {string} */
+                state?: "past" | "current" | "future";
+                actions?: "cancel"[];
+            }[];
         };
         "PublicEdition.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;
@@ -1587,6 +1629,40 @@ export interface operations {
                 };
                 content: {
                     "application/ld+json": components["schemas"]["Me.jsonld"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_meinscriptions_get: {
+        parameters: {
+            query?: {
+                /** @description Édition à afficher ; l’édition publique par défaut. */
+                edition?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyInscriptions resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MyInscriptions.jsonld"];
                 };
             };
             /** @description Not found */
