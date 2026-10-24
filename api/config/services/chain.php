@@ -8,6 +8,7 @@ use App\Chain\Application\CreateTextHandler;
 use App\Chain\Application\DeleteTextHandler;
 use App\Chain\Application\DistributeTextsHandler;
 use App\Chain\Application\Port\HtmlSanitizer;
+use App\Chain\Application\Port\Notifier;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
 use App\Chain\Application\Query\PlanningViewFinder;
@@ -52,6 +53,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryInscriptionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
+use App\Chain\Infrastructure\Mailer\MailerNotifier;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
@@ -181,6 +183,10 @@ return static function (ContainerConfigurator $container): void {
         ->autoconfigure()
         ->autowire()
         ->alias(PriantProfileReader::class, DoctrinePriantProfileReader::class);
+
+    $services->set(MailerNotifier::class)
+        ->autowire()
+        ->alias(Notifier::class, MailerNotifier::class);
 
     $services->set(VisibilityPolicy::class)
         ->autowire();
