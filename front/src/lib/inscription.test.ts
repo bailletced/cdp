@@ -24,6 +24,8 @@ function slot(id: string, rank: number): PlanningSlot {
     textTitle: null,
     textSource: null,
     registrationCount: 0,
+    participants: null,
+    mine: false,
   };
 }
 

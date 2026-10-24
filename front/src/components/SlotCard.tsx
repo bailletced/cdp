@@ -16,6 +16,10 @@ import { now } from "../lib/serverClock";
  *
  * With `selectable`, a not-yet-past slot gets a checkbox (US-08.5, F08-T10):
  * a past slot is never selectable.
+ *
+ * For an inscrit of the edition or an organizer (F10-T10, US-10.1), the card
+ * lists the priants with a « a prié » check (RG-LV-2), and says « Vous » on
+ * the viewer's own slot. A visitor never gets the names (RG-PL-4).
  */
 export function SlotCard({
   slot,
@@ -91,7 +95,29 @@ export function SlotCard({
         <p className="text-muted">
           {registrationCount} priant{registrationCount > 1 ? "s" : ""}
         </p>
+        {slot.mine ? (
+          <p className="rounded-full border border-accent px-3 font-bold text-accent">
+            Vous
+          </p>
+        ) : null}
       </div>
+      {slot.participants && slot.participants.length > 0 ? (
+        <ul aria-label="Priants du créneau" className="mt-2 space-y-1">
+          {slot.participants.map((participant, index) => (
+            // Two priants may share a display name: the position keeps keys unique
+            // biome-ignore lint/suspicious/noArrayIndexKey: the list is never reordered on the client
+            <li className="flex items-center gap-2" key={index}>
+              <span>{participant.name}</span>
+              {participant.prayed ? (
+                <span className="flex items-center gap-1 text-success">
+                  <CheckIcon />
+                  <span className="sr-only">a prié</span>
+                </span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {slot.textTitle ? (
         <div className="mt-3 border-t border-separator pt-3">
           <p className="font-display text-xl leading-snug font-medium">
@@ -107,6 +133,22 @@ export function SlotCard({
         </p>
       )}
     </article>
+  );
+}
+
+/** Check of « a prié »: decorative, the hidden label carries the information. */
+function CheckIcon() {
+  return (
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16">
+      <path
+        d="M3 8.5l3 3 7-7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

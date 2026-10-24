@@ -4,6 +4,10 @@
  * label is the Paris wall-clock range (« 19h00–19h30 »), the state is
  * computed by the API against the server clock. registrationCount is the
  * number of priants on the slot (RG-PL-1, F09-T13).
+ *
+ * F10: participants are the names and pointages of the priants, given only
+ * to the inscrits of the edition and the organizers — null otherwise
+ * (RG-PL-4). mine marks the slots of the viewer (session or device pass).
  */
 export interface PlanningSlot {
   id: string;
@@ -16,6 +20,14 @@ export interface PlanningSlot {
   textTitle: string | null;
   textSource: string | null;
   registrationCount: number;
+  participants: PlanningParticipant[] | null;
+  mine: boolean;
+}
+
+/** A priant registered on a slot, and whether they have prayed (RG-LV-2). */
+export interface PlanningParticipant {
+  name: string;
+  prayed: boolean;
 }
 
 /** Temporal state of a slot: past, current (running now) or future. */
@@ -46,7 +58,8 @@ export function slotTemporalState(
 
 function isPlanningSlot(
   slot: unknown,
-): slot is Omit<PlanningSlot, "registrationCount"> & Record<string, unknown> {
+): slot is Omit<PlanningSlot, "registrationCount" | "participants" | "mine"> &
+  Record<string, unknown> {
   if (typeof slot !== "object" || slot === null) {
     return false;
   }
@@ -70,6 +83,33 @@ function isPlanningSlot(
   );
 }
 
+function isParticipant(
+  participant: unknown,
+): participant is PlanningParticipant {
+  if (typeof participant !== "object" || participant === null) {
+    return false;
+  }
+
+  const candidate = participant as Record<string, unknown>;
+
+  return (
+    typeof candidate.name === "string" && typeof candidate.prayed === "boolean"
+  );
+}
+
+/** Masked participants stay null: only a list means the names are visible. */
+function parseParticipants(
+  participants: unknown,
+): PlanningParticipant[] | null {
+  if (!Array.isArray(participants)) {
+    return null;
+  }
+
+  return participants
+    .filter(isParticipant)
+    .map(({ name, prayed }) => ({ name, prayed }));
+}
+
 /**
  * The OpenAPI schema types slots as unknown[]: narrow them to PlanningSlot,
  * dropping malformed entries instead of failing the whole grid.
@@ -91,5 +131,7 @@ export function parsePlanningSlots(slots: unknown): PlanningSlot[] {
     textSource: slot.textSource ?? null,
     registrationCount:
       typeof slot.registrationCount === "number" ? slot.registrationCount : 0,
+    participants: parseParticipants(slot.participants),
+    mine: slot.mine === true,
   }));
 }

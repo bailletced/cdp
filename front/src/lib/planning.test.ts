@@ -17,6 +17,8 @@ function makeSlot(overrides: Partial<PlanningSlot> = {}): PlanningSlot {
     textTitle: null,
     textSource: null,
     registrationCount: 0,
+    participants: null,
+    mine: false,
     ...overrides,
   };
 }
@@ -56,6 +58,27 @@ describe("parsePlanningSlots", () => {
 
     expect(counted.registrationCount).toBe(3);
     expect(uncounted.registrationCount).toBe(0);
+  });
+
+  it("keeps the participants seen by an inscrit, and the viewer's slots (F10)", () => {
+    const [seen, masked] = parsePlanningSlots([
+      {
+        ...makeSlot(),
+        participants: [
+          { name: "Marie Dupont", prayed: true },
+          { name: 42, prayed: false },
+        ],
+        mine: true,
+      },
+      { ...makeSlot({ rank: 2 }), participants: null, mine: undefined },
+    ]);
+
+    // Malformed participants are dropped, the others kept in order
+    expect(seen.participants).toEqual([{ name: "Marie Dupont", prayed: true }]);
+    expect(seen.mine).toBe(true);
+    // Masked by the API (RG-PL-4): null, never an empty list
+    expect(masked.participants).toBeNull();
+    expect(masked.mine).toBe(false);
   });
 
   it("keeps well-formed slots", () => {

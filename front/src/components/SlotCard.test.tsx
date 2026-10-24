@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { contrastRatio } from "../lib/contrast";
 import type { PlanningSlot } from "../lib/planning";
@@ -36,6 +36,8 @@ function makeSlot(overrides: Partial<PlanningSlot> = {}): PlanningSlot {
     textTitle: "Oraison de Thérèse",
     textSource: "Thérèse de Lisieux",
     registrationCount: 0,
+    participants: null,
+    mine: false,
     ...overrides,
   };
 }
@@ -225,9 +227,10 @@ describe("SlotCard contrast (AA, spec §8.5)", () => {
   it("keeps every text color of the card at level AA on the card surface", () => {
     const surface = token("surface");
 
-    // horaire, title and count (foreground); « À pourvoir » and
-    // « Créneau passé » (muted); « Occupé » (success)
-    for (const name of ["foreground", "muted", "success"]) {
+    // horaire, title, count and names (foreground); « À pourvoir » and
+    // « Créneau passé » (muted); « Occupé » and « a prié » (success);
+    // « Vous » (accent)
+    for (const name of ["foreground", "muted", "success", "accent"]) {
       expect(
         contrastRatio(token(name), surface),
         `${name} on surface must reach WCAG AA (≥ 4.5)`,
@@ -239,5 +242,76 @@ describe("SlotCard contrast (AA, spec §8.5)", () => {
     expect(
       contrastRatio(token("border"), token("surface")),
     ).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe("SlotCard — vue inscrit (F10-T10, US-10.1)", () => {
+  it("shows no name to a visitor (RG-PL-4)", () => {
+    render(
+      <SlotCard
+        slot={makeSlot({ registrationCount: 2, participants: null })}
+        registrationCount={2}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("list", { name: "Priants du créneau" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("2 priants")).toBeInTheDocument();
+  });
+
+  it("lists the priants of the slot for an inscrit, with their pointage (RG-LV-2)", () => {
+    render(
+      <SlotCard
+        slot={makeSlot({
+          registrationCount: 2,
+          participants: [
+            { name: "Marie Dupont", prayed: true },
+            { name: "Famille Martin", prayed: false },
+          ],
+        })}
+        registrationCount={2}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    const priants = screen.getByRole("list", { name: "Priants du créneau" });
+    const [marie, martin] = within(priants).getAllByRole("listitem");
+    expect(marie).toHaveTextContent("Marie Dupont");
+    // The check carries an accessible label, never the icon alone
+    expect(within(marie).getByText("a prié")).toBeInTheDocument();
+    expect(marie.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(martin).toHaveTextContent("Famille Martin");
+    expect(within(martin).queryByText("a prié")).not.toBeInTheDocument();
+  });
+
+  it("says « Vous » on the viewer's own slot", () => {
+    const { rerender } = render(
+      <SlotCard
+        slot={makeSlot({
+          registrationCount: 1,
+          participants: [{ name: "Marie Dupont", prayed: false }],
+          mine: true,
+        })}
+        registrationCount={1}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    expect(screen.getByText("Vous")).toBeInTheDocument();
+
+    rerender(
+      <SlotCard
+        slot={makeSlot({
+          registrationCount: 1,
+          participants: [{ name: "Marie Dupont", prayed: false }],
+        })}
+        registrationCount={1}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    expect(screen.queryByText("Vous")).not.toBeInTheDocument();
   });
 });
