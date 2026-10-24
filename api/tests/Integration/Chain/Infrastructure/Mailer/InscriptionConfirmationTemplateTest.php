@@ -56,8 +56,8 @@ final class InscriptionConfirmationTemplateTest extends KernelTestCase
             'Marie Dupont',
             '24 heures de prière',
             [
-                new InscriptionDigestSlot('0193a1b2-0000-7000-8000-000000000001', 1, new \DateTimeImmutable('2026-11-28 22:30', $utc), new \DateTimeImmutable('2026-11-28 23:00', $utc), '23h30–0h00', 'samedi 28 novembre', 'Que rien ne te trouble', 'Thérèse d’Avila', '<p>Que rien ne te trouble,<br>que rien ne t’effraie.</p><blockquote><p>Dieu seul suffit.</p></blockquote>', "Relire lentement.\nS’arrêter sur un mot."),
-                new InscriptionDigestSlot('0193a1b2-0000-7000-8000-000000000002', 1, new \DateTimeImmutable('2026-11-28 23:00', $utc), new \DateTimeImmutable('2026-11-28 23:30', $utc), '0h00–0h30', 'dimanche 29 novembre', null, null, null, null),
+                new InscriptionDigestSlot('0193a1b2-0000-7000-8000-000000000001', '0193a1b2-0000-7000-8000-0000000000a1', 1, new \DateTimeImmutable('2026-11-28 22:30', $utc), new \DateTimeImmutable('2026-11-28 23:00', $utc), '23h30–0h00', 'samedi 28 novembre', 'Que rien ne te trouble', 'Thérèse d’Avila', '<p>Que rien ne te trouble,<br>que rien ne t’effraie.</p><blockquote><p>Dieu seul suffit.</p></blockquote>', "Relire lentement.\nS’arrêter sur un mot."),
+                new InscriptionDigestSlot('0193a1b2-0000-7000-8000-000000000002', '0193a1b2-0000-7000-8000-0000000000a2', 1, new \DateTimeImmutable('2026-11-28 23:00', $utc), new \DateTimeImmutable('2026-11-28 23:30', $utc), '0h00–0h30', 'dimanche 29 novembre', null, null, null, null),
             ],
             'https://communion.test/auth/connexion?user=0193&expires=1&hash=abc',
             "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n",

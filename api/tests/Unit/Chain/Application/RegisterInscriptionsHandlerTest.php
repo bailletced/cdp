@@ -83,14 +83,16 @@ final class RegisterInscriptionsHandlerTest extends TestCase
         // The device pass lasts until the end of the edition (+ 7 days)
         self::assertEquals($edition->getEndsAt(), $result->editionEndsAt);
 
+        // The account is linked (PriantRegistered) before the confirmation is
+        // sent (InscriptionsRegistered): the worker consumes them in order
         self::assertCount(2, $this->eventBus->dispatched);
-        $registered = $this->eventBus->dispatched[0];
+        $registered = $this->eventBus->dispatched[1];
         self::assertInstanceOf(InscriptionsRegistered::class, $registered);
         self::assertEquals($priant->getId(), $registered->priantId);
         self::assertEquals($edition->getId(), $registered->editionId);
         self::assertCount(2, $registered->slotIds);
 
-        $priantRegistered = $this->eventBus->dispatched[1];
+        $priantRegistered = $this->eventBus->dispatched[0];
         self::assertInstanceOf(PriantRegistered::class, $priantRegistered);
         self::assertSame($priant->getId()->value->toRfc4122(), $priantRegistered->priantId);
         self::assertEquals(new Email('famille.martin@bailletced.org'), $priantRegistered->email);
@@ -161,7 +163,7 @@ final class RegisterInscriptionsHandlerTest extends TestCase
         // priants have no email, F16).
         self::assertNotEquals($first->priantId, $second->priantId);
         self::assertCount(4, $this->eventBus->dispatched);
-        $priantRegistered = $this->eventBus->dispatched[1];
+        $priantRegistered = $this->eventBus->dispatched[0];
         self::assertInstanceOf(PriantRegistered::class, $priantRegistered);
         self::assertNull($priantRegistered->email);
     }

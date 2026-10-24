@@ -66,6 +66,7 @@ final class DoctrineInscriptionDigestFinderTest extends KernelTestCase
         // 19:00 UTC is 20h00 in Paris: slot n° 3 starts at 21h00
         self::assertSame((string) $earlier->getId(), $first->inscriptionId);
         self::assertSame(1, $first->inscriptionVersion);
+        self::assertSame((string) $edition->getSlots()[2]->getId(), $first->slotId);
         self::assertSame('21h00–21h30', $first->label);
         self::assertSame('samedi 28 novembre', $first->dayLabel);
         self::assertEquals(new \DateTimeImmutable('2026-11-28 20:00:00', new \DateTimeZone('UTC')), $first->startsAt);

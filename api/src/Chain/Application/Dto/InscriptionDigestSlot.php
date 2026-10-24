@@ -13,6 +13,7 @@ final readonly class InscriptionDigestSlot
 {
     public function __construct(
         public string $inscriptionId,
+        public string $slotId,
         public int $inscriptionVersion,
         public \DateTimeImmutable $startsAt,
         public \DateTimeImmutable $endsAt,

@@ -194,6 +194,7 @@ return static function (ContainerConfigurator $container): void {
             new Symfony\Component\DependencyInjection\Reference(UserProvider::class),
             new Symfony\Component\DependencyInjection\Reference('security.authenticator.login_link_handler.main'),
             new Symfony\Component\DependencyInjection\Reference(ClockInterface::class),
+            new Symfony\Component\DependencyInjection\Reference(AccountRepositoryInterface::class),
         ])
         ->alias(PersonalLinkIssuer::class, LoginLinkPersonalLinkIssuer::class)
 

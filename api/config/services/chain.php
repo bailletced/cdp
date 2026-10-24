@@ -17,6 +17,7 @@ use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
 use App\Chain\Application\RegisterInscriptionsHandler;
 use App\Chain\Application\ScheduleEditionHandler;
+use App\Chain\Application\SendConfirmationOnInscriptionsRegistered;
 use App\Chain\Application\UnscheduleEditionHandler;
 use App\Chain\Application\UpdateEditionHandler;
 use App\Chain\Application\UpdateTextHandler;
@@ -199,6 +200,10 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set(RichTextExtension::class)
         ->autoconfigure();
+
+    $services->set(SendConfirmationOnInscriptionsRegistered::class)
+        ->autoconfigure()
+        ->autowire();
 
     $services->set(MailerNotifier::class)
         ->autowire()

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Access\Infrastructure\Symfony\Security;
 
+use App\Access\Domain\Repository\AccountRepositoryInterface;
 use App\Shared\Application\Dto\PersonalLink;
 use App\Shared\Application\Port\PersonalLinkIssuer;
+use App\Shared\Domain\ValueObject\Email;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 
@@ -25,6 +27,7 @@ final class LoginLinkPersonalLinkIssuer implements PersonalLinkIssuer
         private UserProvider $userProvider,
         private LoginLinkHandlerInterface $loginLinkHandler,
         private ClockInterface $clock,
+        private AccountRepositoryInterface $accountRepository,
     ) {
     }
 
@@ -38,6 +41,17 @@ final class LoginLinkPersonalLinkIssuer implements PersonalLinkIssuer
         $details = $this->loginLinkHandler->createLoginLink($user, null, $lifetime);
 
         return new PersonalLink($details->getUrl(), $details->getExpiresAt());
+    }
+
+    public function issueForEmail(Email $email, ?\DateTimeImmutable $editionEndsAt = null): PersonalLink
+    {
+        $account = $this->accountRepository->findByEmail($email);
+
+        if (null === $account) {
+            throw new \RuntimeException('No account is linked to this email yet.');
+        }
+
+        return $this->issue($account->getId()->value->toRfc4122(), $editionEndsAt);
     }
 
     /**

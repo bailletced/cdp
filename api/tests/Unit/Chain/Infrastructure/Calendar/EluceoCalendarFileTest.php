@@ -83,6 +83,6 @@ final class EluceoCalendarFileTest extends TestCase
     {
         $utc = new \DateTimeZone('UTC');
 
-        return new InscriptionDigestSlot($inscriptionId, $version, new \DateTimeImmutable($startsAtUtc, $utc), new \DateTimeImmutable($endsAtUtc, $utc), $label, 'samedi 28 novembre', $textTitle, null === $textTitle ? null : 'Source', null === $textTitle ? null : '<p>Texte.</p>', null);
+        return new InscriptionDigestSlot($inscriptionId, '0193a1b2-0000-7000-8000-0000000000ff', $version, new \DateTimeImmutable($startsAtUtc, $utc), new \DateTimeImmutable($endsAtUtc, $utc), $label, 'samedi 28 novembre', $textTitle, null === $textTitle ? null : 'Source', null === $textTitle ? null : '<p>Texte.</p>', null);
     }
 }

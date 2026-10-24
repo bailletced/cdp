@@ -110,17 +110,19 @@ final readonly class RegisterInscriptionsHandler
             $inscriptions[] = $inscription;
         }
 
+        if ($isNewPriant) {
+            // Integration event (Shared) so the Access BC can link the account
+            // to the priant without depending on Chain (F09-T09). Dispatched
+            // first: the worker consumes the events in order, so the account
+            // exists when the confirmation email issues the personal link (F11).
+            $this->eventBus->dispatch(new PriantRegistered($priant->getId()->value->toRfc4122(), $command->email));
+        }
+
         $this->eventBus->dispatch(new InscriptionsRegistered(
             $priant->getId(),
             $edition->getId(),
             array_map(static fn (Slot $slot): SlotId => $slot->getId(), $slots),
         ));
-
-        if ($isNewPriant) {
-            // Integration event (Shared) so the Access BC can link the account
-            // to the priant without depending on Chain (F09-T09).
-            $this->eventBus->dispatch(new PriantRegistered($priant->getId()->value->toRfc4122(), $command->email));
-        }
 
         return new RegisterInscriptionsResult($priant->getId(), $priant->getDisplayName(), $inscriptions, $edition->getEndsAt());
     }

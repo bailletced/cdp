@@ -65,6 +65,7 @@ final class LoginLinkPersonalLinkIssuerTest extends TestCase
             new UserProvider($this->accountRepository, $this->organizerRepository),
             $loginLinkHandler,
             $this->clock,
+            $this->accountRepository,
         );
     }
 
@@ -82,6 +83,30 @@ final class LoginLinkPersonalLinkIssuerTest extends TestCase
             $editionEndsAt->modify('+7 days')->getTimestamp(),
             $link->expiresAt->getTimestamp()
         );
+    }
+
+    public function testALinkIsIssuedForTheAccountOfAnEmail(): void
+    {
+        $uuid = Uuid::v7();
+        $account = new Account(new AccountId($uuid), new Email('marie@bailletced.org'));
+        $this->accountRepository->method('findByEmail')->willReturn($account);
+        $this->accountRepository->method('findById')->willReturn($account);
+        $editionEndsAt = $this->clock->now()->modify('+2 days');
+
+        $link = $this->issuer->issueForEmail(new Email('marie@bailletced.org'), $editionEndsAt);
+
+        $this->assertSame(self::LINK_URL, $link->url);
+        $this->assertSame(9 * 24 * 60 * 60, $this->capturedLifetime);
+    }
+
+    public function testAnEmailWithoutAccountYetGetsNoLink(): void
+    {
+        $this->accountRepository->method('findByEmail')->willReturn(null);
+
+        // The account is linked by another listener: the caller retries later
+        $this->expectException(\RuntimeException::class);
+
+        $this->issuer->issueForEmail(new Email('marie@bailletced.org'));
     }
 
     public function testLinkExpiresInSevenDaysOutsideEdition(): void
