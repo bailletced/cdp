@@ -9,7 +9,9 @@ use App\Chain\Application\Dto\AdminSlotView;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
+use App\Chain\Domain\Repository\TextRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Domain\ValueObject\TextId;
 use App\Shared\Domain\Time\PartOfDay;
 use App\Shared\Domain\Time\SlotLabel;
 use App\Shared\Domain\Time\TimeSlot;
@@ -22,6 +24,7 @@ final readonly class InMemoryAdminEditionViewFinder implements AdminEditionViewF
 {
     public function __construct(
         private EditionRepositoryInterface $editionRepository,
+        private TextRepositoryInterface $textRepository,
         private ClockInterface $clock,
     ) {
     }
@@ -57,16 +60,37 @@ final readonly class InMemoryAdminEditionViewFinder implements AdminEditionViewF
         $now = $this->clock->now();
         $status = $edition->statusAt($now);
 
+        // How many slots carry each text, to flag the duplicates (US-07.1)
+        $uses = [];
+        foreach ($edition->getSlots() as $slot) {
+            $textId = $slot->getTextId()?->toRfc4122();
+            if (null !== $textId) {
+                $uses[$textId] = ($uses[$textId] ?? 0) + 1;
+            }
+        }
+
         $slotViews = [];
+        $slotsWithoutText = 0;
         foreach ($edition->getSlots() as $slot) {
             $timeSlot = new TimeSlot($slot->getStartsAt(), $slot->getEndsAt());
+            $textId = $slot->getTextId()?->toRfc4122();
+            $text = null !== $textId ? $this->textRepository->findById(new TextId($textId)) : null;
+
+            if (null === $textId) {
+                ++$slotsWithoutText;
+            }
+
             $slotViews[] = new AdminSlotView(
+                id: (string) $slot->getId(),
                 rank: $slot->getRank(),
                 startsAtUtc: $slot->getStartsAt()->format(\DateTimeInterface::ATOM),
                 endsAtUtc: $slot->getEndsAt()->format(\DateTimeInterface::ATOM),
                 label: SlotLabel::for($timeSlot),
                 partOfDay: PartOfDay::forSlot($timeSlot)->value,
-                textId: $slot->getTextId()?->toRfc4122(),
+                textId: $textId,
+                textTitle: $text?->getTitle()->value,
+                textSource: $text?->getSource()->value,
+                textAlreadyUsed: null !== $textId && $uses[$textId] > 1,
             );
         }
 
@@ -81,6 +105,8 @@ final readonly class InMemoryAdminEditionViewFinder implements AdminEditionViewF
             scheduledAtUtc: $edition->getScheduledAt()?->format(\DateTimeInterface::ATOM),
             version: $edition->getVersion(),
             slots: $slotViews,
+            slotsWithoutText: $slotsWithoutText,
+            duplicatedTextIds: array_keys(array_filter($uses, static fn (int $count): bool => $count > 1)),
         );
     }
 }

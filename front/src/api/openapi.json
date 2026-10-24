@@ -1880,6 +1880,19 @@
                             "integer",
                             "null"
                         ]
+                    },
+                    "slotsWithoutText": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "duplicatedTextIds": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {}
                     }
                 }
             },
@@ -1971,6 +1984,19 @@
                             "integer",
                             "null"
                         ]
+                    },
+                    "slotsWithoutText": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "duplicatedTextIds": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {}
                     }
                 }
             },
@@ -2067,6 +2093,19 @@
                                     "integer",
                                     "null"
                                 ]
+                            },
+                            "slotsWithoutText": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "duplicatedTextIds": {
+                                "type": [
+                                    "array",
+                                    "null"
+                                ],
+                                "items": {}
                             }
                         }
                     }

@@ -60,13 +60,19 @@ final readonly class AdminEditionProvider implements ProviderInterface
             scheduledAt: $view->scheduledAtUtc,
             version: $view->version,
             slots: array_map(static fn (AdminSlotView $slot): array => [
+                'id' => $slot->id,
                 'rank' => $slot->rank,
                 'startsAt' => $slot->startsAtUtc,
                 'endsAt' => $slot->endsAtUtc,
                 'label' => $slot->label,
                 'partOfDay' => $slot->partOfDay,
                 'textId' => $slot->textId,
+                'textTitle' => $slot->textTitle,
+                'textSource' => $slot->textSource,
+                'textAlreadyUsed' => $slot->textAlreadyUsed,
             ], $view->slots),
+            slotsWithoutText: $view->slotsWithoutText,
+            duplicatedTextIds: $view->duplicatedTextIds,
         );
     }
 }

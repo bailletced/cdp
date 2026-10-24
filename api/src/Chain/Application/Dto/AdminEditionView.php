@@ -8,6 +8,7 @@ final readonly class AdminEditionView
 {
     /**
      * @param AdminSlotView[] $slots
+     * @param list<string>    $duplicatedTextIds texts carried by more than one slot (US-07.1)
      */
     public function __construct(
         public string $id,
@@ -20,6 +21,8 @@ final readonly class AdminEditionView
         public ?string $scheduledAtUtc,
         public int $version,
         public array $slots,
+        public int $slotsWithoutText,
+        public array $duplicatedTextIds,
     ) {
     }
 }

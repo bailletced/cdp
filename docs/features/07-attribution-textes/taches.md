@@ -19,7 +19,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Avertissements (US-07.1, US-07.3)
 
-- [ ] **F07-T04** · `back` Détail admin d'édition enrichi : texte de chaque créneau, textes attribués plusieurs fois, nombre de créneaux sans texte + tests d'intégration — *Dépend de* : F07-T03, F05-T13 · *Fini quand* : doublons et manques calculés en SQL et testés.
+- [x] **F07-T04** · `back` Détail admin d'édition enrichi : texte de chaque créneau, textes attribués plusieurs fois, nombre de créneaux sans texte + tests d'intégration — *Dépend de* : F07-T03, F05-T13 · *Fini quand* : doublons et manques calculés en SQL et testés.
 - [ ] **F07-T05** · `back` RG-ED-4 : `schedule` renvoie l'avertissement « X créneaux sans texte » sans bloquer + test d'acceptation — *Dépend de* : F07-T04, F05-T16 · *Fini quand* : programmation réussie avec avertissement dans la réponse.
 
 ## Écrans (US-07.1 à US-07.3)

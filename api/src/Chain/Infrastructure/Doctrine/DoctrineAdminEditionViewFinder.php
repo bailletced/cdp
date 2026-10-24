@@ -20,7 +20,7 @@ use Symfony\Component\Uid\Uuid;
  * Reads editions and slots from the database, computes status and labels.
  *
  * @phpstan-type EditionRow array{id: string, title: string, presentation: string|null, starts_at: string, opens_at: string, lifecycle: string, scheduled_at: string|null, version: int|string}
- * @phpstan-type SlotRow array{rank: int|string, starts_at: string, ends_at: string, text_id: string|null}
+ * @phpstan-type SlotRow array{id: string, rank: int|string, starts_at: string, ends_at: string, text_id: string|null, text_title: string|null, text_source: string|null, text_already_used: bool}
  */
 final readonly class DoctrineAdminEditionViewFinder implements AdminEditionViewFinder
 {
@@ -90,13 +90,33 @@ final readonly class DoctrineAdminEditionViewFinder implements AdminEditionViewF
             };
         }
 
-        // Load slots
+        // Load slots with their text (F07-T04): a window over text_id flags
+        // a text carried by several slots of the edition
         /** @var list<SlotRow> $slotRows */
         $slotRows = $this->connection->fetchAllAssociative(
-            'SELECT rank, starts_at, ends_at, text_id
-             FROM slot
-             WHERE edition_id = ?
-             ORDER BY rank ASC',
+            'SELECT s.id, s.rank, s.starts_at, s.ends_at, s.text_id,
+                    t.title AS text_title, t.source AS text_source,
+                    (s.text_id IS NOT NULL AND COUNT(s.text_id) OVER (PARTITION BY s.text_id) > 1) AS text_already_used
+             FROM slot s
+             LEFT JOIN text t ON t.id = s.text_id
+             WHERE s.edition_id = ?
+             ORDER BY s.rank ASC',
+            [$row['id']]
+        );
+
+        /** @var int|string $slotsWithoutText */
+        $slotsWithoutText = $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM slot WHERE edition_id = ? AND text_id IS NULL',
+            [$row['id']]
+        );
+
+        /** @var list<string> $duplicatedTextIds */
+        $duplicatedTextIds = $this->connection->fetchFirstColumn(
+            'SELECT text_id FROM slot
+             WHERE edition_id = ? AND text_id IS NOT NULL
+             GROUP BY text_id
+             HAVING COUNT(*) > 1
+             ORDER BY MIN(rank)',
             [$row['id']]
         );
 
@@ -107,12 +127,16 @@ final readonly class DoctrineAdminEditionViewFinder implements AdminEditionViewF
             $timeSlot = new TimeSlot($slotStartsAt, $slotEndsAt);
 
             $slotViews[] = new AdminSlotView(
+                id: Uuid::fromString($slotRow['id'])->toRfc4122(),
                 rank: (int) $slotRow['rank'],
                 startsAtUtc: $slotStartsAt->format(\DateTimeInterface::ATOM),
                 endsAtUtc: $slotEndsAt->format(\DateTimeInterface::ATOM),
                 label: SlotLabel::for($timeSlot),
                 partOfDay: PartOfDay::forSlot($timeSlot)->value,
                 textId: null !== $slotRow['text_id'] ? Uuid::fromString($slotRow['text_id'])->toRfc4122() : null,
+                textTitle: $slotRow['text_title'],
+                textSource: $slotRow['text_source'],
+                textAlreadyUsed: (bool) $slotRow['text_already_used'],
             );
         }
 
@@ -127,6 +151,8 @@ final readonly class DoctrineAdminEditionViewFinder implements AdminEditionViewF
             scheduledAtUtc: null !== $row['scheduled_at'] ? new \DateTimeImmutable($row['scheduled_at'])->format(\DateTimeInterface::ATOM) : null,
             version: (int) $row['version'],
             slots: $slotViews,
+            slotsWithoutText: (int) $slotsWithoutText,
+            duplicatedTextIds: array_map(static fn (string $id): string => Uuid::fromString($id)->toRfc4122(), $duplicatedTextIds),
         );
     }
 }

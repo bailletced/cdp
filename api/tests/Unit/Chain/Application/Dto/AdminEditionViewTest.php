@@ -13,7 +13,7 @@ final class AdminEditionViewTest extends TestCase
     public function testItHoldsEditionData(): void
     {
         $slots = [
-            new AdminSlotView(1, '2026-11-28T19:00:00+00:00', '2026-11-28T19:30:00+00:00', '20h00–20h30', 'evening', null),
+            new AdminSlotView('slot1', 1, '2026-11-28T19:00:00+00:00', '2026-11-28T19:30:00+00:00', '20h00–20h30', 'evening', null, null, null, false),
         ];
 
         $view = new AdminEditionView(
@@ -27,6 +27,8 @@ final class AdminEditionViewTest extends TestCase
             scheduledAtUtc: null,
             version: 1,
             slots: $slots,
+            slotsWithoutText: 48,
+            duplicatedTextIds: [],
         );
 
         self::assertSame('abc-123', $view->id);

@@ -73,8 +73,9 @@ use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
 final class AdminEditionResource
 {
     /**
-     * @param array<array{rank: int, startsAt: string, endsAt: string, label: string, partOfDay: string, textId: string|null}>|null $slots
-     * @param list<string>|null                                                                                                     $textIds
+     * @param array<array{id: string, rank: int, startsAt: string, endsAt: string, label: string, partOfDay: string, textId: string|null, textTitle: string|null, textSource: string|null, textAlreadyUsed: bool}>|null $slots
+     * @param list<string>|null                                                                                                                                                                                         $textIds
+     * @param list<string>|null                                                                                                                                                                                         $duplicatedTextIds texts carried by several slots (« Texte déjà utilisé », F07-T04)
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
@@ -94,6 +95,8 @@ final class AdminEditionResource
         public readonly ?array $slots = null,
         public readonly ?array $textIds = null,
         public readonly ?int $fromRank = null,
+        public readonly ?int $slotsWithoutText = null,
+        public readonly ?array $duplicatedTextIds = null,
     ) {
     }
 }
