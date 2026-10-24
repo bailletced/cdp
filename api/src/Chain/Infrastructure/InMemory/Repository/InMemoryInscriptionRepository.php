@@ -65,6 +65,18 @@ final class InMemoryInscriptionRepository implements InscriptionRepositoryInterf
         return $found;
     }
 
+    #[\Override]
+    public function findById(InscriptionId $id): ?Inscription
+    {
+        return array_find($this->inscriptions, static fn (Inscription $inscription): bool => $inscription->getId()->equals($id));
+    }
+
+    #[\Override]
+    public function remove(Inscription $inscription): void
+    {
+        unset($this->inscriptions[$this->key($inscription->getSlotId(), $inscription->getPriantId())]);
+    }
+
     private function key(SlotId $slotId, PriantId $priantId): string
     {
         return \sprintf('%s|%s', (string) $slotId, (string) $priantId);

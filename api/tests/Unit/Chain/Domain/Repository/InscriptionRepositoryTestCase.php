@@ -8,6 +8,7 @@ use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Exception\AlreadyRegisteredException;
 use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionId;
+use App\Chain\Domain\ValueObject\InscriptionId;
 use App\Chain\Domain\ValueObject\PriantId;
 use App\Chain\Domain\ValueObject\SlotId;
 use PHPUnit\Framework\TestCase;
@@ -95,5 +96,25 @@ abstract class InscriptionRepositoryTestCase extends TestCase
         self::assertEqualsCanonicalizing([$owned, $covered], $found);
         self::assertSame([$covered], $this->repository->findOwnedOrCovered(null, [$covered->getId()]));
         self::assertSame([], $this->repository->findOwnedOrCovered(null, []));
+    }
+
+    public function testItFindsAnInscriptionByItsIdAndRemovesIt(): void
+    {
+        $editionId = new EditionId();
+        $slotId = new SlotId();
+        $priantId = new PriantId();
+        $inscription = new Inscription($editionId, $slotId, $priantId);
+        $this->repository->add($inscription);
+
+        self::assertSame($inscription, $this->repository->findById($inscription->getId()));
+        self::assertNull($this->repository->findById(new InscriptionId()));
+
+        $this->repository->remove($inscription);
+
+        self::assertNull($this->repository->findById($inscription->getId()));
+        self::assertSame(0, $this->repository->countByEdition($editionId));
+        // RG-EP-1: the slot is free again, the priant may come back
+        $this->repository->add(new Inscription($editionId, $slotId, $priantId));
+        self::assertSame(1, $this->repository->countByEdition($editionId));
     }
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Chain\Application\AssignTextHandler;
+use App\Chain\Application\CancelInscriptionHandler;
 use App\Chain\Application\CreateEditionHandler;
 use App\Chain\Application\CreateTextHandler;
 use App\Chain\Application\DeleteTextHandler;
@@ -172,6 +173,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(RegisterInscriptionsHandler::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(CancelInscriptionHandler::class)
         ->autoconfigure()
         ->autowire();
 

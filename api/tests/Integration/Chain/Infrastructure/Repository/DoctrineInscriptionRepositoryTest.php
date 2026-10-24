@@ -9,6 +9,7 @@ use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Entity\Priant;
 use App\Chain\Domain\ValueObject\DisplayName;
 use App\Chain\Domain\ValueObject\EditionTitle;
+use App\Chain\Domain\ValueObject\InscriptionId;
 use App\Chain\Domain\ValueObject\Presentation;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineInscriptionRepository;
 use App\Shared\Domain\Time\ParisCalendar;
@@ -128,6 +129,27 @@ final class DoctrineInscriptionRepositoryTest extends KernelTestCase
         self::assertEqualsCanonicalizing($ids([$owned, $covered]), $ids($this->repository->findOwnedOrCovered($priant->getId(), [$covered->getId()])));
         self::assertSame($ids([$covered]), $ids($this->repository->findOwnedOrCovered(null, [$covered->getId()])));
         self::assertSame([], $this->repository->findOwnedOrCovered(null, []));
+    }
+
+    public function testItFindsAnInscriptionByItsIdAndRemovesItOnFlush(): void
+    {
+        $edition = $this->createEdition();
+        $priant = $this->createPriant();
+        $inscription = new Inscription($edition->getId(), $edition->getSlots()[0]->getId(), $priant->getId());
+        $this->repository->add($inscription);
+        $this->em->flush();
+        $this->em->clear();
+
+        $found = $this->repository->findById($inscription->getId());
+        self::assertNotNull($found);
+        self::assertSame((string) $inscription->getId(), (string) $found->getId());
+        self::assertNull($this->repository->findById(new InscriptionId()));
+
+        $this->repository->remove($found);
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM inscription'));
+        $this->em->flush();
+
+        self::assertSame(0, (int) $this->em->getConnection()->fetchOne('SELECT count(*) FROM inscription'));
     }
 
     private function createEdition(): Edition

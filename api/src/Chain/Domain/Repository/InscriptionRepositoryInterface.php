@@ -36,4 +36,12 @@ interface InscriptionRepositoryInterface
      * @return list<Inscription>
      */
     public function findOwnedOrCovered(?PriantId $priantId, array $inscriptionIds): array;
+
+    public function findById(InscriptionId $id): ?Inscription;
+
+    /**
+     * Remove an inscription (F14-T05, RG-EP-1): its slot is free again. The
+     * removal reaches the database when the surrounding transaction flushes.
+     */
+    public function remove(Inscription $inscription): void;
 }

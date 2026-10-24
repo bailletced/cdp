@@ -47,4 +47,16 @@ final class DoctrineInscriptionRepository extends ServiceEntityRepository implem
         // An inscription both owned and covered is listed once (the entity map gives the same instance)
         return array_values(array_unique([...$owned, ...$covered], \SORT_REGULAR));
     }
+
+    #[\Override]
+    public function findById(InscriptionId $id): ?Inscription
+    {
+        return $this->findOneBy(['id.value' => $id->value->toRfc4122()]);
+    }
+
+    #[\Override]
+    public function remove(Inscription $inscription): void
+    {
+        $this->getEntityManager()->remove($inscription);
+    }
 }
