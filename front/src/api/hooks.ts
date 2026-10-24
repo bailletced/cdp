@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { apiClient } from "./client";
 
 /**
@@ -412,5 +418,37 @@ export function useUnscheduleEdition() {
         queryKey: editionQueryOptions(id).queryKey,
       });
     },
+  });
+}
+
+/** Root key of the text library queries: every text mutation invalidates it. */
+export const textsQueryKey = ["admin", "texts"] as const;
+
+/**
+ * Text library (GET /api/admin/texts, F06-T08): 20 texts per page, searched
+ * on title and source by the API (accent-insensitive). Pages are loaded on
+ * demand while the Hydra view announces a next one.
+ */
+export function useTexts(search: string) {
+  return useInfiniteQuery({
+    queryKey: [...textsQueryKey, "list", search],
+    queryFn: async ({ pageParam }) => {
+      const { data, error } = await apiClient.GET("/api/admin/texts", {
+        params: {
+          query: { page: pageParam, ...(search ? { q: search } : {}) },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage?.view?.next ? lastPageParam + 1 : undefined,
+    // The previous results stay on screen while a new search runs
+    placeholderData: keepPreviousData,
   });
 }

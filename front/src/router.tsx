@@ -180,6 +180,13 @@ const organisationEditionDetailRoute = createRoute({
   ),
 });
 
+// Text library (F06-T12): lazy-loaded with the back-office section
+const organisationTextsRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/texts",
+  component: lazyRouteComponent(() => import("./pages/TextsPage"), "TextsPage"),
+});
+
 // Define the routes
 export const routeTree = Root.addChildren([
   landingRoute,
@@ -196,6 +203,7 @@ export const routeTree = Root.addChildren([
     organisationEditionNewRoute,
     organisationEditionEditRoute,
     organisationEditionDetailRoute,
+    organisationTextsRoute,
   ]),
 ]);
 

@@ -33,7 +33,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F06-T10** · `front` `RichTextEditor` Tiptap 3 (Document, Paragraph, Text, Bold, Italic, Blockquote, HardBreak, History), barre d'outils accessible + tests — *Dépend de* : F01-T09 · *Fini quand* : utilisable au clavier, boutons annoncés avec leur état.
 - [x] **F06-T11** · `front` `RichTextView` : rendu du HTML nettoyé côté serveur, typographie de lecture (≥ 18 px, retours à la ligne des psaumes) + test — *Dépend de* : F01-T05 · *Fini quand* : rendu identique à l'aperçu de l'éditeur.
-- [ ] **F06-T12** · `front` Écran « Textes » : liste, recherche, nombre d'attributions, état vide — *Dépend de* : F06-T08, F04-T04 · *Fini quand* : test Vitest/MSW.
+- [x] **F06-T12** · `front` Écran « Textes » : liste, recherche, nombre d'attributions, état vide — *Dépend de* : F06-T08, F04-T04 · *Fini quand* : test Vitest/MSW.
 - [ ] **F06-T13** · `front` Formulaire de texte (titre, source, corps, pistes) avec aperçu, erreurs 422 + tests — *Dépend de* : F06-T09, F06-T10, F06-T11, F06-T12 · *Fini quand* : création et modification testées.
 - [ ] **F06-T14** · `front` Suppression avec confirmation, message explicite si refusée (409) + test — *Dépend de* : F06-T13 · *Fini quand* : les deux issues testées.
 
