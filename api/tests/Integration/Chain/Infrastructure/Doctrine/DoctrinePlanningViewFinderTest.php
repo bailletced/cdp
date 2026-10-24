@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Chain\Infrastructure\Doctrine;
 
+use App\Chain\Application\Dto\PlanningView;
 use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Inscription;
@@ -23,6 +24,7 @@ use App\Chain\Domain\ValueObject\TextTitle;
 use App\Shared\Domain\Time\ParisCalendar;
 use App\Shared\Domain\ValueObject\Email;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Middleware\Debug\DebugDataHolder;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -127,21 +129,43 @@ final class DoctrinePlanningViewFinderTest extends KernelTestCase
         self::assertNull($view->slots[1]->textSource);
     }
 
-    public function testNoPriantDataIsExposed(): void
+    public function testEachSlotListsItsParticipantsInRegistrationOrder(): void
     {
         $edition = $this->createEdition(lifecycle: 'scheduled');
+        $marie = $this->createPriant('marie@bailletced.org', 'Marie Dupont');
+        $jean = $this->createPriant('jean@bailletced.org', 'Jean Martin');
+        $slot = $edition->getSlots()[2];
+        $first = new Inscription($edition->getId(), $slot->getId(), $marie->getId());
+        $second = new Inscription($edition->getId(), $slot->getId(), $jean->getId());
+        $this->inscriptionRepository->add($first);
+        $this->inscriptionRepository->add($second);
+        $this->em->flush();
 
         $view = $this->finder->findByEdition($edition->getId());
         self::assertNotNull($view);
 
-        // The registration count is public (RG-PL-1) but no priant
-        // identity or name ever is (RG-PL-4).
-        foreach ($view->slots as $slot) {
-            $data = (array) $slot;
-            self::assertArrayNotHasKey('isMine', $data);
-            self::assertArrayNotHasKey('priantId', $data);
-            self::assertArrayNotHasKey('priantName', $data);
-        }
+        // The finder reads everything; the provider masks it (F10-T08, RG-PL-4)
+        $participants = $view->slots[2]->participants;
+        self::assertCount(2, $participants);
+        self::assertSame((string) $first->getId(), $participants[0]->inscriptionId);
+        self::assertSame((string) $marie->getId(), $participants[0]->priantId);
+        self::assertSame('Marie Dupont', $participants[0]->displayName);
+        // RG-LV-2: no pointage before F19
+        self::assertFalse($participants[0]->prayed);
+        self::assertSame('Jean Martin', $participants[1]->displayName);
+        self::assertSame([], $view->slots[3]->participants);
+    }
+
+    public function testTheGridIsReadInASingleQuery(): void
+    {
+        $edition = $this->createEdition(lifecycle: 'scheduled');
+        $marie = $this->createPriant('marie@bailletced.org', 'Marie Dupont');
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $edition->getSlots()[0]->getId(), $marie->getId()));
+        $this->em->flush();
+        $queries = $this->countQueries(fn (): ?PlanningView => $this->finder->findByEdition($edition->getId()));
+
+        // One query to check the edition is public, one for the 48 slots
+        self::assertSame(2, $queries);
     }
 
     public function testEachInscriptionCountsForOneRegistration(): void
@@ -178,6 +202,17 @@ final class DoctrinePlanningViewFinderTest extends KernelTestCase
         self::assertTrue($view->slots[2]->occupied);
         self::assertSame(0, $view->slots[3]->registrationCount);
         self::assertFalse($view->slots[3]->occupied);
+    }
+
+    private function countQueries(callable $read): int
+    {
+        $debugData = self::getContainer()->get('doctrine.debug_data_holder');
+        \assert($debugData instanceof DebugDataHolder);
+        $debugData->reset();
+
+        $read();
+
+        return \count($debugData->getData()['default'] ?? []);
     }
 
     private function createPriant(string $email, string $displayName): Priant

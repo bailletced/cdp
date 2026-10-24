@@ -177,6 +177,9 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
     public function testSlotsExposeNoPriantData(): void
     {
         $edition = $this->createEdition(lifecycle: 'scheduled');
+        $priant = $this->createPriant('marie@bailletced.org', 'Marie Dupont');
+        $this->inscriptionRepository->add(new Inscription($edition->getId(), $edition->getSlots()[0]->getId(), $priant->getId()));
+        $this->em->flush();
 
         $this->client->request('GET', '/api/editions/'.$edition->getId()->value->toRfc4122().'/slots');
 
@@ -185,10 +188,12 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
 
         $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         foreach ($data['slots'] as $slot) {
-            // Counts are public (RG-PL-1) but no priant identity or name is (RG-PL-4).
-            self::assertArrayNotHasKey('isMine', $slot);
+            // Counts are public (RG-PL-1) but no priant identity or name is (RG-PL-4):
+            // the masked participants are present and null, never absent (F10-T08)
+            self::assertArrayHasKey('participants', $slot);
+            self::assertNull($slot['participants']);
+            self::assertFalse($slot['mine']);
             self::assertArrayNotHasKey('priantId', $slot);
-            self::assertArrayNotHasKey('priantName', $slot);
         }
     }
 
@@ -210,7 +215,10 @@ final class PublicEditionSlotsApiTest extends ApiTestCase
 
         $response = $this->client->getResponse();
         self::assertSame(200, $response->getStatusCode());
-        self::assertSame('no-store, private', $response->headers->get('Cache-Control'));
+        // The grid depends on the viewer (F10): never stored by a cache
+        self::assertTrue($response->headers->hasCacheControlDirective('no-store'));
+        self::assertTrue($response->headers->hasCacheControlDirective('private'));
+        self::assertSame([], $response->headers->getCookies(), 'A visitor gets no session cookie.');
     }
 
     private function createPriant(string $email, string $displayName): Priant

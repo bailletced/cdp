@@ -17,8 +17,10 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvid
  *
  * No authentication required: this feeds the public planning page. The
  * identifier is the edition id. The registration count of each slot is
- * public (RG-PL-1); priant identities and names are never exposed
- * (RG-PL-4). The "you" flag is added in F10.
+ * public (RG-PL-1). The participants — names and pointages — are null
+ * unless the viewer is an inscrit of the edition or an organizer (RG-PL-4,
+ * RG-LV-2); `mine` marks the viewer's slots (F10-T08). E-mails and priant
+ * identities are never exposed (RG-EP-2).
  */
 #[ApiResource(
     shortName: 'PublicEditionSlots',
@@ -32,7 +34,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionSlotsProvid
 final class PublicEditionSlotsResource
 {
     /**
-     * @param array<array{id: string, rank: int, startsAt: string, endsAt: string, label: string, partOfDay: string, state: string, textTitle: string|null, textSource: string|null, registrationCount: int, occupied: bool}>|null $slots
+     * @param array<array{id: string, rank: int, startsAt: string, endsAt: string, label: string, partOfDay: string, state: string, textTitle: string|null, textSource: string|null, registrationCount: int, occupied: bool, participants: list<array{name: string, prayed: bool}>|null, mine: bool}>|null $slots
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
