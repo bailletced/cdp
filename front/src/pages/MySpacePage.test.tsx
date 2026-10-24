@@ -321,3 +321,124 @@ describe("MySpacePage — changer mon nom (F14-T08, US-14.2)", () => {
     );
   });
 });
+
+describe("MySpacePage — me désinscrire (F14-T09, US-14.3)", () => {
+  it("offers to cancel only the slots that have not started", async () => {
+    mySpace([
+      myInscription(),
+      myInscription({
+        id: "inscription-0",
+        slotId: "slot-0",
+        label: "19h30–20h00",
+        state: "current",
+        actions: [],
+      }),
+    ]);
+
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Me désinscrire du créneau de 20h00–20h30",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: "Me désinscrire du créneau de 19h30–20h00",
+      }),
+    ).toBeNull();
+  });
+
+  it("cancels after confirmation, says so and refreshes the list and the planning", async () => {
+    let cancelled = false;
+    let deleted: string | null = null;
+    let planningRequests = 0;
+    server.use(
+      http.get(MY_INSCRIPTIONS_URL, () =>
+        HttpResponse.json({
+          editionId: "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b",
+          editionTitle: "24 heures de prière",
+          displayName: "Marie Dupont",
+          inscriptions: cancelled ? [] : [myInscription()],
+        }),
+      ),
+      http.delete(
+        "http://localhost:8080/api/inscriptions/:id",
+        ({ params }) => {
+          deleted = String(params.id);
+          cancelled = true;
+
+          return new HttpResponse(null, { status: 204 });
+        },
+      ),
+      http.get("http://localhost:8080/api/editions/current", () => {
+        planningRequests += 1;
+
+        return HttpResponse.json({ title: "Not Found" }, { status: 404 });
+      }),
+    );
+
+    renderApp("/my-space");
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Me désinscrire du créneau de 20h00–20h30",
+      }),
+    );
+    const confirm = await screen.findByRole("alertdialog", {
+      name: "Me désinscrire",
+    });
+    expect(confirm).toHaveTextContent(
+      "Vous ne serez plus inscrit sur le créneau de 20h00–20h30 du samedi 28 novembre. Aucun e-mail ne vous sera envoyé.",
+    );
+    const before = planningRequests;
+    fireEvent.click(
+      within(confirm).getByRole("button", { name: "Me désinscrire" }),
+    );
+
+    expect(
+      await screen.findByText(
+        "Vous êtes désinscrit du créneau de 20h00–20h30.",
+      ),
+    ).toBeInTheDocument();
+    expect(deleted).toBe("inscription-1");
+    expect(
+      await screen.findByText("Vous n'avez pas encore de créneau."),
+    ).toBeInTheDocument();
+    // The planning and its banner are refreshed (RG-EP-1)
+    expect(planningRequests).toBeGreaterThan(before);
+  });
+
+  it("says why when the slot has started in the meantime", async () => {
+    mySpace([myInscription()]);
+    server.use(
+      http.delete("http://localhost:8080/api/inscriptions/:id", () =>
+        HttpResponse.json(
+          {
+            status: 403,
+            detail:
+              "Ce créneau a déjà commencé : la désinscription n’est plus possible.",
+          },
+          { status: 403 },
+        ),
+      ),
+    );
+
+    renderApp("/my-space");
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Me désinscrire du créneau de 20h00–20h30",
+      }),
+    );
+    fireEvent.click(
+      within(
+        await screen.findByRole("alertdialog", { name: "Me désinscrire" }),
+      ).getByRole("button", { name: "Me désinscrire" }),
+    );
+
+    expect(
+      await screen.findByText(
+        "Ce créneau a déjà commencé : la désinscription n’est plus possible.",
+      ),
+    ).toHaveAttribute("role", "alert");
+  });
+});

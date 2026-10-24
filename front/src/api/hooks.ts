@@ -235,6 +235,31 @@ export function useRenameMe() {
   });
 }
 
+/**
+ * Cancels one of my inscriptions (DELETE /api/inscriptions/{id}, F14-T09):
+ * the slot may be empty again, so « Mon espace », the planning and its
+ * banner are refreshed (RG-EP-1).
+ */
+export function useCancelInscription() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (inscriptionId: string) => {
+      const { error } = await apiClient.DELETE("/api/inscriptions/{id}", {
+        params: { path: { id: inscriptionId } },
+      });
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+      void queryClient.invalidateQueries({ queryKey: ["public", "editions"] });
+    },
+  });
+}
+
 /** Payload of POST /api/inscriptions (F09-T10), bounded by the OpenAPI contract. */
 export interface RegisterInscriptionsPayload {
   slotIds: string[];

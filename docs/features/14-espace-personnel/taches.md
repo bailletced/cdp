@@ -27,7 +27,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F14-T07** · `front` `/mon-espace` : mon nom en tête, « Mes créneaux » (horaire + heure locale, lien texte), état vide, invitation à recevoir son lien si pass sans session — *Dépend de* : F14-T02, F02-T19, F08-T05 · *Fini quand* : tests Vitest/MSW des trois états.
 - [x] **F14-T08** · `front` « Changer mon nom » : dialogue avec explication « le nom s'applique partout », erreurs 422 + tests — *Dépend de* : F14-T04, F14-T07 · *Fini quand* : succès et erreur testés, en-tête mis à jour.
-- [ ] **F14-T09** · `front` Se désinscrire : confirmation, message à l'écran, planning et bandeau invalidés + tests — *Dépend de* : F14-T06, F14-T07 · *Fini quand* : message annoncé (`aria-live`), liste mise à jour.
+- [x] **F14-T09** · `front` Se désinscrire : confirmation, message à l'écran, planning et bandeau invalidés + tests — *Dépend de* : F14-T06, F14-T07 · *Fini quand* : message annoncé (`aria-live`), liste mise à jour.
 - [ ] **F14-T10** · `front` « Ajouter des créneaux » (planning, formulaire pré-rempli) et bouton unique « Ajouter mes créneaux à mon agenda » (`/api/me/calendar.ics`) — *Dépend de* : F14-T07, F11-T06 · *Fini quand* : téléchargement vérifié dans un test e2e léger.
 
 ## Parcours

@@ -1,8 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { baseUrl } from "../api/client";
-import { myInscriptionsQueryOptions, useViewer } from "../api/hooks";
+import { getApiErrorDetail } from "../api/errors";
+import {
+  myInscriptionsQueryOptions,
+  useCancelInscription,
+  useViewer,
+} from "../api/hooks";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CurrentEditionPlanning } from "../components/CurrentEditionPlanning";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
@@ -21,6 +27,7 @@ interface MySlot {
   label: string;
   dayLabel: string;
   textTitle: string | null;
+  cancellable: boolean;
 }
 
 /** The OpenAPI schema types the list as unknown[]: keep the well-formed ones. */
@@ -44,6 +51,9 @@ function parseMySlots(inscriptions: unknown): MySlot[] {
             dayLabel: item.dayLabel,
             textTitle:
               typeof item.textTitle === "string" ? item.textTitle : null,
+            // RG-EP-1: the API says whether the slot can still be cancelled
+            cancellable:
+              Array.isArray(item.actions) && item.actions.includes("cancel"),
           },
         ]
       : [],
@@ -58,9 +68,42 @@ function capitalized(value: string): string {
 /**
  * « Mes créneaux » (F14-T07, US-14.1): my slots of the public edition, each
  * with its day, its schedule (and my local time abroad) and its text.
+ *
+ * « Me désinscrire » (F14-T09, US-14.3) until the slot starts: after a
+ * confirmation, the outcome is announced politely on the screen — no e-mail
+ * is sent — and the focus moves to the list heading, the button being gone.
  */
 function MySlots() {
   const query = useQuery(myInscriptionsQueryOptions);
+  const cancelInscription = useCancelInscription();
+  const [toCancel, setToCancel] = useState<MySlot | null>(null);
+  const [outcome, setOutcome] = useState<string | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  async function confirmCancel() {
+    const slot = toCancel;
+    setToCancel(null);
+
+    if (!slot) {
+      return;
+    }
+
+    setOutcome(null);
+    setFailure(null);
+
+    try {
+      await cancelInscription.mutateAsync(slot.id);
+      setOutcome(`Vous êtes désinscrit du créneau de ${slot.label}.`);
+    } catch (error) {
+      setFailure(
+        getApiErrorDetail(error) ??
+          "La désinscription n'a pas pu être enregistrée. Réessayez dans un instant.",
+      );
+    }
+
+    headingRef.current?.focus();
+  }
 
   if (query.isPending) {
     return <LoadingState label="Chargement de vos créneaux…" />;
@@ -101,9 +144,22 @@ function MySlots() {
         <RenameDialog currentName={space.displayName ?? ""} />
       </div>
       <section aria-labelledby="mes-creneaux" className="mb-12">
-        <h2 id="mes-creneaux" className="mb-4">
+        <h2
+          id="mes-creneaux"
+          ref={headingRef}
+          tabIndex={-1}
+          className="mb-4 outline-none"
+        >
           Mes créneaux
         </h2>
+        <output className={outcome ? "mb-4 block text-lg" : "sr-only"}>
+          {outcome}
+        </output>
+        {failure ? (
+          <p role="alert" className="mb-4 text-danger">
+            {failure}
+          </p>
+        ) : null}
         {slots.length === 0 ? (
           <p className="text-lg">
             Vous n'avez pas encore de créneau.{" "}
@@ -132,11 +188,37 @@ function MySlots() {
                     Le texte de ce créneau sera bientôt disponible
                   </p>
                 )}
+                {slot.cancellable ? (
+                  <button
+                    type="button"
+                    onClick={() => setToCancel(slot)}
+                    className="link mt-3 min-h-11 text-muted"
+                  >
+                    Me désinscrire
+                    <span className="sr-only"> du créneau de {slot.label}</span>
+                  </button>
+                ) : null}
               </li>
             ))}
           </ul>
         )}
       </section>
+      <ConfirmDialog
+        isOpen={toCancel !== null}
+        onClose={() => setToCancel(null)}
+        onConfirm={() => void confirmCancel()}
+        title="Me désinscrire"
+        confirmLabel="Me désinscrire"
+        cancelLabel="Garder ce créneau"
+        isDanger
+      >
+        {toCancel ? (
+          <p>
+            Vous ne serez plus inscrit sur le créneau de {toCancel.label} du{" "}
+            {toCancel.dayLabel}. Aucun e-mail ne vous sera envoyé.
+          </p>
+        ) : null}
+      </ConfirmDialog>
     </>
   );
 }
