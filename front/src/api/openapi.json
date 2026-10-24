@@ -1686,6 +1686,102 @@
                 "summary": "Retrieves a Me resource.",
                 "description": "Retrieves a Me resource.",
                 "parameters": []
+            },
+            "patch": {
+                "operationId": "api_me_patch",
+                "tags": [
+                    "MyProfile"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MyProfile resource updated",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MyProfile.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Updates the MyProfile resource.",
+                "description": "Updates the MyProfile resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The updated MyProfile resource",
+                    "content": {
+                        "application/merge-patch+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MyProfile.RenameMePayload.jsonMergePatch"
+                            }
+                        }
+                    },
+                    "required": true
+                }
             }
         },
         "/api/me/inscriptions": {
@@ -3199,6 +3295,37 @@
                     }
                 ]
             },
+            "MyProfile.RenameMePayload.jsonMergePatch": {
+                "type": "object",
+                "properties": {
+                    "displayName": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 1,
+                        "maxLength": 80
+                    }
+                }
+            },
+            "MyProfile.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "displayName": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
             "PublicEdition.jsonld": {
                 "allOf": [
                     {
@@ -3448,6 +3575,10 @@
         {
             "name": "MyInscriptions",
             "description": "Resource 'MyInscriptions' operations."
+        },
+        {
+            "name": "MyProfile",
+            "description": "Resource 'MyProfile' operations."
         },
         {
             "name": "PublicEdition",

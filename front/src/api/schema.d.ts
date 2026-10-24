@@ -265,7 +265,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Updates the MyProfile resource.
+         * @description Updates the MyProfile resource.
+         */
+        patch: operations["api_me_patch"];
         trace?: never;
     };
     "/api/me/inscriptions": {
@@ -662,6 +666,12 @@ export interface components {
                 state?: "past" | "current" | "future";
                 actions?: "cancel"[];
             }[];
+        };
+        "MyProfile.RenameMePayload.jsonMergePatch": {
+            displayName?: string | null;
+        };
+        "MyProfile.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            displayName?: string | null;
         };
         "PublicEdition.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;
@@ -1640,6 +1650,64 @@ export interface operations {
                     "application/ld+json": components["schemas"]["Error.jsonld"];
                     "application/problem+json": components["schemas"]["Error"];
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The updated MyProfile resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["MyProfile.RenameMePayload.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description MyProfile resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MyProfile.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
                 };
             };
         };
