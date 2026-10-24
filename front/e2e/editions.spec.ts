@@ -51,6 +51,11 @@ test.describe("Back-office /organisation/editions", () => {
     await row.getByRole("link", { name: title }).click();
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await page.getByRole("button", { name: "Programmer" }).click();
+    // The 48 slots have no text yet: RG-ED-4 asks for a confirmation
+    await page
+      .getByRole("alertdialog", { name: "Programmer l’édition" })
+      .getByRole("button", { name: "Programmer quand même" })
+      .click();
     await expect(page.getByText("Programmée", { exact: true })).toBeVisible();
     await expectNoA11yViolations(page);
 

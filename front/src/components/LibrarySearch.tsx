@@ -21,7 +21,11 @@ export function useLibrarySearch() {
       : [],
   );
 
-  return { input, setInput, search, textsQuery, texts };
+  // The texts on screen belong to an older search while the typing waits for
+  // its pause, or while the new search loads (previous results kept)
+  const isStale = input.trim() !== search || textsQuery.isPlaceholderData;
+
+  return { input, setInput, search, textsQuery, texts, isStale };
 }
 
 export function LibrarySearchField({
@@ -48,8 +52,10 @@ export function LibrarySearchField({
 /** « Afficher plus de textes » while the library has further pages. */
 export function MoreTextsButton({
   textsQuery,
+  isStale,
 }: {
   textsQuery: ReturnType<typeof useLibrarySearch>["textsQuery"];
+  isStale: boolean;
 }) {
   if (!textsQuery.hasNextPage) {
     return null;
@@ -58,7 +64,8 @@ export function MoreTextsButton({
   return (
     <Button
       variant="secondary"
-      isDisabled={textsQuery.isFetchingNextPage}
+      // The next page of stale results would belong to an older search
+      isDisabled={textsQuery.isFetchingNextPage || isStale}
       onPress={() => void textsQuery.fetchNextPage()}
     >
       {textsQuery.isFetchingNextPage

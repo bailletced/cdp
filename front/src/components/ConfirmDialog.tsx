@@ -36,26 +36,30 @@ export function ConfirmDialog({
         }
       }}
     >
-      <AlertDialog.Backdrop isKeyboardDismissDisabled={false} />
-      <AlertDialog.Container>
-        <AlertDialog.Dialog>
-          <AlertDialog.Header>
-            <AlertDialog.Heading>{title}</AlertDialog.Heading>
-          </AlertDialog.Header>
-          <AlertDialog.Body>{children}</AlertDialog.Body>
-          <AlertDialog.Footer>
-            <Button variant="outline" onClick={onClose}>
-              {cancelLabel}
-            </Button>
-            <Button
-              variant={isDanger ? "danger" : "primary"}
-              onClick={onConfirm}
-            >
-              {confirmLabel}
-            </Button>
-          </AlertDialog.Footer>
-        </AlertDialog.Dialog>
-      </AlertDialog.Container>
+      {/* The container (the modal) lives inside the backdrop (the overlay):
+          side by side, the backdrop never finished its exit and kept
+          intercepting the clicks on the page after a confirmation */}
+      <AlertDialog.Backdrop isKeyboardDismissDisabled={false}>
+        <AlertDialog.Container>
+          <AlertDialog.Dialog>
+            <AlertDialog.Header>
+              <AlertDialog.Heading>{title}</AlertDialog.Heading>
+            </AlertDialog.Header>
+            <AlertDialog.Body>{children}</AlertDialog.Body>
+            <AlertDialog.Footer>
+              <Button variant="outline" onClick={onClose}>
+                {cancelLabel}
+              </Button>
+              <Button
+                variant={isDanger ? "danger" : "primary"}
+                onClick={onConfirm}
+              >
+                {confirmLabel}
+              </Button>
+            </AlertDialog.Footer>
+          </AlertDialog.Dialog>
+        </AlertDialog.Container>
+      </AlertDialog.Backdrop>
     </AlertDialog>
   );
 }

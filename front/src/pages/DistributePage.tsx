@@ -226,7 +226,8 @@ export function DistributePage() {
     from: "/organisation/editions/$editionId/distribute",
   });
   const editionQuery = useEdition(editionId);
-  const { input, setInput, search, textsQuery, texts } = useLibrarySearch();
+  const { input, setInput, search, textsQuery, texts, isStale } =
+    useLibrarySearch();
   const [items, setItems] = useState<ListedText[]>([]);
   const [fromRank, setFromRank] = useState(1);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -341,12 +342,17 @@ export function DistributePage() {
               ))}
             </ul>
             <div className="mt-4 flex flex-wrap gap-4">
-              <Button variant="secondary" onPress={() => add(texts)}>
+              <Button
+                variant="secondary"
+                // Wait for the results of the current search
+                isDisabled={isStale}
+                onPress={() => add(texts)}
+              >
                 {texts.length === 1
                   ? "Ajouter le texte affiché"
                   : `Ajouter les ${texts.length} textes affichés`}
               </Button>
-              <MoreTextsButton textsQuery={textsQuery} />
+              <MoreTextsButton textsQuery={textsQuery} isStale={isStale} />
             </div>
           </>
         )}

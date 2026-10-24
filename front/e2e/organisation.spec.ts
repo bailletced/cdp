@@ -75,7 +75,7 @@ test.describe("Back-office /organisation", () => {
     // Log out, then log in with the removed account: it is a priant now
     await page.goto("/my-space");
     await page.getByRole("button", { name: "Me déconnecter" }).click();
-    await page.waitForURL("**/receive-my-link");
+    await page.waitForURL((url) => url.pathname === "/");
 
     await loginViaPersonalLink(page, priantEmail);
 

@@ -21,6 +21,20 @@ function formatViolations(violations: AxeResults["violations"]): string {
  * the audit is blocking in CI.
  */
 export async function expectNoA11yViolations(page: Page): Promise<void> {
+  // An opening dialog fades in: measured mid-animation, its colors are
+  // partly transparent and the contrast checks fail for no real reason
+  // (infinite animations, such as a spinner, are not waited for)
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          animation.playState !== "running" ||
+          animation.effect?.getComputedTiming().iterations ===
+            Number.POSITIVE_INFINITY,
+      ),
+  );
+
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();

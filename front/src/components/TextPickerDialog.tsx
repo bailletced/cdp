@@ -11,7 +11,8 @@ import { LoadingState } from "./LoadingState";
 
 /** Search results of the library, mounted only while the dialog is open. */
 function TextResults({ onSelect }: { onSelect: (text: SlotText) => void }) {
-  const { input, setInput, search, textsQuery, texts } = useLibrarySearch();
+  const { input, setInput, search, textsQuery, texts, isStale } =
+    useLibrarySearch();
 
   return (
     <div className="flex flex-col gap-4">
@@ -47,7 +48,7 @@ function TextResults({ onSelect }: { onSelect: (text: SlotText) => void }) {
           ))}
         </ul>
       )}
-      <MoreTextsButton textsQuery={textsQuery} />
+      <MoreTextsButton textsQuery={textsQuery} isStale={isStale} />
     </div>
   );
 }

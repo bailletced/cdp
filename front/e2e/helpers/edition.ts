@@ -47,6 +47,11 @@ export async function createOpenEdition(
   const row = page.getByRole("listitem").filter({ hasText: title });
   await row.getByRole("link", { name: title }).click();
   await page.getByRole("button", { name: "Programmer" }).click();
+  // The 48 slots have no text yet: RG-ED-4 asks for a confirmation
+  await page
+    .getByRole("alertdialog", { name: "Programmer l’édition" })
+    .getByRole("button", { name: "Programmer quand même" })
+    .click();
   // Scheduled: the reverse action appears, with the 48 generated slots. The
   // status badge shows the hybrid status (« Inscriptions ouvertes » here),
   // not the lifecycle word, so the action button is the reliable marker.
