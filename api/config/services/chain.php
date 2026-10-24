@@ -10,6 +10,7 @@ use App\Chain\Application\DistributeTextsHandler;
 use App\Chain\Application\Port\CalendarFile;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Port\Notifier;
+use App\Chain\Application\Port\SlotPicker;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
 use App\Chain\Application\Query\InscriptionDigestFinder;
@@ -62,6 +63,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryInscriptionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Mailer\MailerNotifier;
+use App\Chain\Infrastructure\Random\RandomizerSlotPicker;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Controller\MyCalendarController;
@@ -70,8 +72,11 @@ use App\Chain\Infrastructure\Symfony\Security\InscriptionVoter;
 use App\Chain\Infrastructure\Twig\RichTextExtension;
 use App\Shared\Application\Port\InscriptionDirectory;
 use App\Shared\Application\Port\PriantProfileReader;
+use Random\Randomizer;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
+
+use function Symfony\Component\DependencyInjection\Loader\Configurator\inline_service;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -221,6 +226,11 @@ return static function (ContainerConfigurator $container): void {
     $services->set(MailerNotifier::class)
         ->autowire()
         ->alias(Notifier::class, MailerNotifier::class);
+
+    // The default engine of a Randomizer is the secure one (CSPRNG)
+    $services->set(RandomizerSlotPicker::class)
+        ->args([inline_service(Randomizer::class)])
+        ->alias(SlotPicker::class, RandomizerSlotPicker::class);
 
     $services->set(VisibilityPolicy::class)
         ->autowire();
