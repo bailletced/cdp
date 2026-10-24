@@ -44,5 +44,5 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Données et parcours
 
-- [ ] **F09-T20** · `back` Fixtures : priants (dont « Famille … » et priants sans e-mail), inscriptions multi-créneaux, créneaux restés vides — *Dépend de* : F09-T07, F07-T11 · *Fini quand* : `make fixtures` produit une grille réaliste.
+- [x] **F09-T20** · `back` Fixtures : priants (dont « Famille … » et priants sans e-mail), inscriptions multi-créneaux, créneaux restés vides — *Dépend de* : F09-T07, F07-T11 · *Fini quand* : `make fixtures` produit une grille réaliste.
 - [ ] **F09-T21** · `test` E2E : choisir 2 créneaux → formulaire → confirmation → grille « occupé » avec compteurs à jour ; nouvelle tentative sur le même créneau → message 409 — *Dépend de* : F09-T19, F09-T13 · *Fini quand* : parcours vert avec axe-core.

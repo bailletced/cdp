@@ -7,13 +7,20 @@ namespace App\Chain\Infrastructure\Symfony\Console;
 use App\Chain\Application\CreateEdition;
 use App\Chain\Application\CreateEditionResult;
 use App\Chain\Application\DistributeTexts;
+use App\Chain\Application\RegisterInscriptions;
 use App\Chain\Application\ScheduleEdition;
+use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Text;
+use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
+use App\Chain\Domain\ValueObject\DisplayName;
+use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\EditionTitle;
 use App\Chain\Domain\ValueObject\Presentation;
+use App\Chain\Domain\ValueObject\SlotId;
 use App\Chain\Domain\ValueObject\TextId;
 use App\Shared\Application\Command\CommandBusInterface;
+use App\Shared\Domain\ValueObject\Email;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,6 +33,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * F07-T11: the open edition carries the library texts, in the order of the
  * demonstration library (run app:chain:load-text-fixtures first); the draft
  * edition stays without texts, to try the attribution on it.
+ *
+ * F09-T20: once open, the edition takes the inscriptions of demonstration
+ * priants (InscriptionFixtures), through the public command.
  */
 #[AsCommand(name: 'app:chain:load-edition-fixtures', description: 'Charge les fixtures éditions (F05-T17)')]
 final class LoadEditionFixturesCommand extends Command
@@ -34,6 +44,7 @@ final class LoadEditionFixturesCommand extends Command
         private CommandBusInterface $commandBus,
         private ClockInterface $clock,
         private TextRepositoryInterface $texts,
+        private EditionRepositoryInterface $editions,
     ) {
         parent::__construct();
     }
@@ -68,6 +79,7 @@ final class LoadEditionFixturesCommand extends Command
         }
 
         $this->commandBus->dispatch(new ScheduleEdition($result1->editionId));
+        $this->registerPriants($result1->editionId);
 
         $output->writeln(\sprintf('<info>Édition ouverte créée : %s</info>', (string) $result1->editionId));
 
@@ -89,6 +101,28 @@ final class LoadEditionFixturesCommand extends Command
         $output->writeln(\sprintf('<info>Édition brouillon créée : %s</info>', (string) $result2->editionId));
 
         return Command::SUCCESS;
+    }
+
+    private function registerPriants(EditionId $editionId): void
+    {
+        $edition = $this->editions->findById($editionId);
+        if (!$edition instanceof Edition) {
+            throw new \LogicException('The open edition was just created.');
+        }
+
+        $slotIds = [];
+        foreach ($edition->getSlots() as $slot) {
+            $slotIds[$slot->getRank()] = $slot->getId();
+        }
+
+        foreach (InscriptionFixtures::all() as $priant) {
+            $this->commandBus->dispatch(new RegisterInscriptions(
+                array_map(static fn (int $rank): SlotId => $slotIds[$rank], $priant['ranks']),
+                new DisplayName($priant['displayName']),
+                null === $priant['email'] ? null : new Email($priant['email']),
+                null !== $priant['email'],
+            ));
+        }
     }
 
     private static function halfHourFloor(\DateTimeImmutable $time): \DateTimeImmutable
