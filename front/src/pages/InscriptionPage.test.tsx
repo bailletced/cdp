@@ -630,3 +630,142 @@ describe("InscriptionPage — envoi (F09-T18)", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("InscriptionPage — suggestion après inscription (F13-T07, US-13.3)", () => {
+  const SUGGESTION = {
+    slotId: SLOT_FUTURE_2,
+    startsAt: "2099-11-27T18:30:00+00:00",
+    endsAt: "2099-11-27T19:00:00+00:00",
+    label: "19h30–20h00",
+    textTitle: "Que rien ne te trouble",
+    textSource: "Thérèse d’Avila",
+  };
+
+  /** Captures every POST body; the first answers with the suggestion. */
+  function registrationsSuggesting(suggestion: unknown) {
+    const bodies: unknown[] = [];
+
+    server.use(
+      http.post(INSCRIPTIONS_URL, async ({ request }) => {
+        bodies.push(await request.json());
+
+        return HttpResponse.json(
+          {
+            ...inscriptionItem(),
+            suggestion: bodies.length === 1 ? suggestion : null,
+          },
+          { status: 201 },
+        );
+      }),
+    );
+
+    return bodies;
+  }
+
+  async function registerOnTheFirstSlot() {
+    renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
+    expect(await screen.findByLabelText("Nom affiché")).toBeInTheDocument();
+    fillValidForm();
+    submitForm();
+    expect(
+      await screen.findByRole("heading", { name: "Inscription confirmée" }),
+    ).toBeInTheDocument();
+  }
+
+  it("takes the suggested slot too, in one click, with the same information", async () => {
+    const bodies = registrationsSuggesting(SUGGESTION);
+    openEditionWithSlots([FUTURE_SLOT_1, FUTURE_SLOT_2]);
+
+    await registerOnTheFirstSlot();
+
+    const suggestion = await screen.findByRole("region", {
+      name: "Un créneau voisin est encore vide",
+    });
+    expect(suggestion).toHaveTextContent("19h30–20h00");
+    expect(suggestion).toHaveTextContent("Que rien ne te trouble");
+    fireEvent.click(
+      within(suggestion).getByRole("button", { name: "Le prendre aussi" }),
+    );
+
+    // Both slots in the récapitulatif, no new typing
+    await waitFor(() =>
+      expect(
+        within(
+          screen.getByRole("region", { name: "Vos créneaux" }),
+        ).getAllByRole("listitem"),
+      ).toHaveLength(2),
+    );
+    expect(bodies[1]).toEqual({
+      slotIds: [SLOT_FUTURE_2],
+      displayName: "Marie Dupont",
+      email: "thomas@bailletced.org",
+      consent: true,
+      website: "",
+    });
+    expect(
+      screen.getByText("Vous êtes aussi inscrit sur 19h30–20h00."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", {
+        name: "Un créneau voisin est encore vide",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("dismisses the suggestion with « Non merci »", async () => {
+    const bodies = registrationsSuggesting(SUGGESTION);
+    openEditionWithSlots([FUTURE_SLOT_1, FUTURE_SLOT_2]);
+
+    await registerOnTheFirstSlot();
+    fireEvent.click(await screen.findByRole("button", { name: "Non merci" }));
+
+    expect(
+      screen.queryByRole("region", {
+        name: "Un créneau voisin est encore vide",
+      }),
+    ).not.toBeInTheDocument();
+    expect(bodies).toHaveLength(1);
+  });
+
+  it("suggests nothing once the chain is complete", async () => {
+    registrationsSuggesting(null);
+    openEditionWithSlots([FUTURE_SLOT_1, FUTURE_SLOT_2]);
+
+    await registerOnTheFirstSlot();
+
+    expect(
+      screen.queryByRole("region", {
+        name: "Un créneau voisin est encore vide",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("says when the suggested slot was taken in the meantime", async () => {
+    let posts = 0;
+    server.use(
+      http.post(INSCRIPTIONS_URL, () => {
+        posts += 1;
+
+        return posts === 1
+          ? HttpResponse.json(
+              { ...inscriptionItem(), suggestion: SUGGESTION },
+              { status: 201 },
+            )
+          : HttpResponse.json(
+              { title: "Conflict", detail: "Ce créneau est passé." },
+              { status: 409 },
+            );
+      }),
+    );
+    openEditionWithSlots([FUTURE_SLOT_1, FUTURE_SLOT_2]);
+
+    await registerOnTheFirstSlot();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Le prendre aussi" }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Ce créneau est passé.",
+    );
+  });
+});

@@ -89,12 +89,10 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
     expect(items[0].textContent).toContain("19h00–19h30");
     expect(items[1].textContent).toContain("19h30–20h00");
 
-    // Placeholder for the suggestion (F13)
+    // Reached by a reload: the information typed is gone, no suggestion
     expect(
-      screen.getByText(
-        "Vous pourrez bientôt suggérer un texte pour votre créneau.",
-      ),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Le prendre aussi" }),
+    ).not.toBeInTheDocument();
 
     expect(
       screen.getByRole("link", { name: "Retour à l'accueil" }),

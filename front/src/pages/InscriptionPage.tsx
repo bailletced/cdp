@@ -24,6 +24,10 @@ import {
   parseCreneauxParam,
   selectSlotsByIds,
 } from "../lib/inscription";
+import {
+  parseSlotSuggestion,
+  rememberInscription,
+} from "../lib/lastInscription";
 import { withLocalTime } from "../lib/localTime";
 import { parsePlanningSlots, slotTemporalState } from "../lib/planning";
 import type { PlanningSlot } from "../lib/planning";
@@ -277,12 +281,20 @@ function InscriptionForm({
       setFormError(null);
 
       try {
-        await registerInscriptions.mutateAsync({
+        const payload = {
           slotIds,
           displayName: value.displayName.trim(),
           email: value.email.trim(),
           consent: consentRequired ? value.consent : true,
           website: websiteRef.current?.value ?? "",
+        };
+        const inscription = await registerInscriptions.mutateAsync(payload);
+        // « Le prendre aussi » re-uses this information (F13-T07)
+        rememberInscription({
+          displayName: payload.displayName,
+          email: payload.email,
+          consent: payload.consent,
+          suggestion: parseSlotSuggestion(inscription?.suggestion),
         });
 
         navigate({

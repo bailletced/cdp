@@ -4,6 +4,7 @@ import { editionSlotsQueryOptions, useCurrentEdition } from "../api/hooks";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { ReadTextLink } from "../components/ReadTextLink";
+import { SuggestionOffer } from "../components/SuggestionOffer";
 import { parseCreneauxParam, selectSlotsByIds } from "../lib/inscription";
 import { withLocalTime } from "../lib/localTime";
 import { parsePlanningSlots } from "../lib/planning";
@@ -20,8 +21,8 @@ const LINK_CLASS = "text-link underline underline-offset-4";
  * instead of showing an empty screen. Without the parameter (direct visit),
  * the confirmation message still shows. Each slot links to its text once
  * one is attributed and the device may read it — the pass it just received
- * covers it (F12-T05). The placeholder for the suggestion (F13) is marked
- * as such until that feature lands.
+ * covers it (F12-T05). Then an empty slot next to the last one taken is
+ * suggested (F13-T07).
  */
 export function InscriptionConfirmationPage() {
   const { creneaux } = useSearch({ from: "/inscription/confirmation" });
@@ -79,12 +80,7 @@ export function InscriptionConfirmationPage() {
           </section>
         ) : null
       ) : null}
-      {/* Placeholder: suggestion (F13) */}
-      <section aria-label="Suggérer un texte" className="mb-8">
-        <p className="rounded border border-dashed p-6 text-center text-default-500">
-          Vous pourrez bientôt suggérer un texte pour votre créneau.
-        </p>
-      </section>
+      <SuggestionOffer registeredIds={ids} />
       <Link to="/" className={LINK_CLASS}>
         Retour à l&apos;accueil
       </Link>
