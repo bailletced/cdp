@@ -223,3 +223,101 @@ describe("MySpacePage", () => {
     expect(logoutPosted).toBe(true);
   });
 });
+
+describe("MySpacePage — changer mon nom (F14-T08, US-14.2)", () => {
+  it("renames me everywhere, and the page shows the new name", async () => {
+    let name = "Famille Martin";
+    let patched: { body: unknown; contentType: string | null } | null = null;
+    server.use(
+      http.get(MY_INSCRIPTIONS_URL, () =>
+        HttpResponse.json({
+          editionId: "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b",
+          editionTitle: "24 heures de prière",
+          displayName: name,
+          inscriptions: [],
+        }),
+      ),
+      http.patch("http://localhost:8080/api/me", async ({ request }) => {
+        patched = {
+          body: await request.json(),
+          contentType: request.headers.get("content-type"),
+        };
+        name = "Famille Martin-Dubois";
+
+        return HttpResponse.json({ displayName: name });
+      }),
+    );
+
+    renderApp("/my-space");
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Changer mon nom" }),
+    );
+
+    const dialog = await screen.findByRole("dialog", {
+      name: "Changer mon nom",
+    });
+    expect(dialog).toHaveTextContent(
+      "Votre nom s'applique partout : dans le planning, le fil du relais, les intentions signées et l'historique.",
+    );
+    const field = within(dialog).getByLabelText("Nom affiché");
+    expect(field).toHaveValue("Famille Martin");
+    fireEvent.change(field, { target: { value: "Famille Martin-Dubois" } });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Enregistrer" }),
+    );
+
+    expect(
+      await screen.findByText("Famille Martin-Dubois"),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(patched).toEqual({
+      body: { displayName: "Famille Martin-Dubois" },
+      contentType: "application/merge-patch+json",
+    });
+  });
+
+  it("shows the refusal of the name on the field", async () => {
+    mySpace([]);
+    server.use(
+      http.patch("http://localhost:8080/api/me", () =>
+        HttpResponse.json(
+          {
+            status: 422,
+            violations: [
+              {
+                propertyPath: "displayName",
+                message:
+                  "Le nom affiché doit comporter entre 1 et 80 caractères.",
+              },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+
+    renderApp("/my-space");
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Changer mon nom" }),
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Changer mon nom",
+    });
+    fireEvent.change(within(dialog).getByLabelText("Nom affiché"), {
+      target: { value: "   " },
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Enregistrer" }),
+    );
+
+    expect(
+      await within(dialog).findByText(
+        "Le nom affiché doit comporter entre 1 et 80 caractères.",
+      ),
+    ).toBeInTheDocument();
+    expect(within(dialog).getByLabelText("Nom affiché")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+  });
+});

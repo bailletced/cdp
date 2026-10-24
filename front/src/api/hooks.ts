@@ -208,6 +208,33 @@ export const myInscriptionsQueryOptions = {
   retry: false,
 } as const;
 
+/**
+ * Changes my display name (PATCH /api/me, F14-T08): it applies everywhere
+ * (RG-IN-2), so « Mon espace » and the planning are refreshed.
+ */
+export function useRenameMe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (displayName: string) => {
+      const { data, error } = await apiClient.PATCH("/api/me", {
+        body: { displayName },
+        headers: { "Content-Type": "application/merge-patch+json" },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+      void queryClient.invalidateQueries({ queryKey: ["public", "editions"] });
+    },
+  });
+}
+
 /** Payload of POST /api/inscriptions (F09-T10), bounded by the OpenAPI contract. */
 export interface RegisterInscriptionsPayload {
   slotIds: string[];

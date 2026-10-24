@@ -8,6 +8,7 @@ import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { ReadTextLink } from "../components/ReadTextLink";
+import { RenameDialog } from "../components/RenameDialog";
 import { withLocalTime } from "../lib/localTime";
 
 const LINK_CLASS = "text-link underline underline-offset-4";
@@ -95,9 +96,10 @@ function MySlots() {
 
   return (
     <>
-      <p className="mb-8 font-display text-3xl font-bold">
-        {space.displayName}
-      </p>
+      <div className="mb-8 flex flex-wrap items-center gap-4">
+        <p className="font-display text-3xl font-bold">{space.displayName}</p>
+        <RenameDialog currentName={space.displayName ?? ""} />
+      </div>
       <section aria-labelledby="mes-creneaux" className="mb-12">
         <h2 id="mes-creneaux" className="mb-4">
           Mes créneaux
