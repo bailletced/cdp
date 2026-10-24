@@ -28,4 +28,4 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Vérifications
 
 - [ ] **F11-T07** · `test` Rendu dans Gmail, Outlook et Apple Mail (iOS), poids de l'e-mail mesuré ; import du `.ics` dans Google Agenda et Apple Calendrier — *Dépend de* : F11-T05 · *Fini quand* : captures et poids notés dans la PR, anomalies corrigées.
-- [ ] **F11-T08** · `test` E2E : inscription → e-mail dans Mailpit avec `.ics` joint et lien personnel qui ouvre `/mon-espace` — *Dépend de* : F11-T05, F02-T20, F09-T21 · *Fini quand* : parcours vert en CI.
+- [x] **F11-T08** · `test` E2E : inscription → e-mail dans Mailpit avec `.ics` joint et lien personnel qui ouvre `/mon-espace` — *Dépend de* : F11-T05, F02-T20, F09-T21 · *Fini quand* : parcours vert en CI.

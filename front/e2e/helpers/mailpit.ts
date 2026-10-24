@@ -11,6 +11,13 @@ export interface MailpitEmail {
   subject: string;
   text: string;
   html: string;
+  attachments: MailpitAttachment[];
+}
+
+export interface MailpitAttachment {
+  fileName: string;
+  contentType: string;
+  partId: string;
 }
 
 const MAILPIT_API_URL =
@@ -27,6 +34,11 @@ interface MailpitMessage extends MailpitMessageSummary {
   Subject: string;
   Text: string;
   HTML: string;
+  Attachments?: Array<{
+    FileName: string;
+    ContentType: string;
+    PartID: string;
+  }>;
 }
 
 function toEmail(message: MailpitMessage): MailpitEmail {
@@ -37,6 +49,11 @@ function toEmail(message: MailpitMessage): MailpitEmail {
     subject: message.Subject,
     text: message.Text,
     html: message.HTML,
+    attachments: (message.Attachments ?? []).map((attachment) => ({
+      fileName: attachment.FileName,
+      contentType: attachment.ContentType,
+      partId: attachment.PartID,
+    })),
   };
 }
 
@@ -84,6 +101,20 @@ export function extractLinkFromEmail(email: MailpitEmail): string | null {
     .match(/https?:\/\/[^\s"'<>]+/);
 
   return fromHtml ? fromHtml[0] : null;
+}
+
+/**
+ * The content of an attachment of an email, as text.
+ */
+export async function readAttachment(
+  email: MailpitEmail,
+  attachment: MailpitAttachment,
+): Promise<string> {
+  const response = await fetch(
+    `${MAILPIT_API_URL}/message/${email.id}/part/${attachment.partId}`,
+  );
+
+  return response.text();
 }
 
 /**
