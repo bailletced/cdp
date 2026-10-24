@@ -206,3 +206,95 @@ describe("DistributePage — ordered list (F07-T08)", () => {
     await waitFor(() => expect(orderedTitles()).toEqual([PSALM.title]));
   });
 });
+
+const distributeUrl = `${editionUrl}/distribute-texts`;
+
+describe("DistributePage — start slot, preview, sending (F07-T09)", () => {
+  it("previews the slots to fill, truncated at the last slot (US-07.2)", async () => {
+    server.use(organizerMe(), library(), edition());
+
+    renderApp(`/organisation/editions/${EDITION_ID}/distribute`);
+
+    await addToList(THERESE.title);
+    await addToList(PSALM.title);
+    await addToList(NIGHT.title);
+    fireEvent.change(screen.getByLabelText("Créneau de départ"), {
+      target: { value: "47" },
+    });
+
+    const preview = screen.getByRole("region", { name: "Aperçu" });
+    expect(
+      within(preview).getByText("Les créneaux n° 47 à 48 recevront 2 textes."),
+    ).toBeInTheDocument();
+    expect(
+      within(preview).getByText(
+        "1 texte ne sera pas utilisé : la répartition s’arrête au dernier créneau.",
+      ),
+    ).toBeInTheDocument();
+    const filled = within(preview).getAllByRole("listitem");
+    expect(filled).toHaveLength(2);
+    expect(filled[0]).toHaveTextContent("19h00–19h30");
+    expect(filled[0]).toHaveTextContent(THERESE.title);
+    expect(filled[1]).toHaveTextContent("19h30–20h00");
+    expect(filled[1]).toHaveTextContent(PSALM.title);
+  });
+
+  it("sends the ordered texts and goes back to the attribution", async () => {
+    let body: unknown = null;
+    server.use(
+      organizerMe(),
+      library(),
+      edition(),
+      http.post(distributeUrl, async ({ request }) => {
+        body = await request.json();
+
+        return HttpResponse.json({ id: EDITION_ID });
+      }),
+    );
+
+    renderApp(`/organisation/editions/${EDITION_ID}/distribute`);
+
+    // Nothing to send yet
+    expect(
+      await screen.findByRole("button", { name: "Répartir les textes" }),
+    ).toBeDisabled();
+
+    await addToList(PSALM.title);
+    await addToList(THERESE.title);
+    fireEvent.click(screen.getByRole("button", { name: "Répartir 2 textes" }));
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Attribution des textes",
+      }),
+    ).toBeInTheDocument();
+    expect(body).toEqual({ textIds: [PSALM.id, THERESE.id], fromRank: 1 });
+    expect(await screen.findByText("Textes répartis.")).toBeInTheDocument();
+  });
+
+  it("explains a refusal of the API", async () => {
+    server.use(
+      organizerMe(),
+      library(),
+      edition(),
+      http.post(distributeUrl, () =>
+        HttpResponse.json(
+          { status: 404, detail: "Texte introuvable." },
+          { status: 404 },
+        ),
+      ),
+    );
+
+    renderApp(`/organisation/editions/${EDITION_ID}/distribute`);
+
+    await addToList(THERESE.title);
+    fireEvent.click(screen.getByRole("button", { name: "Répartir 1 texte" }));
+
+    // Not findByRole("alert"): a toast of a previous test may still be there
+    expect(await screen.findByText("Texte introuvable.")).toHaveAttribute(
+      "role",
+      "alert",
+    );
+  });
+});

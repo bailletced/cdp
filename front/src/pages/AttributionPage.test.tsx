@@ -130,6 +130,22 @@ describe("AttributionPage (F07-T06)", () => {
     ).toBeInTheDocument();
   });
 
+  it("leads to « Répartir dans l’ordre »", async () => {
+    server.use(
+      organizerMe(),
+      http.get(editionUrl, () => HttpResponse.json(attributionEdition())),
+    );
+
+    renderApp(`/organisation/editions/${EDITION_ID}/texts`);
+
+    expect(
+      await screen.findByRole("link", { name: "Répartir dans l’ordre" }),
+    ).toHaveAttribute(
+      "href",
+      `/organisation/editions/${EDITION_ID}/distribute`,
+    );
+  });
+
   it("is reachable from the edition detail", async () => {
     server.use(
       organizerMe(),

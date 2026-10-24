@@ -27,7 +27,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F07-T06** · `front` Écran « Attribution » : 48 créneaux groupés par moment avec leur texte (ou « sans texte »), accès depuis le détail d'édition — *Dépend de* : F07-T03, F05-T21 · *Fini quand* : test Vitest/MSW de l'affichage.
 - [x] **F07-T07** · `front` Sélecteur de texte par créneau (Autocomplete sur la bibliothèque : titre, source), attribution et retrait, mise à jour optimiste + tests — *Dépend de* : F07-T06, F06-T12 · *Fini quand* : attribution, retrait et conflit 409 testés.
 - [x] **F07-T08** · `front` « Répartir dans l'ordre » 1/2 : sélection de textes et liste réordonnable accessible (glisser-déposer React Aria + boutons « Monter » / « Descendre ») — *Dépend de* : F07-T07 · *Fini quand* : réordonnancement possible au clavier seul (test).
-- [ ] **F07-T09** · `front` « Répartir dans l'ordre » 2/2 : créneau de départ, aperçu des créneaux remplis, envoi, erreurs + tests — *Dépend de* : F07-T08 · *Fini quand* : aperçu conforme à la troncature (test).
+- [x] **F07-T09** · `front` « Répartir dans l'ordre » 2/2 : créneau de départ, aperçu des créneaux remplis, envoi, erreurs + tests — *Dépend de* : F07-T08 · *Fini quand* : aperçu conforme à la troncature (test).
 - [ ] **F07-T10** · `front` Avertissements : badge « Texte déjà utilisé » et confirmation de programmation « X créneaux n'ont pas encore de texte » — *Dépend de* : F07-T04, F07-T05, F07-T09 · *Fini quand* : test Vitest des deux avertissements.
 
 ## Données et parcours

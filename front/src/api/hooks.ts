@@ -620,3 +620,35 @@ export function useAssignText(editionId: string) {
     },
   });
 }
+
+/**
+ * Distributes an ordered list of texts from a start slot (POST
+ * /api/admin/editions/{id}/distribute-texts, F07-T09): the API truncates the
+ * list at slot 48.
+ */
+export function useDistributeTexts(editionId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { textIds: string[]; fromRank: number }) => {
+      const { error } = await apiClient.POST(
+        "/api/admin/editions/{id}/distribute-texts",
+        {
+          params: { path: { id: editionId } },
+          body: payload,
+          headers: { "Content-Type": "application/ld+json" },
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: editionQueryOptions(editionId).queryKey,
+      });
+      void queryClient.invalidateQueries({ queryKey: textsQueryKey });
+    },
+  });
+}

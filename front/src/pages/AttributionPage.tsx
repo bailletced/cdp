@@ -86,13 +86,22 @@ export function AttributionPage() {
         <p className={missing > 0 ? "text-warning" : "text-success"}>
           {missingTextsSummary(missing, slots.length)}
         </p>
-        <Link
-          to="/organisation/editions/$editionId"
-          params={{ editionId }}
-          className="text-link underline underline-offset-4"
-        >
-          Retour à l’édition
-        </Link>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link
+            to="/organisation/editions/$editionId/distribute"
+            params={{ editionId }}
+            className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 text-accent-foreground no-underline"
+          >
+            Répartir dans l’ordre
+          </Link>
+          <Link
+            to="/organisation/editions/$editionId"
+            params={{ editionId }}
+            className="inline-flex min-h-11 items-center text-link underline underline-offset-4"
+          >
+            Retour à l’édition
+          </Link>
+        </div>
       </div>
       {assignError ? (
         <p role="alert" className="mt-4 text-danger">
