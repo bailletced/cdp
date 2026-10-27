@@ -1,4 +1,5 @@
 import {
+  type QueryClient,
   keepPreviousData,
   useInfiniteQuery,
   useMutation,
@@ -393,6 +394,23 @@ export const editionsQueryOptions = {
   },
 } as const;
 
+/**
+ * Refreshes the editions list after a change. A list still loading would
+ * otherwise answer late with the old content — a refetch is merged into a
+ * pending first load — and stay fresh for the default staleTime: the
+ * pending load is cancelled first.
+ */
+async function refreshEditionsList(queryClient: QueryClient): Promise<void> {
+  await queryClient.cancelQueries({
+    queryKey: editionsQueryOptions.queryKey,
+    exact: true,
+  });
+  await queryClient.invalidateQueries({
+    queryKey: editionsQueryOptions.queryKey,
+    refetchType: "all",
+  });
+}
+
 export function useEditions() {
   return useQuery(editionsQueryOptions);
 }
@@ -454,9 +472,7 @@ export function useCreateEdition() {
       return data;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: editionsQueryOptions.queryKey,
-      });
+      void refreshEditionsList(queryClient);
     },
   });
 }
@@ -491,9 +507,7 @@ export function useUpdateEdition() {
       return data;
     },
     onSuccess: (_data, variables) => {
-      void queryClient.invalidateQueries({
-        queryKey: editionsQueryOptions.queryKey,
-      });
+      void refreshEditionsList(queryClient);
       void queryClient.invalidateQueries({
         queryKey: editionQueryOptions(variables.id).queryKey,
       });
@@ -526,9 +540,7 @@ export function useScheduleEdition() {
       return data;
     },
     onSuccess: (_data, id) => {
-      void queryClient.invalidateQueries({
-        queryKey: editionsQueryOptions.queryKey,
-      });
+      void refreshEditionsList(queryClient);
       void queryClient.invalidateQueries({
         queryKey: editionQueryOptions(id).queryKey,
       });
@@ -561,9 +573,7 @@ export function useUnscheduleEdition() {
       return data;
     },
     onSuccess: (_data, id) => {
-      void queryClient.invalidateQueries({
-        queryKey: editionsQueryOptions.queryKey,
-      });
+      void refreshEditionsList(queryClient);
       void queryClient.invalidateQueries({
         queryKey: editionQueryOptions(id).queryKey,
       });
