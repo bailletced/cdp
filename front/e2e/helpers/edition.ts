@@ -72,15 +72,34 @@ async function freshStartsAt(request: APIRequestContext): Promise<Date> {
   const minStart = roundDownToHalfHour(new Date(Date.now() + 2 * 3600_000));
   const response = await request.get("/api/editions/current");
   if (response.status() !== 200) {
-    return minStart;
+    return unambiguousInParis(minStart);
   }
   const current = (await response.json()) as { startsAt: string };
   const currentStart = new Date(current.startsAt).getTime();
   if (minStart.getTime() <= currentStart) {
     // Both instants are aligned on :00/:30, so +30 min stays aligned
-    return new Date(currentStart + 30 * 60_000);
+    return unambiguousInParis(new Date(currentStart + 30 * 60_000));
   }
-  return minStart;
+  return unambiguousInParis(minStart);
+}
+
+/**
+ * The form takes a Paris wall-clock time: on the night summer time ends,
+ * 2h00 to 2h59 happen twice and the form keeps the first — an earlier
+ * instant than meant, which would never become the current edition. Such a
+ * start moves on by half hours until its wall clock is unique.
+ */
+function unambiguousInParis(start: Date): Date {
+  let candidate = start;
+  const wallClock = (date: Date) => JSON.stringify(parisWallClock(date));
+  while (
+    wallClock(candidate) ===
+      wallClock(new Date(candidate.getTime() - 3600_000)) ||
+    wallClock(candidate) === wallClock(new Date(candidate.getTime() + 3600_000))
+  ) {
+    candidate = new Date(candidate.getTime() + 30 * 60_000);
+  }
+  return candidate;
 }
 
 /** The API rejects minutes other than 00/30 (F05-T15): align to the half hour. */

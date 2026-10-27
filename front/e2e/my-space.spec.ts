@@ -99,7 +99,7 @@ test.describe("Mon espace (F14)", () => {
       page,
       request,
       E2E_ORGANIZER_EMAIL,
-      `24 heures de prière — mon espace E2E ${Date.now()}`,
+      `24 heures de prière — espace personnel E2E ${Date.now()}`,
     );
     await page.close();
   });
