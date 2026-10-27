@@ -70,4 +70,9 @@ export const handlers = [
       slots: [],
     });
   }),
+  // GET /api/altcha-challenge: the anti-robot check is off by default (F15) —
+  // tests of the « on » mode override this handler with server.use()
+  http.get("http://localhost:8080/api/altcha-challenge", () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
 ];

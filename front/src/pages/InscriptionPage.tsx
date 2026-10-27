@@ -14,6 +14,7 @@ import {
   useMe,
   useRegisterInscriptions,
 } from "../api/hooks";
+import { useAltchaCheck } from "../components/AltchaCheck";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorState } from "../components/ErrorState";
 import { FormField, applyApiErrors } from "../components/FormField";
@@ -258,7 +259,9 @@ function SelectedSlotsRecap({
  * Formulaire d'inscription (F09-T16/T17/T18): nom affiché, e-mail,
  * consentement, champ piège `website`. La validation est un Standard Schema
  * borné par l'OpenAPI (F09-T16) ; les violations 422 de l'API sont
- * redirigées vers leur champ, le 409 est affiché en message métier (RG-IN-3).
+ * redirigées vers leur champ, le 409 est affiché en message métier (RG-IN-3),
+ * le 429 invite à réessayer plus tard (F15) ; une fois la vérification
+ * anti-robot activée, sa solution part avec le formulaire (F15-T06).
  */
 function InscriptionForm({
   slotIds,
@@ -277,6 +280,8 @@ function InscriptionForm({
   // input bypasses React's controlled inputs (§6.7)
   const websiteRef = useRef<HTMLInputElement>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  // Anti-robot check, once switched on during an attack (F15-T06)
+  const altcha = useAltchaCheck();
 
   const form = useForm({
     defaultValues: {
@@ -298,6 +303,7 @@ function InscriptionForm({
           email: value.email.trim(),
           consent: consentRequired ? value.consent : true,
           website: websiteRef.current?.value ?? "",
+          ...(altcha.payload ? { altcha: altcha.payload } : {}),
         };
         const inscription = await registerInscriptions.mutateAsync(payload);
         // « Le prendre aussi » re-uses this information (F13-T07)
@@ -320,12 +326,18 @@ function InscriptionForm({
         if (status === 422 && apiError.violations) {
           // Each 422 violation lands on its own field (F09-T10)
           applyApiErrors(form, apiError);
-          const slotViolation = apiError.violations.find(
-            (violation) => violation.propertyPath === "slotIds",
+          // The slots and the anti-robot check have no field of their own
+          const formViolation = apiError.violations.find(
+            (violation) =>
+              violation.propertyPath === "slotIds" ||
+              violation.propertyPath === "altcha",
           );
-          if (slotViolation) {
-            setFormError(slotViolation.message);
+          if (formViolation) {
+            setFormError(formViolation.message);
           }
+        } else if (status === 429) {
+          // F15: beyond the hourly limit of the inscriptions
+          setFormError("Trop de tentatives, réessayez dans quelques minutes.");
         } else if (status === 409) {
           // RG-IN-3: already registered on this slot (double click, race)
           setFormError(
@@ -414,7 +426,12 @@ function InscriptionForm({
         aria-hidden="true"
         hidden
       />
-      <Button type="submit" variant="primary" isDisabled={isPending}>
+      {altcha.widget}
+      <Button
+        type="submit"
+        variant="primary"
+        isDisabled={isPending || (altcha.enabled && !altcha.payload)}
+      >
         {isPending ? "Envoi en cours…" : "S'inscrire"}
       </Button>
       {formError ? (

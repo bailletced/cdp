@@ -16,16 +16,18 @@ use Psr\Clock\ClockInterface;
  * without a code deployment. No third party: the challenge is signed with
  * the application secret, and the visitor's browser solves it on its own.
  *
- * Kept light for an old phone: one SHA-256 per attempt, 10,000 to 50,000
- * attempts — under a second — and valid for ten minutes.
+ * Kept light for an old phone: one SHA-256 per attempt, 5,000 to 20,000
+ * attempts — about a second (44,000 took 2.5 s to the widget's solver on a
+ * single thread) — and valid for ten minutes. It stops the robots that run
+ * no JavaScript; the hourly limits remain the main protection.
  */
 final readonly class AltchaGate
 {
     private const int COST = 1;
 
-    private const int MIN_ATTEMPTS = 10_000;
+    private const int MIN_ATTEMPTS = 5_000;
 
-    private const int MAX_ATTEMPTS = 50_000;
+    private const int MAX_ATTEMPTS = 20_000;
 
     private const int VALIDITY_SECONDS = 600;
 

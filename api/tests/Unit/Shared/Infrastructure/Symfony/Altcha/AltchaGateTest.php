@@ -66,7 +66,7 @@ final class AltchaGateTest extends TestCase
     {
         $challenge = new AltchaGate(true, self::SECRET, new MockClock())->challenge();
 
-        // One SHA-256 per attempt, at most 50,000 attempts
+        // One SHA-256 per attempt, at most 20,000 attempts
         self::assertSame('SHA-256', $challenge['parameters']['algorithm']);
         self::assertSame(1, $challenge['parameters']['cost']);
     }

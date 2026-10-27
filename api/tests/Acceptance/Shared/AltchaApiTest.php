@@ -8,8 +8,16 @@ use AltchaOrg\Altcha\Algorithm\Sha;
 use AltchaOrg\Altcha\Altcha;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\SolveChallengeOptions;
+use App\Access\Domain\Entity\Account;
+use App\Access\Domain\ValueObject\AccountId;
+use App\Access\Infrastructure\Symfony\Security\UserProvider;
+use App\Chain\Domain\Entity\Priant;
+use App\Chain\Domain\Repository\PriantRepositoryInterface;
+use App\Chain\Domain\ValueObject\DisplayName;
+use App\Shared\Domain\ValueObject\Email;
 use App\Tests\ApiTestCase;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
@@ -80,6 +88,18 @@ final class AltchaApiTest extends ApiTestCase
         self::assertSame('slotIds', $response['json']['violations'][0]['propertyPath'] ?? null);
     }
 
+    public function testOnAPriantSignedInByTheirPersonalLinkIsNotChallenged(): void
+    {
+        $this->boot(true);
+        $this->logInAsAPriant();
+
+        // The one-click inscription of « Mon espace » (F14-T12) carries no solution
+        $response = $this->postAs('/api/inscriptions', 'application/ld+json', self::inscription());
+
+        self::assertSame(422, $response['status']);
+        self::assertSame('slotIds', $response['json']['violations'][0]['propertyPath'] ?? null);
+    }
+
     public function testOnALinkRequestWithoutSolutionIsRefused(): void
     {
         $this->boot(true);
@@ -100,6 +120,35 @@ final class AltchaApiTest extends ApiTestCase
         $connection = self::getContainer()->get('doctrine.dbal.default_connection');
         \assert($connection instanceof Connection);
         $connection->executeStatement('DELETE FROM cache_items');
+    }
+
+    /**
+     * Signs in through a personal link (same steps as MeApiTest): the
+     * session of a priant who already consented.
+     */
+    private function logInAsAPriant(): void
+    {
+        $container = self::getContainer();
+        $em = $container->get('doctrine')->getManager();
+        \assert($em instanceof EntityManagerInterface);
+        $em->getConnection()->executeStatement('DELETE FROM priant');
+        $em->getConnection()->executeStatement('TRUNCATE organizer, account CASCADE');
+
+        $priant = new Priant(new Email('marie@example.org'), new DisplayName('Marie Dupont'));
+        $priant->giveConsent(new \DateTimeImmutable('2026-10-20 08:00:00', new \DateTimeZone('UTC')));
+        $container->get(PriantRepositoryInterface::class)->add($priant);
+        $account = new Account(new AccountId(), new Email('marie@example.org'));
+        $account->updatePriantId($priant->getId()->value->toRfc4122());
+        $em->persist($account);
+        $em->flush();
+
+        $securityUser = $container->get(UserProvider::class)->loadUserByIdentifier($account->getId()->value->toRfc4122());
+        $url = $container->get('security.authenticator.login_link_handler.main')->createLoginLink($securityUser)->getUrl();
+        $parts = parse_url($url);
+        \assert(\is_string($parts['path'] ?? null));
+        parse_str($parts['query'] ?? '', $params);
+        $params['_target_path'] = '/my-space';
+        $this->client->request('POST', $parts['path'], $params);
     }
 
     /**

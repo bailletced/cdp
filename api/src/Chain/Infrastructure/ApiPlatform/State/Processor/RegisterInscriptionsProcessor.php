@@ -76,8 +76,11 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         // Hourly limits per IP and per e-mail (F15-T03): 429 + Retry-After
         $this->publicFormLimiter->countInscription($data->email);
 
-        // ALTCHA, once switched on during an attack (F15-T05)
-        if (!$this->altchaGate->allows($data->altcha)) {
+        // ALTCHA, once switched on during an attack (F15-T05); a priant signed
+        // in by their personal link is no robot (one-click inscription, F14-T12)
+        $viewer = $this->currentViewer->current();
+        $signedIn = $viewer->verified || $viewer->isOrganizer;
+        if (!$signedIn && !$this->altchaGate->allows($data->altcha)) {
             throw self::violation('altcha', 'La vérification anti-robot a échoué. Rechargez la page et réessayez.');
         }
 

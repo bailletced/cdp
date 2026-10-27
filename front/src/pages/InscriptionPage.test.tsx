@@ -661,6 +661,67 @@ describe("InscriptionPage — envoi (F09-T18)", () => {
   });
 });
 
+describe("InscriptionPage — anti-abus (F15-T06)", () => {
+  it("demande de réessayer plus tard après trop de tentatives (429)", async () => {
+    server.use(
+      http.post(INSCRIPTIONS_URL, () =>
+        // As the API answers it: a problem with its Retry-After
+        HttpResponse.json(
+          {
+            title: "An error occurred",
+            detail: "Trop de tentatives, réessayez dans quelques minutes.",
+            status: 429,
+          },
+          { status: 429, headers: { "Retry-After": "1200" } },
+        ),
+      ),
+    );
+    openEditionWithSlots([FUTURE_SLOT_1]);
+
+    renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
+
+    expect(await screen.findByLabelText("Nom affiché")).toBeInTheDocument();
+    fillValidForm();
+    submitForm();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Trop de tentatives, réessayez dans quelques minutes.",
+    );
+  });
+
+  it("envoie la solution de la vérification anti-robot une fois activée", async () => {
+    const captured = captureRegistrations();
+    server.use(
+      http.get("http://localhost:8080/api/altcha-challenge", () =>
+        HttpResponse.json({
+          parameters: { algorithm: "SHA-256" },
+          signature: "s",
+        }),
+      ),
+    );
+    openEditionWithSlots([FUTURE_SLOT_1]);
+
+    const { container } = renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
+
+    expect(await screen.findByLabelText("Nom affiché")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(container.querySelector("altcha-widget")).not.toBeNull(),
+    );
+    container.querySelector("altcha-widget")?.dispatchEvent(
+      new CustomEvent("statechange", {
+        detail: { state: "verified", payload: "solution" },
+      }),
+    );
+    fillValidForm();
+    submitForm();
+
+    expect(
+      await screen.findByRole("heading", { name: "Inscription confirmée" }),
+    ).toBeInTheDocument();
+    expect(captured.body).toMatchObject({ altcha: "solution" });
+  });
+});
+
 describe("InscriptionPage — suggestion après inscription (F13-T07, US-13.3)", () => {
   const SUGGESTION = {
     slotId: SLOT_FUTURE_2,

@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { configure } from "@testing-library/react";
 import { setupServer } from "msw/node";
-import { afterAll, afterEach, beforeAll } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
 import { handlers } from "./handlers";
 
 // The back-office pages are lazy-loaded routes: under a full parallel run,
@@ -36,6 +36,11 @@ if (!window.ResizeObserver) {
     disconnect() {}
   } as unknown as typeof ResizeObserver;
 }
+
+// The ALTCHA widget (F15) solves its challenge in workers jsdom has not:
+// the tests drive the <altcha-widget> element through its events instead
+vi.mock("altcha", () => ({}));
+vi.mock("altcha/i18n/fr-fr", () => ({}));
 
 // Setup MSW server
 export const server = setupServer(...handlers);

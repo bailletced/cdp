@@ -1,20 +1,26 @@
 import { Button, Input, Label, TextField } from "@heroui/react";
 import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
+import { useAltchaCheck } from "../components/AltchaCheck";
 import { PageTitle } from "../components/PageTitle";
 
 const GENERIC_ERROR_MESSAGE = "Une erreur est survenue. Veuillez réessayer.";
+const TOO_MANY_REQUESTS_MESSAGE =
+  "Trop de tentatives, réessayez dans quelques minutes.";
 
 type SubmissionState = "idle" | "submitting" | "sent" | "error";
 
 /**
  * /receive-my-link (F02-T17): email form to request a personal login link.
  * The API always answers 202 with the same message, whether the account
- * exists or not: this page never leaks account existence.
+ * exists or not: this page never leaks account existence. Beyond the hourly
+ * limit (F15), a 429 asks to try again later; once the anti-robot check is
+ * on, its solution goes with the e-mail.
  */
 export function ReceiveMyLinkPage() {
   const [state, setState] = useState<SubmissionState>("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const altcha = useAltchaCheck();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,8 +37,18 @@ export function ReceiveMyLinkPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ email, website }),
+        body: JSON.stringify({
+          email,
+          website,
+          ...(altcha.payload ? { altcha: altcha.payload } : {}),
+        }),
       });
+
+      if (response.status === 429) {
+        setMessage(TOO_MANY_REQUESTS_MESSAGE);
+        setState("error");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`Unexpected status ${response.status}`);
@@ -70,10 +86,13 @@ export function ReceiveMyLinkPage() {
             aria-hidden="true"
             hidden
           />
+          {altcha.widget}
           <Button
             type="submit"
             variant="primary"
-            isDisabled={state === "submitting"}
+            isDisabled={
+              state === "submitting" || (altcha.enabled && !altcha.payload)
+            }
           >
             {state === "submitting" ? "Envoi en cours…" : "Recevoir mon lien"}
           </Button>

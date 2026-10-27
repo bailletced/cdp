@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../test/setup";
@@ -93,6 +93,82 @@ describe("ReceiveMyLinkPage", () => {
 
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Une erreur est survenue. Veuillez réessayer.",
+    );
+  });
+
+  it("shows no anti-robot check while it is off", async () => {
+    const { container } = render(<ReceiveMyLinkPage />);
+
+    // The default handler answers 204: no challenge, no widget
+    await waitFor(() =>
+      expect(container.querySelector("altcha-widget")).toBeNull(),
+    );
+    expect(
+      screen.getByRole("button", { name: "Recevoir mon lien" }),
+    ).toBeEnabled();
+  });
+
+  it("sends the solution of the anti-robot check once it is on (F15)", async () => {
+    let capturedBody: unknown = null;
+    server.use(
+      http.get("http://localhost:8080/api/altcha-challenge", () =>
+        HttpResponse.json({
+          parameters: { algorithm: "SHA-256" },
+          signature: "s",
+        }),
+      ),
+      http.post(
+        "http://localhost:8080/auth/link-request",
+        async ({ request }) => {
+          capturedBody = await request.json();
+          return HttpResponse.json(
+            { message: CONFIRMATION_MESSAGE },
+            { status: 202 },
+          );
+        },
+      ),
+    );
+
+    const { container } = render(<ReceiveMyLinkPage />);
+    await waitFor(() =>
+      expect(container.querySelector("altcha-widget")).not.toBeNull(),
+    );
+    // The widget solves its challenge in the browser, then says so
+    container.querySelector("altcha-widget")?.dispatchEvent(
+      new CustomEvent("statechange", {
+        detail: { state: "verified", payload: "solution" },
+      }),
+    );
+    fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
+      target: { value: "thomas@bailletced.org" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Recevoir mon lien" }));
+
+    await screen.findByRole("status");
+    expect(capturedBody).toEqual({
+      email: "thomas@bailletced.org",
+      website: "",
+      altcha: "solution",
+    });
+  });
+
+  it("asks to try again later after too many requests (429)", async () => {
+    server.use(
+      http.post(
+        "http://localhost:8080/auth/link-request",
+        () => new HttpResponse(null, { status: 429 }),
+      ),
+    );
+
+    render(<ReceiveMyLinkPage />);
+
+    fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
+      target: { value: "thomas@bailletced.org" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Recevoir mon lien" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Trop de tentatives, réessayez dans quelques minutes.",
     );
   });
 });
