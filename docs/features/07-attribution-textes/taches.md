@@ -3,10 +3,10 @@
 <!-- recap -->
 | Couche | Tâches | Heures |
 |---|--:|--:|
-| `back` | 6 | 3 h |
+| `back` | 7 | 3,5 h |
 | `front` | 5 | 2,5 h |
 | `test` | 1 | 0,5 h |
-| **Total** | **12** | **6 h** |
+| **Total** | **13** | **6,5 h** |
 
 Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, tests compris. Légende et définition de « terminé » : [index des features](../README.md).
 <!-- /recap -->
@@ -34,3 +34,4 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F07-T11** · `back` Fixtures : attribution des 48 textes à l'édition de démonstration — *Dépend de* : F07-T02, F06-T15 · *Fini quand* : `make fixtures` produit une édition complète.
 - [x] **F07-T12** · `test` E2E : répartir 48 textes puis programmer sans avertissement ; vider un créneau puis reprogrammer → avertissement — *Dépend de* : F07-T10 · *Fini quand* : parcours vert avec axe-core.
+- [x] **F07-T13** · `back` Commande `app:chain:import-gospel-of-luke` : l'évangile selon saint Luc (Louis Segond 1910) en 48 lectures ajoutées à la bibliothèque, réparties sur une édition avec `--edition`, relançable sans doublon + tests — *Dépend de* : F07-T02 · *Fini quand* : les 1151 versets, dans l'ordre (test) ; édition inconnue refusée.

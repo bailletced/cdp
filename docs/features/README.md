@@ -86,19 +86,19 @@ Permettre à une communauté de prière, dont une partie est âgée, de former *
 |---|---|---|---|--:|--:|
 | F00 | [Socle technique](00-socle-technique/README.md) · [tâches](00-socle-technique/taches.md) | MVP | 0 — Socle | 31 | 15,5 h |
 | F01 | [Thème carmélitain et accessibilité de base](01-theme-accessibilite/README.md) · [tâches](01-theme-accessibilite/taches.md) | MVP | 0 — Socle | 13 | 6,5 h |
-| F02 | [Accès par lien personnel (squelette de bout en bout)](02-acces-lien-personnel/README.md) · [tâches](02-acces-lien-personnel/taches.md) | MVP | 0 — Socle | 20 | 10 h |
+| F02 | [Accès par lien personnel (squelette de bout en bout)](02-acces-lien-personnel/README.md) · [tâches](02-acces-lien-personnel/taches.md) | MVP | 0 — Socle | 21 | 10,5 h |
 | F03 | [Déploiement continu et supervision](03-deploiement-supervision/README.md) · [tâches](03-deploiement-supervision/taches.md) | MVP | 0 — Socle | 25 | 12,5 h |
 | F04 | [Back-office : accès et organisateurs](04-back-office-organisateurs/README.md) · [tâches](04-back-office-organisateurs/taches.md) | MVP | 1 — Programme | 6 | 3 h |
 | F05 | [Éditions et calendrier de Paris](05-editions-calendrier/README.md) · [tâches](05-editions-calendrier/taches.md) | MVP | 1 — Programme | 22 | 11 h |
 | F06 | [Bibliothèque de textes](06-bibliotheque-textes/README.md) · [tâches](06-bibliotheque-textes/taches.md) | MVP | 1 — Programme | 16 | 8 h |
-| F07 | [Attribution des textes aux créneaux](07-attribution-textes/README.md) · [tâches](07-attribution-textes/taches.md) | MVP | 1 — Programme | 12 | 6 h |
-| F08 | [Planning public (page d'accueil)](08-planning-public/README.md) · [tâches](08-planning-public/taches.md) | MVP | 1 — Programme | 11 | 5,5 h |
+| F07 | [Attribution des textes aux créneaux](07-attribution-textes/README.md) · [tâches](07-attribution-textes/taches.md) | MVP | 1 — Programme | 13 | 6,5 h |
+| F08 | [Planning public (page d'accueil)](08-planning-public/README.md) · [tâches](08-planning-public/taches.md) | MVP | 1 — Programme | 13 | 6,5 h |
 | F09 | [Inscription sur un ou plusieurs créneaux](09-inscription/README.md) · [tâches](09-inscription/taches.md) | MVP | 2 — Participation | 21 | 10,5 h |
 | F10 | [Pass appareil et politique de visibilité](10-pass-appareil-visibilite/README.md) · [tâches](10-pass-appareil-visibilite/taches.md) | MVP | 2 — Participation | 11 | 5,5 h |
 | F11 | [E-mail de confirmation et fichier agenda (.ics)](11-email-confirmation-ics/README.md) · [tâches](11-email-confirmation-ics/taches.md) | MVP | 2 — Participation | 8 | 4 h |
 | F12 | [Lecture des textes à méditer](12-lecture-textes/README.md) · [tâches](12-lecture-textes/taches.md) | MVP | 2 — Participation | 6 | 3 h |
 | F13 | [Mise en avant des créneaux vides](13-creneaux-vides/README.md) · [tâches](13-creneaux-vides/taches.md) | MVP | 2 — Participation | 8 | 4 h |
-| F14 | [Espace personnel](14-espace-personnel/README.md) · [tâches](14-espace-personnel/taches.md) | MVP | 2 — Participation | 11 | 5,5 h |
+| F14 | [Espace personnel](14-espace-personnel/README.md) · [tâches](14-espace-personnel/taches.md) | MVP | 2 — Participation | 12 | 6 h |
 | F15 | [Protection anti-abus des formulaires publics](15-anti-abus/README.md) · [tâches](15-anti-abus/taches.md) | MVP | 2 — Participation | 6 | 3 h |
 | F16 | [Pilotage des inscriptions (tableau de bord, gestion, export)](16-pilotage-inscriptions/README.md) · [tâches](16-pilotage-inscriptions/taches.md) | MVP | 2 — Participation | 15 | 7,5 h |
 | F17 | [« En ce moment » et bilan](17-en-ce-moment-bilan/README.md) · [tâches](17-en-ce-moment-bilan/taches.md) | MVP | 3 — Les 24 heures | 10 | 5 h |
@@ -114,7 +114,7 @@ Permettre à une communauté de prière, dont une partie est âgée, de former *
 | F27 | [Exploitation, édition de test et répétition générale](27-exploitation-repetition/README.md) · [tâches](27-exploitation-repetition/taches.md) | MVP | 5 — Finitions (une partie en S46, avant l'ouverture) | 17 | 8,5 h |
 | F28 | [Version imprimable des textes](28-version-imprimable/README.md) · [tâches](28-version-imprimable/taches.md) | Cible 1re édition | 5 — Finitions | 3 | 1,5 h |
 | F29 | [Reconduction : duplication, historique, invitations et désabonnement](29-reconduction-invitations/README.md) · [tâches](29-reconduction-invitations/taches.md) | Après 1re édition | 4 — Communication (réalisé après la 1re édition) | 13 | 6,5 h |
-| | **Total** | | | **361** | **180,5 h** |
+| | **Total** | | | **366** | **183 h** |
 <!-- /tableau -->
 
 ## 3. Totaux
@@ -122,15 +122,15 @@ Permettre à une communauté de prière, dont une partie est âgée, de former *
 <!-- totaux -->
 | Priorité | Features | Tâches | Heures |
 |---|---|--:|--:|
-| MVP | F00, F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F13, F14, F15, F16, F17, F23, F24, F25, F26, F27 | 312 | 156 h |
+| MVP | F00, F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F13, F14, F15, F16, F17, F23, F24, F25, F26, F27 | 317 | 158,5 h |
 | Cible 1re édition | F18, F19, F20, F21, F22, F28 | 36 | 18 h |
 | Après 1re édition | F29 | 13 | 6,5 h |
-| **Total** | | **361** | **180,5 h** |
+| **Total** | | **366** | **183 h** |
 
 | Couche | Tâches | Heures |
 |---|--:|--:|
-| `back` | 184 | 92 h |
-| `front` | 87 | 43,5 h |
+| `back` | 185 | 92,5 h |
+| `front` | 91 | 45,5 h |
 | `infra` | 32 | 16 h |
 | `test` | 45 | 22,5 h |
 | `doc` | 9 | 4,5 h |

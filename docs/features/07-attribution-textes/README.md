@@ -2,7 +2,7 @@
 
 | Lot | Priorité | Estimation |
 |---|---|---|
-| 1 — Programme | MVP | <!-- est -->12 tâches · 6 h<!-- /est --> |
+| 1 — Programme | MVP | <!-- est -->13 tâches · 6,5 h<!-- /est --> |
 
 ## Objectif et valeur
 
@@ -50,4 +50,4 @@ En tant qu'**organisatrice**, je veux être avertie s'il reste des créneaux san
 
 ## Estimation
 
-<!-- est -->**12 tâches × 0,5 h = 6 h** (6 `back`, 5 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->
+<!-- est -->**13 tâches × 0,5 h = 6,5 h** (7 `back`, 5 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->
