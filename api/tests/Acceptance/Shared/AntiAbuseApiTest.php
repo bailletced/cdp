@@ -17,7 +17,8 @@ use Zenstruck\Messenger\Test\InteractsWithMessenger;
  * inscription to 10 per IP and 5 per e-mail, the link request to 10 per IP
  * and 3 per e-mail. Beyond, the inscription answers 429 with Retry-After;
  * the link request answers 429 per IP, but stays a silent 202 per e-mail so
- * that it never tells whether an address is known.
+ * that it never tells whether an address is known. A filled honeypot
+ * (`website`) fakes a success and does nothing (F15-T04, US-15.1).
  */
 final class AntiAbuseApiTest extends ApiTestCase
 {
@@ -96,6 +97,36 @@ final class AntiAbuseApiTest extends ApiTestCase
             json_decode($fourth['content'], true, 512, \JSON_THROW_ON_ERROR),
         );
         self::assertCount(3, $this->transport('async_transactional')->queue()->messages(LinkMessage::class));
+    }
+
+    public function testAFilledHoneypotFakesAnInscriptionAndDoesNothing(): void
+    {
+        $response = $this->inscription('82.64.12.34', [
+            'slotIds' => ['01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b'],
+            'email' => 'bot@example.org',
+            'website' => 'http://spam.example',
+        ]);
+
+        // F15-T04 (US-15.1): identical-looking success, nothing created nor queued
+        self::assertSame(201, $response['status']);
+        $connection = self::getContainer()->get('doctrine.dbal.default_connection');
+        \assert($connection instanceof Connection);
+        self::assertSame(0, (int) $connection->fetchOne('SELECT count(*) FROM priant'));
+        self::assertSame(0, (int) $connection->fetchOne('SELECT count(*) FROM inscription'));
+        $this->transport('async_transactional')->queue()->assertEmpty();
+    }
+
+    public function testAFilledHoneypotFakesALinkRequestAndSendsNothing(): void
+    {
+        AccountFactory::createOne(['email' => new Email('marie@example.org')]);
+
+        $response = $this->send('/auth/link-request', 'application/json', '82.64.12.34', [
+            'email' => 'marie@example.org',
+            'website' => 'http://spam.example',
+        ]);
+
+        self::assertSame(202, $response['status']);
+        $this->transport('async_transactional')->queue()->assertEmpty();
     }
 
     /**
