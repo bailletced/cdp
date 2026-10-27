@@ -42,7 +42,8 @@ const LINK_CLASS = "text-link underline underline-offset-4";
  *
  * The selected slots are recap'd with their label and a « Retirer » action
  * (the URL parameter is validated: missing, empty or unknown ids are
- * signalled, US-09.5). Past slots are flagged and never submitted. The
+ * signalled, US-09.5). Past slots and the slots the viewer already holds
+ * (RG-IN-3) are flagged and never submitted. The
  * form collects the display name, the email and the consent (RG-IN-5,
  * RG-IN-7): in session, the name and email are pre-filled and the consent
  * checkbox is hidden once the consent has been given.
@@ -148,10 +149,12 @@ export function InscriptionPage() {
     );
   }
 
-  // Past slots are signalled and never submitted (US-09.5)
-  const submittable = selected.filter(
+  // Past slots (US-09.5) and the slots already taken by the viewer (RG-IN-3)
+  // are signalled and never submitted
+  const notPast = selected.filter(
     (slot) => slotTemporalState(slot, nowMs) !== "past",
   );
+  const submittable = notPast.filter((slot) => !slot.mine);
   const consentRequired = !(meQuery.data?.consentGiven ?? false);
 
   return (
@@ -178,9 +181,13 @@ export function InscriptionPage() {
           Certains créneaux sélectionnés n&apos;existent plus.
         </p>
       ) : null}
-      {submittable.length === 0 ? (
+      {notPast.length === 0 ? (
         <p role="alert" className="text-danger">
           Les créneaux sélectionnés sont passés.
+        </p>
+      ) : submittable.length === 0 ? (
+        <p role="alert" className="text-danger">
+          Vous êtes déjà inscrit sur les créneaux sélectionnés.
         </p>
       ) : (
         <InscriptionForm
@@ -196,7 +203,8 @@ export function InscriptionPage() {
 
 /**
  * Récapitulatif des créneaux choisis (F09-T15): libellé de chaque créneau,
- * état « créneau passé » porté par un libellé (jamais par la couleur seule),
+ * états « créneau passé » et « déjà inscrit » (RG-IN-3) portés par un
+ * libellé (jamais par la couleur seule),
  * et action « Retirer » qui met à jour le paramètre d'URL.
  */
 function SelectedSlotsRecap({
@@ -214,16 +222,19 @@ function SelectedSlotsRecap({
       <ul className="grid gap-2">
         {slots.map((slot) => {
           const isPast = slotTemporalState(slot, nowMs) === "past";
+          const isLeftOut = isPast || slot.mine;
 
           return (
             <li
               key={slot.id}
               className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-3"
             >
-              <span className={isPast ? "text-muted" : undefined}>
+              <span className={isLeftOut ? "text-muted" : undefined}>
                 {withLocalTime(slot.label, slot.startsAt)}
                 {isPast ? (
                   <span className="text-muted"> (créneau passé)</span>
+                ) : slot.mine ? (
+                  <span className="text-muted"> (déjà inscrit)</span>
                 ) : null}
               </span>
               <Button

@@ -1,4 +1,5 @@
 import { Checkbox } from "@heroui/react";
+import { useRef } from "react";
 import { withLocalTime } from "../lib/localTime";
 import { type PlanningSlot, slotTemporalState } from "../lib/planning";
 import { now } from "../lib/serverClock";
@@ -17,7 +18,8 @@ import { ReadTextLink } from "./ReadTextLink";
  * device clock cannot mislead.
  *
  * With `selectable`, a not-yet-past slot gets a checkbox (US-08.5, F08-T10):
- * a past slot is never selectable.
+ * a past slot is never selectable, nor is the viewer's own slot (RG-IN-3),
+ * which shows a check mark instead.
  *
  * For an inscrit of the edition or an organizer (F10-T10, US-10.1), the card
  * lists the priants with a « a prié » check (RG-LV-2), and says « Vous » on
@@ -41,10 +43,13 @@ export function SlotCard({
   selected?: boolean;
   onToggle?: (slotId: string) => void;
 }) {
+  const checkboxRef = useRef<HTMLDivElement>(null);
   const temporalState = slotTemporalState(slot, nowMs);
   const isPast = temporalState === "past";
   const isEmpty = registrationCount < 1;
-  const canSelect = selectable && !isPast;
+  // RG-IN-3: one inscription per slot and priant — the viewer's own slot
+  // cannot be taken twice
+  const canSelect = selectable && !isPast && !slot.mine;
 
   // The state is the empty/occupied one (RG-PL-2, §5.2); a past slot is
   // greyed out and labelled, so the information never rides on color alone.
@@ -72,31 +77,57 @@ export function SlotCard({
 
   return (
     // The banner of the empty slots scrolls to the card and focuses it
-    // (F13-T05): an anchor, never a tab stop
+    // (F13-T05): an anchor, never a tab stop.
+    // A selectable card toggles from anywhere: a large target for the pointer
+    // (a selectable card holds no other control), the checkbox stays the
+    // control for the keyboard and the screen readers.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: the checkbox is the keyboard control
     <article
       id={slotCardId(slot.id)}
       tabIndex={-1}
-      className={`relative h-full scroll-mt-24 rounded-2xl border p-4 outline-accent focus:outline-2 focus:outline-offset-2 sm:p-5 ${toneClasses}`}
+      className={`relative h-full scroll-mt-32 rounded-2xl border p-3 outline-accent focus:outline-2 focus:outline-offset-2 sm:p-4 ${toneClasses} ${
+        canSelect ? "cursor-pointer select-none hover:border-accent" : ""
+      }`}
       data-state={temporalState}
+      onMouseDown={(event) => {
+        // A click selects, it does not focus the card (the focus ring is
+        // for the banner's « go to this slot »)
+        if (canSelect && !checkboxRef.current?.contains(event.target as Node)) {
+          event.preventDefault();
+        }
+      }}
+      onClick={(event) => {
+        if (canSelect && !checkboxRef.current?.contains(event.target as Node)) {
+          onToggle?.(slot.id);
+        }
+      }}
     >
       {canSelect ? (
-        <Checkbox
-          aria-label={`Sélectionner le créneau de ${slot.label}`}
-          className="absolute top-2 right-2 min-w-11 justify-center"
-          isSelected={selected}
-          onChange={() => onToggle?.(slot.id)}
-        >
-          <Checkbox.Content>
-            <Checkbox.Control>
-              <Checkbox.Indicator />
-            </Checkbox.Control>
-          </Checkbox.Content>
-        </Checkbox>
+        <div ref={checkboxRef} className="absolute top-2 right-2">
+          <Checkbox
+            aria-label={`Sélectionner le créneau de ${slot.label}`}
+            className="min-w-11 justify-center"
+            isSelected={selected}
+            onChange={() => onToggle?.(slot.id)}
+          >
+            <Checkbox.Content>
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+            </Checkbox.Content>
+          </Checkbox>
+        </div>
+      ) : selectable && slot.mine && !isPast ? (
+        // Where the checkbox would be: the slot is already taken
+        <span className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-accent-foreground">
+          <CheckIcon />
+          <span className="sr-only">Vous y êtes inscrit</span>
+        </span>
       ) : null}
-      <p className="pr-12 font-display text-2xl leading-tight font-bold lining-nums tabular-nums">
+      <p className="pr-10 font-display text-xl leading-tight font-bold lining-nums tabular-nums">
         {withLocalTime(slot.label, slot.startsAt)}
       </p>
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
         <p className={`flex items-center gap-2 font-bold ${stateClasses}`}>
           {isEmpty && !isPast ? <PlusIcon /> : null}
           {stateLabel}
@@ -111,7 +142,10 @@ export function SlotCard({
         ) : null}
       </div>
       {slot.participants && slot.participants.length > 0 ? (
-        <ul aria-label="Priants du créneau" className="mt-2 space-y-1">
+        <ul
+          aria-label="Priants du créneau"
+          className="mt-1 flex flex-wrap gap-x-3 gap-y-1"
+        >
           {slot.participants.map((participant, index) => (
             // Two priants may share a display name: the position keeps keys unique
             // biome-ignore lint/suspicious/noArrayIndexKey: the list is never reordered on the client
@@ -128,21 +162,21 @@ export function SlotCard({
         </ul>
       ) : null}
       {slot.textTitle ? (
-        <div className="mt-3 border-t border-separator pt-3">
-          <p className="font-display text-xl leading-snug font-medium">
+        <div className="mt-2 border-t border-separator pt-2">
+          <p className="font-display text-lg leading-snug font-medium">
             {slot.textTitle}
           </p>
           {slot.textSource ? (
-            <p className="text-muted">{slot.textSource}</p>
+            <p className="text-sm text-muted">{slot.textSource}</p>
           ) : null}
           {slot.mine ? (
-            <p className="mt-2">
+            <p className="mt-1">
               <ReadTextLink slotId={slot.id} label={slot.label} />
             </p>
           ) : null}
         </div>
       ) : (
-        <p className="mt-3 border-t border-separator pt-3 text-muted">
+        <p className="mt-2 border-t border-separator pt-2 text-sm text-muted">
           Le texte de ce créneau sera bientôt disponible
         </p>
       )}

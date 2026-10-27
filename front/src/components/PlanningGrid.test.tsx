@@ -18,15 +18,19 @@ function renderGrid() {
     },
   });
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <PlanningGrid editionId={EDITION_ID} />
-    </QueryClientProvider>,
-  );
+  return {
+    queryClient,
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <PlanningGrid editionId={EDITION_ID} />
+      </QueryClientProvider>,
+    ),
+  };
 }
 
 interface SlotOverrides {
   registrationCount?: number;
+  mine?: boolean;
   startsAt?: string;
   endsAt?: string;
   textTitle?: string | null;
@@ -190,6 +194,61 @@ describe("PlanningGrid (US-08.2)", () => {
   });
 });
 
+describe("PlanningGrid — moments de la journée", () => {
+  const PAST = {
+    startsAt: "2020-01-01T18:00:00+00:00",
+    endsAt: "2020-01-01T18:30:00+00:00",
+  };
+
+  it("leads to each part of the day from a navigation above the grid", async () => {
+    serveSlots([
+      slot(1, "evening", "19h00–19h30"),
+      slot(2, "night", "0h00–0h30"),
+      slot(3, "morning", "6h00–6h30"),
+      slot(4, "evening", "18h00–18h30"),
+    ]);
+
+    renderGrid();
+    const nav = await screen.findByRole("navigation", {
+      name: "Moments de la journée",
+    });
+
+    // Each link names its part of the day and when it starts: the evening
+    // comes twice when the edition wraps past midnight
+    const links = within(nav).getAllByRole("link");
+    expect(links.map((link) => link.textContent)).toEqual([
+      "Soirée · 19h00",
+      "Nuit · 0h00",
+      "Matin · 6h00",
+      "Soirée · 18h00",
+    ]);
+    const night = screen.getByRole("heading", { name: "Nuit" });
+    expect(links[1]).toHaveAttribute("href", `#${night.id}`);
+  });
+
+  it("folds a part of the day that is over, and leaves it out of the navigation", async () => {
+    serveSlots([
+      slot(1, "evening", "19h00–19h30", PAST),
+      slot(2, "evening", "19h30–20h00", PAST),
+      slot(3, "night", "0h00–0h30"),
+    ]);
+
+    renderGrid();
+    const nav = await screen.findByRole("navigation", {
+      name: "Moments de la journée",
+    });
+
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Nuit · 0h00"]);
+    // The past slots stay reachable, folded under their part of the day
+    const folded = screen.getByText("Soirée — 2 créneaux passés");
+    expect(folded.closest("details")).not.toHaveAttribute("open");
+  });
+});
+
 describe("PlanningGrid selection (US-08.5)", () => {
   it("selects several slots and builds the inscription URL in chronological order", async () => {
     serveSlots([
@@ -249,6 +308,37 @@ describe("PlanningGrid selection (US-08.5)", () => {
       "Sélectionner le créneau de 19h30–20h00",
     );
     expect(screen.getByText("Créneau passé")).toBeInTheDocument();
+  });
+
+  it("drops from the selection a slot the viewer has taken meanwhile (RG-IN-3)", async () => {
+    serveSlots([
+      slot(1, "evening", "19h00–19h30"),
+      slot(2, "evening", "19h30–20h00"),
+    ]);
+
+    const { queryClient } = renderGrid();
+    await screen.findByRole("region", { name: "Grille des créneaux" });
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: "Sélectionner le créneau de 19h00–19h30",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: "Sélectionner le créneau de 19h30–20h00",
+      }),
+    );
+
+    // Registered on the first one from another tab: the refresh marks it
+    serveSlots([
+      slot(1, "evening", "19h00–19h30", { mine: true, registrationCount: 1 }),
+      slot(2, "evening", "19h30–20h00"),
+    ]);
+    await queryClient.invalidateQueries();
+
+    expect(
+      await screen.findByRole("link", { name: "M'inscrire (1)" }),
+    ).toHaveAttribute("href", "/inscription?creneaux=slot-2");
   });
 
   it("disables the inscription button while no slot is selected", async () => {

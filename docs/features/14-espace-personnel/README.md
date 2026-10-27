@@ -2,7 +2,7 @@
 
 | Lot | Priorité | Estimation |
 |---|---|---|
-| 2 — Participation | MVP | <!-- est -->11 tâches · 5,5 h<!-- /est --> |
+| 2 — Participation | MVP | <!-- est -->12 tâches · 6 h<!-- /est --> |
 
 ## Objectif et valeur
 
@@ -61,4 +61,4 @@ En tant que **Thomas**, je veux ajouter des créneaux depuis mon espace et tél�
 
 ## Estimation
 
-<!-- est -->**11 tâches × 0,5 h = 5,5 h** (6 `back`, 4 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->
+<!-- est -->**12 tâches × 0,5 h = 6 h** (6 `back`, 5 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->

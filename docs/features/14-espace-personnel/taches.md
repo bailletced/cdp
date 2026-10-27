@@ -4,9 +4,9 @@
 | Couche | Tâches | Heures |
 |---|--:|--:|
 | `back` | 6 | 3 h |
-| `front` | 4 | 2 h |
+| `front` | 5 | 2,5 h |
 | `test` | 1 | 0,5 h |
-| **Total** | **11** | **5,5 h** |
+| **Total** | **12** | **6 h** |
 
 Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, tests compris. Légende et définition de « terminé » : [index des features](../README.md).
 <!-- /recap -->
@@ -33,3 +33,4 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 ## Parcours
 
 - [x] **F14-T11** · `test` E2E §14.1 n° 1 : inscription → e-mail → lien → espace → changer mon nom (visible dans la grille) → se désinscrire → créneau « À pourvoir » — *Dépend de* : F14-T08, F14-T09, F11-T08 · *Fini quand* : parcours vert avec axe-core.
+- [x] **F14-T12** · `front` Priant en session ayant déjà consenti (RG-IN-5, RG-IN-7) : « M'inscrire (n) » inscrit directement depuis le planning, sans formulaire, puis confirmation + tests — *Dépend de* : F14-T10, F09-T18 · *Fini quand* : un clic suffit, une erreur s'affiche dans la barre (tests).

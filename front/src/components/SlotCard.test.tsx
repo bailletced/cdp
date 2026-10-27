@@ -189,6 +189,46 @@ describe("SlotCard selection (F08-T10, US-08.5)", () => {
     expect(onToggle).toHaveBeenCalledWith(slot.id);
   });
 
+  it("toggles the slot from anywhere on the card, once per click", () => {
+    const slot = makeSlot();
+    const onToggle = vi.fn();
+
+    render(
+      <SlotCard
+        slot={slot}
+        selectable
+        selected={false}
+        onToggle={onToggle}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Oraison de Thérèse"));
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledWith(slot.id);
+
+    // The checkbox inside the card does not toggle twice
+    fireEvent.click(screen.getByRole("checkbox"));
+    expect(onToggle).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not toggle a slot that cannot be selected", () => {
+    const onToggle = vi.fn();
+
+    render(
+      <SlotCard
+        slot={makeSlot({ mine: true, registrationCount: 1 })}
+        selectable
+        selected={false}
+        onToggle={onToggle}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Oraison de Thérèse"));
+    expect(onToggle).not.toHaveBeenCalled();
+  });
+
   it("checks the checkbox when the slot is selected", () => {
     render(
       <SlotCard
@@ -220,6 +260,21 @@ describe("SlotCard selection (F08-T10, US-08.5)", () => {
 
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(screen.getByText("Créneau passé")).toBeInTheDocument();
+  });
+
+  it("offers no checkbox on the viewer's own slot (RG-IN-3)", () => {
+    render(
+      <SlotCard
+        slot={makeSlot({ mine: true, registrationCount: 1 })}
+        selectable
+        selected={false}
+        onToggle={vi.fn()}
+        nowMs={NOW_BEFORE_MS}
+      />,
+    );
+
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(screen.getByText("Vous y êtes inscrit")).toBeInTheDocument();
   });
 });
 

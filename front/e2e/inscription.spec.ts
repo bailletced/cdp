@@ -74,7 +74,7 @@ test.describe("Inscription (F09-T21)", () => {
     await page.close();
   });
 
-  test("registers on two slots, then is refused a second time on one of them", async ({
+  test("registers on two slots, then cannot take one of them twice", async ({
     browser,
     request,
   }) => {
@@ -117,16 +117,27 @@ test.describe("Inscription (F09-T21)", () => {
       await expect(slotCard(grid, slot)).toContainText("1 priant");
     }
 
-    // 4. Registering again on the same slot is refused (RG-IN-3, 409)
-    await tick(grid, first);
-    await page.getByRole("link", { name: "M'inscrire (1)" }).click();
-    await page.waitForURL(/\/inscription\?creneaux=/);
-    await fillAndSend(page, "Famille E2E", email);
+    // 4. This device cannot tick its own slot again (RG-IN-3)
+    await expect(slotCard(grid, first).getByRole("checkbox")).toHaveCount(0);
+    await expect(slotCard(grid, first)).toContainText("Vous y êtes inscrit");
+
+    // 5. Another device, same e-mail: the API refuses it (RG-IN-3, 409)
+    const other = await browser.newContext({ timezoneId: "Europe/Paris" });
+    const otherPage = await other.newPage();
+    await otherPage.goto("/");
+    const otherGrid = otherPage.getByRole("region", {
+      name: "Grille des créneaux",
+    });
+    await tick(otherGrid, first);
+    await otherPage.getByRole("link", { name: "M'inscrire (1)" }).click();
+    await otherPage.waitForURL(/\/inscription\?creneaux=/);
+    await fillAndSend(otherPage, "Famille E2E", email);
     await expect(
-      page.getByText("Vous êtes déjà inscrit sur ce créneau."),
+      otherPage.getByText("Vous êtes déjà inscrit sur ce créneau."),
     ).toBeVisible();
-    await expect(page).toHaveURL(/\/inscription\?creneaux=/);
-    await expectNoA11yViolations(page);
+    await expect(otherPage).toHaveURL(/\/inscription\?creneaux=/);
+    await expectNoA11yViolations(otherPage);
+    await other.close();
 
     await context.close();
   });

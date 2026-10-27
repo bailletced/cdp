@@ -319,6 +319,36 @@ describe("InscriptionPage — récapitulatif des créneaux (F09-T15)", () => {
     });
   });
 
+  it("signale les créneaux où le priant est déjà inscrit et ne les soumet jamais (RG-IN-3)", async () => {
+    const captured = captureRegistrations();
+    openEditionWithSlots([{ ...FUTURE_SLOT_1, mine: true }, FUTURE_SLOT_2]);
+
+    renderApp(`/inscription?creneaux=${SLOT_FUTURE_1},${SLOT_FUTURE_2}`);
+
+    expect(await screen.findByText(/\(déjà inscrit\)/)).toBeInTheDocument();
+
+    fillValidForm();
+    submitForm();
+
+    expect(
+      await screen.findByRole("heading", { name: "Inscription confirmée" }),
+    ).toBeInTheDocument();
+    expect(captured.body).toMatchObject({ slotIds: [SLOT_FUTURE_2] });
+  });
+
+  it("remplace le formulaire quand le priant est déjà inscrit sur tous les créneaux (RG-IN-3)", async () => {
+    openEditionWithSlots([{ ...FUTURE_SLOT_1, mine: true }]);
+
+    renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Vous êtes déjà inscrit sur les créneaux sélectionnés.",
+    );
+    expect(
+      screen.queryByRole("button", { name: "S'inscrire" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("remplace le formulaire quand tous les créneaux sélectionnés sont passés", async () => {
     openEditionWithSlots([PAST_SLOT]);
 

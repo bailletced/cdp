@@ -4,9 +4,9 @@
 | Couche | Tâches | Heures |
 |---|--:|--:|
 | `back` | 4 | 2 h |
-| `front` | 6 | 3 h |
+| `front` | 8 | 4 h |
 | `test` | 1 | 0,5 h |
-| **Total** | **11** | **5,5 h** |
+| **Total** | **13** | **6,5 h** |
 
 Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, tests compris. Légende et définition de « terminé » : [index des features](../README.md).
 <!-- /recap -->
@@ -30,3 +30,8 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F08-T09** · `front` Grille groupée par moment de la journée (titres de section, ordre chronologique), rafraîchissement toutes les 60 s et au retour sur l'onglet — *Dépend de* : F08-T08 · *Fini quand* : test de regroupement, `refetchInterval` configuré.
 - [x] **F08-T10** · `front` Sélection multiple : case par créneau à venir, compteur, bouton « M'inscrire (n) » → `/inscription?creneaux=…` + tests — *Dépend de* : F08-T09 · *Fini quand* : créneau passé non sélectionnable, URL testée.
 - [x] **F08-T11** · `test` E2E visiteur : 48 créneaux affichés, fuseau `America/Montreal` → heure locale, sélection → URL d'inscription, axe-core — *Dépend de* : F08-T10, F01-T12 · *Fini quand* : parcours vert.
+
+## Après livraison : choix des créneaux
+
+- [x] **F08-T12** · `front` Un créneau où le priant est déjà inscrit n'est pas sélectionnable (RG-IN-3) : coche « Vous y êtes inscrit » à la place de la case, retiré de la sélection au rafraîchissement, signalé « (déjà inscrit) » et jamais envoyé depuis `/inscription` + tests — *Dépend de* : F08-T10, F10-T10, F09-T15 · *Fini quand* : aucune double inscription proposée par la grille (Vitest, e2e).
+- [x] **F08-T13** · `front` Choix des créneaux sans défilement laborieux : carte entière cliquable, cartes compactes sur 3 colonnes, navigation collante par moment de la journée, moments passés repliés + tests — *Dépend de* : F08-T10 · *Fini quand* : navigation et repli testés, page desktop ≈ 40 % moins haute.

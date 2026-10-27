@@ -46,6 +46,66 @@ function mySpace(inscriptions: unknown[], displayName = "Famille Martin") {
   );
 }
 
+const EDITION_ID = "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b";
+
+/**
+ * A priant in session who already consented, an open edition with one
+ * slot to come, and the given answer to POST /api/inscriptions.
+ */
+function knownPriantWithOneSlot(
+  answerInscription: Parameters<typeof http.post>[1],
+) {
+  server.use(
+    http.get("http://localhost:8080/api/me", () =>
+      HttpResponse.json({
+        email: "thomas@bailletced.org",
+        isOrganizer: false,
+        displayName: "Thomas Baillet",
+        consentGiven: true,
+      }),
+    ),
+    http.get("http://localhost:8080/api/editions/current", () =>
+      HttpResponse.json({
+        id: EDITION_ID,
+        title: "24 heures de prière",
+        presentation: "",
+        startsAt: "2099-11-27T18:00:00+00:00",
+        opensAt: "2026-11-20T18:00:00+00:00",
+        status: "open",
+      }),
+    ),
+    http.get(`http://localhost:8080/api/editions/${EDITION_ID}/slots`, () =>
+      HttpResponse.json({
+        id: EDITION_ID,
+        slots: [
+          {
+            id: "slot-1",
+            rank: 1,
+            startsAt: "2099-11-27T18:00:00+00:00",
+            endsAt: "2099-11-27T18:30:00+00:00",
+            label: "19h00–19h30",
+            partOfDay: "evening",
+            state: "future",
+            textTitle: null,
+            textSource: null,
+            registrationCount: 0,
+          },
+        ],
+      }),
+    ),
+    http.post("http://localhost:8080/api/inscriptions", answerInscription),
+  );
+}
+
+async function tickAndRegister() {
+  fireEvent.click(
+    await screen.findByRole("checkbox", {
+      name: "Sélectionner le créneau de 19h00–19h30",
+    }),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "M'inscrire (1)" }));
+}
+
 describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
   it("shows my name, then my slots with their schedule and their text", async () => {
     mySpace([
@@ -172,6 +232,50 @@ describe("MySpacePage", () => {
     // The default MSW handler answers an empty grid
     expect(
       await screen.findByText("Aucun créneau pour le moment."),
+    ).toBeInTheDocument();
+  });
+
+  it("registers a known priant on the ticked slots in one click, without the form", async () => {
+    let posted: unknown = null;
+    knownPriantWithOneSlot(async ({ request }) => {
+      posted = await request.json();
+      return HttpResponse.json(
+        { id: EDITION_ID, displayName: "Thomas Baillet", inscriptions: [] },
+        { status: 201 },
+      );
+    });
+
+    renderApp("/my-space");
+    await tickAndRegister();
+
+    expect(
+      await screen.findByRole("heading", { name: "Inscription confirmée" }),
+    ).toBeInTheDocument();
+    expect(posted).toEqual({
+      slotIds: ["slot-1"],
+      displayName: "Thomas Baillet",
+      email: "thomas@bailletced.org",
+      consent: true,
+      website: "",
+    });
+  });
+
+  it("says why the one-click inscription failed, and stays on the planning", async () => {
+    knownPriantWithOneSlot(() =>
+      HttpResponse.json(
+        { detail: "Vous êtes déjà inscrit sur ce créneau." },
+        { status: 409 },
+      ),
+    );
+
+    renderApp("/my-space");
+    await tickAndRegister();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Vous êtes déjà inscrit sur ce créneau.",
+    );
+    expect(
+      screen.getByRole("region", { name: "Grille des créneaux" }),
     ).toBeInTheDocument();
   });
 

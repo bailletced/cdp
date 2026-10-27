@@ -2,7 +2,7 @@
 
 | Lot | Priorité | Estimation |
 |---|---|---|
-| 1 — Programme | MVP | <!-- est -->11 tâches · 5,5 h<!-- /est --> |
+| 1 — Programme | MVP | <!-- est -->13 tâches · 6,5 h<!-- /est --> |
 
 ## Objectif et valeur
 
@@ -66,4 +66,4 @@ En tant que **Thomas**, je veux cocher plusieurs créneaux puis cliquer sur « M
 
 ## Estimation
 
-<!-- est -->**11 tâches × 0,5 h = 5,5 h** (4 `back`, 6 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->
+<!-- est -->**13 tâches × 0,5 h = 6,5 h** (4 `back`, 8 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->
