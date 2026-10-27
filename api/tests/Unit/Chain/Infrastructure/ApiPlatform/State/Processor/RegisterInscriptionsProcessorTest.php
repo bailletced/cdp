@@ -25,6 +25,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\Random\RandomizerSlotPicker;
 use App\Shared\Domain\Security\Viewer;
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Infrastructure\Symfony\Altcha\AltchaGate;
 use App\Shared\Infrastructure\Symfony\RateLimiter\PublicFormLimiter;
 use App\Tests\Unit\Shared\Application\Command\Fixture\FakeCommandBus;
 use App\Tests\Unit\Shared\Application\Command\Fixture\ThrowingCommandBus;
@@ -35,6 +36,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PHPUnit\Framework\TestCase;
 use Random\Engine\Mt19937;
 use Random\Randomizer;
+use Symfony\Component\Clock\MockClock;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
@@ -246,6 +248,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $this->devicePassIssuer,
             self::noSuggestion(),
             self::noLimit(),
+            new AltchaGate(false, 'secret', new MockClock()),
         );
 
         $this->expectException(AlreadyRegisteredException::class);
@@ -264,6 +267,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $this->devicePassIssuer,
             self::noSuggestion(),
             self::noLimit(),
+            new AltchaGate(false, 'secret', new MockClock()),
         );
 
         $this->expectException(UniqueConstraintViolationException::class);
@@ -280,6 +284,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             $this->devicePassIssuer,
             self::noSuggestion(),
             self::noLimit(),
+            new AltchaGate(false, 'secret', new MockClock()),
         );
     }
 

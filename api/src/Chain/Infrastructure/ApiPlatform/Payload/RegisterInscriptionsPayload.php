@@ -56,6 +56,9 @@ final class RegisterInscriptionsPayload
         public readonly ?bool $consent = null,
         #[ApiProperty(schema: ['type' => ['string', 'null']])]
         public readonly ?string $website = null,
+        // Solution of the ALTCHA challenge, required once it is on (F15-T05)
+        #[ApiProperty(schema: ['type' => ['string', 'null']])]
+        public readonly ?string $altcha = null,
     ) {
     }
 }

@@ -7,6 +7,7 @@ namespace App\Access\Infrastructure\Symfony\Controller;
 use App\Access\Application\RequestPersonalLink;
 use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Infrastructure\Symfony\Altcha\AltchaGate;
 use App\Shared\Infrastructure\Symfony\RateLimiter\PublicFormLimiter;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,15 +22,19 @@ use Symfony\Component\HttpFoundation\Response;
  * endpoint cannot be used to enumerate accounts. The command is only
  * dispatched for a plausible non-bot request; the handler stays silent for
  * unknown accounts. Hourly limits (F15-T03): beyond 10 requests from an IP,
- * a 429; beyond 3 for an address, the same 202 but no e-mail leaves.
+ * a 429; beyond 3 for an address, the same 202 but no e-mail leaves. Once
+ * ALTCHA is on (F15-T05), a request without a valid solution gets a 422.
  */
 final class LinkRequestController
 {
+    private const ALTCHA_FAILED_MESSAGE = 'La vérification anti-robot a échoué. Rechargez la page et réessayez.';
+
     private const ACCEPTED_MESSAGE = 'Si un compte correspond à cette adresse, un lien de connexion vient de vous être envoyé.';
 
     public function __construct(
         private readonly CommandBusInterface $commandBus,
         private readonly PublicFormLimiter $publicFormLimiter,
+        private readonly AltchaGate $altchaGate,
     ) {
     }
 
@@ -39,6 +44,12 @@ final class LinkRequestController
         $this->publicFormLimiter->countLinkRequest();
 
         $payload = json_decode($request->getContent(), true);
+
+        // ALTCHA, once switched on during an attack (F15-T05)
+        $altcha = \is_array($payload) && \is_string($payload['altcha'] ?? null) ? $payload['altcha'] : null;
+        if (!$this->altchaGate->allows($altcha)) {
+            return new JsonResponse(['message' => self::ALTCHA_FAILED_MESSAGE], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         if (\is_array($payload) && !$this->isHoneypotFilled($payload)) {
             $this->dispatchIfValidEmail($payload);

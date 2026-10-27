@@ -634,6 +634,7 @@ export interface components {
             email?: string | null;
             consent?: boolean | null;
             website?: string | null;
+            altcha?: string | null;
         };
         "Inscription.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string | null;

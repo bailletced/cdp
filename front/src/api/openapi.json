@@ -3141,6 +3141,12 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "altcha": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },

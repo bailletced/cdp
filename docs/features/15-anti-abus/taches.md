@@ -19,5 +19,5 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 ## Défi activable (US-15.3)
 
-- [ ] **F15-T05** · `back` ALTCHA auto-hébergé : endpoint de défi, vérification serveur, activation par `ALTCHA_ENABLED`, configuration exposée à la SPA + tests — *Dépend de* : F15-T03 · *Fini quand* : désactivé par défaut ; activé → requête sans solution refusée (test).
+- [x] **F15-T05** · `back` ALTCHA auto-hébergé : endpoint de défi, vérification serveur, activation par `ALTCHA_ENABLED`, configuration exposée à la SPA + tests — *Dépend de* : F15-T03 · *Fini quand* : désactivé par défaut ; activé → requête sans solution refusée (test).
 - [ ] **F15-T06** · `front` Widget ALTCHA conditionnel (inscription, lien) et message 429 accessible (« Trop de tentatives, réessayez dans quelques minutes ») + tests — *Dépend de* : F15-T05, F09-T18, F02-T17 · *Fini quand* : les deux modes et le 429 testés avec MSW.

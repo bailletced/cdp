@@ -33,7 +33,9 @@ final class AntiAbuseApiTest extends ApiTestCase
 
         $connection = self::getContainer()->get('doctrine.dbal.default_connection');
         \assert($connection instanceof Connection);
-        $connection->executeStatement('DELETE FROM cache_items');
+        foreach (['cache_items', 'device_pass', 'inscription', 'priant'] as $table) {
+            $connection->executeStatement(\sprintf('DELETE FROM %s', $table));
+        }
         $connection->executeStatement('TRUNCATE organizer, account CASCADE');
     }
 

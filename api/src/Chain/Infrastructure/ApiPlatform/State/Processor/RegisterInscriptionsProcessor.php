@@ -22,6 +22,7 @@ use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Port\CurrentViewer;
 use App\Shared\Application\Port\DevicePassIssuer;
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Infrastructure\Symfony\Altcha\AltchaGate;
 use App\Shared\Infrastructure\Symfony\RateLimiter\PublicFormLimiter;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Uid\Uuid;
@@ -33,7 +34,8 @@ use Symfony\Component\Validator\ConstraintViolationList;
  *
  * Anti-abuse first (§6.7): a filled honeypot (`website`) answers an
  * identical-looking 201 success and nothing is done; beyond the hourly
- * limits per IP and per e-mail, a 429 (F15-T03). Then the payload is
+ * limits per IP and per e-mail, a 429 (F15-T03); once ALTCHA is on, a 422
+ * on `altcha` without a valid solution (F15-T05). Then the payload is
  * checked field by field (422 with one violation per field), the consent rule
  * is enforced (RG-IN-5: mandatory off-session, or when the authenticated
  * priant never consented), and the command is dispatched. Domain exceptions
@@ -54,6 +56,7 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         private DevicePassIssuer $devicePassIssuer,
         private SuggestEmptySlot $suggestEmptySlot,
         private PublicFormLimiter $publicFormLimiter,
+        private AltchaGate $altchaGate,
     ) {
     }
 
@@ -72,6 +75,11 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
 
         // Hourly limits per IP and per e-mail (F15-T03): 429 + Retry-After
         $this->publicFormLimiter->countInscription($data->email);
+
+        // ALTCHA, once switched on during an attack (F15-T05)
+        if (!$this->altchaGate->allows($data->altcha)) {
+            throw self::violation('altcha', 'La vérification anti-robot a échoué. Rechargez la page et réessayez.');
+        }
 
         $slotIds = $this->toSlotIds($data->slotIds);
         $displayName = $this->toDisplayName($data->displayName);
