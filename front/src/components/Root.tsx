@@ -16,7 +16,8 @@ const NAV_LINK =
 
 /**
  * Public layout (F01-T07): skip link, header (community name from the single
- * site config), main landmark, footer (Confidentialité, Recevoir mon lien).
+ * site config), main landmark, footer (Confidentialité, and Recevoir mon lien
+ * when no session is open).
  * The <main> landmark is provided here: pages render their content inside it.
  */
 export const Root = createRootRouteWithContext<AppRouterContext>()({
@@ -27,6 +28,7 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
   notFoundComponent: NotFoundPage,
   component: () => {
     const { data, isLoading, isError } = useMe();
+    const isSignedIn = !isError && Boolean(data);
 
     return (
       <div className="flex min-h-screen flex-col">
@@ -48,7 +50,7 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
               </span>
             </Link>
             <nav aria-label="Navigation principale">
-              {isLoading ? null : !isError && data ? (
+              {isLoading ? null : isSignedIn && data ? (
                 <ul className="flex flex-wrap gap-x-4">
                   {/* The back-office entry, for organizers only (F04) */}
                   {data.isOrganizer ? (
@@ -80,9 +82,12 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
             <Link to="/confidentialite" className={NAV_LINK}>
               Confidentialité
             </Link>
-            <Link to="/receive-my-link" className={NAV_LINK}>
-              Recevoir mon lien
-            </Link>
+            {/* A signed-in priant already has their link */}
+            {isLoading || isSignedIn ? null : (
+              <Link to="/receive-my-link" className={NAV_LINK}>
+                Recevoir mon lien
+              </Link>
+            )}
           </div>
         </footer>
       </div>

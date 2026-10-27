@@ -4,9 +4,9 @@
 | Couche | Tâches | Heures |
 |---|--:|--:|
 | `back` | 16 | 8 h |
-| `front` | 3 | 1,5 h |
+| `front` | 4 | 2 h |
 | `test` | 1 | 0,5 h |
-| **Total** | **20** | **10 h** |
+| **Total** | **21** | **10,5 h** |
 
 Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, tests compris. Légende et définition de « terminé » : [index des features](../README.md).
 <!-- /recap -->
@@ -42,3 +42,4 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 - [x] **F02-T18** · `front` Page `/login` : POST automatique, états « en cours », « lien expiré → recevoir un nouveau lien », redirection vers la cible + tests — *Dépend de* : F02-T08, F01-T08 · *Fini quand* : les trois états testés.
 - [x] **F02-T19** · `front` Hook `useViewer`, garde de route, `/my-space` squelette avec « Me déconnecter » ; en-tête « Mon espace » ou « Recevoir mon lien » selon la session — *Dépend de* : F02-T16, F02-T10, F01-T07 · *Fini quand* : visiteur redirigé vers `/receive-my-link` (test).
 - [x] **F02-T20** · `test` E2E squelette : `app:organizer:create` → demande de lien → Mailpit → `/login` → `/my-space` → rechargement → déconnexion — *Dépend de* : F02-T17, F02-T18, F02-T19, F02-T04 · *Fini quand* : parcours vert en CI.
+- [x] **F02-T21** · `front` « Recevoir mon lien » retiré du pied de page en session, comme dans l'en-tête + tests — *Dépend de* : F02-T19 · *Fini quand* : testé en session et hors session.

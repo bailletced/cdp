@@ -41,16 +41,39 @@ describe("public layout (F01-T07)", () => {
     expect(banner.querySelector("h1, h2, h3, h4, h5, h6")).toBeNull();
   });
 
-  it("shows the footer links", async () => {
+  it("shows the footer links to a visitor", async () => {
+    server.use(
+      http.get(
+        "http://localhost:8080/api/me",
+        () => new HttpResponse(null, { status: 401 }),
+      ),
+    );
     renderApp("/receive-my-link");
 
     const footer = await screen.findByRole("contentinfo");
     expect(
       screen.getByRole("link", { name: "Confidentialité" }),
     ).toHaveAttribute("href", "/confidentialite");
-    const receiveLink = screen.getByRole("link", { name: "Recevoir mon lien" });
+    const receiveLink = await within(footer).findByRole("link", {
+      name: "Recevoir mon lien",
+    });
     expect(footer).toContainElement(receiveLink);
     expect(receiveLink).toHaveAttribute("href", "/receive-my-link");
+  });
+
+  it("does not offer to receive the personal link once a session is open", async () => {
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByRole("link", { name: "Mon espace" }),
+    ).toBeInTheDocument();
+    const footer = screen.getByRole("contentinfo");
+    expect(
+      within(footer).getByRole("link", { name: "Confidentialité" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Recevoir mon lien" }),
+    ).not.toBeInTheDocument();
   });
 
   it("offers Mon espace in the nav when a session is open (MSW: authenticated)", async () => {

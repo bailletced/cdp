@@ -2,7 +2,7 @@
 
 | Lot | Priorité | Estimation |
 |---|---|---|
-| 0 — Socle | MVP | <!-- est -->20 tâches · 10 h<!-- /est --> |
+| 0 — Socle | MVP | <!-- est -->21 tâches · 10,5 h<!-- /est --> |
 
 ## Objectif et valeur
 
@@ -68,4 +68,4 @@ En tant que **mainteneur**, je veux créer le premier organisateur en ligne de c
 
 ## Estimation
 
-<!-- est -->**20 tâches × 0,5 h = 10 h** (16 `back`, 3 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->
+<!-- est -->**21 tâches × 0,5 h = 10,5 h** (16 `back`, 4 `front`, 1 `test`). Détail dans [taches.md](taches.md).<!-- /est -->

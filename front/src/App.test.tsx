@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { SITE_NAME } from "./config/site";
@@ -47,8 +47,11 @@ describe("Header session state", () => {
     );
 
     renderApp("/");
+    const nav = await screen.findByRole("navigation", {
+      name: "Navigation principale",
+    });
     expect(
-      await screen.findByRole("link", { name: "Recevoir mon lien" }),
+      await within(nav).findByRole("link", { name: "Recevoir mon lien" }),
     ).toBeInTheDocument();
   });
 });
