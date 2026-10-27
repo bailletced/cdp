@@ -39,15 +39,19 @@ services:
       - --accesslog=true
       # API (désactivée par défaut, à activer pour debug)
       - --api.dashboard=false
+    # Mode host (F15-T02) : en mode ingress, le routing mesh de Swarm
+    # remplace l'IP du client par une IP interne, la même pour tout le
+    # monde ; l'anti-abus compterait alors tous les visiteurs ensemble.
+    # Un seul Traefik, sur le nœud manager : le mode host suffit.
     ports:
       - target: 80
         published: 80
         protocol: tcp
-        mode: ingress
+        mode: host
       - target: 443
         published: 443
         protocol: tcp
-        mode: ingress
+        mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_letsencrypt:/letsencrypt

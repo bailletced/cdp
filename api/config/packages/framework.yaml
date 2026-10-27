@@ -2,6 +2,17 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    # Behind Traefik (reverse proxy): trust the X-Forwarded-* headers sent
+    # from a private address only — Traefik on the Swarm overlay; the app is
+    # only reachable through it (port 80 not published). Symfony then knows
+    # the external scheme/host/port (else SameOriginListener compares Origin
+    # port 443 against the internal port 80 and rejects same-origin POSTs
+    # with 403) and the real client IP, which the anti-abuse limiters count
+    # (F15-T02). Traefik publishes its ports in host mode for that IP to be
+    # the client's, not the one of the Swarm routing mesh.
+    trusted_proxies: 'private_ranges'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
+
     # Note that the session will be started ONLY if you read or write from it.
     session:
         handler_id: null
