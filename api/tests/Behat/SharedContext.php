@@ -36,6 +36,7 @@ final class SharedContext implements Context
         // database (same isolation strategy as the functional tests).
         $entityManager = $this->state()->entityManager;
         $connection = $entityManager?->getConnection();
+        $connection?->executeStatement('DELETE FROM cache_items');
         $connection?->executeStatement('DELETE FROM inscription');
         $connection?->executeStatement('DELETE FROM priant');
         $connection?->executeStatement('DELETE FROM slot');

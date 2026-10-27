@@ -47,7 +47,7 @@ final class CancelInscriptionApiTest extends ApiTestCase
 
         $this->em = self::getContainer()->get('doctrine')->getManager();
         $connection = $this->em->getConnection();
-        foreach (['device_pass', 'inscription', 'priant', 'slot', 'edition'] as $table) {
+        foreach (['cache_items', 'device_pass', 'inscription', 'priant', 'slot', 'edition'] as $table) {
             $connection->executeStatement(\sprintf('DELETE FROM %s', $table));
         }
         $connection->executeStatement('TRUNCATE organizer, account CASCADE');

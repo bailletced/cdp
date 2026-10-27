@@ -25,6 +25,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryPriantRepository;
 use App\Chain\Infrastructure\Random\RandomizerSlotPicker;
 use App\Shared\Domain\Security\Viewer;
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Infrastructure\Symfony\RateLimiter\PublicFormLimiter;
 use App\Tests\Unit\Shared\Application\Command\Fixture\FakeCommandBus;
 use App\Tests\Unit\Shared\Application\Command\Fixture\ThrowingCommandBus;
 use App\Tests\Unit\Shared\Application\Port\Fixture\DevicePassIssuerSpy;
@@ -34,6 +35,9 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PHPUnit\Framework\TestCase;
 use Random\Engine\Mt19937;
 use Random\Randomizer;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 
 final class RegisterInscriptionsProcessorTest extends TestCase
 {
@@ -241,6 +245,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             new FakeCurrentViewer(Viewer::visitor()),
             $this->devicePassIssuer,
             self::noSuggestion(),
+            self::noLimit(),
         );
 
         $this->expectException(AlreadyRegisteredException::class);
@@ -258,6 +263,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             new FakeCurrentViewer(Viewer::visitor()),
             $this->devicePassIssuer,
             self::noSuggestion(),
+            self::noLimit(),
         );
 
         $this->expectException(UniqueConstraintViolationException::class);
@@ -273,6 +279,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
             new FakeCurrentViewer($viewer),
             $this->devicePassIssuer,
             self::noSuggestion(),
+            self::noLimit(),
         );
     }
 
@@ -280,6 +287,13 @@ final class RegisterInscriptionsProcessorTest extends TestCase
      * The suggestion (F13-T04) is covered by the acceptance tests: here, the
      * chain is complete.
      */
+    private static function noLimit(): PublicFormLimiter
+    {
+        $noLimit = new RateLimiterFactory(['id' => 'test', 'policy' => 'no_limit'], new InMemoryStorage());
+
+        return new PublicFormLimiter(new RequestStack(), $noLimit, $noLimit, $noLimit, $noLimit);
+    }
+
     private static function noSuggestion(): SuggestEmptySlot
     {
         return new SuggestEmptySlot(

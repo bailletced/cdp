@@ -14,7 +14,7 @@ Chaque tâche vaut environ 30 minutes de travail d'un développeur confirmé, te
 
 - [x] **F15-T01** · `back` Pool de cache DBAL sur PostgreSQL (migration) + limiteurs `symfony/rate-limiter` : inscription (10/h IP, 5/h e-mail), lien (10/h IP, 3/h e-mail) + tests — *Dépend de* : F00-T19 · *Fini quand* : compteurs partagés entre deux processus (test d'intégration).
 - [x] **F15-T02** · `back` `trusted_proxies` / `trusted_headers` pour Traefik (IP réelle du client) + test — *Dépend de* : F00-T08 · *Fini quand* : `X-Forwarded-For` pris en compte seulement depuis le réseau `edge` (test).
-- [ ] **F15-T03** · `back` Limiteurs appliqués : `POST /api/inscriptions` → 429 + `Retry-After` ; `/auth/link-request` → 429 par IP, 202 silencieux par e-mail + tests d'acceptation — *Dépend de* : F15-T01, F15-T02, F09-T10, F02-T15 · *Fini quand* : les quatre seuils testés avec `MockClock`.
+- [x] **F15-T03** · `back` Limiteurs appliqués : `POST /api/inscriptions` → 429 + `Retry-After` ; `/auth/link-request` → 429 par IP, 202 silencieux par e-mail + tests d'acceptation — *Dépend de* : F15-T01, F15-T02, F09-T10, F02-T15 · *Fini quand* : les quatre seuils testés avec `MockClock`.
 - [ ] **F15-T04** · `back` Champ piège `website` : réponse identique à un succès, aucun effet, pour l'inscription comme pour le lien + tests — *Dépend de* : F09-T10, F02-T15 · *Fini quand* : aucune ligne créée, aucun message mis en file (tests).
 
 ## Défi activable (US-15.3)

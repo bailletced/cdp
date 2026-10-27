@@ -2,6 +2,9 @@
 # vivent dans PostgreSQL (table cache_items), partagés entre les réplicas.
 # Sans verrou (symfony/lock absent) : deux requêtes simultanées peuvent
 # passer d'une unité la limite, ce qui reste sans conséquence ici.
+# Limites par heure lues dans l'environnement (.env : valeurs de §6.7) : le
+# dev et les e2e, où toutes les requêtes viennent d'une seule IP, les
+# relèvent.
 framework:
     cache:
         pools:
@@ -11,25 +14,25 @@ framework:
     rate_limiter:
         inscription_by_ip:
             policy: sliding_window
-            limit: 10
+            limit: '%env(int:RATE_LIMIT_INSCRIPTION_PER_IP)%'
             interval: '1 hour'
             cache_pool: cache.rate_limiter
             lock_factory: null
         inscription_by_email:
             policy: sliding_window
-            limit: 5
+            limit: '%env(int:RATE_LIMIT_INSCRIPTION_PER_EMAIL)%'
             interval: '1 hour'
             cache_pool: cache.rate_limiter
             lock_factory: null
         link_request_by_ip:
             policy: sliding_window
-            limit: 10
+            limit: '%env(int:RATE_LIMIT_LINK_REQUEST_PER_IP)%'
             interval: '1 hour'
             cache_pool: cache.rate_limiter
             lock_factory: null
         link_request_by_email:
             policy: sliding_window
-            limit: 3
+            limit: '%env(int:RATE_LIMIT_LINK_REQUEST_PER_EMAIL)%'
             interval: '1 hour'
             cache_pool: cache.rate_limiter
             lock_factory: null

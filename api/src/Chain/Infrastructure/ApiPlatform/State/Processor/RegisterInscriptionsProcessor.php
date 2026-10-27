@@ -22,6 +22,7 @@ use App\Shared\Application\Command\CommandBusInterface;
 use App\Shared\Application\Port\CurrentViewer;
 use App\Shared\Application\Port\DevicePassIssuer;
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Infrastructure\Symfony\RateLimiter\PublicFormLimiter;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\ConstraintViolation;
@@ -31,7 +32,8 @@ use Symfony\Component\Validator\ConstraintViolationList;
  * Processes POST /api/inscriptions (F09-T10).
  *
  * Anti-abuse first (§6.7): a filled honeypot (`website`) answers an
- * identical-looking 201 success and nothing is done. Then the payload is
+ * identical-looking 201 success and nothing is done; beyond the hourly
+ * limits per IP and per e-mail, a 429 (F15-T03). Then the payload is
  * checked field by field (422 with one violation per field), the consent rule
  * is enforced (RG-IN-5: mandatory off-session, or when the authenticated
  * priant never consented), and the command is dispatched. Domain exceptions
@@ -51,6 +53,7 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         private CurrentViewer $currentViewer,
         private DevicePassIssuer $devicePassIssuer,
         private SuggestEmptySlot $suggestEmptySlot,
+        private PublicFormLimiter $publicFormLimiter,
     ) {
     }
 
@@ -66,6 +69,9 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         if (null !== $data->website && '' !== trim($data->website)) {
             return new InscriptionResource(id: Uuid::v4()->toRfc4122());
         }
+
+        // Hourly limits per IP and per e-mail (F15-T03): 429 + Retry-After
+        $this->publicFormLimiter->countInscription($data->email);
 
         $slotIds = $this->toSlotIds($data->slotIds);
         $displayName = $this->toDisplayName($data->displayName);

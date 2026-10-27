@@ -44,6 +44,7 @@ final class InscriptionApiTest extends ApiTestCase
         // Clean slate for each test (same isolation strategy as the Behat scenarios)
         $connection = $this->em->getConnection();
         $connection->executeStatement('DELETE FROM device_pass');
+        $connection->executeStatement('DELETE FROM cache_items');
         $connection->executeStatement('DELETE FROM inscription');
         $connection->executeStatement('DELETE FROM priant');
         $connection->executeStatement('DELETE FROM slot');

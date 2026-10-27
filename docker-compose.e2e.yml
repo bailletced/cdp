@@ -26,6 +26,12 @@ services:
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
       SENTRY_DSN_FILE: /run/secrets/sentry_dsn
+      # Les parcours e2e viennent tous d'une seule IP : limites anti-abus
+      # relevées (F15), sinon la 11e inscription de l'heure serait refusée
+      RATE_LIMIT_INSCRIPTION_PER_IP: 10000
+      RATE_LIMIT_INSCRIPTION_PER_EMAIL: 10000
+      RATE_LIMIT_LINK_REQUEST_PER_IP: 10000
+      RATE_LIMIT_LINK_REQUEST_PER_EMAIL: 10000
     secrets:
       - app_secret
       - db_password
