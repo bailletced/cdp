@@ -1,0 +1,35 @@
+# Anti-abus des formulaires publics (§6.7, T18, F15-T01) : les compteurs
+# vivent dans PostgreSQL (table cache_items), partagés entre les réplicas.
+# Sans verrou (symfony/lock absent) : deux requêtes simultanées peuvent
+# passer d'une unité la limite, ce qui reste sans conséquence ici.
+framework:
+    cache:
+        pools:
+            cache.rate_limiter:
+                adapter: cache.adapter.doctrine_dbal
+
+    rate_limiter:
+        inscription_by_ip:
+            policy: sliding_window
+            limit: 10
+            interval: '1 hour'
+            cache_pool: cache.rate_limiter
+            lock_factory: null
+        inscription_by_email:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'
+            cache_pool: cache.rate_limiter
+            lock_factory: null
+        link_request_by_ip:
+            policy: sliding_window
+            limit: 10
+            interval: '1 hour'
+            cache_pool: cache.rate_limiter
+            lock_factory: null
+        link_request_by_email:
+            policy: sliding_window
+            limit: 3
+            interval: '1 hour'
+            cache_pool: cache.rate_limiter
+            lock_factory: null
