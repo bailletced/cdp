@@ -57,7 +57,13 @@ export default defineConfig({
         {
           // The API. In the docker stack the php service already listens on
           // localhost:8080 (reused); in CI a local PHP server is started.
-          command: "php -S 127.0.0.1:8080 -t public public/index.php",
+          // variables_order=EGPCS: with the default GPCS the built-in server
+          // does not expose environment variables in $_SERVER/$_ENV, so Dotenv
+          // (.env.dev) would override APP_SECRET here while the CLI worker
+          // keeps the real env var — links signed by the worker would then be
+          // rejected by the web server (401 altered).
+          command:
+            "php -d variables_order=EGPCS -S 127.0.0.1:8080 -t public public/index.php",
           url: "http://localhost:8080/auth/status",
           reuseExistingServer: !process.env.CI,
           cwd: apiDir,

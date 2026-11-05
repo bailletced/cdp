@@ -56,6 +56,10 @@ services:
     command: ["worker"]
     environment:
       APP_ENV: prod
+      # Le worker génère les liens personnels en CLI (hors requête HTTP) : sans
+      # DEFAULT_URI, le routeur retombe sur https://localhost et les liens des
+      # e-mails de test sont invalides.
+      DEFAULT_URI: http://localhost:9080
       APP_SECRET_FILE: /run/secrets/app_secret
       DB_PASSWORD_FILE: /run/secrets/db_password
       MAILER_DSN_FILE: /run/secrets/mailer_dsn
