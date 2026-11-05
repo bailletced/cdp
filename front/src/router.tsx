@@ -11,6 +11,7 @@ import { ConfidentialitePage } from "./pages/ConfidentialitePage";
 import { DemoPage } from "./pages/DemoPage";
 import { EditionEditPage, EditionFormPage } from "./pages/EditionFormPage";
 import { ErrorPage } from "./pages/ErrorPage";
+import { EventLandingPage } from "./pages/EventLandingPage";
 import { InscriptionConfirmationPage } from "./pages/InscriptionConfirmationPage";
 import { InscriptionPage } from "./pages/InscriptionPage";
 import { LandingPage } from "./pages/LandingPage";
@@ -34,6 +35,15 @@ const landingRoute = createRoute({
     }
   },
   component: LandingPage,
+});
+
+// Event landing (marketing page of the prayer chain): public on purpose —
+// the personal login link sent from this page lands the priant back here,
+// on the slot grid, so signed-in visitors must not be redirected away.
+const eventLandingRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/landing",
+  component: EventLandingPage,
 });
 
 // The inscription pages carry the selected slot ids in ?creneaux=… (built
@@ -239,6 +249,7 @@ const organisationTextEditRoute = createRoute({
 // Define the routes
 export const routeTree = Root.addChildren([
   landingRoute,
+  eventLandingRoute,
   receiveMyLinkRoute,
   confidentialiteRoute,
   inscriptionRoute,

@@ -1,10 +1,15 @@
 import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { POST_LOGIN_TARGET_KEY } from "../lib/postLoginTarget";
 import { renderApp } from "../test/renderApp";
 import { server } from "../test/setup";
 
 const LINK_QUERY = "user=abc&expires=123&hash=def";
+
+afterEach(() => {
+  localStorage.clear();
+});
 
 describe("LoginPage", () => {
   it("shows a loading state then redirects to the target returned by the API", async () => {
@@ -116,6 +121,40 @@ describe("LoginPage", () => {
     ).toBeInTheDocument();
 
     releaseVisitorMe();
+  });
+
+  it("lands on the page that requested the link (/landing) when a post-login target is stored", async () => {
+    localStorage.setItem(POST_LOGIN_TARGET_KEY, "/landing");
+
+    const bodies: string[] = [];
+    server.use(
+      http.get("http://localhost:8080/api/me", () =>
+        HttpResponse.json({ email: "priant@example.org", isOrganizer: false }),
+      ),
+      http.get(
+        "http://localhost:8080/api/editions/current",
+        () => new HttpResponse(null, { status: 404 }),
+      ),
+      http.post("http://localhost:8080/auth/login", async ({ request }) => {
+        bodies.push(await request.text());
+        return HttpResponse.json({ target: "/landing" });
+      }),
+    );
+
+    renderApp(`/login?${LINK_QUERY}`);
+
+    // The landing of the event shows up, signed in
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Une chaîne de prière ininterrompue",
+      }),
+    ).toBeInTheDocument();
+
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]).toContain("_target_path=%2Flanding");
+    // The stored target is consumed, not replayed on the next login
+    expect(localStorage.getItem(POST_LOGIN_TARGET_KEY)).toBeNull();
   });
 
   it("shows the invalid state without posting when the link parameters are missing", async () => {
