@@ -32,7 +32,7 @@ function renderPage() {
 }
 
 describe("EventLandingPage (/landing)", () => {
-  it("is reachable at /landing through the router", async () => {
+  it("is reachable at /landing, in its own light treatment", async () => {
     renderApp("/landing");
 
     expect(
@@ -41,10 +41,11 @@ describe("EventLandingPage (/landing)", () => {
         name: "Une chaîne de prière de 24 heures",
       }),
     ).toBeInTheDocument();
+    expect(document.body.classList.contains("event-landing")).toBe(true);
   });
 
-  it("explains the event: 24 h chain from Sat 28 Nov 22:00 to Sun 29 Nov 22:00, Gospel of Mark, 30-minute slots", async () => {
-    renderPage();
+  it("does not offer « Recevoir mon lien » anywhere: the form is the page", async () => {
+    renderApp("/landing");
 
     expect(
       await screen.findByRole("heading", {
@@ -52,34 +53,54 @@ describe("EventLandingPage (/landing)", () => {
         name: "Une chaîne de prière de 24 heures",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/samedi 28 novembre à 22h00/)).toBeInTheDocument();
     expect(
-      screen.getByText(/dimanche 29 novembre à 22h00/),
+      screen.queryByRole("link", { name: "Recevoir mon lien" }),
+    ).toBeNull();
+  });
+
+  it("welcomes people who know nothing: the event, then how it happens", async () => {
+    renderPage();
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Une chaîne de prière de 24 heures",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/samedi 28 novembre à 22h/)).toBeInTheDocument();
+    expect(screen.getByText(/dimanche 29 novembre à 22h/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 3,
+        name: "L'Évangile selon saint Marc, porté par tous",
+      }),
+    ).toBeInTheDocument();
+
+    // Three editorial paragraphs, no interactive planning here
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Une veillée continue" }),
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText(/Évangile selon saint Marc/i).length,
-    ).toBeGreaterThan(0);
-    // The chain timeline is drawn and labelled, but not interactive
-    expect(
-      screen.getByRole("img", { name: /Frise des 24 heures/ }),
+      screen.getByRole("heading", { level: 3, name: "30 minutes à vous" }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("region", { name: "Grille des créneaux" }),
     ).toBeNull();
 
-    // The three steps of the journey
+    // The steps, then the second capture form
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Comment ça se passe" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Entrez votre e-mail")).toBeInTheDocument();
-    expect(screen.getByText("Cliquez le lien")).toBeInTheDocument();
-    expect(screen.getByText("Choisissez vos créneaux")).toBeInTheDocument();
-
-    // Hero CTA anchors to the form
-    expect(screen.getByRole("link", { name: "Je participe" })).toHaveAttribute(
-      "href",
-      "#inscription",
-    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Rejoignez la chaîne" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Je m'inscris" }),
+    ).toBeInTheDocument();
   });
 
-  it("submits the e-mail to /auth/register and confirms the welcome e-mail", async () => {
+  it("shows the form in the hero and after the pitch, both posting /auth/register", async () => {
     const bodies: string[] = [];
     server.use(
       http.post(REGISTER_URL, async ({ request }) => {
@@ -96,7 +117,11 @@ describe("EventLandingPage (/landing)", () => {
 
     renderPage();
 
-    fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
+    // Two instances, one above the fold and one after the pitch
+    const emailFields = screen.getAllByLabelText("Adresse e-mail");
+    expect(emailFields).toHaveLength(2);
+
+    fireEvent.change(emailFields[0], {
       target: { value: "priant@example.org" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Je participe" }));
@@ -112,7 +137,7 @@ describe("EventLandingPage (/landing)", () => {
     });
   });
 
-  it("hides the e-mail form for a signed-in priant and links to /my-space", async () => {
+  it("replaces the forms by a link to my-space for a signed-in visitor", async () => {
     server.use(
       http.get(ME_URL, () =>
         HttpResponse.json({ email: "priant@example.org", isOrganizer: false }),
@@ -121,9 +146,12 @@ describe("EventLandingPage (/landing)", () => {
 
     renderPage();
 
+    // Both captures are replaced by a link to my-space
     expect(
-      await screen.findByRole("link", { name: "Aller à mon espace" }),
-    ).toHaveAttribute("href", "/my-space");
+      await screen.findAllByRole("link", {
+        name: "Choisissez vos créneaux dans mon espace",
+      }),
+    ).toHaveLength(2);
     expect(screen.queryByLabelText("Adresse e-mail")).toBeNull();
   });
 
@@ -134,7 +162,7 @@ describe("EventLandingPage (/landing)", () => {
 
     renderPage();
 
-    fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
+    fireEvent.change(screen.getAllByLabelText("Adresse e-mail")[0], {
       target: { value: "priant@example.org" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Je participe" }));

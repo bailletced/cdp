@@ -2,6 +2,7 @@ import {
   Link,
   Outlet,
   createRootRouteWithContext,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useMe } from "../api/hooks";
 import { SITE_NAME } from "../config/site";
@@ -29,6 +30,11 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
   component: () => {
     const { data, isLoading, isError } = useMe();
     const isSignedIn = !isError && Boolean(data);
+    // On the event landing the e-mail form is the page itself: the
+    // « Recevoir mon lien » entry would only compete with it
+    const isEventLanding = useRouterState({
+      select: (state) => state.location.pathname === "/landing",
+    });
 
     return (
       <div className="flex min-h-screen flex-col">
@@ -66,7 +72,7 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
                     </Link>
                   </li>
                 </ul>
-              ) : (
+              ) : isEventLanding ? null : (
                 <Link to="/receive-my-link" className={NAV_LINK}>
                   Recevoir mon lien
                 </Link>
@@ -82,8 +88,9 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
             <Link to="/confidentialite" className={NAV_LINK}>
               Confidentialité
             </Link>
-            {/* A signed-in priant already has their link */}
-            {isLoading || isSignedIn ? null : (
+            {/* A signed-in priant already has their link; the event landing
+             * carries its own e-mail form */}
+            {isLoading || isSignedIn || isEventLanding ? null : (
               <Link to="/receive-my-link" className={NAV_LINK}>
                 Recevoir mon lien
               </Link>

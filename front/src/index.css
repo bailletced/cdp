@@ -271,3 +271,48 @@
     outline-offset: 2px;
   }
 }
+
+/* Landing /landing (v3) : traitement clair local. La page accueille des
+ * visiteurs qui ne connaissent pas encore l'événement — un traitement
+ * ivoire, chaleureux et aéré, distinct du thème sombre « la veille » qui
+ * reste celui du reste de l'application. Toutes les paires ci-dessous
+ * atteignent AA (texte 4,5:1, composants 3:1) comme le thème sombre :
+ * foreground 12,9:1, muted 5,6:1, link 6,2:1, accent-foreground sur
+ * accent 6,8:1, border 3,4:1, placeholder 4,7:1 sur blanc. */
+body.event-landing {
+  color-scheme: light;
+  --background: #faf7f0;
+  --foreground: #2b2118;
+  --surface: #ffffff;
+  --surface-foreground: #2b2118;
+  --surface-secondary: #f1eadd;
+  --surface-secondary-foreground: #2b2118;
+  --surface-tertiary: #f1eadd;
+  --surface-tertiary-foreground: #2b2118;
+  --overlay: #ffffff;
+  --overlay-foreground: #2b2118;
+  --muted: #6e5c49;
+  --accent: #7c4a1f;
+  --accent-foreground: #fffdf6;
+  --accent-hover: #5f3a17;
+  --default: #f1eadd;
+  --default-foreground: #2b2118;
+  --border: #cfc0a7;
+  --separator: #e9e0d0;
+  --focus: #7c4a1f;
+  --link: #7c4a1f;
+  --field-background: #ffffff;
+  --field-foreground: #2b2118;
+  --field-placeholder: #74644f;
+  --field-border: #b8a687;
+  --backdrop: rgb(43 33 24 / 0.35);
+  background-color: var(--background);
+  /* Pas de lueur de lampe : la page est claire */
+  background-image: none;
+}
+
+/* L'inline-thumb du Carmel (header) garde un or plus clair sur ivoire pour
+ * garder 3:1 (WCAG 1.4.11) */
+body.event-landing .text-accent {
+  color: #a86e2f;
+}

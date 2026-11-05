@@ -4,9 +4,9 @@ import { createOpenEdition } from "./helpers/edition";
 import { extractLinkFromEmail, waitForEmail } from "./helpers/mailpit";
 
 /**
- * The /landing journey: the event landing explains the 24-hour chain and
- * takes an e-mail; the welcome e-mail carries a personal link; clicking it
- * signs the priant in on /my-space, where the slot picker lives.
+ * The /landing journey: the event landing welcomes people who know nothing,
+ * takes their e-mail, and the welcome e-mail's personal link signs them in
+ * on /my-space, where the slot picker lives.
  */
 test.describe("Landing /landing", () => {
   test.beforeAll(async ({ browser, request }) => {
@@ -22,13 +22,14 @@ test.describe("Landing /landing", () => {
     await page.close();
   });
 
-  test("explains the event, then e-mail → welcome link → signed in on /my-space with the slot picker", async ({
+  test("welcomes, takes the e-mail, then the link signs in on /my-space", async ({
     page,
   }) => {
     test.setTimeout(90_000);
     const address = `landing-e2e-${Date.now()}@example.org`;
 
-    // 1. The landing explains the event (no interactive grid here)
+    // 1. The landing presents the event (nothing about slots, no links to
+    //    request one: the form is the page)
     await page.goto("/landing");
     await expect(
       page.getByRole("heading", {
@@ -36,17 +37,23 @@ test.describe("Landing /landing", () => {
         name: "Une chaîne de prière de 24 heures",
       }),
     ).toBeVisible();
-    await expect(page.getByText(/samedi 28 novembre à 22h00/)).toBeVisible();
-    await expect(page.getByText(/dimanche 29 novembre à 22h00/)).toBeVisible();
+    await expect(page.getByText(/samedi 28 novembre à 22h/)).toBeVisible();
+    // The page carries its own light treatment (warm ivory), unlike the dark
+    // vigil theme of the rest of the app
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
+    ).toBe("rgb(250, 247, 240)");
     await expect(
-      page.getByRole("img", { name: /Frise des 24 heures/ }),
-    ).toBeVisible();
+      page.getByRole("link", { name: "Recevoir mon lien" }),
+    ).toHaveCount(0);
     await expect(
       page.getByRole("region", { name: "Grille des créneaux" }),
     ).toHaveCount(0);
 
-    // 2. The e-mail form sends the welcome e-mail with the personal link
-    await page.getByLabel("Adresse e-mail").fill(address);
+    // 2. The hero form sends the welcome e-mail with the personal link
+    await page.locator("#inscription input[name=email]").fill(address);
     await page.getByRole("button", { name: "Je participe" }).click();
     await expect(
       page.getByText(/Un lien de connexion vient de vous être envoyé/),
@@ -72,12 +79,6 @@ test.describe("Landing /landing", () => {
     // The slot picker section is right there on /my-space
     await expect(
       page.getByRole("heading", { level: 2, name: "Ajouter des créneaux" }),
-    ).toBeVisible();
-    // Signed in: the e-mail form is gone from the landing
-    await page.goto("/landing");
-    await expect(page.getByLabel("Adresse e-mail")).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: "Aller à mon espace" }),
     ).toBeVisible();
   });
 });
