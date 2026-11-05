@@ -16,6 +16,7 @@ import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { ReadTextLink } from "../components/ReadTextLink";
 import { RenameDialog } from "../components/RenameDialog";
+import { SlotPickerDialog } from "../components/SlotPickerDialog";
 import { useDawnTheme } from "../lib/dawnTheme";
 import { withLocalTime } from "../lib/localTime";
 
@@ -278,11 +279,12 @@ function AddSlots() {
 
   return (
     <>
-      <p className="mb-4 text-muted">
-        La chaîne vous propose un créneau encore libre — prenez-le, ou
-        demandez-en un autre.
+      <p className="w-full max-w-prose text-muted">
+        La chaîne vous propose un créneau encore libre — prenez-le, demandez-en
+        un autre, ou choisissez le temps qui vous convient.
       </p>
       <EmptySlotDraw editionId={editionId} />
+      <SlotPickerDialog editionId={editionId} />
     </>
   );
 }

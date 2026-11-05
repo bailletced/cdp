@@ -162,22 +162,52 @@ describe("MySpacePage", () => {
     ).toBeInTheDocument();
   });
 
-  it("offers the empty-slot draw of the current edition, not the whole grid", async () => {
+  it("offers the empty-slot draw and the picker, not the whole grid", async () => {
     openEdition();
+    server.use(
+      http.get(`http://localhost:8080/api/editions/${EDITION_ID}/slots`, () =>
+        HttpResponse.json({
+          id: EDITION_ID,
+          slots: [
+            {
+              id: "slot-14",
+              rank: 15,
+              startsAt: "2099-11-28T21:00:00+00:00",
+              endsAt: "2099-11-28T21:30:00+00:00",
+              label: "22h00\u201322h30",
+              partOfDay: "evening",
+              state: "future",
+              textTitle: null,
+              textSource: null,
+              registrationCount: 2,
+            },
+          ],
+        }),
+      ),
+    );
 
     renderApp("/my-space");
 
-    // Not the banner of the empty slots, not the 48 cards: the draw CTA
+    // Not the banner of the empty slots, not the 48 cards: two actions
     expect(
       await screen.findByRole("button", { name: "Prendre un créneau vide" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/La chaîne vous propose un créneau encore libre/),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("region", { name: "Grille des créneaux" }),
     ).toBeNull();
     expect(screen.queryByText(/Il reste/)).toBeNull();
+
+    // « Choisir un créneau » lists every slot to come, compactly, with the
+    // priants count, and links to the one-click inscription
+    fireEvent.click(screen.getByRole("button", { name: "Choisir un créneau" }));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Choisir un créneau",
+    });
+    expect(within(dialog).getByText("22h00\u201322h30")).toBeInTheDocument();
+    expect(within(dialog).getByText("2 priants")).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("link", { name: "Je le prends" }),
+    ).toHaveAttribute("href", "/inscription?creneaux=slot-14");
   });
 
   it("announces the next edition when none is open yet", async () => {

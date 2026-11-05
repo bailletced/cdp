@@ -131,6 +131,51 @@ test.describe("Mon espace (F14)", () => {
     await page.context().close();
   });
 
+  test("chooses a specific slot from the picker, with the members count (F14-T12)", async ({
+    browser,
+    request,
+  }) => {
+    test.setTimeout(90_000);
+    const slots = await fetchCurrentSlots(request);
+    const wanted = slots[5];
+    const stamp = Date.now();
+    const page = await registerThenOpenMySpace(
+      browser,
+      [slots[30]],
+      `Famille Bertrand ${stamp}`,
+    );
+
+    // « Choisir un créneau » opens the compact picker: one line per slot to
+    // come, its schedule and its priants count, one « Je le prends »
+    await page.getByRole("button", { name: "Choisir un créneau" }).click();
+    const dialog = page.getByRole("dialog", { name: "Choisir un créneau" });
+    const list = dialog.getByRole("list", { name: "Créneaux encore libres" });
+    const wantedRow = list
+      .getByRole("listitem")
+      .filter({ hasText: wanted.label });
+    await expect(wantedRow).toBeVisible();
+    await expect(wantedRow).toContainText(/\d priant/);
+    // the whole grid never mounts: no 48 cards, no empty-slot banner
+    await expect(
+      page.getByRole("region", { name: "Grille des créneaux" }),
+    ).toHaveCount(0);
+
+    // Taking it lands on the inscription form, pre-filled: the consent was
+    // already given, so no checkbox — one last « S'inscrire » and done
+    await wantedRow.getByRole("link", { name: "Je le prends" }).click();
+    await page.waitForURL("**/inscription**");
+    await expect(page.getByLabel("Nom affiché")).toHaveValue(
+      `Famille Bertrand ${stamp}`,
+    );
+    const confirmInscription = page.getByRole("button", { name: "S'inscrire" });
+    await confirmInscription.click();
+    await page.waitForURL(/\/inscription\/confirmation/);
+    await expect(
+      page.getByRole("heading", { name: "Inscription confirmée" }),
+    ).toBeVisible();
+    await page.context().close();
+  });
+
   test("parcours n° 1: rename myself, then cancel a slot (F14-T11)", async ({
     browser,
     request,
