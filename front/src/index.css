@@ -272,14 +272,15 @@
   }
 }
 
-/* Landing /landing (v3) : traitement clair local. La page accueille des
- * visiteurs qui ne connaissent pas encore l'événement — un traitement
+/* Traitement clair « aube » des pages d'accueil (landing /landing et
+ * « Mon espace ») : la classe body.theme-dawn est posée par useDawnTheme().
+ * Ces pages accueillent des visiteurs — un traitement
  * ivoire, chaleureux et aéré, distinct du thème sombre « la veille » qui
  * reste celui du reste de l'application. Toutes les paires ci-dessous
  * atteignent AA (texte 4,5:1, composants 3:1) comme le thème sombre :
  * foreground 12,9:1, muted 5,6:1, link 6,2:1, accent-foreground sur
  * accent 6,8:1, border 3,4:1, placeholder 4,7:1 sur blanc. */
-body.event-landing {
+body.theme-dawn {
   color-scheme: light;
   --background: #faf7f0;
   --foreground: #2b2118;
@@ -312,6 +313,14 @@ body.event-landing {
   --field-hover: #ffffff;
   --field-border-hover: #b8a687;
   --field-border-focus: #7c4a1f;
+  /* Toast/marker state colors: HeroUI computes the *-soft-foreground mixes
+   * as var() on :root — where the dark theme's accent/success live — so
+   * they must be re-derived here, or the toast titles turn pale on the
+   * light surfaces */
+  --accent-soft-foreground: #7c4a1f;
+  --success-soft-foreground: #3d6b47;
+  --warning-soft-foreground: #8a5c17;
+  --danger-soft-foreground: #8c3a31;
   --backdrop: rgb(43 33 24 / 0.35);
   background-color: var(--background);
   /* Pas de lueur de lampe : la page est claire */
@@ -320,6 +329,6 @@ body.event-landing {
 
 /* L'inline-thumb du Carmel (header) garde un or plus clair sur ivoire pour
  * garder 3:1 (WCAG 1.4.11) */
-body.event-landing .text-accent {
+body.theme-dawn .text-accent {
   color: #a86e2f;
 }

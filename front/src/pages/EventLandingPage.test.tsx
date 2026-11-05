@@ -41,7 +41,7 @@ describe("EventLandingPage (/landing)", () => {
         name: "Une chaîne de prière de 24 heures",
       }),
     ).toBeInTheDocument();
-    expect(document.body.classList.contains("event-landing")).toBe(true);
+    expect(document.body.classList.contains("theme-dawn")).toBe(true);
   });
 
   it("does not offer « Recevoir mon lien » anywhere: the form is the page", async () => {

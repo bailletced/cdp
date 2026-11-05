@@ -48,64 +48,21 @@ function mySpace(inscriptions: unknown[], displayName = "Famille Martin") {
 
 const EDITION_ID = "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b";
 
-/**
- * A priant in session who already consented, an open edition with one
- * slot to come, and the given answer to POST /api/inscriptions.
- */
-function knownPriantWithOneSlot(
-  answerInscription: Parameters<typeof http.post>[1],
-) {
+/** An open public edition, answered to GET /api/editions/current. */
+function openEdition() {
   server.use(
-    http.get("http://localhost:8080/api/me", () =>
-      HttpResponse.json({
-        email: "thomas@bailletced.org",
-        isOrganizer: false,
-        displayName: "Thomas Baillet",
-        consentGiven: true,
-      }),
-    ),
     http.get("http://localhost:8080/api/editions/current", () =>
       HttpResponse.json({
         id: EDITION_ID,
-        title: "24 heures de prière",
+        title: "24 heures de prière — novembre 2026",
         presentation: "",
         startsAt: "2099-11-27T18:00:00+00:00",
         opensAt: "2026-11-20T18:00:00+00:00",
         status: "open",
       }),
     ),
-    http.get(`http://localhost:8080/api/editions/${EDITION_ID}/slots`, () =>
-      HttpResponse.json({
-        id: EDITION_ID,
-        slots: [
-          {
-            id: "slot-1",
-            rank: 1,
-            startsAt: "2099-11-27T18:00:00+00:00",
-            endsAt: "2099-11-27T18:30:00+00:00",
-            label: "19h00–19h30",
-            partOfDay: "evening",
-            state: "future",
-            textTitle: null,
-            textSource: null,
-            registrationCount: 0,
-          },
-        ],
-      }),
-    ),
-    http.post("http://localhost:8080/api/inscriptions", answerInscription),
   );
 }
-
-async function tickAndRegister() {
-  fireEvent.click(
-    await screen.findByRole("checkbox", {
-      name: "Sélectionner le créneau de 19h00–19h30",
-    }),
-  );
-  fireEvent.click(screen.getByRole("button", { name: "M'inscrire (1)" }));
-}
-
 describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
   it("shows my name, then my slots with their schedule and their text", async () => {
     mySpace([
@@ -205,78 +162,69 @@ describe("MySpacePage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the planning grid of the current edition", async () => {
+  it("offers the empty-slot draw of the current edition, not the whole grid", async () => {
+    openEdition();
+
+    renderApp("/my-space");
+
+    // Not the banner of the empty slots, not the 48 cards: the draw CTA
+    expect(
+      await screen.findByRole("button", { name: "Prendre un créneau vide" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/La chaîne vous propose un créneau encore libre/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Grille des créneaux" }),
+    ).toBeNull();
+    expect(screen.queryByText(/Il reste/)).toBeNull();
+  });
+
+  it("announces the next edition when none is open yet", async () => {
     server.use(
       http.get("http://localhost:8080/api/editions/current", () =>
-        HttpResponse.json({
-          id: "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b",
-          title: "24 heures de prière — novembre 2026",
-          presentation: "",
-          startsAt: "2026-11-27T18:00:00+00:00",
-          opensAt: "2026-11-20T18:00:00+00:00",
-          status: "open",
-        }),
+        HttpResponse.json({ title: "Not Found" }, { status: 404 }),
       ),
     );
 
     renderApp("/my-space");
 
     expect(
-      await screen.findByRole("heading", {
-        name: "24 heures de prière — novembre 2026",
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Début : vendredi 27 novembre 2026/),
-    ).toBeInTheDocument();
-    // The default MSW handler answers an empty grid
-    expect(
-      await screen.findByText("Aucun créneau pour le moment."),
+      await screen.findByText("La prochaine édition sera bientôt annoncée."),
     ).toBeInTheDocument();
   });
 
-  it("registers a known priant on the ticked slots in one click, without the form", async () => {
-    let posted: unknown = null;
-    knownPriantWithOneSlot(async ({ request }) => {
-      posted = await request.json();
-      return HttpResponse.json(
-        { id: EDITION_ID, displayName: "Thomas Baillet", inscriptions: [] },
-        { status: 201 },
-      );
-    });
-
-    renderApp("/my-space");
-    await tickAndRegister();
-
-    expect(
-      await screen.findByRole("heading", { name: "Inscription confirmée" }),
-    ).toBeInTheDocument();
-    expect(posted).toEqual({
-      slotIds: ["slot-1"],
-      displayName: "Thomas Baillet",
-      email: "thomas@bailletced.org",
-      consent: true,
-      website: "",
-    });
-  });
-
-  it("says why the one-click inscription failed, and stays on the planning", async () => {
-    knownPriantWithOneSlot(() =>
-      HttpResponse.json(
-        { detail: "Vous êtes déjà inscrit sur ce créneau." },
-        { status: 409 },
+  it("draws an empty slot, leading to the one-click inscription", async () => {
+    openEdition();
+    server.use(
+      http.get(
+        `http://localhost:8080/api/editions/${EDITION_ID}/slot-suggestion`,
+        () =>
+          HttpResponse.json({
+            "@context": "/api/contexts/SlotSuggestion",
+            "@id": `/api/editions/${EDITION_ID}/slot-suggestion`,
+            "@type": "SlotSuggestion",
+            id: EDITION_ID,
+            slotId: "slot-12",
+            startsAt: "2099-11-28T19:00:00+00:00",
+            endsAt: "2099-11-28T19:30:00+00:00",
+            label: "20h00–20h30",
+            textTitle: "Que rien ne te trouble",
+            textSource: "Thérèse d’Avila",
+          }),
       ),
     );
 
     renderApp("/my-space");
-    await tickAndRegister();
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Vous êtes déjà inscrit sur ce créneau.",
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Prendre un créneau vide" }),
     );
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByText("20h00–20h30")).toBeVisible();
     expect(
-      screen.getByRole("region", { name: "Grille des créneaux" }),
-    ).toBeInTheDocument();
+      within(dialog).getByRole("link", { name: "Je le prends" }),
+    ).toHaveAttribute("href", "/inscription?creneaux=slot-12");
   });
 
   it("redirects a visitor to the landing page", async () => {

@@ -76,6 +76,7 @@ use App\Chain\Infrastructure\InMemory\Repository\InMemoryTextRepository;
 use App\Chain\Infrastructure\Mailer\MailerNotifier;
 use App\Chain\Infrastructure\Random\RandomizerSlotPicker;
 use App\Chain\Infrastructure\Symfony\Console\ImportGospelOfLukeCommand;
+use App\Chain\Infrastructure\Symfony\Console\ImportGospelOfMarkCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Controller\MyCalendarController;
@@ -345,6 +346,11 @@ return static function (ContainerConfigurator $container): void {
         ->tag('console.command');
 
     $services->set(ImportGospelOfLukeCommand::class)
+        ->autoconfigure()
+        ->autowire()
+        ->tag('console.command');
+
+    $services->set(ImportGospelOfMarkCommand::class)
         ->autoconfigure()
         ->autowire()
         ->tag('console.command');

@@ -50,6 +50,12 @@ final class BehatState
 
     public ?string $capturedEditionId = null;
 
+    /** Exit code of the last console command run by a step. */
+    public ?int $lastCommandExitCode = null;
+
+    /** Display of the last console command run by a step. */
+    public ?string $lastCommandDisplay = null;
+
     /** @var list<string> Slot ids of the last created edition, in rank order. */
     public array $capturedSlotIds = [];
 
@@ -70,6 +76,8 @@ final class BehatState
         $this->capturedTextId = null;
         $this->capturedEditionId = null;
         $this->capturedSlotIds = [];
+        $this->lastCommandExitCode = null;
+        $this->lastCommandDisplay = null;
         $this->capturedPriantId = null;
     }
 }

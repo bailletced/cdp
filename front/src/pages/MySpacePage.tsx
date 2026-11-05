@@ -6,15 +6,17 @@ import { getApiErrorDetail } from "../api/errors";
 import {
   myInscriptionsQueryOptions,
   useCancelInscription,
+  useCurrentEdition,
   useViewer,
 } from "../api/hooks";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { CurrentEditionPlanning } from "../components/CurrentEditionPlanning";
+import { EmptySlotDraw } from "../components/EmptySlotDraw";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { ReadTextLink } from "../components/ReadTextLink";
 import { RenameDialog } from "../components/RenameDialog";
+import { useDawnTheme } from "../lib/dawnTheme";
 import { withLocalTime } from "../lib/localTime";
 
 const LINK_CLASS = "text-link underline underline-offset-4";
@@ -246,17 +248,59 @@ function MySlots() {
 }
 
 /**
+ * « Ajouter des créneaux » (F14-T12): not the whole planning — the draw of
+ * an empty slot (F13-T06) is enough from here, and « Je le prends » then
+ * registers the already-consented priant at once.
+ */
+function AddSlots() {
+  const editionQuery = useCurrentEdition();
+
+  if (editionQuery.isError) {
+    return (
+      <ErrorState
+        message="L'édition n'a pas pu être chargée."
+        onRetry={() => void editionQuery.refetch()}
+      />
+    );
+  }
+
+  const editionId = editionQuery.data?.id;
+
+  if (editionQuery.isPending) {
+    return null;
+  }
+
+  if (!editionId) {
+    return (
+      <p className="text-muted">La prochaine édition sera bientôt annoncée.</p>
+    );
+  }
+
+  return (
+    <>
+      <p className="mb-4 text-muted">
+        La chaîne vous propose un créneau encore libre — prenez-le, ou
+        demandez-en un autre.
+      </p>
+      <EmptySlotDraw editionId={editionId} />
+    </>
+  );
+}
+
+/**
  * /my-space (F02-T19, F14-T07): « Mon espace » — my name, my slots of the
- * current edition, then the planning to add slots. The route guard
- * redirects visitors (and a device pass without session) to the landing
- * page; should the session expire while the page is open, it invites to
- * receive the personal link again.
+ * current edition, then the draw to add a slot. The route guard redirects
+ * visitors (and a device pass without session) to the landing page; should
+ * the session expire while the page is open, it invites to receive the
+ * personal link again. Same warm-ivory treatment as the event landing.
  */
 export function MySpacePage() {
   const { viewer, isLoading } = useViewer();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
+
+  useDawnTheme();
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -291,7 +335,7 @@ export function MySpacePage() {
           Ajouter des créneaux
         </h2>
         <div id="ajouter-des-creneaux" className="scroll-mt-24">
-          <CurrentEditionPlanning />
+          <AddSlots />
         </div>
       </section>
       <button

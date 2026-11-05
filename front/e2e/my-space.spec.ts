@@ -88,7 +88,7 @@ test.describe.configure({ mode: "serial" });
 /**
  * « Mon espace » (F14-T10, F14-T11): the single agenda file, then the
  * parcours §14.1 n° 1 — inscription → e-mail → personal link → my space →
- * change my name (seen in the grid) → cancel → the slot is « À pourvoir ».
+ * change my name → cancel → then the empty-slot draw to add one again.
  */
 test.describe("Mon espace (F14)", () => {
   test.beforeAll(async ({ browser, request }) => {
@@ -137,11 +137,11 @@ test.describe("Mon espace (F14)", () => {
   }) => {
     test.setTimeout(90_000);
     const slots = await fetchCurrentSlots(request);
-    const [kept, freed] = [slots[30], slots[31]];
+    const freed = slots[31];
     const stamp = Date.now();
     const page = await registerThenOpenMySpace(
       browser,
-      [kept, freed],
+      [slots[30], freed],
       `Famille Martin ${stamp}`,
     );
 
@@ -154,7 +154,7 @@ test.describe("Mon espace (F14)", () => {
     await expect(mine.getByRole("listitem")).toHaveCount(2);
     await expectNoA11yViolations(page);
 
-    // 2. Change my name: it shows in the grid at once
+    // 2. Change my name: the new name shows at once
     await page.getByRole("button", { name: "Changer mon nom" }).click();
     const rename = page.getByRole("dialog", { name: "Changer mon nom" });
     await expectNoA11yViolations(page);
@@ -166,13 +166,8 @@ test.describe("Mon espace (F14)", () => {
     await expect(
       page.getByText(`Famille Martin-Dubois ${stamp}`, { exact: true }).first(),
     ).toBeVisible();
-    const grid = page.getByRole("region", { name: "Grille des créneaux" });
-    const keptCard = grid.getByRole("article").filter({ hasText: kept.label });
-    await expect(
-      keptCard.getByRole("list", { name: "Priants du créneau" }),
-    ).toContainText(`Famille Martin-Dubois ${stamp}`);
 
-    // 3. Cancel the second slot: announced on screen, « À pourvoir » again
+    // 3. Cancel the second slot: announced on screen, one slot left
     await mine
       .getByRole("button", {
         name: `Me désinscrire du créneau de ${freed.label}`,
@@ -185,11 +180,18 @@ test.describe("Mon espace (F14)", () => {
       page.getByText(`Vous êtes désinscrit du créneau de ${freed.label}.`),
     ).toBeVisible();
     await expect(mine.getByRole("listitem")).toHaveCount(1);
-    const freedCard = grid
-      .getByRole("article")
-      .filter({ hasText: freed.label });
-    await expect(freedCard).toContainText("À pourvoir");
-    await expect(freedCard).toContainText("0 priant");
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Ajouter des créneaux" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Prendre un créneau vide" }),
+    ).toBeVisible();
+    // Same warm-ivory treatment as the event landing
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
+    ).toBe("rgb(250, 247, 240)");
     await page.context().close();
   });
 });
