@@ -1,13 +1,12 @@
 import { Button, Input, Label, Link, TextField } from "@heroui/react";
 import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
-import { useCurrentEdition, useMe } from "../api/hooks";
+import { useMe } from "../api/hooks";
 import { PageTitle } from "../components/PageTitle";
-import { PlanningGrid } from "../components/PlanningGrid";
 import { SITE_NAME } from "../config/site";
-import { POST_LOGIN_TARGET_KEY } from "../lib/postLoginTarget";
 
 const GENERIC_ERROR_MESSAGE = "Une erreur est survenue. Veuillez réessayer.";
+// Same wording as the API's own 202 body (RegisterController)
 const CONFIRMATION_MESSAGE =
   "Un lien de connexion vient de vous être envoyé à cette adresse.";
 
@@ -20,33 +19,158 @@ type SubmissionState = "idle" | "submitting" | "sent" | "error";
  * Sunday 29 Nov at 22:00, Paris time.)
  */
 const EVENT = {
-  title: "24 heures de prière",
-  headline: "Une chaîne de prière ininterrompue",
-  fromLabel: "samedi 28 novembre 2026 à 22h00",
-  toLabel: "dimanche 29 novembre 2026 à 22h00",
+  headline: "Une chaîne de prière de 24 heures",
+  fromLabel: "samedi 28 novembre à 22h00",
+  toLabel: "dimanche 29 novembre à 22h00",
   gospel: "l'Évangile selon saint Marc",
   slotMinutes: 30,
   slotsCount: 48,
 } as const;
 
+/* ------------------------------------------------------------------ */
+/* Inline SVG icons, stroked in the lamp-gold accent — no icon library  */
+/* ------------------------------------------------------------------ */
+
+function IconChain() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      className="h-7 w-7 text-accent"
+      aria-hidden="true"
+    >
+      <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" />
+      <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
+    </svg>
+  );
+}
+
+function IconBook() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-7 w-7 text-accent"
+      aria-hidden="true"
+    >
+      <path d="M12 6c-1.5-1.3-3.5-2-6-2H4v14h2c2.5 0 4.5.7 6 2 1.5-1.3 3.5-2 6-2h2V4h-2c-2.5 0-4.5.7-6 2Z" />
+      <path d="M12 6v14" />
+    </svg>
+  );
+}
+
+function IconClock() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      className="h-7 w-7 text-accent"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
+/**
+ * The 24-hour chain as a timeline: 48 half-hour segments from Saturday 22:00
+ * to Sunday 22:00, dark at both ends (the night) and lit gold around dawn.
+ * Purely illustrative (role="img" with a label): the real, interactive
+ * slot picker lives on /my-space once signed in.
+ */
+function ChainTimeline() {
+  const segments = Array.from({ length: EVENT.slotsCount }, (_, i) => i);
+  // Dawn (about 7:30) is 9.5 h after the 22:00 start: 39.6 % of the chain
+  const dawn = 0.396;
+
+  return (
+    <svg
+      role="img"
+      aria-label="Frise des 24 heures : 48 créneaux de 30 minutes du samedi 28 novembre à 22h00 au dimanche 29 novembre à 22h00, heure de Paris"
+      viewBox="0 0 480 56"
+      className="w-full"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id="chain-night" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#211913" />
+          <stop
+            offset={`${dawn * 100}%`}
+            stopColor="#e6b762"
+            stopOpacity="0.9"
+          />
+          <stop offset="60%" stopColor="#3a2e25" />
+          <stop offset="100%" stopColor="#211913" />
+        </linearGradient>
+      </defs>
+      {segments.map((i) => (
+        <rect
+          key={i}
+          x={i * 10 + 0.5}
+          y="8"
+          width="9"
+          height="14"
+          rx="2"
+          fill="url(#chain-night)"
+          stroke="#4a3b2f"
+          strokeWidth="0.5"
+        />
+      ))}
+      {/* hour labels: 22h, 0h, 6h, 12h, 18h, 22h */}
+      {[
+        { at: 0, label: "22h" },
+        { at: 2 * 10 * 2, label: "0h" }, // 2 h later
+        { at: 8 * 10 * 2, label: "6h" },
+        { at: 14 * 10 * 2, label: "12h" },
+        { at: 20 * 10 * 2, label: "18h" },
+        { at: 470, label: "22h" },
+      ].map((tick) => (
+        <text
+          key={tick.label + tick.at}
+          x={tick.at}
+          y="42"
+          fill="#b9a78f"
+          fontSize="11"
+          textAnchor={
+            tick.at === 0 ? "start" : tick.at === 470 ? "end" : "middle"
+          }
+        >
+          {tick.label}
+        </text>
+      ))}
+      <text x="240" y="53" fill="#b9a78f" fontSize="10" textAnchor="middle">
+        samedi 28 nov. 22h → dimanche 29 nov. 22h (heure de Paris)
+      </text>
+    </svg>
+  );
+}
+
 /**
  * /landing: marketing landing of the prayer-chain event.
  *
- * Typography-led hero (dates + double CTA), the principle in three cards,
- * the three-step journey, then the e-mail form: submitting it creates the
- * account when needed and sends the personal login link (POST /auth/register,
- * F07-T01 — the API always answers 202, never leaking account existence).
- * Before submitting, the page stores "/landing" as post-login target so the
- * link, once clicked, lands the freshly signed-in priant on this page, on
- * the slot grid, ready to pick slots. When an edition is open, its planning
- * grid (US-08.2) closes the page.
+ * Typography-led hero with a single CTA, the 24-hour chain drawn as a
+ * timeline, the principle in three cards, the three-step journey, then the
+ * e-mail form. Submitting it creates the account when needed and sends the
+ * personal login link (POST /auth/register, F07-T01 — the API always
+ * answers 202, never leaking account existence); the link signs the priant
+ * in on /my-space, where the slot picker (« Ajouter des créneaux ») lives.
+ * The landing itself never shows the interactive grid: choosing slots makes
+ * sense only once signed in.
  *
- * Public route: a signed-in priant is not redirected away — arriving here
- * after the login link is the intended journey. The form is then replaced
- * by a link to « Mon espace ».
+ * Public route: a signed-in priant is not redirected away.
  */
 export function EventLandingPage() {
-  const editionQuery = useCurrentEdition();
   const me = useMe().data;
   const [state, setState] = useState<SubmissionState>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -58,10 +182,6 @@ export function EventLandingPage() {
     const email = String(formData.get("email") ?? "");
     // Honeypot field: legitimate users never see it, bots fill it (F02-T15)
     const website = String(formData.get("website") ?? "");
-
-    // The personal link sent by e-mail must bring the priant back here, on
-    // the slot grid — not on /my-space (consumed by the login page)
-    localStorage.setItem(POST_LOGIN_TARGET_KEY, "/landing");
 
     setState("submitting");
 
@@ -87,57 +207,45 @@ export function EventLandingPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pt-10 pb-8 sm:pt-16">
-      {/* Hero — typography-led, the lamp glow of the theme does the rest */}
-      <header className="mb-16">
-        <p className="mb-3 text-muted">{SITE_NAME}</p>
+    <div className="mx-auto w-full max-w-3xl px-4 pt-14 pb-10 sm:pt-24">
+      {/* Hero — typography-led; the lamp glow of the theme does the rest */}
+      <header className="mb-14">
+        <p className="mb-4 text-muted">{SITE_NAME}</p>
         <PageTitle>{EVENT.headline}</PageTitle>
         <p className="mt-6 max-w-prose text-xl leading-relaxed">
-          {EVENT.title} : du <strong>{EVENT.fromLabel}</strong> au{" "}
+          Du <strong>{EVENT.fromLabel}</strong> au{" "}
           <strong>{EVENT.toLabel}</strong> (heure de Paris), {EVENT.gospel} est
-          prié sans interruption, créneau de {EVENT.slotMinutes} minutes après
-          créneau.
+          prié sans interruption — un membre de la Communion toutes les{" "}
+          {EVENT.slotMinutes} minutes.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-9 flex flex-wrap items-center gap-4">
           <a
             href="#inscription"
-            className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] bg-accent px-5 font-medium text-accent-foreground no-underline hover:bg-accent-hover"
+            className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] bg-accent px-6 text-lg font-medium text-accent-foreground no-underline hover:bg-accent-hover"
           >
             Je participe
           </a>
-          <a
-            href="#planning"
-            className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] border border-border bg-default px-5 font-medium text-default-foreground no-underline hover:bg-surface-secondary"
+          <Link
+            href="#deroulement"
+            className="underline decoration-1 underline-offset-4"
           >
-            Voir les créneaux
-          </a>
+            Voir le déroulement
+          </Link>
         </div>
       </header>
 
-      {/* The event in three figures */}
-      <ul
-        aria-label="L'événement en chiffres"
-        className="mb-16 grid gap-4 sm:grid-cols-3"
+      {/* The signature visual: the 24-hour chain */}
+      <div
+        id="deroulement"
+        className="mb-16 scroll-mt-8 rounded-2xl border border-separator bg-surface p-6 sm:p-8"
       >
-        {[
-          { figure: "24 h", label: "de prière ininterrompue" },
-          {
-            figure: `${EVENT.slotsCount} × ${EVENT.slotMinutes} min`,
-            label: "de créneaux à prendre",
-          },
-          { figure: "Marc", label: "l'Évangile prié toute la chaîne" },
-        ].map((stat) => (
-          <li
-            key={stat.label}
-            className="rounded-2xl border border-separator bg-surface p-6 text-center"
-          >
-            <p className="font-display text-3xl font-bold text-accent tabular-nums">
-              {stat.figure}
-            </p>
-            <p className="mt-2 text-muted">{stat.label}</p>
-          </li>
-        ))}
-      </ul>
+        <ChainTimeline />
+        <p className="mt-4 text-muted">
+          {EVENT.slotsCount} créneaux de {EVENT.slotMinutes} minutes se
+          succèdent sans laisser de trou : à chaque instant des 24 heures,
+          quelqu'un prie.
+        </p>
+      </div>
 
       {/* The principle */}
       <section aria-labelledby="principe" className="mb-16">
@@ -146,25 +254,27 @@ export function EventLandingPage() {
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <article className="rounded-2xl border border-separator bg-surface p-6">
-            <h3 className="mb-2">Personne ne prie seul</h3>
+            <IconChain />
+            <h3 className="mt-4 mb-2">Personne ne prie seul</h3>
             <p className="text-muted">
-              Pendant ces 24 heures, quelqu'un prie toujours. Votre créneau
-              s'enchaîne avec celui du priant suivant : la prière ne s'arrête
-              jamais.
+              Votre créneau s'enchaîne avec celui du priant suivant : la prière
+              ne s'arrête jamais pendant ces 24 heures.
             </p>
           </article>
           <article className="rounded-2xl border border-separator bg-surface p-6">
-            <h3 className="mb-2">L'Évangile selon saint Marc</h3>
+            <IconBook />
+            <h3 className="mt-4 mb-2">L'Évangile selon saint Marc</h3>
             <p className="text-muted">
-              {EVENT.gospel} est lu et prié à travers les créneaux : chaque
-              membre qui prend un créneau porte la Parole pendant sa demi-heure.
+              {EVENT.gospel} est porté créneau après créneau : chaque membre qui
+              prend un créneau prie la Parole pendant sa demi-heure.
             </p>
           </article>
           <article className="rounded-2xl border border-separator bg-surface p-6">
-            <h3 className="mb-2">30 minutes, un engagement tenable</h3>
+            <IconClock />
+            <h3 className="mt-4 mb-2">30 minutes, un engagement tenable</h3>
             <p className="text-muted">
-              Un créneau de {EVENT.slotMinutes} minutes, chez vous, devant
-              l'écran. Vous pouvez en prendre plusieurs.
+              Une demi-heure chez vous, devant l'écran. Vous pouvez prendre
+              plusieurs créneaux.
             </p>
           </article>
         </div>
@@ -185,12 +295,12 @@ export function EventLandingPage() {
             {
               step: "2",
               title: "Cliquez le lien",
-              text: "Il vous connecte directement, sans mot de passe.",
+              text: "Il vous connecte directement à votre espace, sans mot de passe.",
             },
             {
               step: "3",
               title: "Choisissez vos créneaux",
-              text: "Dans le planning ci-dessous, prenez un ou plusieurs créneaux de 30 minutes.",
+              text: "Depuis votre espace, prenez un ou plusieurs créneaux de 30 minutes dans le planning.",
             },
           ].map((item) => (
             <li
@@ -214,17 +324,21 @@ export function EventLandingPage() {
       <section
         aria-labelledby="inscription-titre"
         id="inscription"
-        className="mb-16 scroll-mt-8"
+        className="scroll-mt-8"
       >
-        <div className="rounded-2xl border border-separator bg-surface p-6 sm:p-8">
-          <h2 id="inscription-titre" className="mb-6">
+        <div className="rounded-2xl border border-accent/40 bg-surface p-6 sm:p-8">
+          <h2 id="inscription-titre" className="mb-2">
             Je participe
           </h2>
+          <p className="mb-6 text-muted">
+            Laissez votre e-mail : un lien de connexion vous est envoyé pour
+            choisir vos créneaux.
+          </p>
           {me ? (
             <p>
               Vous êtes connecté·e ({me.email}).{" "}
-              <Link href="/my-space">Aller à mon espace</Link> ou choisissez
-              directement vos créneaux ci-dessous.
+              <Link href="/my-space">Aller à mon espace</Link> pour choisir vos
+              créneaux.
             </p>
           ) : state === "sent" || state === "error" ? (
             <output>{message}</output>
@@ -256,40 +370,11 @@ export function EventLandingPage() {
                 variant="primary"
                 isDisabled={state === "submitting"}
               >
-                {state === "submitting"
-                  ? "Envoi en cours…"
-                  : "Recevoir mon lien"}
+                {state === "submitting" ? "Envoi en cours…" : "Je participe"}
               </Button>
             </form>
           )}
         </div>
-      </section>
-
-      {/* The slot picker */}
-      <section
-        aria-labelledby="planning-titre"
-        id="planning"
-        className="scroll-mt-8"
-      >
-        <h2 id="planning-titre" className="mb-8">
-          Les créneaux
-        </h2>
-        {editionQuery.isPending ? (
-          <p className="text-muted">Chargement des créneaux…</p>
-        ) : editionQuery.data?.id ? (
-          <PlanningGrid editionId={editionQuery.data.id} />
-        ) : (
-          <div className="rounded-2xl border border-separator bg-surface p-6">
-            <p>
-              {EVENT.fromLabel} — {EVENT.toLabel} (heure de Paris) :{" "}
-              {EVENT.slotsCount} créneaux de {EVENT.slotMinutes} minutes pour
-              prier {EVENT.gospel}.
-            </p>
-            <p className="mt-2 text-muted">
-              Le planning s'ouvrira à l'ouverture des inscriptions.
-            </p>
-          </div>
-        )}
       </section>
     </div>
   );

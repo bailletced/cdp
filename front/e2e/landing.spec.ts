@@ -4,9 +4,9 @@ import { createOpenEdition } from "./helpers/edition";
 import { extractLinkFromEmail, waitForEmail } from "./helpers/mailpit";
 
 /**
- * The /landing journey: the event landing explains the 24-hour chain, an
- * e-mail earns a personal link, and clicking it signs the priant in — back
- * on /landing, on the slot grid, ready to pick slots.
+ * The /landing journey: the event landing explains the 24-hour chain and
+ * takes an e-mail; the welcome e-mail carries a personal link; clicking it
+ * signs the priant in on /my-space, where the slot picker lives.
  */
 test.describe("Landing /landing", () => {
   test.beforeAll(async ({ browser, request }) => {
@@ -22,45 +22,37 @@ test.describe("Landing /landing", () => {
     await page.close();
   });
 
-  test("explains the event, then e-mail → link → signed in on /landing with the slot grid", async ({
+  test("explains the event, then e-mail → welcome link → signed in on /my-space with the slot picker", async ({
     page,
   }) => {
     test.setTimeout(90_000);
     const address = `landing-e2e-${Date.now()}@example.org`;
 
-    // 1. The landing explains the event
+    // 1. The landing explains the event (no interactive grid here)
     await page.goto("/landing");
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Une chaîne de prière ininterrompue",
+        name: "Une chaîne de prière de 24 heures",
       }),
     ).toBeVisible();
+    await expect(page.getByText(/samedi 28 novembre à 22h00/)).toBeVisible();
+    await expect(page.getByText(/dimanche 29 novembre à 22h00/)).toBeVisible();
     await expect(
-      page.getByText(/samedi 28 novembre 2026 à 22h00/),
+      page.getByRole("img", { name: /Frise des 24 heures/ }),
     ).toBeVisible();
     await expect(
-      page.getByText(/dimanche 29 novembre 2026 à 22h00/),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Le principe" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Comment participer" }),
-    ).toBeVisible();
+      page.getByRole("region", { name: "Grille des créneaux" }),
+    ).toHaveCount(0);
 
-    // 2. The open edition's slot grid is on the page
-    const grid = page.getByRole("region", { name: "Grille des créneaux" });
-    await expect(grid).toBeVisible();
-
-    // 3. The e-mail form sends the personal link
+    // 2. The e-mail form sends the welcome e-mail with the personal link
     await page.getByLabel("Adresse e-mail").fill(address);
-    await page.getByRole("button", { name: "Recevoir mon lien" }).click();
+    await page.getByRole("button", { name: "Je participe" }).click();
     await expect(
-      page.getByText("Un lien de connexion vient de vous être envoyé"),
+      page.getByText(/Un lien de connexion vient de vous être envoyé/),
     ).toBeVisible();
 
-    // 4. The link arrives by e-mail (sent by the messenger worker)
+    // 3. The link arrives by e-mail (sent by the messenger worker)
     const email = await waitForEmail(address, 30_000);
     if (!email) {
       throw new Error(`No e-mail received for ${address}`);
@@ -71,17 +63,18 @@ test.describe("Landing /landing", () => {
     }
     expect(link).toContain("/auth/login?");
 
-    // 5. Clicking the link signs in and lands back on /landing, on the grid
+    // 4. Clicking the link signs in on /my-space, where slots are picked
     await page.goto(link);
-    await page.waitForURL("**/landing");
+    await page.waitForURL("**/my-space");
     await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "Une chaîne de prière ininterrompue",
-      }),
+      page.getByRole("heading", { name: "Mon espace" }),
     ).toBeVisible();
-    await expect(grid).toBeVisible();
-    // Signed in: the e-mail form is gone, « Mon espace » is offered
+    // The slot picker section is right there on /my-space
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Ajouter des créneaux" }),
+    ).toBeVisible();
+    // Signed in: the e-mail form is gone from the landing
+    await page.goto("/landing");
     await expect(page.getByLabel("Adresse e-mail")).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: "Aller à mon espace" }),

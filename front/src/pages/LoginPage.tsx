@@ -5,10 +5,9 @@ import { baseUrl } from "../api/client";
 import { meQueryOptions } from "../api/hooks";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
-import { consumePostLoginTarget } from "../lib/postLoginTarget";
 
 // Post-login targets allowed by the specs (whitelist): never an open redirect
-const SAFE_TARGETS = ["/", "/my-space", "/landing"];
+const SAFE_TARGETS = ["/", "/my-space"];
 
 function safeTarget(target: string | undefined): string {
   return target && SAFE_TARGETS.includes(target) ? target : "/my-space";
@@ -46,10 +45,6 @@ export function LoginPage() {
       return;
     }
 
-    // The page that requested the link (e.g. /landing) stored where to land
-    // after the login; default to /my-space
-    const target = consumePostLoginTarget();
-
     async function submitLoginLink() {
       try {
         const response = await fetch(`${baseUrl}/auth/login`, {
@@ -60,7 +55,7 @@ export function LoginPage() {
             user,
             expires,
             hash,
-            _target_path: target,
+            _target_path: "/my-space",
           }),
         });
 
