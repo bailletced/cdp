@@ -171,6 +171,7 @@ describe("EmptySlotDraw (F13-T06, US-13.2)", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Fermer" }));
 
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    expect(trigger).toHaveFocus();
+    // React Aria returns the focus asynchronously (next animation frame)
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });
