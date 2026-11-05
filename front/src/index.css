@@ -305,6 +305,13 @@ body.event-landing {
   --field-foreground: #2b2118;
   --field-placeholder: #74644f;
   --field-border: #b8a687;
+  /* Field state colors: HeroUI computes them as var() on :root — where the
+   * dark theme's --field-background lives — so they must be re-derived
+   * here, or the field turns dark on focus/hover */
+  --field-focus: #ffffff;
+  --field-hover: #ffffff;
+  --field-border-hover: #b8a687;
+  --field-border-focus: #7c4a1f;
   --backdrop: rgb(43 33 24 / 0.35);
   background-color: var(--background);
   /* Pas de lueur de lampe : la page est claire */

@@ -11,10 +11,10 @@ const CONFIRMATION_MESSAGE =
   "Un lien de connexion vient de vous être envoyé à cette adresse.";
 
 /**
- * The event this landing sells, as announced by the community: a 24-hour
- * uninterrupted prayer chain, the Gospel of Mark prayed slot after slot,
- * each slot lasting 30 minutes. (28 Nov 2026 is a Saturday; 24 h later is
- * Sunday 29 Nov at 22:00, Paris time.)
+ * The event this landing is about: a 24-hour uninterrupted prayer chain, the
+ * Gospel of Mark prayed slot after slot, each slot lasting 30 minutes.
+ * (28 Nov 2026 is a Saturday; 24 h later is Sunday 29 Nov at 22:00, Paris
+ * time.)
  */
 const EVENT = {
   headline: "Une chaîne de prière de 24 heures",
@@ -23,7 +23,7 @@ const EVENT = {
 } as const;
 
 const SIGNUP_HINT =
-  "Un e-mail suffit, sans mot de passe : vous recevez un lien pour choisir vos créneaux.";
+  "Un e-mail suffit : votre lien de connexion arrive aussitôt, pour choisir votre créneau. Sans mot de passe.";
 
 type SubmissionState = "idle" | "submitting" | "sent" | "error";
 
@@ -101,14 +101,16 @@ function EmailCapture({ submitLabel }: { submitLabel: string }) {
 }
 
 /**
- * /landing: the event landing, written for people who know nothing yet.
+ * /landing: the event landing, written for Catholics who need no convincing
+ * — the wording speaks of a vigil, of half an hour offered to the Lord, not
+ * of accounts and forms.
  *
  * A light, airful page (the `event-landing` body class swaps the dark
  * vigil theme for a warm ivory treatment, scoped to this route) whose one
- * job is collecting e-mail addresses: the form sits in the hero, above
- * the fold, and again after the pitch. No slot grid, no jargon — choosing
- * a slot happens on /my-space once the welcome e-mail's link has signed
- * the visitor in.
+ * job is collecting e-mail addresses: the form sits in the hero, next to
+ * Our Lady of Mount Carmel with the Child Jesus, and again after the
+ * pitch. Choosing a slot happens on /my-space once the welcome e-mail's
+ * link has signed the visitor in.
  */
 export function EventLandingPage() {
   const me = useMe().data;
@@ -122,131 +124,152 @@ export function EventLandingPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 pt-14 pb-12 sm:pt-20">
-      {/* Hero: what it is, when, and the form straight away */}
-      <header>
-        <p className="text-muted">{SITE_NAME}</p>
-        <div className="mt-6">
-          <PageTitle>{EVENT.headline}</PageTitle>
+    <>
+      {/* Hero: the event, Our Lady, and the form straight away */}
+      <header className="mx-auto w-full max-w-5xl px-4 pt-12 pb-4 sm:pt-16">
+        <div className="grid items-center gap-10 md:grid-cols-[3fr_2fr]">
+          <div>
+            <p className="text-muted">{SITE_NAME}</p>
+            <div className="mt-6">
+              <PageTitle>{EVENT.headline}</PageTitle>
+            </div>
+            <p className="mt-6 max-w-prose text-xl leading-relaxed">
+              Du <strong>{EVENT.fromLabel}</strong> au{" "}
+              <strong>{EVENT.toLabel}</strong> (heure de Paris), la Communion
+              veille sans interruption : l'Évangile selon saint Marc est prié
+              trente minutes après trente minutes, chacun offrant une demi-heure
+              au Seigneur.
+            </p>
+            <div id="inscription" className="mt-8 scroll-mt-8">
+              {me ? (
+                <p className="text-lg">
+                  Vous êtes déjà inscrit·e.{" "}
+                  <Link href="/my-space">
+                    Choisissez vos créneaux dans mon espace
+                  </Link>
+                  .
+                </p>
+              ) : (
+                <>
+                  <EmailCapture submitLabel="Je participe" />
+                  <p className="mt-3 text-muted">{SIGNUP_HINT}</p>
+                </>
+              )}
+            </div>
+          </div>
+          <figure className="mx-auto w-full max-w-xs md:max-w-none">
+            <img
+              src="/img/notre-dame-du-mont-carmel.jpg"
+              alt="Notre-Dame du Mont-Carmel portant l'Enfant Jésus"
+              className="w-full rounded-2xl border border-separator object-cover"
+              // Do not let the image push the form below the fold
+              decoding="async"
+            />
+            <figcaption className="mt-3 text-center text-muted">
+              Notre-Dame du Mont-Carmel et l'Enfant Jésus — José de Ibarra,
+              XVIII<sup>e</sup> siècle
+            </figcaption>
+          </figure>
         </div>
-        <p className="mt-6 max-w-prose text-xl leading-relaxed">
-          Du <strong>{EVENT.fromLabel}</strong> au{" "}
-          <strong>{EVENT.toLabel}</strong> (heure de Paris), des personnes se
-          relaient pour prier sans interruption : l'Évangile selon saint Marc,
-          porté par tous, trente minutes après trente minutes.
-        </p>
-        <div id="inscription" className="mt-8 scroll-mt-8">
+      </header>
+
+      <div className="mx-auto w-full max-w-2xl px-4 pb-12">
+        {/* What the vigil is, in three short editorial paragraphs */}
+        <section aria-labelledby="levenement" className="mt-16">
+          <h2 id="levenement" className="mb-8">
+            Une veillée continue
+          </h2>
+          <div className="max-w-prose space-y-8">
+            <div className="border-t border-separator pt-6">
+              <h3 className="mb-2">Quelqu'un prie à chaque instant</h3>
+              <p>
+                Chaque créneau de 30 minutes s'enchaîne au suivant : de la nuit
+                du samedi à la nuit du dimanche, la prière ne s'interrompt pas.
+                Une veillée que la Communion porte ensemble.
+              </p>
+            </div>
+            <div className="border-t border-separator pt-6">
+              <h3 className="mb-2">
+                L'Évangile selon saint Marc, d'un bout à l'autre
+              </h3>
+              <p>
+                Toute la chaîne prie l'Évangile selon saint Marc : le passage de
+                votre créneau vous est remis à votre espace, avec le texte à
+                méditer et ses pistes d'oraison.
+              </p>
+            </div>
+            <div className="border-t border-separator pt-6">
+              <h3 className="mb-2">Une demi-heure, offerte</h3>
+              <p>
+                De chez vous, comme vous priez — oraison, chapelet, simple
+                silence. Trente minutes offertes au Seigneur, c'est tout ce que
+                la chaîne demande.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How it happens, in three steps */}
+        <section aria-labelledby="comment" className="mt-20">
+          <h2 id="comment" className="mb-8">
+            Comment ça se passe
+          </h2>
+          <ol className="grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                step: "1",
+                title: "Entrez votre e-mail",
+                text: "Votre lien de connexion arrive aussitôt dans votre boîte.",
+              },
+              {
+                step: "2",
+                title: "Ouvrez le lien",
+                text: "Il vous ouvre votre espace, sans mot de passe à retenir.",
+              },
+              {
+                step: "3",
+                title: "Choisissez votre créneau",
+                text: "Dans le planning : votre demi-heure — ou plusieurs, si le Seigneur vous en donne le loisir.",
+              },
+            ].map((item) => (
+              <li key={item.step} className="border-t border-separator pt-4">
+                <p className="font-display text-2xl font-bold text-accent">
+                  {item.step}
+                </p>
+                <h3 className="mt-1 mb-1 text-lg font-medium leading-snug">
+                  {item.title}
+                </h3>
+                <p className="text-muted">{item.text}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Second capture, for the readers who made it this far */}
+        <section
+          aria-labelledby="offrir-titre"
+          id="inscription-fin"
+          className="mt-20 scroll-mt-8"
+        >
+          <h2 id="offrir-titre" className="mb-4">
+            Offrez une demi-heure
+          </h2>
+          <p className="mb-6 max-w-prose">
+            Rien à installer, rien à régler : votre e-mail suffit, la chaîne
+            vous attend.
+          </p>
           {me ? (
-            <p className="text-lg">
-              Vous êtes déjà inscrit·e.{" "}
+            <p>
               <Link href="/my-space">
                 Choisissez vos créneaux dans mon espace
               </Link>
               .
             </p>
           ) : (
-            <>
-              <EmailCapture submitLabel="Je participe" />
-              <p className="mt-3 text-muted">{SIGNUP_HINT}</p>
-            </>
+            <EmailCapture submitLabel="Je m'inscris" />
           )}
-        </div>
-      </header>
-
-      {/* What the event is, in three short editorial paragraphs */}
-      <section aria-labelledby="levenement" className="mt-20">
-        <h2 id="levenement" className="mb-8">
-          Une veillée continue
-        </h2>
-        <div className="max-w-prose space-y-8">
-          <div className="border-t border-separator pt-6">
-            <h3 className="mb-2">Pendant 24 heures, quelqu'un prie toujours</h3>
-            <p>
-              Chaque créneau de 30 minutes s'enchaîne avec le suivant : du
-              samedi soir au dimanche soir, la prière ne s'arrête jamais une
-              minute.
-            </p>
-          </div>
-          <div className="border-t border-separator pt-6">
-            <h3 className="mb-2">
-              L'Évangile selon saint Marc, porté par tous
-            </h3>
-            <p>
-              Le récit de l'Évangile selon Marc est prié d'un bout à l'autre de
-              la chaîne. Chaque personne qui prend un créneau porte la Parole
-              pendant sa demi-heure.
-            </p>
-          </div>
-          <div className="border-t border-separator pt-6">
-            <h3 className="mb-2">30 minutes à vous</h3>
-            <p>
-              Un créneau de 30 minutes, de chez vous, dans votre façon de prier.
-              Rien à préparer — le texte du créneau vous est donné sur la page.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* How it happens, in three steps */}
-      <section aria-labelledby="comment" className="mt-20">
-        <h2 id="comment" className="mb-8">
-          Comment ça se passe
-        </h2>
-        <ol className="grid gap-6 sm:grid-cols-3">
-          {[
-            {
-              step: "1",
-              title: "Entrez votre e-mail",
-              text: "Un e-mail de bienvenue arrive aussitôt, avec votre lien personnel.",
-            },
-            {
-              step: "2",
-              title: "Cliquez le lien",
-              text: "Il vous connecte, sans mot de passe à retenir.",
-            },
-            {
-              step: "3",
-              title: "Choisissez vos créneaux",
-              text: "Dans le planning, prenez le créneau de 30 minutes qui vous convient.",
-            },
-          ].map((item) => (
-            <li key={item.step} className="border-t border-separator pt-4">
-              <p className="font-display text-2xl font-bold text-accent">
-                {item.step}
-              </p>
-              <h3 className="mt-1 mb-1 text-lg font-medium leading-snug">
-                {item.title}
-              </h3>
-              <p className="text-muted">{item.text}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* Second capture, for the readers who made it this far */}
-      <section
-        aria-labelledby="inscription-fin-titre"
-        id="inscription-fin"
-        className="mt-20 scroll-mt-8"
-      >
-        <h2 id="inscription-fin-titre" className="mb-4">
-          Rejoignez la chaîne
-        </h2>
-        <p className="mb-6 max-w-prose">
-          Rien à régler, rien à installer : laissez votre e-mail, la chaîne vous
-          attend.
-        </p>
-        {me ? (
-          <p>
-            <Link href="/my-space">
-              Choisissez vos créneaux dans mon espace
-            </Link>
-            .
-          </p>
-        ) : (
-          <EmailCapture submitLabel="Je m'inscris" />
-        )}
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }

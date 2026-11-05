@@ -45,6 +45,21 @@ test.describe("Landing /landing", () => {
         () => getComputedStyle(document.body).backgroundColor,
       ),
     ).toBe("rgb(250, 247, 240)");
+    // Our Lady of Mount Carmel with the Child Jesus is part of the hero
+    const image = page.getByRole("img", {
+      name: "Notre-Dame du Mont-Carmel portant l'Enfant Jésus",
+    });
+    await expect(image).toBeVisible();
+    expect(await image.getAttribute("src")).toBe(
+      "/img/notre-dame-du-mont-carmel.jpg",
+    );
+    // The focused (empty) e-mail field stays light: the field states are
+    // re-derived from the page theme, not the dark one
+    await page.locator("#inscription input[name=email]").click();
+    await page.waitForFunction(() => {
+      const input = document.querySelector("#inscription input[name=email]");
+      return getComputedStyle(input).backgroundColor === "rgb(255, 255, 255)";
+    });
     await expect(
       page.getByRole("link", { name: "Recevoir mon lien" }),
     ).toHaveCount(0);

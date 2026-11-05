@@ -72,7 +72,7 @@ describe("EventLandingPage (/landing)", () => {
     expect(
       screen.getByRole("heading", {
         level: 3,
-        name: "L'Évangile selon saint Marc, porté par tous",
+        name: "L'Évangile selon saint Marc, d'un bout à l'autre",
       }),
     ).toBeInTheDocument();
 
@@ -81,11 +81,20 @@ describe("EventLandingPage (/landing)", () => {
       screen.getByRole("heading", { level: 2, name: "Une veillée continue" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 3, name: "30 minutes à vous" }),
+      screen.getByRole("heading", {
+        level: 3,
+        name: "Une demi-heure, offerte",
+      }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("region", { name: "Grille des créneaux" }),
     ).toBeNull();
+
+    // Our Lady of Mount Carmel with the Child Jesus
+    const image = screen.getByRole("img", {
+      name: "Notre-Dame du Mont-Carmel portant l'Enfant Jésus",
+    });
+    expect(image).toHaveAttribute("src", "/img/notre-dame-du-mont-carmel.jpg");
 
     // The steps, then the second capture form
     expect(
@@ -93,7 +102,7 @@ describe("EventLandingPage (/landing)", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Entrez votre e-mail")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "Rejoignez la chaîne" }),
+      screen.getByRole("heading", { level: 2, name: "Offrez une demi-heure" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Je m'inscris" }),
