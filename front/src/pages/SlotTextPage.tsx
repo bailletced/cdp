@@ -5,6 +5,7 @@ import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { RichTextView } from "../components/RichTextView";
+import { useDawnTheme } from "../lib/dawnTheme";
 import { withLocalTime } from "../lib/localTime";
 import { parseSlotTextContent } from "../lib/slotText";
 
@@ -28,6 +29,10 @@ function capitalized(value: string): string {
 export function SlotTextPage() {
   const { slotId } = useParams({ from: "/textes/$slotId" });
   const query = useQuery(slotTextQueryOptions(slotId));
+
+  // Same warm-ivory treatment as the landing and « Mon espace » : the
+  // reading page is where the priant lands from them
+  useDawnTheme();
 
   if (query.isPending) {
     return (

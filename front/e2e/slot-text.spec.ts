@@ -100,6 +100,12 @@ test.describe("Lecture du texte (F12-T06)", () => {
       })
       .click();
     await page.waitForURL(`**/textes/${slot.id}`);
+    // Same warm-ivory treatment as the landing and « Mon espace »
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
+    ).toBe("rgb(250, 247, 240)");
     await expect(
       page.getByRole("heading", { level: 1, name: textTitle }),
     ).toBeVisible();

@@ -52,6 +52,8 @@ describe("SlotTextPage (F12-T04, US-12.1)", () => {
         name: "Que rien ne te trouble",
       }),
     ).toBeInTheDocument();
+    // Same warm-ivory treatment as the landing and « Mon espace »
+    expect(document.body.classList.contains("theme-dawn")).toBe(true);
     expect(
       screen.getByText("Samedi 28 novembre, 20h00–20h30"),
     ).toBeInTheDocument();
