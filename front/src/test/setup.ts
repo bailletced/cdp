@@ -14,6 +14,17 @@ window.scrollTo = () => undefined;
 // Nor scrollIntoView (the banner of the empty slots scrolls to a card, F13)
 Element.prototype.scrollIntoView = () => undefined;
 
+// jsdom has no layout: Text and Range have no getClientRects, which
+// prosemirror reads in scrollToSelection — an unhandled error otherwise
+for (const proto of [Text.prototype, Range.prototype]) {
+  if (!("getClientRects" in proto)) {
+    Object.defineProperty(proto, "getClientRects", { value: () => [] });
+    Object.defineProperty(proto, "getBoundingClientRect", {
+      value: () => new DOMRect(),
+    });
+  }
+}
+
 // jsdom does not implement matchMedia (used by HeroUI ToastProvider)
 if (!window.matchMedia) {
   window.matchMedia = (query: string): MediaQueryList => ({
