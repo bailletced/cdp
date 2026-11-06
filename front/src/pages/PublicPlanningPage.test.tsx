@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SITE_NAME } from "../config/site";
 import { renderApp } from "../test/renderApp";
 import { server } from "../test/setup";
-import { LandingPage } from "./LandingPage";
+import { PublicPlanningPage } from "./PublicPlanningPage";
 
 const CONFIRMATION_MESSAGE =
   "Un lien de connexion vient de vous être envoyé à cette adresse.";
@@ -36,7 +36,7 @@ function renderPage() {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <LandingPage />
+      <PublicPlanningPage />
     </QueryClientProvider>,
   );
 }
@@ -89,7 +89,7 @@ function openEdition() {
   );
 }
 
-describe("LandingPage", () => {
+describe("PublicPlanningPage", () => {
   it("shows the edition header when an edition is open (US-08.1)", async () => {
     openEdition();
 
@@ -250,8 +250,8 @@ describe("Route /", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows the landing page to a visitor", async () => {
-    renderApp("/");
+  it("shows the planning and its registration form on /planning", async () => {
+    renderApp("/planning");
 
     expect(
       await screen.findByRole("button", { name: "S'inscrire" }),

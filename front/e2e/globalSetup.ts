@@ -45,7 +45,7 @@ export default async function globalSetup(): Promise<void> {
       "bin/console",
       "messenger:consume",
       "async_transactional",
-      "--time-limit=300",
+      "--time-limit=1800",
     ],
     {
       cwd: apiDir,

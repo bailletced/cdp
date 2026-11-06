@@ -17,7 +17,6 @@ import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { RenameDialog } from "../components/RenameDialog";
 import { SlotPickerDialog } from "../components/SlotPickerDialog";
-import { useDawnTheme } from "../lib/dawnTheme";
 import { withLocalTime } from "../lib/localTime";
 import { type SlotTemporalState, slotTemporalState } from "../lib/planning";
 import { useNow } from "../lib/serverClock";
@@ -382,15 +381,13 @@ function AddSlots() {
  * current edition, then the draw to add a slot. The route guard redirects
  * visitors (and a device pass without session) to the landing page; should
  * the session expire while the page is open, it invites to receive the
- * personal link again. Same warm-ivory treatment as the event landing.
+ * personal link again.
  */
 export function MySpacePage() {
   const { viewer, isLoading } = useViewer();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
-
-  useDawnTheme();
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -402,7 +399,7 @@ export function MySpacePage() {
     } finally {
       // Drop the cached identity: the next GET /api/me answers 401 (visitor)
       queryClient.removeQueries({ queryKey: ["me"] });
-      navigate({ to: "/", replace: true });
+      navigate({ to: "/landing", replace: true });
     }
   }
 

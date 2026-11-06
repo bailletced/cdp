@@ -84,7 +84,7 @@ test.describe("Planning public (F08-T11, US-08.2/08.3/08.5)", () => {
 
     const context = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await context.newPage();
-    await page.goto("/");
+    await page.goto("/planning");
 
     // Edition header (US-08.1): the current public edition
     await expect(
@@ -143,7 +143,7 @@ test.describe("Planning public (F08-T11, US-08.2/08.3/08.5)", () => {
       timezoneId: "America/Montreal",
     });
     const page = await context.newPage();
-    await page.goto("/");
+    await page.goto("/planning");
 
     const grid = page.getByRole("region", { name: "Grille des créneaux" });
     await expect(grid).toBeVisible();
@@ -171,7 +171,7 @@ test.describe("Planning public (F08-T11, US-08.2/08.3/08.5)", () => {
 
     const context = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await context.newPage();
-    await page.goto("/");
+    await page.goto("/planning");
 
     const grid = page.getByRole("region", { name: "Grille des créneaux" });
     await expect(grid.getByRole("article")).toHaveCount(48);

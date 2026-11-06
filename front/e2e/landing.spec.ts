@@ -96,4 +96,36 @@ test.describe("Landing /landing", () => {
       page.getByRole("heading", { level: 2, name: "Ajouter des créneaux" }),
     ).toBeVisible();
   });
+
+  test("the root sends the visitor to /landing, then the member to /my-space", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    // A visitor with no session on / is oriented towards the landing
+    await page.goto("/");
+    await page.waitForURL("**/landing");
+
+    // The hero form registers a new priant and sends the personal link
+    const address = `sorter-e2e-${Date.now()}@example.org`;
+    await page.locator("#inscription input[name=email]").fill(address);
+    await page.getByRole("button", { name: "Je participe" }).click();
+    const email = await waitForEmail(address, 30_000);
+    if (!email) {
+      throw new Error(`No welcome e-mail received for ${address}`);
+    }
+    const link = extractLinkFromEmail(email);
+    if (!link) {
+      throw new Error("No link found in the welcome e-mail");
+    }
+
+    // Signed in through the link, / leads to the member's space instead
+    await page.goto(link);
+    await page.waitForURL("**/my-space");
+    await page.goto("/");
+    await page.waitForURL("**/my-space");
+    await expect(
+      page.getByRole("heading", { name: "Mon espace" }),
+    ).toBeVisible();
+  });
 });

@@ -4,7 +4,6 @@ import { baseUrl } from "../api/client";
 import { useMe } from "../api/hooks";
 import { PageTitle } from "../components/PageTitle";
 import { SITE_NAME } from "../config/site";
-import { useDawnTheme } from "../lib/dawnTheme";
 
 const GENERIC_ERROR_MESSAGE = "Une erreur est survenue. Veuillez réessayer.";
 // Same wording as the API's own 202 body (RegisterController)
@@ -115,8 +114,6 @@ function EmailCapture({ submitLabel }: { submitLabel: string }) {
  */
 export function EventLandingPage() {
   const me = useMe().data;
-
-  useDawnTheme();
 
   return (
     <>

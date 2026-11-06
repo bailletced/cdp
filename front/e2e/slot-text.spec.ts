@@ -71,7 +71,7 @@ test.describe("Lecture du texte (F12-T06)", () => {
     // 1. Register from the phone
     const phone = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await phone.newPage();
-    await page.goto("/");
+    await page.goto("/planning");
     const checkbox = page
       .getByRole("region", { name: "Grille des créneaux" })
       .getByRole("checkbox", {

@@ -87,7 +87,7 @@ test.describe("Inscription (F09-T21)", () => {
     const page = await context.newPage();
 
     // 1. Pick two empty slots on the public grid
-    await page.goto("/");
+    await page.goto("/planning");
     const grid = page.getByRole("region", { name: "Grille des créneaux" });
     await expect(slotCard(grid, first)).toContainText("À pourvoir");
     await tick(grid, first);
@@ -111,7 +111,7 @@ test.describe("Inscription (F09-T21)", () => {
     await expectNoA11yViolations(page);
 
     // 3. Back on the grid: both slots are taken, their priant counted
-    await page.getByRole("link", { name: "Retour à l'accueil" }).click();
+    await page.getByRole("link", { name: "Retour au planning" }).click();
     for (const slot of [first, second]) {
       await expect(slotCard(grid, slot)).toContainText("Occupé");
       await expect(slotCard(grid, slot)).toContainText("1 priant");
@@ -124,7 +124,7 @@ test.describe("Inscription (F09-T21)", () => {
     // 5. Another device, same e-mail: the API refuses it (RG-IN-3, 409)
     const other = await browser.newContext({ timezoneId: "Europe/Paris" });
     const otherPage = await other.newPage();
-    await otherPage.goto("/");
+    await otherPage.goto("/planning");
     const otherGrid = otherPage.getByRole("region", {
       name: "Grille des créneaux",
     });

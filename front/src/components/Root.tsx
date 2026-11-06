@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { useMe } from "../api/hooks";
 import { SITE_NAME } from "../config/site";
+import { useDawnTheme } from "../lib/dawnTheme";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import type { AppRouterContext } from "../routerContext";
 
@@ -16,7 +17,8 @@ const NAV_LINK =
   "flex min-h-11 items-center px-2 text-link underline decoration-1 underline-offset-4";
 
 /**
- * Public layout (F01-T07): skip link, header (community name from the single
+ * Public layout (F01-T07): the warm-ivory “ dawn » treatment for the whole
+ * site, skip link, header (community name from the single
  * site config), main landmark, footer (Confidentialité, and Recevoir mon lien
  * when no session is open).
  * The <main> landmark is provided here: pages render their content inside it.
@@ -30,6 +32,8 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
   component: () => {
     const { data, isLoading, isError } = useMe();
     const isSignedIn = !isError && Boolean(data);
+    // The warm-ivory “ dawn » treatment is the DA of the whole site
+    useDawnTheme();
     // On the event landing the e-mail form is the page itself: the
     // « Recevoir mon lien » entry would only compete with it
     const isEventLanding = useRouterState({

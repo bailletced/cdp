@@ -38,7 +38,7 @@ async function registerThenOpenMySpace(
   const address = `mon-espace-e2e-${Date.now()}@example.org`;
   const device = await browser.newContext({ timezoneId: "Europe/Paris" });
   const page = await device.newPage();
-  await page.goto("/");
+  await page.goto("/planning");
   const grid = page.getByRole("region", { name: "Grille des créneaux" });
   for (const slot of slots) {
     // react-aria hides the input in a clipped span: click the wrapping label

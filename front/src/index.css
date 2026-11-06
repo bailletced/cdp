@@ -272,9 +272,9 @@
   }
 }
 
-/* Traitement clair « aube » des pages d'accueil (landing /landing et
- * « Mon espace ») : la classe body.theme-dawn est posée par useDawnTheme().
- * Ces pages accueillent des visiteurs — un traitement
+/* Traitement clair « aube » du site entier : la classe body.theme-dawn est
+ * posée une fois par le layout racine (Root), toutes les pages la partagent —
+ * un traitement
  * ivoire, chaleureux et aéré, distinct du thème sombre « la veille » qui
  * reste celui du reste de l'application. Toutes les paires ci-dessous
  * atteignent AA (texte 4,5:1, composants 3:1) comme le thème sombre :
@@ -321,14 +321,50 @@ body.theme-dawn {
   --success-soft-foreground: #3d6b47;
   --warning-soft-foreground: #8a5c17;
   --danger-soft-foreground: #8c3a31;
+  /* Message d'issue (text-success, -warning, -danger) : sur l'ivoire, les
+   * teintes claires du thème de nuit n'atteignaient plus AA (1,56 à 2,07:1)
+   * — les executes/détails gardent leurs tons profonds */
+  --success: #3d6b47;
+  --success-foreground: #fffdf6;
+  --warning: #8a5c17;
+  --warning-foreground: #fffdf6;
+  --danger: #8c3a31;
+  --danger-foreground: #fffdf6;
+  /* Survol des boutons neutres : HeroUI calcule les dérivées (hover, bords)
+   * sur :root — avec les tokens de nuit. Re-dérivées ici */
+  --default-hover: color-mix(
+    in oklab,
+    var(--default) 96%,
+    var(--default-foreground) 4%
+  );
+  --separator-secondary: color-mix(
+    in oklab,
+    var(--surface) 85%,
+    var(--surface-foreground) 15%
+  );
+  --separator-tertiary: color-mix(
+    in oklab,
+    var(--surface) 81%,
+    var(--surface-foreground) 19%
+  );
+  --border-secondary: color-mix(
+    in oklab,
+    var(--surface) 78%,
+    var(--surface-foreground) 22%
+  );
+  --border-tertiary: color-mix(
+    in oklab,
+    var(--surface) 66%,
+    var(--surface-foreground) 34%
+  );
   --backdrop: rgb(43 33 24 / 0.35);
   background-color: var(--background);
   /* Pas de lueur de lampe : la page est claire */
   background-image: none;
 }
 
-/* L'inline-thumb du Carmel (header) garde un or plus clair sur ivoire pour
- * garder 3:1 (WCAG 1.4.11) */
+/* L'or accent en tant que texte (le « Vous » du planning, peut passer sur
+ * blanc) doit garder AA 4,5:1 : un or profond sur ivoire comme sur blanc */
 body.theme-dawn .text-accent {
-  color: #a86e2f;
+  color: #8a541f;
 }

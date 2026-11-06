@@ -383,9 +383,9 @@ describe("MySpacePage", () => {
 
     renderApp("/my-space");
 
-    // The guard redirects before the page mounts: the landing form shows up
+    // The guard redirects before the page mounts: the event landing shows up
     expect(
-      await screen.findByRole("button", { name: "S'inscrire" }),
+      await screen.findByRole("button", { name: "Je participe" }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Me déconnecter" }),
@@ -417,7 +417,7 @@ describe("MySpacePage", () => {
     );
 
     expect(
-      await screen.findByRole("button", { name: "S'inscrire" }),
+      await screen.findByRole("button", { name: "Je participe" }),
     ).toBeInTheDocument();
     expect(logoutPosted).toBe(true);
   });

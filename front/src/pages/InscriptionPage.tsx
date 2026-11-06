@@ -90,8 +90,8 @@ export function InscriptionPage() {
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <PageTitle>Inscription</PageTitle>
         <EmptyState message="Les inscriptions ne sont pas ouvertes pour le moment." />
-        <Link to="/" className={LINK_CLASS}>
-          Retour à l&apos;accueil
+        <Link to="/planning" className={LINK_CLASS}>
+          Retour au planning
         </Link>
       </div>
     );
@@ -128,10 +128,10 @@ export function InscriptionPage() {
         <PageTitle>Inscription</PageTitle>
         <EmptyState message="Aucun créneau sélectionné." />
         <p className="mb-4">
-          Retournez à l&apos;accueil pour choisir un ou plusieurs créneaux.
+          Retournez au planning pour choisir un ou plusieurs créneaux.
         </p>
-        <Link to="/" className={LINK_CLASS}>
-          Retour à l&apos;accueil
+        <Link to="/planning" className={LINK_CLASS}>
+          Retour au planning
         </Link>
       </div>
     );
@@ -143,8 +143,8 @@ export function InscriptionPage() {
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <PageTitle>Inscription</PageTitle>
         <EmptyState message="Les créneaux sélectionnés sont introuvables." />
-        <Link to="/" className={LINK_CLASS}>
-          Retour à l&apos;accueil
+        <Link to="/planning" className={LINK_CLASS}>
+          Retour au planning
         </Link>
       </div>
     );
@@ -346,7 +346,7 @@ function InscriptionForm({
           );
         } else if (status === 404) {
           setFormError(
-            "Ce créneau n'existe plus. Retournez à l'accueil pour en choisir un autre.",
+            "Ce créneau n'existe plus. Retournez au planning pour en choisir un autre.",
           );
         } else {
           setFormError(

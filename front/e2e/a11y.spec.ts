@@ -5,7 +5,7 @@ test.describe("accessibility audit (F01-T12, US-01.4)", () => {
   test("the root page (404 inside the layout) has no axe violation", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/planning");
     await expectNoA11yViolations(page);
   });
 

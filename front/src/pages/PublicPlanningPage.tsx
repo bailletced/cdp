@@ -16,7 +16,7 @@ const CONFIRMATION_MESSAGE =
 type SubmissionState = "idle" | "submitting" | "sent" | "error";
 
 /**
- * / (F08-T07, F07-T01): landing page for the 24-hour prayer chain.
+ * /planning (F08-T07, F07-T01): the public planning of the current edition,
  *
  * The header shows the current public edition — community name, title,
  * dates and presentation (US-08.1) — or, when no edition is open, a sober
@@ -31,7 +31,7 @@ type SubmissionState = "idle" | "submitting" | "sent" | "error";
  *
  * Visitors only: the route sends a signed-in priant to « Mon espace ».
  */
-export function LandingPage() {
+export function PublicPlanningPage() {
   const editionQuery = useCurrentEdition();
   const [state, setState] = useState<SubmissionState>("idle");
   const [message, setMessage] = useState<string | null>(null);

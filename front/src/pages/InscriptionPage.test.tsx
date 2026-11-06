@@ -216,8 +216,8 @@ describe("InscriptionPage — récapitulatif des créneaux (F09-T15)", () => {
       await screen.findByText("Aucun créneau sélectionné."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour à l'accueil" }),
-    ).toHaveAttribute("href", "/");
+      screen.getByRole("link", { name: "Retour au planning" }),
+    ).toHaveAttribute("href", "/planning");
   });
 
   it("signale qu'aucun créneau n'est sélectionné avec un paramètre vide", async () => {
@@ -239,8 +239,8 @@ describe("InscriptionPage — récapitulatif des créneaux (F09-T15)", () => {
       await screen.findByText("Les créneaux sélectionnés sont introuvables."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour à l'accueil" }),
-    ).toHaveAttribute("href", "/");
+      screen.getByRole("link", { name: "Retour au planning" }),
+    ).toHaveAttribute("href", "/planning");
   });
 
   it("récapitule les créneaux connus et signale les ids qui n'existent plus", async () => {
@@ -267,8 +267,8 @@ describe("InscriptionPage — récapitulatif des créneaux (F09-T15)", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour à l'accueil" }),
-    ).toHaveAttribute("href", "/");
+      screen.getByRole("link", { name: "Retour au planning" }),
+    ).toHaveAttribute("href", "/planning");
   });
 
   it("retire un créneau du récapitulatif via le paramètre d'URL", async () => {

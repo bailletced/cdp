@@ -81,8 +81,8 @@ export function InscriptionConfirmationPage() {
         ) : null
       ) : null}
       <SuggestionOffer registeredIds={ids} />
-      <Link to="/" className={LINK_CLASS}>
-        Retour à l&apos;accueil
+      <Link to="/planning" className={LINK_CLASS}>
+        Retour au planning
       </Link>
     </div>
   );

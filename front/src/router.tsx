@@ -14,15 +14,16 @@ import { ErrorPage } from "./pages/ErrorPage";
 import { EventLandingPage } from "./pages/EventLandingPage";
 import { InscriptionConfirmationPage } from "./pages/InscriptionConfirmationPage";
 import { InscriptionPage } from "./pages/InscriptionPage";
-import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
+import { PublicPlanningPage } from "./pages/PublicPlanningPage";
 import { ReceiveMyLinkPage } from "./pages/ReceiveMyLinkPage";
 import { SlotTextPage } from "./pages/SlotTextPage";
 
-// Landing page (F08-T07, F07-T01): public home page with the registration
-// form. Reserved to visitors: a signed-in priant goes straight to /my-space.
-const landingRoute = createRoute({
+// The sorter of the site: “/” sends each visitor where they belong —
+// signed-in priants to « Mon espace », everyone else to the landing that
+// presents the event and collects the e-mail.
+const rootIndexRoute = createRoute({
   getParentRoute: () => Root,
   path: "/",
   beforeLoad: async ({ context }) => {
@@ -30,11 +31,16 @@ const landingRoute = createRoute({
       .ensureQueryData(meQueryOptions)
       .catch(() => null);
 
-    if (null !== me) {
-      throw redirect({ to: "/my-space" });
-    }
+    throw redirect({ to: null !== me ? "/my-space" : "/landing" });
   },
-  component: LandingPage,
+});
+
+// The public planning of the current edition (F08-T07): schedules, priants
+// count, and the registration form for a visitor.
+const planningRoute = createRoute({
+  getParentRoute: () => Root,
+  path: "/planning",
+  component: PublicPlanningPage,
 });
 
 // Event landing (marketing page of the prayer chain): public on purpose —
@@ -122,7 +128,7 @@ const mySpaceRoute = createRoute({
     try {
       await context.queryClient.ensureQueryData(meQueryOptions);
     } catch {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/landing" });
     }
   },
   component: MySpacePage,
@@ -141,7 +147,7 @@ const organisationRoute = createRoute({
       .catch(() => null);
 
     if (null === me) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/landing" });
     }
 
     if (!me.isOrganizer) {
@@ -248,7 +254,8 @@ const organisationTextEditRoute = createRoute({
 
 // Define the routes
 export const routeTree = Root.addChildren([
-  landingRoute,
+  rootIndexRoute,
+  planningRoute,
   eventLandingRoute,
   receiveMyLinkRoute,
   confidentialiteRoute,

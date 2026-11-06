@@ -55,7 +55,7 @@ test.describe("E-mail de confirmation (F11-T08)", () => {
 
     const context = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await context.newPage();
-    await page.goto("/");
+    await page.goto("/planning");
     const grid = page.getByRole("region", { name: "Grille des créneaux" });
     for (const slot of [first, second]) {
       // react-aria hides the input in a clipped span: click the wrapping label

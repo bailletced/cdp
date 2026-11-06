@@ -50,7 +50,7 @@ test.describe("Pass appareil (F10-T11)", () => {
     // 1. Register from Marie's phone
     const phone = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await phone.newPage();
-    await page.goto("/");
+    await page.goto("/planning");
     const grid = page.getByRole("region", { name: "Grille des créneaux" });
     const checkbox = grid.getByRole("checkbox", {
       name: `Sélectionner le créneau de ${slot.label}`,
@@ -76,7 +76,7 @@ test.describe("Pass appareil (F10-T11)", () => {
     ).toBe(true);
 
     // 2. Back on the grid, on this device: the name, and « Vous »
-    await page.getByRole("link", { name: "Retour à l'accueil" }).click();
+    await page.getByRole("link", { name: "Retour au planning" }).click();
     const card = grid.getByRole("article").filter({ hasText: slot.label });
     await expect(
       card.getByRole("list", { name: "Priants du créneau" }),
@@ -88,7 +88,7 @@ test.describe("Pass appareil (F10-T11)", () => {
     // 3. Another browser, no pass: the count, never a name (RG-PL-4)
     const other = await browser.newContext({ timezoneId: "Europe/Paris" });
     const visitor = await other.newPage();
-    await visitor.goto("/");
+    await visitor.goto("/planning");
     const otherCard = visitor
       .getByRole("region", { name: "Grille des créneaux" })
       .getByRole("article")

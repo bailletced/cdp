@@ -33,7 +33,7 @@ test.describe("Créneaux vides (F13-T08)", () => {
     const page = await context.newPage();
 
     // 1. The banner: a fresh edition, every slot is empty
-    await page.goto("/");
+    await page.goto("/planning");
     const banner = page.getByRole("region", { name: "Créneaux à pourvoir" });
     await expect(banner.getByRole("status")).toHaveText(
       "Il reste 48 créneaux vides sur 48",
@@ -85,7 +85,7 @@ test.describe("Créneaux vides (F13-T08)", () => {
     ).toHaveCount(2);
 
     // 5. Back home: two empty slots less
-    await page.getByRole("link", { name: "Retour à l'accueil" }).click();
+    await page.getByRole("link", { name: "Retour au planning" }).click();
     await expect(banner.getByRole("status")).toHaveText(
       "Il reste 46 créneaux vides sur 48",
     );

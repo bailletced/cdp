@@ -46,7 +46,9 @@ describe("Header session state", () => {
       }),
     );
 
-    renderApp("/");
+    // The sorter sends a visitor to /landing, where the header keeps its
+    // own link quiet: the nav state is asserted on the public planning
+    renderApp("/planning");
     const nav = await screen.findByRole("navigation", {
       name: "Navigation principale",
     });

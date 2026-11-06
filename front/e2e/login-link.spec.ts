@@ -44,9 +44,11 @@ test.describe("Personal link journey", () => {
       page.getByRole("heading", { name: "Mon espace" }),
     ).toBeVisible();
 
-    // 5. Logout returns to the landing page and its email form
+    // 5. Logout returns to the event landing and its e-mail capture
     await page.getByRole("button", { name: "Me déconnecter" }).click();
-    await page.waitForURL((url) => url.pathname === "/");
-    await expect(page.getByLabel("Adresse e-mail")).toBeVisible();
+    await page.waitForURL((url) => url.pathname === "/landing");
+    await expect(
+      page.getByRole("button", { name: "Je participe" }),
+    ).toBeVisible();
   });
 });
