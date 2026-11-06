@@ -10,15 +10,17 @@ import {
   useViewer,
 } from "../api/hooks";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { EditionBanner } from "../components/EditionBanner";
 import { EmptySlotDraw } from "../components/EmptySlotDraw";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
-import { ReadTextLink } from "../components/ReadTextLink";
 import { RenameDialog } from "../components/RenameDialog";
 import { SlotPickerDialog } from "../components/SlotPickerDialog";
 import { useDawnTheme } from "../lib/dawnTheme";
 import { withLocalTime } from "../lib/localTime";
+import { type SlotTemporalState, slotTemporalState } from "../lib/planning";
+import { useNow } from "../lib/serverClock";
 
 const LINK_CLASS = "text-link underline underline-offset-4";
 
@@ -27,9 +29,11 @@ interface MySlot {
   id: string;
   slotId: string;
   startsAt: string;
+  endsAt: string;
   label: string;
   dayLabel: string;
   textTitle: string | null;
+  textSource: string | null;
   cancellable: boolean;
 }
 
@@ -43,6 +47,7 @@ function parseMySlots(inscriptions: unknown): MySlot[] {
     typeof item?.id === "string" &&
     typeof item.slotId === "string" &&
     typeof item.startsAt === "string" &&
+    typeof item.endsAt === "string" &&
     typeof item.label === "string" &&
     typeof item.dayLabel === "string"
       ? [
@@ -50,10 +55,13 @@ function parseMySlots(inscriptions: unknown): MySlot[] {
             id: item.id,
             slotId: item.slotId,
             startsAt: item.startsAt,
+            endsAt: item.endsAt,
             label: item.label,
             dayLabel: item.dayLabel,
             textTitle:
               typeof item.textTitle === "string" ? item.textTitle : null,
+            textSource:
+              typeof item.textSource === "string" ? item.textSource : null,
             // RG-EP-1: the API says whether the slot can still be cancelled
             cancellable:
               Array.isArray(item.actions) && item.actions.includes("cancel"),
@@ -66,6 +74,45 @@ function parseMySlots(inscriptions: unknown): MySlot[] {
 /** « samedi 28 novembre » → « Samedi 28 novembre » */
 function capitalized(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/** The state of my slot, in the vocabulary of the chain (§14.1). */
+const SLOT_STATE_LABEL: Record<SlotTemporalState, string> = {
+  future: "À venir",
+  current: "En cours",
+  past: "Terminé",
+};
+
+/**
+ * A discreet badge that tells at a glance where my slot stands: a golden
+ * dot while it is still to come (the expectation), a filled golden pill
+ * while I can pray it now, muted once it is behind me. The label always
+ * accompanies the colour (§5.3-1: never colour alone).
+ */
+function SlotStateBadge({ state }: { state: SlotTemporalState }) {
+  return (
+    <p
+      className={
+        state === "current"
+          ? "inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-sm font-medium text-accent-foreground"
+          : state === "future"
+            ? "inline-flex items-center gap-2 rounded-full border border-accent px-3 py-1 text-sm font-medium text-accent-soft-foreground"
+            : "inline-flex items-center gap-2 rounded-full border border-separator px-3 py-1 text-sm font-medium text-muted"
+      }
+    >
+      <span
+        aria-hidden="true"
+        className={
+          state === "current"
+            ? "h-2 w-2 rounded-full bg-accent-foreground"
+            : state === "future"
+              ? "h-2 w-2 rounded-full bg-accent"
+              : "h-2 w-2 rounded-full bg-muted"
+        }
+      />
+      {SLOT_STATE_LABEL[state]}
+    </p>
+  );
 }
 
 /**
@@ -83,6 +130,8 @@ function capitalized(value: string): string {
  */
 function MySlots() {
   const query = useQuery(myInscriptionsQueryOptions);
+  const editionQuery = useCurrentEdition();
+  const nowMs = useNow();
   const cancelInscription = useCancelInscription();
   const [toCancel, setToCancel] = useState<MySlot | null>(null);
   const [outcome, setOutcome] = useState<string | null>(null);
@@ -151,6 +200,9 @@ function MySlots() {
         <p className="font-display text-3xl font-bold">{space.displayName}</p>
         <RenameDialog currentName={space.displayName ?? ""} />
       </div>
+      {editionQuery.data?.startsAt ? (
+        <EditionBanner startsAt={editionQuery.data.startsAt} />
+      ) : null}
       <section aria-labelledby="mes-creneaux" className="mb-12">
         <h2
           id="mes-creneaux"
@@ -176,38 +228,74 @@ function MySlots() {
             </a>
           </p>
         ) : (
-          <ul className="grid gap-3">
-            {slots.map((slot) => (
-              <li
-                key={slot.id}
-                className="rounded-2xl border border-separator bg-surface p-4 sm:p-5"
-              >
-                <p className="text-muted">{capitalized(slot.dayLabel)}</p>
-                <p className="font-display text-2xl font-bold lining-nums tabular-nums">
-                  {withLocalTime(slot.label, slot.startsAt)}
-                </p>
-                {slot.textTitle ? (
-                  <p className="mt-2">
-                    {slot.textTitle}{" "}
-                    <ReadTextLink slotId={slot.slotId} label={slot.label} />
+          <ul className="grid gap-4">
+            {slots.map((slot) => {
+              const state = slotTemporalState(slot, nowMs);
+
+              return (
+                <li
+                  key={slot.id}
+                  className="rounded-2xl border border-separator bg-surface p-4 sm:p-6"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-muted">{capitalized(slot.dayLabel)}</p>
+                    <SlotStateBadge state={state} />
+                  </div>
+                  <p className="mt-1 font-display text-2xl font-bold lining-nums tabular-nums">
+                    {withLocalTime(slot.label, slot.startsAt)}
                   </p>
-                ) : (
-                  <p className="mt-2 text-muted">
-                    Le texte de ce créneau sera bientôt disponible
-                  </p>
-                )}
-                {slot.cancellable ? (
-                  <button
-                    type="button"
-                    onClick={() => setToCancel(slot)}
-                    className="link mt-3 min-h-11 text-muted"
+                  {slot.textTitle ? (
+                    <p className="mt-2">
+                      <strong>{slot.textTitle}</strong>
+                      {slot.textSource ? (
+                        <span className="text-muted"> — {slot.textSource}</span>
+                      ) : null}
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-muted">
+                      Le texte de ce créneau sera bientôt disponible
+                    </p>
+                  )}
+                  <a
+                    href={`/textes/${slot.slotId}`}
+                    className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-accent px-5 font-medium text-accent-foreground no-underline hover:bg-accent-hover"
                   >
-                    Me désinscrire
-                    <span className="sr-only"> du créneau de {slot.label}</span>
-                  </button>
-                ) : null}
-              </li>
-            ))}
+                    {state === "past"
+                      ? "Relire ce créneau"
+                      : state === "current"
+                        ? "Prier maintenant"
+                        : "Prier ce créneau"}
+                    <span className="sr-only"> — {slot.label}</span>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m13 6 6 6-6 6" />
+                    </svg>
+                  </a>
+                  {slot.cancellable ? (
+                    <button
+                      type="button"
+                      onClick={() => setToCancel(slot)}
+                      className="link mt-3 min-h-11 text-muted"
+                    >
+                      Me désinscrire
+                      <span className="sr-only">
+                        {" "}
+                        du créneau de {slot.label}
+                      </span>
+                    </button>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         )}
         <div className="mt-6 flex flex-wrap gap-3">

@@ -48,6 +48,22 @@ function mySpace(inscriptions: unknown[], displayName = "Famille Martin") {
 
 const EDITION_ID = "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b";
 
+/** The current public edition starting at the given ISO instant. */
+function currentEditionStartingAt(startsAt: string) {
+  server.use(
+    http.get("http://localhost:8080/api/editions/current", () =>
+      HttpResponse.json({
+        id: EDITION_ID,
+        title: "24 heures de prière — novembre 2026",
+        presentation: "",
+        startsAt,
+        opensAt: "2026-10-20T18:00:00+00:00",
+        status: "open",
+      }),
+    ),
+  );
+}
+
 /** An open public edition, answered to GET /api/editions/current. */
 function openEdition() {
   server.use(
@@ -63,6 +79,109 @@ function openEdition() {
     ),
   );
 }
+describe("MySpacePage — l'état de la chaîne (F14)", () => {
+  it("counts down to the start of the edition before it begins", async () => {
+    openEdition();
+    mySpace([]);
+
+    renderApp("/my-space");
+
+    const banner = await screen.findByRole("region", {
+      name: "État de l'édition",
+    });
+    expect(within(banner).getByText(/La chaîne commence/)).toBeInTheDocument();
+    expect(within(banner).getByText(/heure de Paris/)).toBeInTheDocument();
+    // The countdown is a live figure, tied to the server clock
+    expect(within(banner).getByRole("timer")).toBeInTheDocument();
+    expect(within(banner).getByRole("timer").textContent ?? "").toMatch(
+      /\u202f[jms]/,
+    );
+  });
+
+  it("says the chain is running while it is underway, with what is left to pray", async () => {
+    const startsAt = new Date(Date.now() - 2 * 3600_000).toISOString();
+    currentEditionStartingAt(startsAt);
+    mySpace([]);
+
+    renderApp("/my-space");
+
+    const banner = await screen.findByRole("region", {
+      name: "État de l'édition",
+    });
+    expect(
+      within(banner).getByText(/La chaîne est en cours/),
+    ).toBeInTheDocument();
+    expect(within(banner).getByText(/encore/)).toBeInTheDocument();
+    expect(within(banner).queryByRole("timer")).not.toBeInTheDocument();
+  });
+
+  it("thanks the priant once the edition is over", async () => {
+    const startsAt = new Date(Date.now() - 25 * 3600_000).toISOString();
+    currentEditionStartingAt(startsAt);
+    mySpace([]);
+
+    renderApp("/my-space");
+
+    const banner = await screen.findByRole("region", {
+      name: "État de l'édition",
+    });
+    expect(
+      within(banner).getByText(/Cette édition est terminée/),
+    ).toBeInTheDocument();
+    expect(within(banner).getByText(/Merci d'avoir prié/)).toBeInTheDocument();
+  });
+
+  it("offers the one-way funnel of prayer on each of my slots", async () => {
+    openEdition();
+    mySpace([
+      myInscription(),
+      myInscription({
+        id: "inscription-past",
+        slotId: "slot-past",
+        startsAt: new Date(Date.now() - 3600_000).toISOString(),
+        endsAt: new Date(Date.now() - 1800_000).toISOString(),
+        label: "22h00–22h30",
+        dayLabel: "samedi 28 novembre",
+        actions: [],
+      }),
+    ]);
+
+    renderApp("/my-space");
+
+    const mine = await screen.findByRole("region", { name: "Mes créneaux" });
+    const [upcoming, past] = within(mine).getAllByRole("listitem");
+
+    // The pray CTA is the first, full-width action of every card
+    const prayUpcoming = within(upcoming).getByRole("link", {
+      name: "Prier ce créneau — 20h00–20h30",
+    });
+    expect(prayUpcoming).toHaveAttribute("href", "/textes/slot-1");
+    expect(
+      within(prayUpcoming).getByText("Prier ce créneau"),
+    ).toBeInTheDocument();
+
+    const prayPast = within(past).getByRole("link", {
+      name: "Relire ce créneau — 22h00–22h30",
+    });
+    expect(prayPast).toHaveAttribute("href", "/textes/slot-past");
+    expect(within(prayPast).getByText("Relire ce créneau")).toBeInTheDocument();
+
+    // The states are labelled, never colour alone (§5.3-1)
+    expect(within(upcoming).getByText("À venir")).toBeInTheDocument();
+    expect(within(past).getByText("Terminé")).toBeInTheDocument();
+
+    // « Me désinscrire » stays away from the pray funnel: a muted link
+    // below, not a competing button
+    const unsubscribe = within(upcoming).getByRole("button", {
+      name: /Me désinscrire du créneau de 20h00–20h30/,
+    });
+    expect(unsubscribe.className).toContain("text-muted");
+    expect(
+      within(past).queryByRole("button", { name: /Me désinscrire/ }),
+    ).toBeNull();
+  });
+});
+
 describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
   it("shows my name, then my slots with their schedule and their text", async () => {
     mySpace([
@@ -88,15 +207,13 @@ describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
     expect(first).toHaveTextContent(
       "Le texte de ce créneau sera bientôt disponible",
     );
-    expect(
-      within(first).queryByRole("link", { name: /Lire le texte/ }),
-    ).toBeNull();
     expect(second).toHaveTextContent("Que rien ne te trouble");
     expect(
       within(second).getByRole("link", {
-        name: "Lire le texte du créneau de 22h00–22h30",
+        name: "Prier ce créneau — 22h00–22h30",
       }),
     ).toHaveAttribute("href", "/textes/slot-5");
+    expect(within(second).getByText("À venir")).toBeInTheDocument();
   });
 
   it("adds the local time for a priant outside Europe/Paris (RG-PL-3)", async () => {

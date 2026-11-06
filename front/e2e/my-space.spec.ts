@@ -182,6 +182,7 @@ test.describe("Mon espace (F14)", () => {
   }) => {
     test.setTimeout(90_000);
     const slots = await fetchCurrentSlots(request);
+    const kept = slots[30];
     const freed = slots[31];
     const stamp = Date.now();
     const page = await registerThenOpenMySpace(
@@ -197,6 +198,16 @@ test.describe("Mon espace (F14)", () => {
     ).toBeVisible();
     const mine = page.getByRole("region", { name: "Mes créneaux" });
     await expect(mine.getByRole("listitem")).toHaveCount(2);
+    // The state of the chain is at a glance: before the start — the countdown
+    const banner = page.getByRole("region", { name: "État de l'édition" });
+    await expect(banner.getByText(/La chaîne commence/)).toBeVisible();
+    await expect(banner.getByRole("timer")).toBeVisible();
+    // Each card offers the prayer funnel first: the golden CTA, and
+    // « Me désinscrire » stays a muted link away from it
+    const keptCard = mine.getByRole("listitem").filter({ hasText: kept.label });
+    await expect(
+      keptCard.getByRole("link", { name: `Prier ce créneau — ${kept.label}` }),
+    ).toBeVisible();
     await expectNoA11yViolations(page);
 
     // 2. Change my name: the new name shows at once
@@ -210,6 +221,19 @@ test.describe("Mon espace (F14)", () => {
     await expect(rename).toBeHidden();
     await expect(
       page.getByText(`Famille Martin-Dubois ${stamp}`, { exact: true }).first(),
+    ).toBeVisible();
+
+    // 2bis. The prayer funnel indeed leads to the reading page
+    await page
+      .getByRole("link", { name: `Prier ce créneau — ${kept.label}` })
+      .click();
+    await page.waitForURL("**/textes/**");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Texte du créneau" }),
+    ).toBeVisible();
+    await page.goBack();
+    await expect(
+      page.getByRole("region", { name: "Mes créneaux" }),
     ).toBeVisible();
 
     // 3. Cancel the second slot: announced on screen, one slot left
