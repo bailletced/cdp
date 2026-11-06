@@ -190,6 +190,20 @@ function MySlots() {
     return null;
   }
 
+  // The account has no priant yet (403, F14-T02): it never inscribed — it
+  // has just arrived from the landing. No name to show, the invitation is
+  // the point of the page.
+  if (query.data.status === "no-priant") {
+    return (
+      <p className="text-lg">
+        Vous n'avez pas encore de créneau.{" "}
+        <a href="#ajouter-des-creneaux" className={LINK_CLASS}>
+          Choisir un créneau
+        </a>
+      </p>
+    );
+  }
+
   const { space } = query.data;
   const slots = parseMySlots(space.inscriptions);
 

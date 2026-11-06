@@ -240,6 +240,28 @@ describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
     ).toHaveAttribute("href", "#ajouter-des-creneaux");
   });
 
+  it("invites the same way a member whose account has no priant yet (403)", async () => {
+    server.use(
+      http.get(
+        MY_INSCRIPTIONS_URL,
+        () => new HttpResponse(null, { status: 403 }),
+      ),
+    );
+
+    renderApp("/my-space");
+
+    expect(
+      await screen.findByText("Vous n'avez pas encore de créneau."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Choisir un créneau" }),
+    ).toHaveAttribute("href", "#ajouter-des-creneaux");
+    // The 403 is a normal state, not a loading failure
+    expect(
+      screen.queryByText("Vos créneaux n'ont pas pu être chargés."),
+    ).not.toBeInTheDocument();
+  });
+
   it("invites to receive the personal link again once the session is gone", async () => {
     server.use(
       http.get(

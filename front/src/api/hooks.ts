@@ -183,7 +183,9 @@ export const slotSuggestionQueryOptions = (
 /**
  * « Mon espace » (GET /api/me/inscriptions, F14-T07): my name and my slots
  * of the public edition. A 404 means no edition is public; a 401 means the
- * session is gone (expired, or a device pass only) — both normal states.
+ * session is gone (expired, or a device pass only); a 403 means the account
+ * has no priant yet — it never inscribed (F14-T02) — all three normal
+ * states, not failures.
  */
 export const myInscriptionsQueryOptions = {
   queryKey: ["me", "inscriptions"],
@@ -194,6 +196,10 @@ export const myInscriptionsQueryOptions = {
 
     if (response.status === 401) {
       return { status: "expired" } as const;
+    }
+
+    if (response.status === 403) {
+      return { status: "no-priant" } as const;
     }
 
     if (response.status === 404) {
