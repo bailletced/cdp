@@ -81,6 +81,21 @@ final class RegisterContext implements Context
     #[Then('a personal link email is sent to :email')]
     public function personalLinkEmailIsSentTo(string $email): void
     {
+        $this->someEmailIsSentTo($email, 'Votre lien personnel');
+    }
+
+    #[Then('a confirmation email is sent to :email')]
+    public function confirmationEmailIsSentTo(string $email): void
+    {
+        $this->someEmailIsSentTo($email, 'Votre inscription :');
+    }
+
+    /**
+     * Any email sent to the address whose subject starts with the given
+     * prefix passes: anonymous registrations only have one email each.
+     */
+    private function someEmailIsSentTo(string $email, string $subjectPrefix): void
+    {
         $sent = $this->mailTransport()->sent;
 
         foreach ($sent as $message) {
@@ -93,12 +108,13 @@ final class RegisterContext implements Context
                 $message->getTo(),
             );
 
-            if (\in_array($email, $recipients, true)) {
+            if (\in_array($email, $recipients, true)
+                && str_starts_with((string) $message->getSubject(), $subjectPrefix)) {
                 return;
             }
         }
 
-        throw new \RuntimeException(\sprintf('Expected a personal link email sent to "%s", got %d email(s)', $email, \count($sent)));
+        throw new \RuntimeException(\sprintf('Expected an email ("%s…") sent to "%s", got %d email(s)', $subjectPrefix, $email, \count($sent)));
     }
 
     #[Then('no email is sent')]

@@ -12,7 +12,8 @@ use App\Shared\Domain\Event\DomainEvent;
 /**
  * Raised when a priant has been registered on one or more slots (F09-T07).
  * Carries the slot list so listeners (planning refresh, notifications) do
- * not have to reload the inscriptions.
+ * not have to reload the inscriptions, and whether the confirmation e-mail
+ * belongs to this batch — off-session only, nothing unannounced in session.
  */
 final readonly class InscriptionsRegistered implements DomainEvent
 {
@@ -23,6 +24,7 @@ final readonly class InscriptionsRegistered implements DomainEvent
         public PriantId $priantId,
         public EditionId $editionId,
         public array $slotIds,
+        public bool $confirmByEmail = true,
     ) {
     }
 }

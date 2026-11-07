@@ -93,6 +93,8 @@ final class RegisterInscriptionsProcessorTest extends TestCase
         self::assertSame('Famille Martin', $command->displayName->value);
         self::assertSame('famille.martin@bailletced.org', $command->email->value);
         self::assertTrue($command->consent);
+        // Off-session, the e-mail is the only receipt the visitor ever gets
+        self::assertTrue($command->confirmByEmail);
 
         self::assertInstanceOf(InscriptionResource::class, $resource);
         self::assertSame($result->inscriptions[0]->getId()->value->toRfc4122(), $resource->id);
@@ -229,14 +231,16 @@ final class RegisterInscriptionsProcessorTest extends TestCase
         ), $viewer);
     }
 
-    public function testASignedInMemberRegistersWithTheirOwnEmail(): void
+    public function testASignedInMemberSkipsTheConfirmationEmail(): void
     {
+        // In session, the screen IS the confirmation (my-space, the agenda
+        // button): the e-mail would only surprise, nothing announces it
+        $result = self::successfulResult();
+        $commandBus = new FakeCommandBus($result);
         $priant = new Priant(new Email('marie@bailletced.org'), new DisplayName('Marie Dupont'));
         $priant->giveConsent(new \DateTimeImmutable('2026-10-15 08:00:00', new \DateTimeZone('UTC')));
         $this->priantRepository->add($priant);
         $viewer = new Viewer($priant->getId()->value->toRfc4122(), true, [], false, 'marie@bailletced.org');
-
-        $commandBus = new FakeCommandBus(self::successfulResult());
         $processor = $this->processor($commandBus, $viewer);
 
         $processor->process(new RegisterInscriptionsPayload(
@@ -247,7 +251,7 @@ final class RegisterInscriptionsProcessorTest extends TestCase
 
         $command = $commandBus->dispatched;
         self::assertInstanceOf(RegisterInscriptions::class, $command);
-        self::assertSame('marie@bailletced.org', $command->email?->value);
+        self::assertFalse($command->confirmByEmail);
     }
 
     public function testAnAuthenticatedPriantWhoAlreadyConsentedDoesNotNeedToConsentAgain(): void

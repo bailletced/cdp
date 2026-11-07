@@ -38,6 +38,11 @@ final readonly class SendConfirmationOnInscriptionsRegistered
 
     public function __invoke(InscriptionsRegistered $event): void
     {
+        // In session, the screen is the confirmation: nothing is sent
+        if (!$event->confirmByEmail) {
+            return;
+        }
+
         $priant = $this->priantRepository->findById($event->priantId);
         $email = $priant?->getEmail();
 

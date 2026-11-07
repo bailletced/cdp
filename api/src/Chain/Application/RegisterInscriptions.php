@@ -15,6 +15,10 @@ use App\Shared\Domain\ValueObject\Email;
  * or created with the given display name (RG-IN-2); consent is recorded
  * when asked (RG-IN-5).
  *
+ * The confirmation e-mail (texts, agenda file) belongs to the off-session
+ * visitor — its only receipt. In session, the screen is the confirmation:
+ * `confirmByEmail` keeps the worker silent then.
+ *
  * @see specs-fonctionnelles.md §5.4, RG-IN-1 to RG-IN-5
  */
 final readonly class RegisterInscriptions implements CommandInterface
@@ -27,6 +31,7 @@ final readonly class RegisterInscriptions implements CommandInterface
         public DisplayName $displayName,
         public ?Email $email,
         public bool $consent,
+        public bool $confirmByEmail = true,
     ) {
     }
 }

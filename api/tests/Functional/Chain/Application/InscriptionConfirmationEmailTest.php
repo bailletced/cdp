@@ -65,7 +65,7 @@ final class InscriptionConfirmationEmailTest extends KernelTestCase
 
     public function testThreeSlotsAtOnceMakeOneEmailWithTheAgendaFileAndThePersonalLink(): void
     {
-        $this->register(new Email('marie@bailletced.org'), 0, 1, 2);
+        $this->register(new Email('marie@bailletced.org'), [0, 1, 2]);
 
         // Queued during the request, sent by the worker
         self::assertCount(0, $this->mailTransport->sent);
@@ -90,9 +90,9 @@ final class InscriptionConfirmationEmailTest extends KernelTestCase
 
     public function testASecondBatchOnlyRecallsItsOwnSlots(): void
     {
-        $this->register(new Email('marie@bailletced.org'), 0);
+        $this->register(new Email('marie@bailletced.org'), [0]);
         $this->transport('async_transactional')->process();
-        $this->register(new Email('marie@bailletced.org'), 5);
+        $this->register(new Email('marie@bailletced.org'), [5]);
         $this->transport('async_transactional')->process();
 
         self::assertCount(2, $this->mailTransport->sent);
@@ -103,19 +103,33 @@ final class InscriptionConfirmationEmailTest extends KernelTestCase
 
     public function testAPriantWithoutEmailGetsNoEmail(): void
     {
-        $this->register(null, 0);
+        $this->register(null, [0]);
         $this->transport('async_transactional')->process();
 
         self::assertCount(0, $this->mailTransport->sent);
     }
 
-    private function register(?Email $email, int ...$slotIndexes): void
+    public function testAQuietBatchSendsNoEmail(): void
     {
+        // In session, the screen is the confirmation: the worker stays silent
+        $this->register(new Email('marie@bailletced.org'), [6], confirmByEmail: false);
+        $this->transport('async_transactional')->process();
+
+        self::assertCount(0, $this->mailTransport->sent);
+    }
+
+    /**
+     * @param list<int> $slotIndexes
+     */
+    private function register(?Email $email, array $slotIndexes, bool $confirmByEmail = true): void
+    {
+        \assert([] !== $slotIndexes);
         $this->commandBus->dispatch(new RegisterInscriptions(
             array_map(fn (int $index) => $this->edition->getSlots()[$index]->getId(), $slotIndexes),
             new DisplayName('Marie Dupont'),
             $email,
             consent: true,
+            confirmByEmail: $confirmByEmail,
         ));
     }
 }

@@ -87,6 +87,10 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         $slotIds = $this->toSlotIds($data->slotIds);
         $displayName = $this->toDisplayName($data->displayName);
         $email = $this->toEmail($data->email);
+        // The confirmation e-mail is the receipt of the off-session visitor;
+        // in session the screen and the agenda button are the confirmation —
+        // an unannounced e-mail would only surprise
+        $confirmByEmail = !$signedIn;
 
         // RG-IN-2: a signed-in member registers themselves only — the
         // e-mail of the account wins, nobody registers another member.
@@ -104,6 +108,7 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
                 $displayName,
                 $email,
                 $data->consent ?? false,
+                $confirmByEmail,
             ));
         } catch (UniqueConstraintViolationException $e) {
             // RG-IN-3: a concurrent request (double click) registered the same

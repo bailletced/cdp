@@ -122,6 +122,7 @@ final readonly class RegisterInscriptionsHandler
             $priant->getId(),
             $edition->getId(),
             array_map(static fn (Slot $slot): SlotId => $slot->getId(), $slots),
+            $command->confirmByEmail,
         ));
 
         return new RegisterInscriptionsResult($priant->getId(), $priant->getDisplayName(), $inscriptions, $edition->getEndsAt());

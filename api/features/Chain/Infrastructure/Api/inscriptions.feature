@@ -63,6 +63,15 @@ Feature: Public inscriptions API (F09-T07 to F09-T13)
         Then the response should be "422 Unprocessable Entity"
         And the response should contain a violation on "consent"
 
+    Scenario: A visitor keeps its receipt by e-mail
+        When I register on the first slot of the last created edition with body:
+            """
+            {"displayName": "Famille Martin", "email": "famille.martin@bailletced.org", "consent": true}
+            """
+        Then the response should be "201 Created"
+        When I process the async queue
+        Then a confirmation email is sent to "famille.martin@bailletced.org"
+
     Scenario: A recognized priant who already consented registers without the checkbox (RG-IN-5, RG-IN-7)
         Given an account exists with email "marie@bailletced.org"
         And a priant exists with email "marie@bailletced.org" and display name "Marie Dupont"
@@ -75,6 +84,10 @@ Feature: Public inscriptions API (F09-T07 to F09-T13)
             """
         Then the response should be "201 Created"
         And an inscription should exist on the first slot of the last created edition
+        # In session the screen is the confirmation: the worker stays silent,
+        # no e-mail lands unannounced
+        When I process the async queue
+        Then no email is sent
 
     Scenario: A signed-in member cannot register someone else (RG-IN-2)
         Given an account exists with email "marie@bailletced.org"
