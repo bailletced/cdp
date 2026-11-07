@@ -22,13 +22,11 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["title", "source", "body", "hints"],
+          "required": ["title", "source", "body"],
           "properties": {
             "title": { "type": "string", "minLength": 1 },
             "source": { "type": "string", "minLength": 1 },
-            "body": { "type": "string", "minLength": 1 },
-            "hints": { "type": ["string", "null"] }
-          }
+            "body": { "type": "string", "minLength": 1 },          }
         }
       ]
     }

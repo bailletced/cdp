@@ -4,7 +4,6 @@ import {
   FieldError,
   Input,
   Label,
-  TextArea,
   TextField,
 } from "@heroui/react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
@@ -33,7 +32,6 @@ interface TextFieldErrors {
   title?: string;
   source?: string;
   body?: string;
-  hints?: string;
 }
 
 /**
@@ -57,7 +55,6 @@ function TextForm({ textId }: { textId: string | null }) {
   const [title, setTitle] = useState("");
   const [source, setSource] = useState("");
   const [body, setBody] = useState("");
-  const [hints, setHints] = useState("");
   const [fieldErrors, setFieldErrors] = useState<TextFieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -75,7 +72,6 @@ function TextForm({ textId }: { textId: string | null }) {
     setTitle(text.title ?? "");
     setSource(text.source ?? "");
     setBody(text.body ?? "");
-    setHints(text.hints ?? "");
   }, [text]);
 
   const isPending =
@@ -92,7 +88,6 @@ function TextForm({ textId }: { textId: string | null }) {
       title: title.trim(),
       source: source.trim(),
       body,
-      hints: hints.trim(),
     };
 
     try {
@@ -220,23 +215,6 @@ function TextForm({ textId }: { textId: string | null }) {
             <p className="text-muted">Le corps du texte s'affichera ici.</p>
           )}
         </section>
-        <TextField
-          isInvalid={Boolean(fieldErrors.hints)}
-          className="w-full max-w-2xl"
-        >
-          <Label>Pistes de méditation</Label>
-          <TextArea
-            value={hints}
-            onChange={(event) => setHints(event.target.value)}
-            maxLength={2000}
-            rows={4}
-            disabled={isPending}
-          />
-          <Description>
-            Facultatif : questions ou intentions pour prier.
-          </Description>
-          <FieldError>{fieldErrors.hints}</FieldError>
-        </TextField>
         <div className="flex flex-wrap items-center gap-4">
           <Button type="submit" variant="primary" isDisabled={isPending}>
             {isPending

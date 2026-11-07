@@ -158,9 +158,9 @@ final class AdminTextsApiTest extends ApiTestCase
         self::assertArrayHasKey('next', $data['view']);
     }
 
-    public function testOrganizerGetsTheTextDetailsWithTheBodyAndTheHints(): void
+    public function testOrganizerGetsTheTextDetailsWithTheBody(): void
     {
-        $text = $this->createText('Oraison de Thérèse', 'Thérèse de Lisieux', '<p>Corps <strong>riche</strong>.</p>', 'Méditer le matin.');
+        $text = $this->createText('Oraison de Thérèse', 'Thérèse de Lisieux', '<p>Corps <strong>riche</strong>.</p>');
         $edition = $this->createEdition();
         $edition->getSlots()[0]->setTextId($text->getId()->value);
         $this->em->flush();
@@ -177,7 +177,6 @@ final class AdminTextsApiTest extends ApiTestCase
         self::assertSame('Oraison de Thérèse', $data['title'] ?? null);
         self::assertSame('Thérèse de Lisieux', $data['source'] ?? null);
         self::assertSame('<p>Corps <strong>riche</strong>.</p>', $data['body'] ?? null);
-        self::assertSame('Méditer le matin.', $data['hints'] ?? null);
         self::assertSame(1, $data['attributionCount'] ?? null);
     }
 
@@ -255,7 +254,7 @@ final class AdminTextsApiTest extends ApiTestCase
         self::assertIsArray($itemSchema);
         $itemProperties = $itemSchema['properties'] ?? null;
         self::assertIsArray($itemProperties);
-        foreach (['id', 'title', 'source', 'body', 'hints', 'attributionCount'] as $property) {
+        foreach (['id', 'title', 'source', 'body', 'attributionCount'] as $property) {
             self::assertArrayHasKey($property, $itemProperties);
         }
 
@@ -289,7 +288,6 @@ final class AdminTextsApiTest extends ApiTestCase
             'title' => 'Oraison de Thérèse',
             'source' => 'Thérèse de Lisieux',
             'body' => '<p>Je voudrais aimer.</p>',
-            'hints' => 'Méditer le matin.',
         ]));
 
         $response = $this->client->getResponse();
@@ -386,7 +384,6 @@ final class AdminTextsApiTest extends ApiTestCase
             'title' => 'Titre modifié',
             'source' => 'Nouvel auteur',
             'body' => '<p>Nouveau corps.</p>',
-            'hints' => 'Nouvelles pistes.',
         ]));
 
         $response = $this->client->getResponse();
@@ -525,13 +522,12 @@ final class AdminTextsApiTest extends ApiTestCase
         $this->client->request('POST', $parts['path'], $params);
     }
 
-    private function createText(string $title, string $source, string $body = '<p>Corps du texte.</p>', ?string $hints = null): Text
+    private function createText(string $title, string $source, string $body = '<p>Corps du texte.</p>'): Text
     {
         $text = Text::create(
             new TextTitle($title),
             new TextSource($source),
             new RichText($body),
-            $hints,
         );
         $this->textRepository->add($text);
         $this->em->flush();

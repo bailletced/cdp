@@ -200,7 +200,7 @@ export function EventLandingPage() {
               <p>
                 Toute la chaîne prie l'Évangile selon saint Marc : le passage de
                 votre créneau vous est remis à votre espace, avec le texte à
-                méditer et ses pistes d'oraison.
+                méditer.
               </p>
             </div>
             <div className="border-t border-separator pt-6">

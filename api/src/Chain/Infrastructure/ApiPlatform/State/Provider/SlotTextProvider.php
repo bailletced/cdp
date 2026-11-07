@@ -67,7 +67,6 @@ final readonly class SlotTextProvider implements ProviderInterface
                 'title' => $view->text->title,
                 'source' => $view->text->source,
                 'body' => $view->text->body,
-                'hints' => $view->text->hints,
             ],
         );
     }

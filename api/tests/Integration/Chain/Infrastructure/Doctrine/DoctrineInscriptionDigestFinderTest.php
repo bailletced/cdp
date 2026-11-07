@@ -79,7 +79,6 @@ final class DoctrineInscriptionDigestFinderTest extends KernelTestCase
         self::assertSame('Que rien ne te trouble', $second->textTitle);
         self::assertSame('Thérèse d’Avila', $second->textSource);
         self::assertSame('<p>Que rien ne te trouble.</p>', $second->textBody);
-        self::assertSame('Relire lentement.', $second->textHints);
     }
 
     public function testAPriantWithoutInscriptionInTheEditionHasNoDigest(): void

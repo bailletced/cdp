@@ -59,7 +59,6 @@ final class DoctrineSlotTextViewFinderTest extends KernelTestCase
         self::assertSame('Que rien ne te trouble', $view->text->title);
         self::assertSame('Thérèse d’Avila', $view->text->source);
         self::assertSame('<p>Que rien ne te trouble.</p>', $view->text->body);
-        self::assertSame('Relire lentement.', $view->text->hints);
     }
 
     public function testASlotWithoutTextHasANullText(): void

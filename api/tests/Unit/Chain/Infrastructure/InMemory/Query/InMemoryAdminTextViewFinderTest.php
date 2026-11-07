@@ -116,7 +116,6 @@ final class InMemoryAdminTextViewFinderTest extends TestCase
         self::assertSame('Oraison de Thérèse', $view->title);
         self::assertSame('Thérèse de Lisieux', $view->source);
         self::assertSame('<p>Corps <strong>riche</strong>.</p>', $view->body);
-        self::assertSame('Méditer le matin.', $view->hints);
         self::assertSame(1, $view->attributionCount);
     }
 

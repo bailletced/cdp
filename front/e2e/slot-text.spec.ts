@@ -51,7 +51,6 @@ test.describe("Lecture du texte (F12-T06)", () => {
         title: textTitle,
         source: "Thérèse d’Avila",
         body: "<p>Que rien ne te trouble, que rien ne t’effraie.</p>",
-        hints: "Relire lentement chaque vers.",
       },
     });
     expect(text.status()).toBe(201);
@@ -93,7 +92,7 @@ test.describe("Lecture du texte (F12-T06)", () => {
     await page.getByRole("button", { name: "S'inscrire" }).click();
     await page.waitForURL(/\/inscription\/confirmation/);
 
-    // 2. From the confirmation, the full text and its hints
+    // 2. From the confirmation, the full text
     await page
       .getByRole("link", {
         name: `Lire le texte du créneau de ${slot.label}`,
@@ -112,9 +111,6 @@ test.describe("Lecture du texte (F12-T06)", () => {
     await expect(
       page.getByText("Que rien ne te trouble, que rien ne t’effraie."),
     ).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "Pistes de méditation" }),
-    ).toContainText("Relire lentement chaque vers.");
     await expectNoA11yViolations(page);
     await phone.close();
 

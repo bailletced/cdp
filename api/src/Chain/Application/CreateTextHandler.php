@@ -31,7 +31,7 @@ final readonly class CreateTextHandler
     {
         $body = new RichText($this->htmlSanitizer->sanitize($command->body));
 
-        $text = Text::create($command->title, $command->source, $body, $command->hints);
+        $text = Text::create($command->title, $command->source, $body);
 
         $this->textRepository->add($text);
 

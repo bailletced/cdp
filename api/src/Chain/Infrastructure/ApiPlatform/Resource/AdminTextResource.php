@@ -23,7 +23,7 @@ use App\Shared\Infrastructure\Symfony\Validator\AssertValueObject;
  * F06-T09 for the writes).
  *
  * - GET    /api/admin/texts       → paginated, searchable list (title, source, attribution count)
- * - GET    /api/admin/texts/{id}  → full details (body and hints included)
+ * - GET    /api/admin/texts/{id}  → full details (body included)
  * - POST   /api/admin/texts       → create a text (422 on invalid payload)
  * - PATCH  /api/admin/texts/{id}  → update a text (404 unknown, 422 invalid)
  * - DELETE /api/admin/texts/{id}  → delete a text (404 unknown, 409 attributed to a scheduled edition)
@@ -83,7 +83,6 @@ final class AdminTextResource
         #[AssertValueObject(TextSource::class)]
         public readonly ?string $source = null,
         public readonly ?string $body = null,
-        public readonly ?string $hints = null,
         public readonly ?int $attributionCount = null,
     ) {
     }

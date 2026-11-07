@@ -67,10 +67,6 @@ describe("TextFormPage (F06-T13)", () => {
       await screen.findByRole("textbox", { name: "Corps du texte" }),
       '<p style="color:red">Que rien <b>ne te trouble</b></p>',
     );
-    fireEvent.change(screen.getByLabelText("Pistes de méditation"), {
-      target: { value: "Qu'est-ce qui me trouble aujourd'hui ?" },
-    });
-
     // The preview renders the body as the priants will read it
     const preview = screen.getByRole("region", { name: "Aperçu" });
     await waitFor(() =>
@@ -88,7 +84,6 @@ describe("TextFormPage (F06-T13)", () => {
       title: "Que rien ne te trouble",
       source: "Thérèse d'Avila",
       body: "<p>Que rien <strong>ne te trouble</strong></p>",
-      hints: "Qu'est-ce qui me trouble aujourd'hui ?",
     });
     expect(await screen.findByText("Texte créé.")).toBeInTheDocument();
   });
@@ -144,7 +139,6 @@ describe("TextFormPage (F06-T13)", () => {
           title: "Que rien ne te trouble",
           source: "Thérèse d'Avila",
           body: "<p>Que rien ne te trouble.</p>",
-          hints: null,
           attributionCount: 3,
         }),
       ),
@@ -192,7 +186,6 @@ describe("TextFormPage (F06-T13)", () => {
       title: "Que rien ne te trouble",
       source: "Thérèse de Jésus (d'Avila)",
       body: "<p>Que rien ne te trouble.</p>",
-      hints: "",
     });
   });
 
@@ -233,7 +226,6 @@ const existingText = () =>
       title: "Que rien ne te trouble",
       source: "Thérèse d'Avila",
       body: "<p>Que rien ne te trouble.</p>",
-      hints: null,
       attributionCount: 0,
     }),
   );

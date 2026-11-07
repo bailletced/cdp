@@ -21,11 +21,11 @@ final class GospelOfMark
     private const string READINGS = __DIR__.'/Resources/gospel-of-mark-segond-1910.json';
 
     /**
-     * @return list<array{title: string, source: string, body: string, hints: string}>
+     * @return list<array{title: string, source: string, body: string}>
      */
     public static function readings(): array
     {
-        /** @var list<array{title: string, source: string, body: string, hints: string}> $readings */
+        /** @var list<array{title: string, source: string, body: string}> $readings */
         $readings = json_decode((string) file_get_contents(self::READINGS), true, 512, \JSON_THROW_ON_ERROR);
 
         return $readings;

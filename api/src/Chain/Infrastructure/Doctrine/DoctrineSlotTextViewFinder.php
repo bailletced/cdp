@@ -28,10 +28,10 @@ final readonly class DoctrineSlotTextViewFinder implements SlotTextViewFinder
     #[\Override]
     public function findBySlot(SlotId $slotId): ?SlotTextView
     {
-        /** @var array{slot_id: string, edition_id: string, edition_title: string, starts_at: string, ends_at: string, text_title: string|null, text_source: string|null, text_body: string|null, text_hints: string|null}|false $row */
+        /** @var array{slot_id: string, edition_id: string, edition_title: string, starts_at: string, ends_at: string, text_title: string|null, text_source: string|null, text_body: string|null}|false $row */
         $row = $this->connection->fetchAssociative(
             'SELECT s.id AS slot_id, e.id AS edition_id, e.title AS edition_title, s.starts_at, s.ends_at,
-                    t.title AS text_title, t.source AS text_source, t.body AS text_body, t.hints AS text_hints
+                    t.title AS text_title, t.source AS text_source, t.body AS text_body
              FROM slot s
              JOIN edition e ON e.id = s.edition_id
              LEFT JOIN text t ON t.id = s.text_id
@@ -57,7 +57,7 @@ final readonly class DoctrineSlotTextViewFinder implements SlotTextViewFinder
             DayLabel::for($startsAt),
             null === $row['text_title'] || null === $row['text_source'] || null === $row['text_body']
                 ? null
-                : new SlotTextContent($row['text_title'], $row['text_source'], $row['text_body'], $row['text_hints']),
+                : new SlotTextContent($row['text_title'], $row['text_source'], $row['text_body']),
         );
     }
 }

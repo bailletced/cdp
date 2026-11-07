@@ -45,7 +45,6 @@ final class UpdateTextHandlerTest extends TestCase
             new TextTitle('La nuit obscure'),
             new TextSource('Saint Jean de la Croix, La Nuit obscure, chant I'),
             '<p>Texte corrigé <em>mis en forme</em>.</p><script>alert(1)</script>',
-            'Nouvelle piste',
         ));
 
         $text = $this->repository->findById($createResult->textId);
@@ -53,7 +52,6 @@ final class UpdateTextHandlerTest extends TestCase
         self::assertSame('La nuit obscure', $text->getTitle()->value);
         self::assertSame('Saint Jean de la Croix, La Nuit obscure, chant I', $text->getSource()->value);
         self::assertSame('<p>Texte corrigé <em>mis en forme</em>.</p>', $text->getBody()->value);
-        self::assertSame('Nouvelle piste', $text->getHints());
     }
 
     public function testUpdateThrowsWhenTextIsUnknown(): void

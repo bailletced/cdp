@@ -72,7 +72,6 @@ final class ImportGospelOfMarkCommand extends Command
                     new TextTitle($reading['title']),
                     new TextSource($reading['source']),
                     $reading['body'],
-                    $reading['hints'],
                 ));
 
                 if (!$result instanceof CreateTextResult) {

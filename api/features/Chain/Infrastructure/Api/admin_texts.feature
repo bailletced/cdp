@@ -29,7 +29,7 @@ Feature: Admin texts API (F06-T08, F06-T09)
         And I am logged in as this account
         When I POST JSON-LD to "/api/admin/texts" with body:
             """
-            {"title": "Oraison de Thérèse", "source": "Thérèse de Lisieux", "body": "<p>Je voudrais aimer.</p>", "hints": "Méditer le matin."}
+            {"title": "Oraison de Thérèse", "source": "Thérèse de Lisieux", "body": "<p>Je voudrais aimer.</p>"}
             """
         Then the response should be "201 Created"
         And the response should contain a text id

@@ -36,12 +36,11 @@ function slotText(text: unknown) {
 }
 
 describe("SlotTextPage (F12-T04, US-12.1)", () => {
-  it("shows the schedule, the title, the source, the body and the hints", async () => {
+  it("shows the schedule, the title, the source and the body", async () => {
     slotText({
       title: "Que rien ne te trouble",
       source: "Thérèse d’Avila",
       body: "<p>Que rien ne te <strong>trouble</strong>.</p>",
-      hints: "Relire lentement.\nS’arrêter sur un mot.",
     });
 
     renderApp(`/textes/${SLOT_ID}`);
@@ -62,10 +61,6 @@ describe("SlotTextPage (F12-T04, US-12.1)", () => {
     expect(
       screen.getByText("trouble", { selector: "strong" }),
     ).toBeInTheDocument();
-
-    const hints = screen.getByRole("region", { name: "Pistes de méditation" });
-    expect(hints).toHaveTextContent("Relire lentement.");
-    expect(hints).toHaveTextContent("S’arrêter sur un mot.");
   });
 
   it("adds the local time for a priant outside Europe/Paris (RG-PL-3)", async () => {
@@ -95,9 +90,6 @@ describe("SlotTextPage (F12-T04, US-12.1)", () => {
     expect(
       screen.getByText("Le texte de ce créneau sera bientôt disponible."),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("region", { name: "Pistes de méditation" }),
-    ).not.toBeInTheDocument();
   });
 
   it("explains that the text is reserved to the priants of the slot (US-12.2)", async () => {

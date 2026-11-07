@@ -16,7 +16,6 @@ final class AdminTextResourceTest extends TestCase
             title: 'Oraison de Thérèse',
             source: 'Thérèse de Lisieux',
             body: '<p>Corps du texte.</p>',
-            hints: 'Méditer le matin.',
             attributionCount: 2,
         );
 
@@ -24,7 +23,6 @@ final class AdminTextResourceTest extends TestCase
         self::assertSame('Oraison de Thérèse', $text->title);
         self::assertSame('Thérèse de Lisieux', $text->source);
         self::assertSame('<p>Corps du texte.</p>', $text->body);
-        self::assertSame('Méditer le matin.', $text->hints);
         self::assertSame(2, $text->attributionCount);
     }
 }

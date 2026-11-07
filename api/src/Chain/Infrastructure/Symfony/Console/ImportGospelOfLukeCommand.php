@@ -71,7 +71,6 @@ final class ImportGospelOfLukeCommand extends Command
                     new TextTitle($reading['title']),
                     new TextSource($reading['source']),
                     $reading['body'],
-                    null,
                 ));
 
                 if (!$result instanceof CreateTextResult) {

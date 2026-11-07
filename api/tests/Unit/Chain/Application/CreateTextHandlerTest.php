@@ -23,7 +23,6 @@ final class CreateTextHandlerTest extends TestCase
             new TextTitle('Le château de l’âme'),
             new TextSource('Sainte Thérèse d’Avila, Le Château intérieur, I, 1'),
             '<p>Texte <strong>gras</strong> et <em>italique</em>.</p><script>alert(1)</script>',
-            'Piste de méditation',
         ));
 
         self::assertNotNull($result->textId);
@@ -32,7 +31,6 @@ final class CreateTextHandlerTest extends TestCase
         self::assertSame('Le château de l’âme', $text->getTitle()->value);
         self::assertSame('Sainte Thérèse d’Avila, Le Château intérieur, I, 1', $text->getSource()->value);
         self::assertSame('<p>Texte <strong>gras</strong> et <em>italique</em>.</p>', $text->getBody()->value);
-        self::assertSame('Piste de méditation', $text->getHints());
     }
 
     public function testItRejectsBodyThatIsEmptyAfterSanitizing(): void

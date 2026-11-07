@@ -43,7 +43,6 @@ final class AdminTextProcessorTest extends TestCase
             title: 'Oraison de Thérèse',
             source: 'Thérèse de Lisieux',
             body: '<p>Corps du texte.</p>',
-            hints: 'Méditer le matin.',
         );
 
         $result = $processor->process($data, new Post(), [], []);
@@ -53,7 +52,6 @@ final class AdminTextProcessorTest extends TestCase
         self::assertSame('Oraison de Thérèse', $commandBus->lastCommand->title->value);
         self::assertSame('Thérèse de Lisieux', $commandBus->lastCommand->source->value);
         self::assertSame('<p>Corps du texte.</p>', $commandBus->lastCommand->body);
-        self::assertSame('Méditer le matin.', $commandBus->lastCommand->hints);
         self::assertNotNull($result->id);
     }
 
@@ -84,7 +82,6 @@ final class AdminTextProcessorTest extends TestCase
         );
 
         self::assertInstanceOf(CreateText::class, $commandBus->lastCommand);
-        self::assertNull($commandBus->lastCommand->hints);
     }
 
     public function testPatchDispatchesUpdateTextCommand(): void
@@ -107,7 +104,6 @@ final class AdminTextProcessorTest extends TestCase
             title: 'Titre modifié',
             source: 'Source modifiée',
             body: '<p>Nouveau corps.</p>',
-            hints: null,
         );
 
         $processor->process($data, new Patch(), ['id' => (string) $textId], []);
@@ -117,7 +113,6 @@ final class AdminTextProcessorTest extends TestCase
         self::assertSame('Titre modifié', $commandBus->lastCommand->title->value);
         self::assertSame('Source modifiée', $commandBus->lastCommand->source->value);
         self::assertSame('<p>Nouveau corps.</p>', $commandBus->lastCommand->body);
-        self::assertNull($commandBus->lastCommand->hints);
     }
 
     public function testPatchOnUnknownTextThrowsNotFound(): void
@@ -268,26 +263,6 @@ final class AdminTextProcessorTest extends TestCase
             self::assertCount(1, $violations);
             self::assertSame('body', $violations[0]->getPropertyPath());
             self::assertSame('Le corps du texte est obligatoire.', $violations[0]->getMessage());
-        }
-    }
-
-    public function testCreateWithTooLongHintsThrowsValidationExceptionOnHints(): void
-    {
-        $processor = self::processorReturningCreateResult();
-
-        try {
-            $processor->process(new AdminTextResource(
-                title: 'Titre valide',
-                source: 'Auteur',
-                body: '<p>Corps.</p>',
-                hints: str_repeat('a', 2001),
-            ), new Post(), [], []);
-            self::fail('A ValidationException was expected.');
-        } catch (ValidationException $e) {
-            $violations = $e->getConstraintViolationList();
-            self::assertCount(1, $violations);
-            self::assertSame('hints', $violations[0]->getPropertyPath());
-            self::assertSame('Les pistes de méditation ne doivent pas dépasser 2000 caractères.', $violations[0]->getMessage());
         }
     }
 

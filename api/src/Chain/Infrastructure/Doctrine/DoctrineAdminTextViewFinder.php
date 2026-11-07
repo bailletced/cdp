@@ -21,7 +21,7 @@ use Symfony\Component\Uid\Uuid;
  * migration), so « therese » finds « Thérèse ».
  *
  * @phpstan-type TextRow array{id: string, title: string, source: string, attribution_count: int|string}
- * @phpstan-type TextDetailsRow array{id: string, title: string, source: string, body: string, hints: string|null, attribution_count: int|string}
+ * @phpstan-type TextDetailsRow array{id: string, title: string, source: string, body: string, attribution_count: int|string}
  */
 final readonly class DoctrineAdminTextViewFinder implements AdminTextViewFinder
 {
@@ -73,7 +73,7 @@ final readonly class DoctrineAdminTextViewFinder implements AdminTextViewFinder
     {
         /** @var TextDetailsRow|false $row */
         $row = $this->connection->fetchAssociative(
-            'SELECT t.id, t.title, t.source, t.body, t.hints, COUNT(s.id) AS attribution_count
+            'SELECT t.id, t.title, t.source, t.body, COUNT(s.id) AS attribution_count
              FROM text t
              LEFT JOIN slot s ON s.text_id = t.id
              WHERE t.id = ?
@@ -90,7 +90,6 @@ final readonly class DoctrineAdminTextViewFinder implements AdminTextViewFinder
             title: $row['title'],
             source: $row['source'],
             body: $row['body'],
-            hints: $row['hints'],
             attributionCount: (int) $row['attribution_count'],
         );
     }

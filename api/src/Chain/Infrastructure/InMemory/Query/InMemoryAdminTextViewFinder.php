@@ -76,7 +76,6 @@ final readonly class InMemoryAdminTextViewFinder implements AdminTextViewFinder
             title: $text->getTitle()->value,
             source: $text->getSource()->value,
             body: $text->getBody()->value,
-            hints: $text->getHints(),
             attributionCount: $this->countAttributions($text->getId()),
         );
     }

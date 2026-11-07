@@ -103,13 +103,6 @@ final class ImportGospelOfMarkCommandTest extends TestCase
         }
     }
 
-    public function testEachReadingCarriesItsMeditationHint(): void
-    {
-        foreach (GospelOfMark::readings() as $reading) {
-            self::assertNotEmpty($reading['hints'], $reading['title']);
-        }
-    }
-
     public function testItAddsTheFortyEightReadingsToTheLibrary(): void
     {
         $tester = $this->execute([]);
@@ -118,7 +111,6 @@ final class ImportGospelOfMarkCommandTest extends TestCase
         $texts = $this->texts->findAll();
         self::assertCount(48, $texts);
         self::assertSame('Évangile selon saint Marc — traduction Louis Segond (1910)', $texts[0]->getSource()->value);
-        self::assertNotNull($texts[0]->getHints());
         self::assertStringContainsString('48 lectures ajoutées à la bibliothèque', $tester->getDisplay());
     }
 

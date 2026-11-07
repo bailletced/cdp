@@ -636,7 +636,7 @@ export const textQueryOptions = (id: string) =>
   }) as const;
 
 /**
- * Single text with its body and hints (GET /api/admin/texts/{id}). A null id
+ * Single text with its body (GET /api/admin/texts/{id}). A null id
  * disables the query (creation form).
  */
 export function useText(id: string | null) {
@@ -651,7 +651,6 @@ export interface TextFormValues {
   title: string;
   source: string;
   body: string;
-  hints: string;
 }
 
 /**

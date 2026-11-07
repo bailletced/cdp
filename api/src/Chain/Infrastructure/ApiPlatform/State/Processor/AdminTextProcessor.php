@@ -15,7 +15,6 @@ use App\Chain\Application\CreateTextResult;
 use App\Chain\Application\DeleteText;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\UpdateText;
-use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\ValueObject\RichText;
 use App\Chain\Domain\ValueObject\TextId;
 use App\Chain\Domain\ValueObject\TextSource;
@@ -30,8 +29,8 @@ use Symfony\Component\Validator\ConstraintViolationList;
  * DELETE operations (F06-T09).
  *
  * Invalid payloads answer 422 with one violation per offending property:
- * value object rejections (title, source, body) and hints length are mapped
- * to their respective property paths. Domain exceptions (404, 409) propagate
+ * value object rejections (title, source, body) are mapped to their
+ * respective property paths. Domain exceptions (404, 409) propagate
  * to API Platform's error handling.
  *
  * @implements ProcessorInterface<AdminTextResource, AdminTextResource>
@@ -72,13 +71,11 @@ final readonly class AdminTextProcessor implements ProcessorInterface
         $title = $this->toTitle($data->title);
         $source = $this->toSource($data->source);
         $this->validateBody($data->body);
-        $this->validateHints($data->hints);
 
         $result = $this->commandBus->dispatch(new CreateText(
             $title,
             $source,
             $data->body ?? '',
-            $data->hints,
         ));
 
         if (!$result instanceof CreateTextResult) {
@@ -90,7 +87,6 @@ final readonly class AdminTextProcessor implements ProcessorInterface
             title: $data->title,
             source: $data->source,
             body: $data->body,
-            hints: $data->hints,
         );
     }
 
@@ -104,7 +100,6 @@ final readonly class AdminTextProcessor implements ProcessorInterface
         $title = $this->toTitle($data->title);
         $source = $this->toSource($data->source);
         $this->validateBody($data->body);
-        $this->validateHints($data->hints);
 
         // TextNotFoundException propagates: the DomainException mechanism maps it to 404.
         $this->commandBus->dispatch(new UpdateText(
@@ -112,7 +107,6 @@ final readonly class AdminTextProcessor implements ProcessorInterface
             $title,
             $source,
             $data->body ?? '',
-            $data->hints,
         ));
 
         return new AdminTextResource(
@@ -120,7 +114,6 @@ final readonly class AdminTextProcessor implements ProcessorInterface
             title: $data->title,
             source: $data->source,
             body: $data->body,
-            hints: $data->hints,
         );
     }
 
@@ -176,23 +169,6 @@ final readonly class AdminTextProcessor implements ProcessorInterface
             new RichText($this->htmlSanitizer->sanitize($body));
         } catch (\InvalidArgumentException $e) {
             throw self::violation('body', $e->getMessage());
-        }
-    }
-
-    private function validateHints(?string $hints): void
-    {
-        if (null === $hints) {
-            return;
-        }
-
-        $hints = trim($hints);
-
-        if ('' === $hints) {
-            return;
-        }
-
-        if (mb_strlen($hints) > Text::MAX_HINTS_LENGTH) {
-            throw self::violation('hints', \sprintf('Les pistes de méditation ne doivent pas dépasser %d caractères.', Text::MAX_HINTS_LENGTH));
         }
     }
 

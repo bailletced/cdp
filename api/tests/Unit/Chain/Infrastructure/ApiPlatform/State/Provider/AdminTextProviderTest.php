@@ -120,7 +120,7 @@ final class AdminTextProviderTest extends TestCase
     public function testProvideItemReturnsTheTextDetailsAsAResource(): void
     {
         $id = Uuid::v7()->toRfc4122();
-        $details = new AdminTextDetailsView($id, 'Oraison de Thérèse', 'Thérèse de Lisieux', '<p>Corps <strong>riche</strong>.</p>', 'Méditer le matin.', 3);
+        $details = new AdminTextDetailsView($id, 'Oraison de Thérèse', 'Thérèse de Lisieux', '<p>Corps <strong>riche</strong>.</p>', 3);
         $finder = new class($details) implements AdminTextViewFinder {
             public function __construct(
                 private readonly AdminTextDetailsView $details,
@@ -147,7 +147,6 @@ final class AdminTextProviderTest extends TestCase
         self::assertSame('Oraison de Thérèse', $result->title);
         self::assertSame('Thérèse de Lisieux', $result->source);
         self::assertSame('<p>Corps <strong>riche</strong>.</p>', $result->body);
-        self::assertSame('Méditer le matin.', $result->hints);
         self::assertSame(3, $result->attributionCount);
     }
 

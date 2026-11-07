@@ -74,7 +74,6 @@ final class SlotTextApiTest extends ApiTestCase
             'title' => 'Que rien ne te trouble',
             'source' => 'Thérèse d’Avila',
             'body' => '<p>Que rien ne te <strong>trouble</strong>.</p>',
-            'hints' => 'Relire lentement.',
         ], $body['text']);
     }
 

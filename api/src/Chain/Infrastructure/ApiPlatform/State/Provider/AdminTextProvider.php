@@ -92,7 +92,6 @@ final readonly class AdminTextProvider implements ProviderInterface
             title: $view->title,
             source: $view->source,
             body: $view->body,
-            hints: $view->hints,
             attributionCount: $view->attributionCount,
         );
     }

@@ -478,7 +478,6 @@ export interface components {
             title?: string | null;
             source?: string | null;
             body?: string | null;
-            hints?: string | null;
             attributionCount?: number | null;
         };
         "AdminText.jsonMergePatch": {
@@ -486,7 +485,6 @@ export interface components {
             title?: string | null;
             source?: string | null;
             body?: string | null;
-            hints?: string | null;
             attributionCount?: number | null;
         };
         "AdminText.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
@@ -494,7 +492,6 @@ export interface components {
             title?: string | null;
             source?: string | null;
             body?: string | null;
-            hints?: string | null;
             attributionCount?: number | null;
         };
         /** @description Unprocessable entity */

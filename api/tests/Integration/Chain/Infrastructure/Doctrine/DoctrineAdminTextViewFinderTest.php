@@ -67,9 +67,9 @@ final class DoctrineAdminTextViewFinderTest extends KernelTestCase
         self::assertSame('Oraison de Thérèse', $page->items[0]->title);
     }
 
-    public function testFindOneReturnsTheTextDetailsWithBodyHintsAndAttributionCount(): void
+    public function testFindOneReturnsTheTextDetailsWithBodyAndAttributionCount(): void
     {
-        $text = $this->createText('Oraison de Thérèse', 'Thérèse de Lisieux', '<p>Corps <strong>riche</strong>.</p>', 'Méditer le matin.');
+        $text = $this->createText('Oraison de Thérèse', 'Thérèse de Lisieux', '<p>Corps <strong>riche</strong>.</p>');
         $this->textRepository->add($text);
         $edition = $this->createEdition();
         $edition->getSlots()[0]->setTextId($text->getId()->value);
@@ -83,7 +83,6 @@ final class DoctrineAdminTextViewFinderTest extends KernelTestCase
         self::assertSame('Oraison de Thérèse', $view->title);
         self::assertSame('Thérèse de Lisieux', $view->source);
         self::assertSame('<p>Corps <strong>riche</strong>.</p>', $view->body);
-        self::assertSame('Méditer le matin.', $view->hints);
         self::assertSame(1, $view->attributionCount);
     }
 
@@ -162,13 +161,12 @@ final class DoctrineAdminTextViewFinderTest extends KernelTestCase
         self::assertNull($this->finder->findOne(new TextId()));
     }
 
-    private function createText(string $title, string $source, string $body = '<p>Corps du texte.</p>', ?string $hints = null): Text
+    private function createText(string $title, string $source, string $body = '<p>Corps du texte.</p>'): Text
     {
         return Text::create(
             new TextTitle($title),
             new TextSource($source),
             new RichText($body),
-            $hints,
         );
     }
 

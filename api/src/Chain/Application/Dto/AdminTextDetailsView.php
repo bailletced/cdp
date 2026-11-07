@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Chain\Application\Dto;
 
 /**
- * Full details of one text of the library (US-06.1): body and hints included,
+ * Full details of one text of the library (US-06.1): the body included,
  * with the attribution count.
  */
 final readonly class AdminTextDetailsView
@@ -15,7 +15,6 @@ final readonly class AdminTextDetailsView
         public string $title,
         public string $source,
         public string $body,
-        public ?string $hints,
         public int $attributionCount,
     ) {
     }

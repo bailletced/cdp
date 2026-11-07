@@ -29,11 +29,11 @@ final readonly class DoctrineInscriptionDigestFinder implements InscriptionDiges
     #[\Override]
     public function findByPriantAndEdition(PriantId $priantId, EditionId $editionId): ?InscriptionDigest
     {
-        /** @var list<array{edition_title: string, edition_starts_at: string, inscription_id: string, version: int|string, slot_id: string, starts_at: string, ends_at: string, text_title: string|null, text_source: string|null, text_body: string|null, text_hints: string|null}> $rows */
+        /** @var list<array{edition_title: string, edition_starts_at: string, inscription_id: string, version: int|string, slot_id: string, starts_at: string, ends_at: string, text_title: string|null, text_source: string|null, text_body: string|null}> $rows */
         $rows = $this->connection->fetchAllAssociative(
             'SELECT e.title AS edition_title, e.starts_at AS edition_starts_at,
                     i.id AS inscription_id, i.version, s.id AS slot_id, s.starts_at, s.ends_at,
-                    t.title AS text_title, t.source AS text_source, t.body AS text_body, t.hints AS text_hints
+                    t.title AS text_title, t.source AS text_source, t.body AS text_body
              FROM inscription i
              JOIN slot s ON s.id = i.slot_id
              JOIN edition e ON e.id = i.edition_id
@@ -64,7 +64,6 @@ final readonly class DoctrineInscriptionDigestFinder implements InscriptionDiges
                     $row['text_title'],
                     $row['text_source'],
                     $row['text_body'],
-                    $row['text_hints'],
                 );
             },
             $rows,

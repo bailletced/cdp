@@ -45,7 +45,6 @@ final class LoadTextFixturesCommand extends Command
                 new TextTitle($text['title']),
                 new TextSource($text['source']),
                 $text['body'],
-                $text['hints'],
             ));
         }
 

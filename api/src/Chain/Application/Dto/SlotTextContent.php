@@ -6,7 +6,7 @@ namespace App\Chain\Application\Dto;
 
 /**
  * The full text attributed to a slot (RG-TX-1): the body is the sanitized
- * HTML stored by the library (T27), the hints are plain text.
+ * HTML stored by the library (T27).
  */
 final readonly class SlotTextContent
 {
@@ -14,7 +14,6 @@ final readonly class SlotTextContent
         public string $title,
         public string $source,
         public string $body,
-        public ?string $hints,
     ) {
     }
 }

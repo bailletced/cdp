@@ -20,7 +20,6 @@ final readonly class CreateText implements CommandInterface
         public TextTitle $title,
         public TextSource $source,
         public string $body,
-        public ?string $hints = null,
     ) {
     }
 }

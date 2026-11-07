@@ -34,7 +34,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\SlotTextProvider;
 final class SlotTextResource
 {
     /**
-     * @param array{title: string, source: string, body: string, hints: string|null}|null $text
+     * @param array{title: string, source: string, body: string}|null $text
      */
     public function __construct(
         #[ApiProperty(identifier: true)]

@@ -37,6 +37,6 @@ final readonly class UpdateTextHandler
 
         $body = new RichText($this->htmlSanitizer->sanitize($command->body));
 
-        $text->update($command->title, $command->source, $body, $command->hints);
+        $text->update($command->title, $command->source, $body);
     }
 }

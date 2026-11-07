@@ -26,7 +26,7 @@ interface AdminTextViewFinder
     public function search(string $query, int $page, int $itemsPerPage): AdminTextViewPage;
 
     /**
-     * Full details of one text (body and hints included), with its
+     * Full details of one text (body included), with its
      * attribution count.
      */
     public function findOne(TextId $id): ?AdminTextDetailsView;

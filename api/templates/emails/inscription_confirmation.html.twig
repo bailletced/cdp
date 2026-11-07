@@ -18,9 +18,6 @@
                         <p style="margin: 0; font-size: 18px; font-weight: bold;">{{ slot.textTitle }}</p>
                         <p style="margin: 0 0 12px; color: #7c4a1f;">{{ slot.textSource }}</p>
                         <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 17px; line-height: 1.7;">{{ slot.textBody|raw }}</div>
-                        {% if slot.textHints %}
-                            <p style="margin-top: 12px; padding: 12px; background-color: #f1eadd;"><strong>Pistes de méditation</strong><br>{{ slot.textHints|nl2br }}</p>
-                        {% endif %}
                     {% else %}
                         <p style="color: #7c4a1f;">Le texte de ce créneau sera bientôt disponible.</p>
                     {% endif %}

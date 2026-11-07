@@ -22,7 +22,6 @@ final readonly class InscriptionDigestSlot
         public ?string $textTitle,
         public ?string $textSource,
         public ?string $textBody,
-        public ?string $textHints,
     ) {
     }
 }

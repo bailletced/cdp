@@ -18,7 +18,7 @@ function capitalized(value: string): string {
 /**
  * /textes/$slotId (F12-T04, US-12.1, US-12.2): the reading page of a slot —
  * its day and schedule (with the local time outside Europe/Paris), the
- * title, the source, the body in large type and the meditation hints.
+ * title, the source, the body in large type.
  *
  * The API answers 404 to anyone but the priants of the slot and the
  * organizers (RG-TX-1): the page then explains the text is reserved, with a
@@ -94,19 +94,6 @@ export function SlotTextPage() {
         <>
           <p className="mt-2 mb-8 text-lg italic">{text.source}</p>
           <RichTextView html={text.body} />
-          {text.hints ? (
-            <section
-              aria-labelledby="pistes"
-              className="mt-10 max-w-[65ch] border-accent border-l-2 pl-5"
-            >
-              <h2 id="pistes" className="mb-3 text-xl font-semibold">
-                Pistes de méditation
-              </h2>
-              <p className="whitespace-pre-line text-lg leading-relaxed">
-                {text.hints}
-              </p>
-            </section>
-          ) : null}
         </>
       ) : (
         <p className="mt-4 text-lg">
