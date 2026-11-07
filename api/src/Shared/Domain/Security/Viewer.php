@@ -17,12 +17,16 @@ final readonly class Viewer
 {
     /**
      * @param string[] $coveredInscriptionIds Active inscriptions covered by the device pass (F10)
+     * @param ?string  $accountEmail          E-mail of the signed-in account (F02-T12):
+     *                                        none off-session. The inscription is tied to it — a signed-in
+     *                                        member registers themselves only, nobody else (RG-IN-2).
      */
     public function __construct(
         public ?string $priantId,
         public bool $verified,
         public array $coveredInscriptionIds,
         public bool $isOrganizer,
+        public ?string $accountEmail = null,
     ) {
     }
 

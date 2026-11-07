@@ -88,6 +88,12 @@ final readonly class RegisterInscriptionsProcessor implements ProcessorInterface
         $displayName = $this->toDisplayName($data->displayName);
         $email = $this->toEmail($data->email);
 
+        // RG-IN-2: a signed-in member registers themselves only — the
+        // e-mail of the account wins, nobody registers another member.
+        if (null !== $viewer->accountEmail && $email->value !== $viewer->accountEmail) {
+            throw self::violation('email', 'Vous ne pouvez pas inscrire un autre membre : l’adresse e-mail ne correspond pas à votre compte.');
+        }
+
         if (!$this->hasConsent($data->consent)) {
             throw self::violation('consent', 'Le consentement est obligatoire pour s’inscrire.');
         }

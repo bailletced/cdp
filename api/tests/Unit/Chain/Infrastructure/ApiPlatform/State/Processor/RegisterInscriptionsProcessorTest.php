@@ -215,6 +215,41 @@ final class RegisterInscriptionsProcessorTest extends TestCase
         ), $viewer);
     }
 
+    public function testASignedInMemberCannotRegisterWithSomeoneElsesEmail(): void
+    {
+        // RG-IN-2: a signed-in member registers themselves only — the
+        // e-mail of the session wins, nobody registers another member
+        $viewer = new Viewer(null, true, [], false, 'marie@bailletced.org');
+
+        $this->assertViolationOn('email', new RegisterInscriptionsPayload(
+            slotIds: [new SlotId()->value->toRfc4122()],
+            displayName: 'Famille Martin',
+            email: 'famille.martin@bailletced.org',
+            consent: true,
+        ), $viewer);
+    }
+
+    public function testASignedInMemberRegistersWithTheirOwnEmail(): void
+    {
+        $priant = new Priant(new Email('marie@bailletced.org'), new DisplayName('Marie Dupont'));
+        $priant->giveConsent(new \DateTimeImmutable('2026-10-15 08:00:00', new \DateTimeZone('UTC')));
+        $this->priantRepository->add($priant);
+        $viewer = new Viewer($priant->getId()->value->toRfc4122(), true, [], false, 'marie@bailletced.org');
+
+        $commandBus = new FakeCommandBus(self::successfulResult());
+        $processor = $this->processor($commandBus, $viewer);
+
+        $processor->process(new RegisterInscriptionsPayload(
+            slotIds: [new SlotId()->value->toRfc4122()],
+            displayName: 'Marie Dupont',
+            email: 'marie@bailletced.org',
+        ), new Post(), [], []);
+
+        $command = $commandBus->dispatched;
+        self::assertInstanceOf(RegisterInscriptions::class, $command);
+        self::assertSame('marie@bailletced.org', $command->email?->value);
+    }
+
     public function testAnAuthenticatedPriantWhoAlreadyConsentedDoesNotNeedToConsentAgain(): void
     {
         $priant = new Priant(new Email('famille.martin@bailletced.org'), new DisplayName('Famille Martin'));

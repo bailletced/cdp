@@ -76,6 +76,19 @@ Feature: Public inscriptions API (F09-T07 to F09-T13)
         Then the response should be "201 Created"
         And an inscription should exist on the first slot of the last created edition
 
+    Scenario: A signed-in member cannot register someone else (RG-IN-2)
+        Given an account exists with email "marie@bailletced.org"
+        And a priant exists with email "marie@bailletced.org" and display name "Marie Dupont"
+        And this account is linked to the last created priant
+        And I am logged in as this account
+        When I register on the first slot of the last created edition with body:
+            """
+            {"displayName": "Famille Martin", "email": "famille.martin@bailletced.org", "consent": true}
+            """
+        Then the response should be "422 Unprocessable Entity"
+        And the response should contain a violation on "email"
+        And no inscription should exist on the first slot of the last created edition
+
     Scenario: Registering twice on the same slot returns a 409 (RG-IN-3)
         When I register on the first slot of the last created edition with body:
             """

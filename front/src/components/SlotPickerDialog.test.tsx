@@ -75,7 +75,7 @@ describe("SlotPickerDialog", () => {
       name: "Choisir un créneau",
     });
     const list = await within(dialog).findByRole("list", {
-      name: "Créneaux encore libres",
+      name: "Créneaux à venir",
     });
 
     expect(within(list).getAllByRole("listitem")).toHaveLength(2);
@@ -109,7 +109,7 @@ describe("SlotPickerDialog", () => {
     ).toBeNull();
   });
 
-  it("hides the past slots (RG-PL-2) and the viewer's own (RG-IN-3)", async () => {
+  it("hides the past, shows my own slots marked and untakeable", async () => {
     server.use(
       http.get(SLOTS_URL, () =>
         HttpResponse.json({
@@ -121,7 +121,14 @@ describe("SlotPickerDialog", () => {
               startsAt: "2020-11-28T21:00:00+00:00",
               label: "22h00–22h30 (passé)",
             }),
-            openSlot({ id: "slot-mine", mine: true, rank: 2 }),
+            openSlot({
+              id: "slot-mine",
+              mine: true,
+              rank: 2,
+              startsAt: "2099-11-28T22:00:00+00:00",
+              endsAt: "2099-11-28T22:30:00+00:00",
+              label: "23h00–23h30",
+            }),
           ],
         }),
       ),
@@ -134,20 +141,36 @@ describe("SlotPickerDialog", () => {
       name: "Choisir un créneau",
     });
     const list = await within(dialog).findByRole("list", {
-      name: "Créneaux encore libres",
+      name: "Créneaux à venir",
     });
 
-    expect(within(list).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(list).getAllByRole("listitem")).toHaveLength(2);
     expect(within(list).getByText("22h00–22h30")).toBeInTheDocument();
     expect(screen.queryByText("22h00–22h30 (passé)")).toBeNull();
+
+    // My own slot stays visible (RG-IN-3): muted, wearing the « Vous y êtes »
+    // mark, its priants count — and no « Je le prends » to re-register on it
+    const rows = within(list).getAllByRole("listitem");
+    const mineRow = rows[1] as HTMLElement;
+    expect(mineRow).toHaveTextContent(/Vous y êtes/);
+    expect(mineRow).toHaveTextContent(/0 priant/);
+    expect(
+      within(mineRow).queryByRole("link", { name: "Je le prends" }),
+    ).toBeNull();
   });
 
-  it("says the chain is complete once every slot is taken", async () => {
+  it("says the chain is complete once no slot is left to come", async () => {
     server.use(
       http.get(SLOTS_URL, () =>
         HttpResponse.json({
           id: EDITION_ID,
-          slots: [openSlot({ mine: true })],
+          slots: [
+            openSlot({
+              startsAt: "2020-11-28T21:00:00+00:00",
+              endsAt: "2020-11-28T21:30:00+00:00",
+              label: "22h00–22h30 (passé)",
+            }),
+          ],
         }),
       ),
     );

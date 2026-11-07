@@ -44,10 +44,12 @@ const LINK_CLASS = "text-link underline underline-offset-4";
  * The selected slots are recap'd with their label and a « Retirer » action
  * (the URL parameter is validated: missing, empty or unknown ids are
  * signalled, US-09.5). Past slots and the slots the viewer already holds
- * (RG-IN-3) are flagged and never submitted. The
- * form collects the display name, the email and the consent (RG-IN-5,
- * RG-IN-7): in session, the name and email are pre-filled and the consent
- * checkbox is hidden once the consent has been given.
+ * (RG-IN-3) are flagged and never submitted. The form collects the display
+ * name, the e-mail and the consent (RG-IN-5, RG-IN-7): in session, the
+ * name is pre-filled and the e-mail field disappears — the one of the
+ * account is sent (nobody registers another member, RG-IN-2, enforced by
+ * the API too) and the consent checkbox is hidden once the consent has
+ * been given.
  */
 export function InscriptionPage() {
   const { creneaux } = useSearch({ from: "/inscription" });
@@ -196,6 +198,7 @@ export function InscriptionPage() {
           defaultDisplayName={meQuery.data?.displayName ?? ""}
           defaultEmail={meQuery.data?.email ?? ""}
           consentRequired={consentRequired}
+          sessionEmail={meQuery.data?.email ?? null}
         />
       )}
     </div>
@@ -262,17 +265,22 @@ function SelectedSlotsRecap({
  * redirigées vers leur champ, le 409 est affiché en message métier (RG-IN-3),
  * le 429 invite à réessayer plus tard (F15) ; une fois la vérification
  * anti-robot activée, sa solution part avec le formulaire (F15-T06).
+ *
+ * En session (RG-IN-2) : le champ e-mail disparaît — l'adresse du compte
+ * est envoyée telle quelle, on n'inscrit jamais un autre membre.
  */
 function InscriptionForm({
   slotIds,
   defaultDisplayName,
   defaultEmail,
   consentRequired,
+  sessionEmail,
 }: {
   slotIds: string[];
   defaultDisplayName: string;
   defaultEmail: string;
   consentRequired: boolean;
+  sessionEmail: string | null;
 }) {
   const navigate = useNavigate();
   const registerInscriptions = useRegisterInscriptions();
@@ -300,7 +308,9 @@ function InscriptionForm({
         const payload = {
           slotIds,
           displayName: value.displayName.trim(),
-          email: value.email.trim(),
+          // In session, the account's e-mail is sent (RG-IN-2): the field
+          // is hidden, nobody registers another member
+          email: (sessionEmail ?? value.email).trim(),
           consent: consentRequired ? value.consent : true,
           website: websiteRef.current?.value ?? "",
           ...(altcha.payload ? { altcha: altcha.payload } : {}),
@@ -379,13 +389,20 @@ function InscriptionForm({
         placeholder="Famille Dupont"
         autoComplete="name"
       />
-      <FormField
-        form={form}
-        name="email"
-        label="Adresse e-mail"
-        type="email"
-        autoComplete="email"
-      />
+      {sessionEmail ? (
+        // The e-mail of the signed-in account, said but not editable
+        <p className="text-muted">
+          Inscription pour <strong>{sessionEmail}</strong>.
+        </p>
+      ) : (
+        <FormField
+          form={form}
+          name="email"
+          label="Adresse e-mail"
+          type="email"
+          autoComplete="email"
+        />
+      )}
       {consentRequired ? (
         <div className="flex flex-col items-start gap-1">
           <Checkbox

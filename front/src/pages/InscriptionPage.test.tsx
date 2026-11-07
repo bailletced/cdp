@@ -178,8 +178,9 @@ function trackRegistrations() {
 }
 
 /**
- * Fills the form as a valid visitor: the email is pre-filled from /api/me,
- * only the display name and the consent checkbox remain.
+ * Fills the form as a recognized priant: in session the e-mail field is
+ * gone (the account's e-mail is sent), only the display name and the
+ * consent checkbox remain.
  */
 function fillValidForm() {
   fireEvent.change(screen.getByLabelText("Nom affiché"), {
@@ -398,8 +399,9 @@ describe("InscriptionPage — validation du formulaire (F09-T16)", () => {
     expect(posts.called).toBe(false);
   });
 
-  it("rejette une adresse e-mail invalide", async () => {
+  it("rejette une adresse e-mail invalide, hors session", async () => {
     const posts = trackRegistrations();
+    visitor();
     openEditionWithSlots([FUTURE_SLOT_1]);
 
     renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
@@ -474,9 +476,10 @@ describe("InscriptionPage — consentement, champ piège, état d'envoi (F09-T17
     expect(await screen.findByLabelText("Nom affiché")).toHaveValue(
       "Thomas Baillet",
     );
-    expect(screen.getByLabelText("Adresse e-mail")).toHaveValue(
-      "thomas@bailletced.org",
-    );
+    // RG-IN-2: in session the e-mail field disappears — the account's
+    // e-mail is sent, nobody registers another member
+    expect(screen.queryByLabelText("Adresse e-mail")).not.toBeInTheDocument();
+    expect(screen.getByText("thomas@bailletced.org")).toBeInTheDocument();
     // The consent checkbox is hidden: the consent was already given
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
 
@@ -608,12 +611,16 @@ describe("InscriptionPage — envoi (F09-T18)", () => {
         );
       }),
     );
+    visitor();
     openEditionWithSlots([FUTURE_SLOT_1]);
 
     renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
 
     expect(await screen.findByLabelText("Nom affiché")).toBeInTheDocument();
     fillValidForm();
+    fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
+      target: { value: "marie@bailletced.org" },
+    });
     submitForm();
 
     // Each violation lands on its own field; the form stays on screen

@@ -149,7 +149,7 @@ test.describe("Mon espace (F14)", () => {
     // come, its schedule and its priants count, one « Je le prends »
     await page.getByRole("button", { name: "Choisir un créneau" }).click();
     const dialog = page.getByRole("dialog", { name: "Choisir un créneau" });
-    const list = dialog.getByRole("list", { name: "Créneaux encore libres" });
+    const list = dialog.getByRole("list", { name: "Créneaux à venir" });
     const wantedRow = list
       .getByRole("listitem")
       .filter({ hasText: wanted.label });

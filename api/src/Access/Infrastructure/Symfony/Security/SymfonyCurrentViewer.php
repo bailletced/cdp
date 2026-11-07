@@ -48,6 +48,7 @@ final readonly class SymfonyCurrentViewer implements CurrentViewer
             true,
             $covered,
             $user->isOrganizer(),
+            $account?->getEmail()->value,
         );
     }
 
