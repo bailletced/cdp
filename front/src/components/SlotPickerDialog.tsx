@@ -34,11 +34,27 @@ function priantsLabel(count: number): string {
  *
  * The viewer's own slots don't appear (RG-IN-3) ; past slots neither
  * (RG-PL-2) ; every action stays a single click deep.
+ *
+ * The dialog lives here but can also be opened from outside — my-space
+ * buttons far above this block open it directly (« Ajouter des
+ * créneaux ») through the optional `open`/`onOpenChange` pair, so no
+ * action ever depends on the reader scrolling to the right place.
  */
-export function SlotPickerDialog({ editionId }: { editionId: string }) {
+export function SlotPickerDialog({
+  editionId,
+  open,
+  onOpenChange,
+}: {
+  editionId: string;
+  /** Controlled mode: omit it and the internal trigger owns the state. */
+  open?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+}) {
   const slotsQuery = useEditionSlots(editionId);
   const nowMs = useNow();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ?? internalOpen;
+  const setDialogOpen = onOpenChange ?? setInternalOpen;
 
   let content: React.ReactNode = null;
 
@@ -64,7 +80,7 @@ export function SlotPickerDialog({ editionId }: { editionId: string }) {
           <Button
             variant="tertiary"
             className="mt-2"
-            onPress={() => setIsOpen(false)}
+            onPress={() => setDialogOpen(false)}
           >
             Fermer
           </Button>
@@ -98,10 +114,10 @@ export function SlotPickerDialog({ editionId }: { editionId: string }) {
 
   return (
     <>
-      <Button variant="outline" onPress={() => setIsOpen(true)}>
+      <Button variant="outline" onPress={() => setDialogOpen(true)}>
         Choisir un créneau
       </Button>
-      <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
+      <Modal isOpen={isOpen} onOpenChange={setDialogOpen}>
         <Modal.Backdrop isDismissable>
           <Modal.Container>
             <Modal.Dialog>
@@ -110,7 +126,7 @@ export function SlotPickerDialog({ editionId }: { editionId: string }) {
               </Modal.Header>
               <Modal.Body>{content}</Modal.Body>
               <Modal.Footer>
-                <Button variant="tertiary" onPress={() => setIsOpen(false)}>
+                <Button variant="tertiary" onPress={() => setDialogOpen(false)}>
                   Fermer
                 </Button>
               </Modal.Footer>

@@ -118,16 +118,17 @@ function SlotStateBadge({ state }: { state: SlotTemporalState }) {
  * « Mes créneaux » (F14-T07, US-14.1): my slots of the public edition, each
  * with its day, its schedule (and my local time abroad) and its text.
  *
- * « Ajouter des créneaux » leads to the planning below — the inscription
- * form is pre-filled from the session (RG-IN-7) — and a single « Ajouter mes
- * créneaux à mon agenda » downloads the file of all my slots (F14-T10,
- * arbitrage Q15: no button per slot).
+ * « Ajouter des créneaux » (and « Choisir un créneau » when I have none)
+ * opens the picker dialog at once, wherever the reader stands on the page
+ * — never a scroll to hunt for — and a single « Ajouter mes créneaux à mon
+ * agenda » downloads the file of all my slots (F14-T10, arbitrage Q15: no
+ * button per slot).
  *
  * « Me désinscrire » (F14-T09, US-14.3) until the slot starts: after a
  * confirmation, the outcome is announced politely on the screen — no e-mail
  * is sent — and the focus moves to the list heading, the button being gone.
  */
-function MySlots() {
+function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
   const query = useQuery(myInscriptionsQueryOptions);
   const editionQuery = useCurrentEdition();
   const nowMs = useNow();
@@ -197,9 +198,9 @@ function MySlots() {
     return (
       <p className="text-lg">
         Vous n'avez pas encore de créneau.{" "}
-        <a href="#ajouter-des-creneaux" className={LINK_CLASS}>
+        <button type="button" className="link" onClick={onAddSlots}>
           Choisir un créneau
-        </a>
+        </button>
       </p>
     );
   }
@@ -236,9 +237,9 @@ function MySlots() {
         {slots.length === 0 ? (
           <p className="text-lg">
             Vous n'avez pas encore de créneau.{" "}
-            <a href="#ajouter-des-creneaux" className={LINK_CLASS}>
+            <button type="button" className="link" onClick={onAddSlots}>
               Choisir un créneau
-            </a>
+            </button>
           </p>
         ) : (
           <ul className="grid gap-4">
@@ -312,12 +313,13 @@ function MySlots() {
           </ul>
         )}
         <div className="mt-6 flex flex-wrap gap-3">
-          <a
-            href="#ajouter-des-creneaux"
+          <button
+            type="button"
+            onClick={onAddSlots}
             className="inline-flex min-h-11 items-center rounded-[var(--radius)] border border-border px-5 font-medium"
           >
             Ajouter des créneaux
-          </a>
+          </button>
           {slots.length > 0 ? (
             <a
               href={`${baseUrl}/api/me/calendar.ics`}
@@ -354,7 +356,13 @@ function MySlots() {
  * an empty slot (F13-T06) is enough from here, and « Je le prends » then
  * registers the already-consented priant at once.
  */
-function AddSlots() {
+function AddSlots({
+  pickerOpen,
+  setPickerOpen,
+}: {
+  pickerOpen: boolean;
+  setPickerOpen: (isOpen: boolean) => void;
+}) {
   const editionQuery = useCurrentEdition();
 
   if (editionQuery.isError) {
@@ -385,7 +393,11 @@ function AddSlots() {
         un autre, ou choisissez le temps qui vous convient.
       </p>
       <EmptySlotDraw editionId={editionId} />
-      <SlotPickerDialog editionId={editionId} />
+      <SlotPickerDialog
+        editionId={editionId}
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+      />
     </>
   );
 }
@@ -402,6 +414,10 @@ export function MySpacePage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
+  // The picker's « open » state lives here: every « Ajouter des créneaux »
+  // affordance — far above the section that owns the dialog — opens it at
+  // once, no scroll needed (a short page would make an anchor invisible)
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -430,13 +446,13 @@ export function MySpacePage() {
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <PageTitle>Mon espace</PageTitle>
       <p className="mb-6 text-muted">{viewer.email}</p>
-      <MySlots />
+      <MySlots onAddSlots={() => setPickerOpen(true)} />
       <section aria-labelledby="ajouter-des-creneaux-titre">
         <h2 id="ajouter-des-creneaux-titre" className="mb-4 scroll-mt-24">
           Ajouter des créneaux
         </h2>
         <div id="ajouter-des-creneaux" className="scroll-mt-24">
-          <AddSlots />
+          <AddSlots pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
         </div>
       </section>
       <button

@@ -229,18 +229,38 @@ describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
 
   it("invites to choose a slot when I have none yet", async () => {
     mySpace([]);
+    openEdition();
 
     renderApp("/my-space");
 
     expect(
       await screen.findByText("Vous n'avez pas encore de créneau."),
     ).toBeInTheDocument();
+    // The invitation opens the picker at once, it is not an anchor to hunt for
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Choisir un créneau" })[0],
+    );
     expect(
-      screen.getByRole("link", { name: "Choisir un créneau" }),
-    ).toHaveAttribute("href", "#ajouter-des-creneaux");
+      await screen.findByRole("dialog", { name: "Choisir un créneau" }),
+    ).toBeInTheDocument();
+  });
+
+  it("opens the picker from « Ajouter des créneaux », no scroll involved", async () => {
+    mySpace([]);
+    openEdition();
+
+    renderApp("/my-space");
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Ajouter des créneaux" }),
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Choisir un créneau" }),
+    ).toBeInTheDocument();
   });
 
   it("invites the same way a member whose account has no priant yet (403)", async () => {
+    openEdition();
     server.use(
       http.get(
         MY_INSCRIPTIONS_URL,
@@ -253,9 +273,12 @@ describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
     expect(
       await screen.findByText("Vous n'avez pas encore de créneau."),
     ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Choisir un créneau" })[0],
+    );
     expect(
-      screen.getByRole("link", { name: "Choisir un créneau" }),
-    ).toHaveAttribute("href", "#ajouter-des-creneaux");
+      await screen.findByRole("dialog", { name: "Choisir un créneau" }),
+    ).toBeInTheDocument();
     // The 403 is a normal state, not a loading failure
     expect(
       screen.queryByText("Vos créneaux n'ont pas pu être chargés."),
@@ -666,15 +689,13 @@ describe("MySpacePage — me désinscrire (F14-T09, US-14.3)", () => {
 
 describe("MySpacePage — ajouter des créneaux et mon agenda (F14-T10, US-14.4)", () => {
   it("leads to the planning and offers a single agenda file for all my slots", async () => {
+    openEdition();
     mySpace([myInscription(), myInscription({ id: "inscription-2" })]);
 
     renderApp("/my-space");
 
-    expect(
-      await screen.findByRole("link", { name: "Ajouter des créneaux" }),
-    ).toHaveAttribute("href", "#ajouter-des-creneaux");
     // Arbitrage Q15: one button for the whole edition, none per slot
-    const agenda = screen.getAllByRole("link", {
+    const agenda = await screen.findAllByRole("link", {
       name: "Ajouter mes créneaux à mon agenda",
     });
     expect(agenda).toHaveLength(1);
@@ -683,6 +704,14 @@ describe("MySpacePage — ajouter des créneaux et mon agenda (F14-T10, US-14.4)
       "http://localhost:8080/api/me/calendar.ics",
     );
     expect(agenda[0]).toHaveAttribute("download", "mes-creneaux.ics");
+
+    // « Ajouter des créneaux » opens the picker dialog at once (F14-T12)
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ajouter des créneaux" }),
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Choisir un créneau" }),
+    ).toBeInTheDocument();
   });
 
   it("offers no agenda file while I have no slot", async () => {
