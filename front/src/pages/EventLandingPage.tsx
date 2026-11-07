@@ -25,6 +25,11 @@ const EVENT = {
 const SIGNUP_HINT =
   "Un e-mail suffit : votre lien de connexion arrive aussitôt, pour choisir votre créneau. Sans mot de passe.";
 
+// E-mail clients are quick to misfile an automatic e-mail: say it before the
+// user concludes nothing was sent
+const SPAM_HINT =
+  "L'e-mail peut se glisser parmi vos indésirables — pensez à y regarder, et à nous marquer comme expéditeur sûr.";
+
 type SubmissionState = "idle" | "submitting" | "sent" | "error";
 
 /**
@@ -94,7 +99,12 @@ function EmailCapture({ submitLabel }: { submitLabel: string }) {
         {state === "submitting" ? "Envoi en cours…" : submitLabel}
       </Button>
       {state === "sent" || state === "error" ? (
-        <output>{message}</output>
+        <output className="flex flex-col gap-1">
+          <span>{message}</span>
+          {state === "sent" ? (
+            <span className="text-muted">{SPAM_HINT}</span>
+          ) : null}
+        </output>
       ) : null}
     </form>
   );
@@ -108,9 +118,9 @@ function EmailCapture({ submitLabel }: { submitLabel: string }) {
  * A light, airful page (the `event-landing` body class swaps the dark
  * vigil theme for a warm ivory treatment, scoped to this route) whose one
  * job is collecting e-mail addresses: the form sits in the hero, next to
- * Our Lady of Mount Carmel with the Child Jesus, and again after the
- * pitch. Choosing a slot happens on /my-space once the welcome e-mail's
- * link has signed the visitor in.
+ * Christ the King and the Queen Virgin — Hans von Kulmbach, Pławno
+ * triptych — and again after the pitch. Choosing a slot happens on
+ * /my-space once the welcome e-mail's link has signed the visitor in.
  */
 export function EventLandingPage() {
   const me = useMe().data;
@@ -145,21 +155,23 @@ export function EventLandingPage() {
                 <>
                   <EmailCapture submitLabel="Je participe" />
                   <p className="mt-3 text-muted">{SIGNUP_HINT}</p>
+                  <p className="mt-1 text-muted">{SPAM_HINT}</p>
                 </>
               )}
             </div>
           </div>
           <figure className="mx-auto w-full max-w-xs md:max-w-none">
             <img
-              src="/img/notre-dame-du-mont-carmel.jpg"
-              alt="Notre-Dame du Mont-Carmel portant l'Enfant Jésus"
+              src="/img/christ-roi.jpg"
+              alt="Le Christ roi et la Vierge reine, couronnés, par Hans von Kulmbach"
               className="w-full rounded-2xl border border-separator object-cover"
               // Do not let the image push the form below the fold
               decoding="async"
             />
             <figcaption className="mt-3 text-center text-muted">
-              Notre-Dame du Mont-Carmel et l'Enfant Jésus — José de Ibarra,
-              XVIII<sup>e</sup> siècle
+              Le Christ roi et la Vierge reine — Hans von Kulmbach, début du XVI
+              <sup>e</sup> siècle (triptyque de Pławno, musée national de
+              Varsovie)
             </figcaption>
           </figure>
         </div>
@@ -258,7 +270,10 @@ export function EventLandingPage() {
               .
             </p>
           ) : (
-            <EmailCapture submitLabel="Je m'inscris" />
+            <>
+              <EmailCapture submitLabel="Je m'inscris" />
+              <p className="mt-3 text-muted">{SPAM_HINT}</p>
+            </>
           )}
         </section>
       </div>

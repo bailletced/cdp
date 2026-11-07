@@ -90,11 +90,12 @@ describe("EventLandingPage (/landing)", () => {
       screen.queryByRole("region", { name: "Grille des créneaux" }),
     ).toBeNull();
 
-    // Our Lady of Mount Carmel with the Child Jesus
+    // Christ the King, by a named painter
     const image = screen.getByRole("img", {
-      name: "Notre-Dame du Mont-Carmel portant l'Enfant Jésus",
+      name: "Le Christ roi et la Vierge reine, couronnés, par Hans von Kulmbach",
     });
-    expect(image).toHaveAttribute("src", "/img/notre-dame-du-mont-carmel.jpg");
+    expect(image).toHaveAttribute("src", "/img/christ-roi.jpg");
+    expect(screen.getByText(/Hans von Kulmbach/)).toBeInTheDocument();
 
     // The steps, then the second capture form
     expect(

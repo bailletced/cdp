@@ -45,14 +45,16 @@ test.describe("Landing /landing", () => {
         () => getComputedStyle(document.body).backgroundColor,
       ),
     ).toBe("rgb(250, 247, 240)");
-    // Our Lady of Mount Carmel with the Child Jesus is part of the hero
+    // Christ the King, an existing painting by a named painter, heads the hero
     const image = page.getByRole("img", {
-      name: "Notre-Dame du Mont-Carmel portant l'Enfant Jésus",
+      name: "Le Christ roi et la Vierge reine, couronnés, par Hans von Kulmbach",
     });
     await expect(image).toBeVisible();
-    expect(await image.getAttribute("src")).toBe(
-      "/img/notre-dame-du-mont-carmel.jpg",
-    );
+    expect(await image.getAttribute("src")).toBe("/img/christ-roi.jpg");
+    // The painter is named on the page
+    await expect(page.getByText(/Hans von Kulmbach/)).toBeVisible();
+    // The e-mail may be misfiled: said before and after sending
+    await expect(page.getByText(/indésirables/).first()).toBeVisible();
     // The focused (empty) e-mail field stays light: the field states are
     // re-derived from the page theme, not the dark one
     await page.locator("#inscription input[name=email]").click();
