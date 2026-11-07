@@ -117,10 +117,11 @@ function EmailCapture({ submitLabel }: { submitLabel: string }) {
  *
  * A light, airful page (the `event-landing` body class swaps the dark
  * vigil theme for a warm ivory treatment, scoped to this route) whose one
- * job is collecting e-mail addresses: the form sits in the hero, next to
+ * job is collecting e-mail addresses: a single form, in the hero, next to
  * Christ the King and the Queen Virgin — Hans von Kulmbach, Pławno
- * triptych — and again after the pitch. Choosing a slot happens on
- * /my-space once the welcome e-mail's link has signed the visitor in.
+ * triptych. The closing word links back to it, never a second form.
+ * Choosing a slot happens on /my-space once the welcome e-mail's link has
+ * signed the visitor in.
  */
 export function EventLandingPage() {
   const me = useMe().data;
@@ -249,7 +250,8 @@ export function EventLandingPage() {
           </ol>
         </section>
 
-        {/* Second capture, for the readers who made it this far */}
+        {/* The closing word: one form only, at the top — this leads back to it
+         * so the reader who reached the end never meets a second input */}
         <section
           aria-labelledby="offrir-titre"
           id="inscription-fin"
@@ -258,22 +260,26 @@ export function EventLandingPage() {
           <h2 id="offrir-titre" className="mb-4">
             Offrez une demi-heure
           </h2>
-          <p className="mb-6 max-w-prose">
+          <p className="max-w-prose">
             Rien à installer, rien à régler : votre e-mail suffit, la chaîne
             vous attend.
           </p>
           {me ? (
-            <p>
+            <p className="mt-2">
               <Link href="/my-space">
                 Choisissez vos créneaux dans mon espace
               </Link>
               .
             </p>
           ) : (
-            <>
-              <EmailCapture submitLabel="Je m'inscris" />
-              <p className="mt-3 text-muted">{SPAM_HINT}</p>
-            </>
+            <p className="mt-2">
+              <a
+                href="#inscription"
+                className="text-link underline underline-offset-4"
+              >
+                Je participe
+              </a>
+            </p>
           )}
         </section>
       </div>

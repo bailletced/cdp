@@ -105,12 +105,15 @@ describe("EventLandingPage (/landing)", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "Offrez une demi-heure" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Je m'inscris" }),
-    ).toBeInTheDocument();
+    // One form only: the closing word links back to it, no second input
+    expect(screen.queryByRole("button", { name: "Je m'inscris" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Je participe" })).toHaveAttribute(
+      "href",
+      "#inscription",
+    );
   });
 
-  it("shows the form in the hero and after the pitch, both posting /auth/register", async () => {
+  it("shows one form in the hero, posting /auth/register", async () => {
     const bodies: string[] = [];
     server.use(
       http.post(REGISTER_URL, async ({ request }) => {
@@ -127,9 +130,9 @@ describe("EventLandingPage (/landing)", () => {
 
     renderPage();
 
-    // Two instances, one above the fold and one after the pitch
+    // A single instance, above the fold: the closing word links back to it
     const emailFields = screen.getAllByLabelText("Adresse e-mail");
-    expect(emailFields).toHaveLength(2);
+    expect(emailFields).toHaveLength(1);
 
     fireEvent.change(emailFields[0], {
       target: { value: "priant@example.org" },
@@ -156,7 +159,7 @@ describe("EventLandingPage (/landing)", () => {
 
     renderPage();
 
-    // Both captures are replaced by a link to my-space
+    // The capture is replaced by a link to my-space; the closing word too
     expect(
       await screen.findAllByRole("link", {
         name: "Choisissez vos créneaux dans mon espace",
