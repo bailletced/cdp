@@ -206,7 +206,7 @@ test.describe("Mon espace (F14)", () => {
     // « Me désinscrire » stays a muted link away from it
     const keptCard = mine.getByRole("listitem").filter({ hasText: kept.label });
     await expect(
-      keptCard.getByRole("link", { name: `Prier ce créneau — ${kept.label}` }),
+      keptCard.getByRole("link", { name: `Voir le créneau — ${kept.label}` }),
     ).toBeVisible();
     await expectNoA11yViolations(page);
 
@@ -225,7 +225,7 @@ test.describe("Mon espace (F14)", () => {
 
     // 2bis. The prayer funnel indeed leads to the reading page
     await page
-      .getByRole("link", { name: `Prier ce créneau — ${kept.label}` })
+      .getByRole("link", { name: `Voir le créneau — ${kept.label}` })
       .click();
     await page.waitForURL("**/textes/**");
     await expect(

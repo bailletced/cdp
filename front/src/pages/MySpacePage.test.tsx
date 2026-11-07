@@ -153,11 +153,11 @@ describe("MySpacePage — l'état de la chaîne (F14)", () => {
 
     // The pray CTA is the first, full-width action of every card
     const prayUpcoming = within(upcoming).getByRole("link", {
-      name: "Prier ce créneau — 20h00–20h30",
+      name: "Voir le créneau — 20h00–20h30",
     });
     expect(prayUpcoming).toHaveAttribute("href", "/textes/slot-1");
     expect(
-      within(prayUpcoming).getByText("Prier ce créneau"),
+      within(prayUpcoming).getByText("Voir le créneau"),
     ).toBeInTheDocument();
 
     const prayPast = within(past).getByRole("link", {
@@ -210,7 +210,7 @@ describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
     expect(second).toHaveTextContent("Que rien ne te trouble");
     expect(
       within(second).getByRole("link", {
-        name: "Prier ce créneau — 22h00–22h30",
+        name: "Voir le créneau — 22h00–22h30",
       }),
     ).toHaveAttribute("href", "/textes/slot-5");
     expect(within(second).getByText("À venir")).toBeInTheDocument();

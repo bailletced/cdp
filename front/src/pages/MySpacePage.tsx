@@ -278,7 +278,7 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
                       ? "Relire ce créneau"
                       : state === "current"
                         ? "Prier maintenant"
-                        : "Prier ce créneau"}
+                        : "Voir le créneau"}
                     <span className="sr-only"> — {slot.label}</span>
                     <svg
                       viewBox="0 0 24 24"
