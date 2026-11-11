@@ -72,7 +72,7 @@ describe("EmptySlotDraw (F13-T06, US-13.2)", () => {
       within(dialog).getByText("Que rien ne te trouble"),
     ).toBeInTheDocument();
     expect(
-      within(dialog).getByRole("link", { name: "Je le prends" }),
+      within(dialog).getByRole("link", { name: "Choisir" }),
     ).toHaveAttribute("href", "/inscription?creneaux=slot-12");
     // The focus moved into the dialog (React Aria, next animation frame)
     await waitFor(() =>
@@ -111,7 +111,7 @@ describe("EmptySlotDraw (F13-T06, US-13.2)", () => {
     expect(await within(dialog).findByText("5h00–5h30")).toBeInTheDocument();
     expect(excluded).toEqual(["", "slot-12"]);
     expect(
-      within(dialog).getByRole("link", { name: "Je le prends" }),
+      within(dialog).getByRole("link", { name: "Choisir" }),
     ).toHaveAttribute("href", "/inscription?creneaux=slot-30");
   });
 
@@ -150,7 +150,7 @@ describe("EmptySlotDraw (F13-T06, US-13.2)", () => {
     expect(
       await screen.findByText("La chaîne est complète. Merci !"),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Je le prends" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Choisir" })).toBeNull();
   });
 
   it("gives the focus back to the button once closed", async () => {

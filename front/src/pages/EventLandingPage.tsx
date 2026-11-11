@@ -3,7 +3,6 @@ import { type FormEvent, useState } from "react";
 import { baseUrl } from "../api/client";
 import { useMe } from "../api/hooks";
 import { PageTitle } from "../components/PageTitle";
-import { SITE_NAME } from "../config/site";
 
 const GENERIC_ERROR_MESSAGE = "Une erreur est survenue. Veuillez réessayer.";
 // Same wording as the API's own 202 body (RegisterController)
@@ -23,12 +22,12 @@ const EVENT = {
 } as const;
 
 const SIGNUP_HINT =
-  "Un e-mail suffit : votre lien de connexion arrive aussitôt, pour choisir votre créneau. Sans mot de passe.";
+  "Nous allons vous faire parvenir un lien de connexion qui vous permettra de choisir votre créneau.";
 
 // E-mail clients are quick to misfile an automatic e-mail: say it before the
 // user concludes nothing was sent
 const SPAM_HINT =
-  "L'e-mail peut se glisser parmi vos indésirables — pensez à y regarder, et à nous marquer comme expéditeur sûr.";
+  "L'e-mail peut se glisser parmi vos indésirables ! Pour éviter que cela se reproduise, vous pouvez nous marquer comme expéditeur sûr.";
 
 type SubmissionState = "idle" | "submitting" | "sent" | "error";
 
@@ -132,34 +131,14 @@ export function EventLandingPage() {
       <header className="mx-auto w-full max-w-5xl px-4 pt-12 pb-4 sm:pt-16">
         <div className="grid items-center gap-10 md:grid-cols-[3fr_2fr]">
           <div>
-            <p className="text-muted">{SITE_NAME}</p>
             <div className="mt-6">
               <PageTitle>{EVENT.headline}</PageTitle>
             </div>
             <p className="mt-6 max-w-prose text-xl leading-relaxed">
               Du <strong>{EVENT.fromLabel}</strong> au{" "}
-              <strong>{EVENT.toLabel}</strong> (heure de Paris), la Communion
-              veille sans interruption : l'Évangile selon saint Marc est prié
-              trente minutes après trente minutes, chacun offrant une demi-heure
-              au Seigneur.
+              <strong>{EVENT.toLabel}</strong>, prions ensemble sans
+              interruption pour la paix avec l'Évangile selon Saint Marc.
             </p>
-            <div id="inscription" className="mt-8 scroll-mt-8">
-              {me ? (
-                <p className="text-lg">
-                  Vous êtes déjà inscrit·e.{" "}
-                  <Link href="/my-space">
-                    Choisissez vos créneaux dans mon espace
-                  </Link>
-                  .
-                </p>
-              ) : (
-                <>
-                  <EmailCapture submitLabel="Je participe" />
-                  <p className="mt-3 text-muted">{SIGNUP_HINT}</p>
-                  <p className="mt-1 text-muted">{SPAM_HINT}</p>
-                </>
-              )}
-            </div>
           </div>
           <figure className="mx-auto w-full max-w-xs md:max-w-none">
             <img
@@ -186,29 +165,25 @@ export function EventLandingPage() {
           </h2>
           <div className="max-w-prose space-y-8">
             <div className="border-t border-separator pt-6">
-              <h3 className="mb-2">Quelqu'un prie à chaque instant</h3>
+              <h3 className="mb-2">Relayons-nous dans la prière</h3>
               <p>
-                Chaque créneau de 30 minutes s'enchaîne au suivant : de la nuit
-                du samedi à la nuit du dimanche, la prière ne s'interrompt pas.
-                Une veillée que la Communion porte ensemble.
+                En nous passant des relais de 30 minutes, la chaîne de prière ne
+                s'interromp pas.
               </p>
             </div>
             <div className="border-t border-separator pt-6">
-              <h3 className="mb-2">
-                L'Évangile selon saint Marc, d'un bout à l'autre
-              </h3>
+              <h3 className="mb-2">L'Évangile selon saint Marc</h3>
               <p>
-                Toute la chaîne prie l'Évangile selon saint Marc : le passage de
-                votre créneau vous est remis à votre espace, avec le texte à
-                méditer.
+                Tous les participants prient avec un passage de l'Évangile selon
+                saint Marc. Celui-ci vous sera transmis par email et sera
+                accessible sur la plateforme.
               </p>
             </div>
             <div className="border-t border-separator pt-6">
-              <h3 className="mb-2">Une demi-heure, offerte</h3>
+              <h3 className="mb-2">Une demi-heure offerte</h3>
               <p>
-                De chez vous, comme vous priez — oraison, chapelet, simple
-                silence. Trente minutes offertes au Seigneur, c'est tout ce que
-                la chaîne demande.
+                À la veille de l'Avent, prions en oraison les uns avec les
+                autres pour la paix.
               </p>
             </div>
           </div>
@@ -234,7 +209,7 @@ export function EventLandingPage() {
               {
                 step: "3",
                 title: "Choisissez votre créneau",
-                text: "Dans le planning : votre demi-heure — ou plusieurs, si le Seigneur vous en donne le loisir.",
+                text: "Dans votre espace : votre demi-heure — ou plusieurs.",
               },
             ].map((item) => (
               <li key={item.step} className="border-t border-separator pt-4">
@@ -248,39 +223,24 @@ export function EventLandingPage() {
               </li>
             ))}
           </ol>
-        </section>
 
-        {/* The closing word: one form only, at the top — this leads back to it
-         * so the reader who reached the end never meets a second input */}
-        <section
-          aria-labelledby="offrir-titre"
-          id="inscription-fin"
-          className="mt-20 scroll-mt-8"
-        >
-          <h2 id="offrir-titre" className="mb-4">
-            Offrez une demi-heure
-          </h2>
-          <p className="max-w-prose">
-            Rien à installer, rien à régler : votre e-mail suffit, la chaîne
-            vous attend.
-          </p>
-          {me ? (
-            <p className="mt-2">
-              <Link href="/my-space">
-                Choisissez vos créneaux dans mon espace
-              </Link>
-              .
-            </p>
-          ) : (
-            <p className="mt-2">
-              <a
-                href="#inscription"
-                className="text-link underline underline-offset-4"
-              >
-                Je participe
-              </a>
-            </p>
-          )}
+          <div id="inscription" className="mt-8 scroll-mt-8">
+            {me ? (
+              <p className="text-lg">
+                Vous êtes déjà inscrit(e){" "}
+                <Link href="/my-space">
+                  Choisissez vos créneaux dans mon espace
+                </Link>
+                .
+              </p>
+            ) : (
+              <>
+                <EmailCapture submitLabel="Je participe" />
+                <p className="mt-3 text-muted">{SIGNUP_HINT}</p>
+                <p className="mt-1 text-muted">{SPAM_HINT}</p>
+              </>
+            )}
+          </div>
         </section>
       </div>
     </>

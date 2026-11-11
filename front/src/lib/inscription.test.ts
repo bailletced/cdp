@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  CONSENT_REQUIRED_MESSAGE,
   DISPLAY_NAME_LENGTH_MESSAGE,
   DISPLAY_NAME_REQUIRED_MESSAGE,
   EMAIL_INVALID_MESSAGE,
@@ -30,9 +29,8 @@ function slot(id: string, rank: number): PlanningSlot {
 }
 
 /** Runs the Standard Schema synchronously and returns its issues. */
-function validate(values: unknown, consentRequired = true) {
-  const result =
-    inscriptionFormSchema(consentRequired)["~standard"].validate(values);
+function validate(values: unknown) {
+  const result = inscriptionFormSchema()["~standard"].validate(values);
 
   if (result instanceof Promise) {
     throw new Error("The inscription form schema must validate synchronously.");
@@ -41,14 +39,8 @@ function validate(values: unknown, consentRequired = true) {
   return result.issues ?? [];
 }
 
-function issueOn(
-  values: unknown,
-  field: string,
-  consentRequired = true,
-): string | undefined {
-  return validate(values, consentRequired).find(
-    (issue) => issue.path?.[0] === field,
-  )?.message;
+function issueOn(values: unknown, field: string): string | undefined {
+  return validate(values).find((issue) => issue.path?.[0] === field)?.message;
 }
 
 const VALID_VALUES = {
@@ -145,14 +137,12 @@ describe("inscriptionFormSchema (F09-T16)", () => {
     );
   });
 
-  it("requires the consent only when its checkbox is shown (RG-IN-5, RG-IN-7)", () => {
-    expect(issueOn({ ...VALID_VALUES, consent: false }, "consent", true)).toBe(
-      CONSENT_REQUIRED_MESSAGE,
+  it("never requires the consent: sending the registration accepts (RG-IN-5 reformulé)", () => {
+    // No consent checkbox anymore: any boolean passes — the page always
+    // sends consent:true with the payload
+    expect(issueOn({ ...VALID_VALUES, consent: false }, "consent")).toBe(
+      undefined,
     );
-    // Hidden checkbox (session, consent already given): no consent required
-    expect(
-      issueOn({ ...VALID_VALUES, consent: false }, "consent", false),
-    ).toBeUndefined();
   });
 
   it("never validates the honeypot field (§6.7)", () => {

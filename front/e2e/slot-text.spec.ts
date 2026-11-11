@@ -2,6 +2,7 @@ import { type APIRequestContext, expect, test } from "@playwright/test";
 import { E2E_ORGANIZER_EMAIL } from "./globalSetup";
 import { expectNoA11yViolations } from "./helpers/a11y";
 import { createOpenEdition } from "./helpers/edition";
+import { registerOnSlots } from "./helpers/inscription";
 
 const JSON_LD = { "Content-Type": "application/ld+json" };
 
@@ -70,27 +71,12 @@ test.describe("Lecture du texte (F12-T06)", () => {
     // 1. Register from the phone
     const phone = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await phone.newPage();
-    await page.goto("/planning");
-    const checkbox = page
-      .getByRole("region", { name: "Grille des créneaux" })
-      .getByRole("checkbox", {
-        name: `Sélectionner le créneau de ${slot.label}`,
-      });
-    // react-aria hides the input in a clipped span: click the wrapping label
-    await checkbox.locator("xpath=ancestor::label[1]").click();
-    await page.getByRole("link", { name: "M'inscrire (1)" }).click();
-    await page.getByLabel("Nom affiché").fill(`Lectrice E2E ${Date.now()}`);
-    await page
-      .getByLabel("Adresse e-mail")
-      .fill(`lecture-e2e-${Date.now()}@example.org`);
-    await page
-      .getByRole("checkbox", {
-        name: /J'accepte la politique de confidentialité/,
-      })
-      .locator("xpath=ancestor::label[1]")
-      .click({ position: { x: 12, y: 12 } });
-    await page.getByRole("button", { name: "S'inscrire" }).click();
-    await page.waitForURL(/\/inscription\/confirmation/);
+    await registerOnSlots(
+      page,
+      [slot.id],
+      `Lectrice E2E ${Date.now()}`,
+      `lecture-e2e-${Date.now()}@example.org`,
+    );
 
     // 2. From the confirmation, the full text
     await page

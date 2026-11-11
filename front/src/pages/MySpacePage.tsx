@@ -10,13 +10,13 @@ import {
   useViewer,
 } from "../api/hooks";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { EditionBanner } from "../components/EditionBanner";
 import { EmptySlotDraw } from "../components/EmptySlotDraw";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 import { RenameDialog } from "../components/RenameDialog";
 import { SlotPickerDialog } from "../components/SlotPickerDialog";
+import { formatCountdown } from "../lib/editionStatus";
 import { withLocalTime } from "../lib/localTime";
 import { type SlotTemporalState, slotTemporalState } from "../lib/planning";
 import { useNow } from "../lib/serverClock";
@@ -86,9 +86,17 @@ const SLOT_STATE_LABEL: Record<SlotTemporalState, string> = {
  * A discreet badge that tells at a glance where my slot stands: a golden
  * dot while it is still to come (the expectation), a filled golden pill
  * while I can pray it now, muted once it is behind me. The label always
- * accompanies the colour (§5.3-1: never colour alone).
+ * accompanies the colour (§5.3-1: never colour alone). While the slot is
+ * still to come, the badge carries the countdown to its start — « À venir
+ * · 12 j 03 h » — the figure speaks for itself, no « dans » needed.
  */
-function SlotStateBadge({ state }: { state: SlotTemporalState }) {
+function SlotStateBadge({
+  state,
+  countdown,
+}: {
+  state: SlotTemporalState;
+  countdown?: string;
+}) {
   return (
     <p
       className={
@@ -110,27 +118,32 @@ function SlotStateBadge({ state }: { state: SlotTemporalState }) {
         }
       />
       {SLOT_STATE_LABEL[state]}
+      {countdown ? (
+        // role="timer": aria-live off, the ticking figure stays silent
+        // for screen readers (the server-corrected clock drives it)
+        <span role="timer" className="font-normal">
+          {" · "}
+          {countdown}
+        </span>
+      ) : null}
     </p>
   );
 }
 
 /**
  * « Mes créneaux » (F14-T07, US-14.1): my slots of the public edition, each
- * with its day, its schedule (and my local time abroad) and its text.
- *
- * « Ajouter des créneaux » (and « Choisir un créneau » when I have none)
- * opens the picker dialog at once, wherever the reader stands on the page
- * — never a scroll to hunt for — and a single « Ajouter mes créneaux à mon
- * agenda » downloads the file of all my slots (F14-T10, arbitrage Q15: no
- * button per slot).
+ * with its day, its schedule (and my local time abroad), its text and —
+ * while it is still to come — its countdown inside the state badge.
+ * No « Ajouter des créneaux » button anymore: the CTAs of the draw/picker
+ * below carry the action, and the single agenda-file button left with
+ * the removed F14-T10 button row.
  *
  * « Me désinscrire » (F14-T09, US-14.3) until the slot starts: after a
  * confirmation, the outcome is announced politely on the screen — no e-mail
  * is sent — and the focus moves to the list heading, the button being gone.
  */
-function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
+function MySlots() {
   const query = useQuery(myInscriptionsQueryOptions);
-  const editionQuery = useCurrentEdition();
   const nowMs = useNow();
   const cancelInscription = useCancelInscription();
   const [toCancel, setToCancel] = useState<MySlot | null>(null);
@@ -193,15 +206,11 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
 
   // The account has no priant yet (403, F14-T02): it never inscribed — it
   // has just arrived from the landing. No name to show, the invitation is
-  // the point of the page.
+  // the point of the page. The draw CTA below carries the action: no inline
+  // link duplicating it (arbitrage: the picker stays one gesture away).
   if (query.data.status === "no-priant") {
     return (
-      <p className="text-lg">
-        Vous n'avez pas encore de créneau.{" "}
-        <button type="button" className="link" onClick={onAddSlots}>
-          Choisir un créneau
-        </button>
-      </p>
+      <p className="text-center text-lg">Vous n'avez pas encore de créneau.</p>
     );
   }
 
@@ -214,9 +223,6 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
         <p className="font-display text-3xl font-bold">{space.displayName}</p>
         <RenameDialog currentName={space.displayName ?? ""} />
       </div>
-      {editionQuery.data?.startsAt ? (
-        <EditionBanner startsAt={editionQuery.data.startsAt} />
-      ) : null}
       <section aria-labelledby="mes-creneaux" className="mb-12">
         <h2
           id="mes-creneaux"
@@ -235,11 +241,8 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
           </p>
         ) : null}
         {slots.length === 0 ? (
-          <p className="text-lg">
-            Vous n'avez pas encore de créneau.{" "}
-            <button type="button" className="link" onClick={onAddSlots}>
-              Choisir un créneau
-            </button>
+          <p className="text-center text-lg">
+            Vous n'avez pas encore de créneau.
           </p>
         ) : (
           <ul className="grid gap-4">
@@ -253,7 +256,16 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-muted">{capitalized(slot.dayLabel)}</p>
-                    <SlotStateBadge state={state} />
+                    <SlotStateBadge
+                      state={state}
+                      countdown={
+                        state === "future"
+                          ? formatCountdown(
+                              new Date(slot.startsAt).getTime() - nowMs,
+                            )
+                          : undefined
+                      }
+                    />
                   </div>
                   <p className="mt-1 font-display text-2xl font-bold lining-nums tabular-nums">
                     {withLocalTime(slot.label, slot.startsAt)}
@@ -298,7 +310,7 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
                     <button
                       type="button"
                       onClick={() => setToCancel(slot)}
-                      className="link mt-3 min-h-11 text-muted"
+                      className="link mt-5 min-h-11 text-muted"
                     >
                       Me désinscrire
                       <span className="sr-only">
@@ -312,24 +324,9 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
             })}
           </ul>
         )}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={onAddSlots}
-            className="inline-flex min-h-11 items-center rounded-[var(--radius)] border border-border px-5 font-medium"
-          >
-            Ajouter des créneaux
-          </button>
-          {slots.length > 0 ? (
-            <a
-              href={`${baseUrl}/api/me/calendar.ics`}
-              download="mes-creneaux.ics"
-              className="inline-flex min-h-11 items-center rounded-[var(--radius)] bg-accent px-5 font-medium text-accent-foreground"
-            >
-              Ajouter mes créneaux à mon agenda
-            </a>
-          ) : null}
-        </div>
+        {/* No « Ajouter des créneaux » row anymore: the CTAs live below
+         * (Prendre un créneau vide, Choisir un créneau) and the agenda
+         * download left with the removed F14-T10 button. */}
       </section>
       <ConfirmDialog
         isOpen={toCancel !== null}
@@ -353,8 +350,9 @@ function MySlots({ onAddSlots }: { onAddSlots: () => void }) {
 
 /**
  * « Ajouter des créneaux » (F14-T12): not the whole planning — the draw of
- * an empty slot (F13-T06) is enough from here, and « Je le prends » then
- * registers the already-consented priant at once.
+ * an empty slot (F13-T06), centered, is enough from here, and « Je le
+ * prends » then registers the already-consented priant at once. No heading
+ * nor lead text: the CTA speaks for itself.
  */
 function AddSlots({
   pickerOpen,
@@ -364,6 +362,9 @@ function AddSlots({
   setPickerOpen: (isOpen: boolean) => void;
 }) {
   const editionQuery = useCurrentEdition();
+  // The draw dialog state lives here: its « complete » fallback closes it
+  // before handing over to the picker — the two dialogs never stack.
+  const [drawOpen, setDrawOpen] = useState(false);
 
   if (editionQuery.isError) {
     return (
@@ -388,16 +389,24 @@ function AddSlots({
 
   return (
     <>
-      <p className="w-full max-w-prose text-muted">
-        La chaîne vous propose un créneau encore libre — prenez-le, demandez-en
-        un autre, ou choisissez le temps qui vous convient.
-      </p>
-      <EmptySlotDraw editionId={editionId} />
-      <SlotPickerDialog
-        editionId={editionId}
-        open={pickerOpen}
-        onOpenChange={setPickerOpen}
-      />
+      <div className="flex flex-wrap items-center justify-center gap-4">
+        <EmptySlotDraw
+          editionId={editionId}
+          open={drawOpen}
+          onOpenChange={setDrawOpen}
+          onFallbackToPicker={() => {
+            // Even complete, the chain can be joined (RG-PL-1): the picker
+            // takes over, the draw dialog steps aside.
+            setDrawOpen(false);
+            setPickerOpen(true);
+          }}
+        />
+        <SlotPickerDialog
+          editionId={editionId}
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+        />
+      </div>
     </>
   );
 }
@@ -446,15 +455,13 @@ export function MySpacePage() {
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <PageTitle>Mon espace</PageTitle>
       <p className="mb-6 text-muted">{viewer.email}</p>
-      <MySlots onAddSlots={() => setPickerOpen(true)} />
-      <section aria-labelledby="ajouter-des-creneaux-titre">
-        <h2 id="ajouter-des-creneaux-titre" className="mb-4 scroll-mt-24">
-          Ajouter des créneaux
-        </h2>
-        <div id="ajouter-des-creneaux" className="scroll-mt-24">
-          <AddSlots pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
-        </div>
-      </section>
+      <MySlots />
+      {/* Draw CTA, centered, no heading nor lead text: the button speaks
+       * for itself, and the invitation lives in MySlots above. Collapses
+       * with MySlots' mb-12 when slots exist. */}
+      <div className="mt-12">
+        <AddSlots pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
+      </div>
       <button
         type="button"
         onClick={handleLogout}

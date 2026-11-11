@@ -95,8 +95,8 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
     ).not.toBeInTheDocument();
 
     expect(
-      screen.getByRole("link", { name: "Retour au planning" }),
-    ).toHaveAttribute("href", "/planning");
+      screen.getByRole("link", { name: "Retour à mon espace" }),
+    ).toHaveAttribute("href", "/my-space");
   });
 
   it("mène au texte de chaque créneau inscrit qui en a un (F12-T05)", async () => {
@@ -153,8 +153,8 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
       screen.getByText("Un e-mail de confirmation vous a été envoyé."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour au planning" }),
-    ).toHaveAttribute("href", "/planning");
+      screen.getByRole("link", { name: "Retour à mon espace" }),
+    ).toHaveAttribute("href", "/my-space");
     // No récapitulatif, but never an empty screen
     expect(
       screen.queryByRole("region", { name: "Vos créneaux" }),

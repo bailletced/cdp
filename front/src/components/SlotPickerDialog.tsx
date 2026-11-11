@@ -1,7 +1,7 @@
 import { Button, Modal } from "@heroui/react";
 import { useState } from "react";
 import { useEditionSlots } from "../api/hooks";
-import { withLocalTime } from "../lib/localTime";
+import { parisDayLabel, withLocalTime } from "../lib/localTime";
 import {
   type PlanningSlot,
   parsePlanningSlots,
@@ -19,20 +19,36 @@ function slotsToCome(slots: PlanningSlot[], nowMs: number): PlanningSlot[] {
   return slots.filter((slot) => slotTemporalState(slot, nowMs) === "future");
 }
 
-/** « N priant(s) » (RG-PL-1: the count accompanies every schedule). */
+/**
+ * « N priant(s) » (RG-PL-1: the count accompanies every schedule). The
+ * count also carries its state's colour: a gold pill when the slot is
+ * still « à pourvoir » (no priant), a green pill as soon as one priant
+ * holds it — filled pills, far more legible at a glance than coloured
+ * text on the dark theme. The pairs (accent/accent-foreground,
+ * success/success-foreground) are the AA-validated ones of the theme.
+ */
 function priantsLabel(count: number): string {
   return count > 1 ? `${count} priants` : `${count} priant`;
+}
+
+function priantsClass(count: number): string {
+  const pill =
+    "ml-2 rounded-full px-2.5 py-0.5 font-sans text-sm font-bold whitespace-nowrap";
+
+  return count === 0
+    ? `${pill} bg-accent text-accent-foreground`
+    : `${pill} bg-success text-success-foreground`;
 }
 
 /**
  * « Choisir un créneau » (F14-T12): the whole list of the slots still to
  * come, one compact line each — schedule, priants count, and one button
- * to take it. Not the heavy planning grid: the list scrolls on its own
- * inside the dialog, the page never grows, and « Je le prends » leads to
+ * to take it. The list scrolls on its own inside the dialog, the page
+ * never grows, and « Choisir » leads to
  * the one-click inscription of the already-consented priant.
  *
  * Every future slot is listed, the viewer's own included: they are shown
- * muted, wearing the « Vous y êtes » mark, with no « Je le prends » —
+ * muted, wearing the « Vous y êtes » mark, with no « Choisir » —
  * impossible to re-register on them (RG-IN-3). Past slots don't appear
  * (RG-PL-2) ; every action stays a single click deep.
  *
@@ -100,10 +116,17 @@ export function SlotPickerDialog({
                     : ""
                 }`}
               >
-                <span className="font-display font-bold lining-nums tabular-nums">
-                  {withLocalTime(slot.label, slot.startsAt)}
-                  <span className="ml-3 font-sans font-normal text-muted">
-                    {priantsLabel(slot.registrationCount)}
+                <span>
+                  <span className="mr-2 text-muted">
+                    {parisDayLabel(slot.startsAt)}
+                  </span>
+                  <span className="font-display font-bold lining-nums tabular-nums">
+                    {withLocalTime(slot.label, slot.startsAt)}
+                    <span
+                      className={`ml-3 font-sans font-normal ${priantsClass(slot.registrationCount)}`}
+                    >
+                      {priantsLabel(slot.registrationCount)}
+                    </span>
                   </span>
                 </span>
                 {slot.mine ? (
@@ -115,7 +138,7 @@ export function SlotPickerDialog({
                     href={`/inscription?creneaux=${slot.id}`}
                     className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] border border-border px-4 no-underline"
                   >
-                    Je le prends
+                    Choisir
                   </a>
                 )}
               </div>

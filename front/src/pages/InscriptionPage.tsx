@@ -1,5 +1,5 @@
-import { Button, Checkbox } from "@heroui/react";
-import { useField, useForm } from "@tanstack/react-form";
+import { Button } from "@heroui/react";
+import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useRef, useState } from "react";
@@ -39,17 +39,18 @@ const LINK_CLASS = "text-link underline underline-offset-4";
 
 /**
  * /inscription?creneaux=a,b,c (F09-T15 to T18, US-09.1): inscription form
- * for the slots selected on the planning grid (F08-T10).
+ * for the slots chosen through the my-space picker.
  *
  * The selected slots are recap'd with their label and a « Retirer » action
  * (the URL parameter is validated: missing, empty or unknown ids are
  * signalled, US-09.5). Past slots and the slots the viewer already holds
  * (RG-IN-3) are flagged and never submitted. The form collects the display
- * name, the e-mail and the consent (RG-IN-5, RG-IN-7): in session, the
- * name is pre-filled and the e-mail field disappears — the one of the
- * account is sent (nobody registers another member, RG-IN-2, enforced by
- * the API too) and the consent checkbox is hidden once the consent has
- * been given.
+ * name and the e-mail: in session, the name is pre-filled and the e-mail
+ * field disappears — the one of the account is sent (nobody registers
+ * another member, RG-IN-2, enforced by the API too). No consent checkbox
+ * anymore: sending the registration is accepting the privacy policy,
+ * which stays linked under the form (the API contract keeps
+ * consent:true).
  */
 export function InscriptionPage() {
   const { creneaux } = useSearch({ from: "/inscription" });
@@ -92,8 +93,8 @@ export function InscriptionPage() {
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <PageTitle>Inscription</PageTitle>
         <EmptyState message="Les inscriptions ne sont pas ouvertes pour le moment." />
-        <Link to="/planning" className={LINK_CLASS}>
-          Retour au planning
+        <Link to="/my-space" className={LINK_CLASS}>
+          Retour à mon espace
         </Link>
       </div>
     );
@@ -130,10 +131,10 @@ export function InscriptionPage() {
         <PageTitle>Inscription</PageTitle>
         <EmptyState message="Aucun créneau sélectionné." />
         <p className="mb-4">
-          Retournez au planning pour choisir un ou plusieurs créneaux.
+          Retournez dans votre espace pour choisir un ou plusieurs créneaux.
         </p>
-        <Link to="/planning" className={LINK_CLASS}>
-          Retour au planning
+        <Link to="/my-space" className={LINK_CLASS}>
+          Retour à mon espace
         </Link>
       </div>
     );
@@ -145,8 +146,8 @@ export function InscriptionPage() {
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <PageTitle>Inscription</PageTitle>
         <EmptyState message="Les créneaux sélectionnés sont introuvables." />
-        <Link to="/planning" className={LINK_CLASS}>
-          Retour au planning
+        <Link to="/my-space" className={LINK_CLASS}>
+          Retour à mon espace
         </Link>
       </div>
     );
@@ -158,7 +159,6 @@ export function InscriptionPage() {
     (slot) => slotTemporalState(slot, nowMs) !== "past",
   );
   const submittable = notPast.filter((slot) => !slot.mine);
-  const consentRequired = !(meQuery.data?.consentGiven ?? false);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
@@ -197,7 +197,6 @@ export function InscriptionPage() {
           slotIds={submittable.map((slot) => slot.id)}
           defaultDisplayName={meQuery.data?.displayName ?? ""}
           defaultEmail={meQuery.data?.email ?? ""}
-          consentRequired={consentRequired}
           sessionEmail={meQuery.data?.email ?? null}
         />
       )}
@@ -260,11 +259,13 @@ function SelectedSlotsRecap({
 
 /**
  * Formulaire d'inscription (F09-T16/T17/T18): nom affiché, e-mail,
- * consentement, champ piège `website`. La validation est un Standard Schema
+ * champ piège `website`. La validation est un Standard Schema
  * borné par l'OpenAPI (F09-T16) ; les violations 422 de l'API sont
  * redirigées vers leur champ, le 409 est affiché en message métier (RG-IN-3),
  * le 429 invite à réessayer plus tard (F15) ; une fois la vérification
  * anti-robot activée, sa solution part avec le formulaire (F15-T06).
+ * L'envoi du formulaire vaut acceptation de la politique de
+ * confidentialité (consent:true part à l'API, plus de case à cocher).
  *
  * En session (RG-IN-2) : le champ e-mail disparaît — l'adresse du compte
  * est envoyée telle quelle, on n'inscrit jamais un autre membre.
@@ -273,13 +274,11 @@ function InscriptionForm({
   slotIds,
   defaultDisplayName,
   defaultEmail,
-  consentRequired,
   sessionEmail,
 }: {
   slotIds: string[];
   defaultDisplayName: string;
   defaultEmail: string;
-  consentRequired: boolean;
   sessionEmail: string | null;
 }) {
   const navigate = useNavigate();
@@ -295,11 +294,12 @@ function InscriptionForm({
     defaultValues: {
       displayName: defaultDisplayName,
       email: defaultEmail,
-      consent: false,
+      // Never asked as a checkbox: sending the registration is accepting
+      consent: true,
       website: "",
     },
     validators: {
-      onSubmit: standardSchemaValidator(inscriptionFormSchema(consentRequired)),
+      onSubmit: standardSchemaValidator(inscriptionFormSchema()),
     },
     onSubmit: async ({ value }) => {
       setFormError(null);
@@ -311,7 +311,7 @@ function InscriptionForm({
           // In session, the account's e-mail is sent (RG-IN-2): the field
           // is hidden, nobody registers another member
           email: (sessionEmail ?? value.email).trim(),
-          consent: consentRequired ? value.consent : true,
+          consent: true,
           website: websiteRef.current?.value ?? "",
           ...(altcha.payload ? { altcha: altcha.payload } : {}),
         };
@@ -368,8 +368,6 @@ function InscriptionForm({
     },
   });
 
-  const consentField = useField({ form, name: "consent" });
-  const consentErrors = consentField.state.meta.errors;
   const isPending = registerInscriptions.isPending;
 
   return (
@@ -403,36 +401,16 @@ function InscriptionForm({
           autoComplete="email"
         />
       )}
-      {consentRequired ? (
-        <div className="flex flex-col items-start gap-1">
-          <Checkbox
-            isSelected={consentField.state.value}
-            onChange={(isSelected) => consentField.handleChange(isSelected)}
-            isInvalid={consentErrors.length > 0}
-            isDisabled={isPending}
-          >
-            <Checkbox.Content>
-              <Checkbox.Control>
-                <Checkbox.Indicator />
-              </Checkbox.Control>
-              <span>
-                J&apos;accepte la{" "}
-                <Link
-                  to="/confidentialite"
-                  className="text-link underline underline-offset-4"
-                >
-                  politique de confidentialité
-                </Link>
-              </span>
-            </Checkbox.Content>
-          </Checkbox>
-          {consentErrors[0] ? (
-            <p role="alert" className="text-danger">
-              {consentErrors[0]}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      <p className="text-sm text-muted">
+        En vous inscrivant, vous acceptez notre{" "}
+        <Link
+          to="/confidentialite"
+          className="text-link underline underline-offset-4"
+        >
+          politique de confidentialité
+        </Link>
+        .
+      </p>
       {/* Honeypot: hidden from humans, filled by bots (§6.7) */}
       <input
         ref={websiteRef}

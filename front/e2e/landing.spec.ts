@@ -65,9 +65,6 @@ test.describe("Landing /landing", () => {
     await expect(
       page.getByRole("link", { name: "Recevoir mon lien" }),
     ).toHaveCount(0);
-    await expect(
-      page.getByRole("region", { name: "Grille des créneaux" }),
-    ).toHaveCount(0);
 
     // 2. The hero form sends the welcome e-mail with the personal link
     await page.locator("#inscription input[name=email]").fill(address);
@@ -93,9 +90,9 @@ test.describe("Landing /landing", () => {
     await expect(
       page.getByRole("heading", { name: "Mon espace" }),
     ).toBeVisible();
-    // The slot picker section is right there on /my-space
+    // The empty-slot draw CTA is right there on /my-space
     await expect(
-      page.getByRole("heading", { level: 2, name: "Ajouter des créneaux" }),
+      page.getByRole("button", { name: "Prendre un créneau vide" }),
     ).toBeVisible();
   });
 

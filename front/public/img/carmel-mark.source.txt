@@ -1,0 +1,11 @@
+Marque du Carmel (header du site)
+Emblème de Notre-Dame du Mont-Carmel, PNG RGBA 350 × 412 (détouré).
+Source : vignette Google https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJmBTXzByZGaMpDEVDwxNjVZjZua61B1NovpTPn1MfCw&s=10
+(418 × 478, fond blanc) — source primaire non identifiée : la remplacer si
+elle est retrouvée.
+
+Transformations (Pillow) :
+- fond blanc rendu transparent par remplissage depuis les bords (seuil 230) ;
+- frange claire au contour adoucie (alpha 90 sur les pixels jouxtant la
+  zone transparente) ;
+- recadrage sur l'enveloppe du contenu (image entière conservée).

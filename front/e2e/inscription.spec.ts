@@ -25,40 +25,30 @@ async function fetchCurrentSlots(
   return ((await response.json()) as { slots: ApiSlot[] }).slots;
 }
 
-function slotCard(grid: Locator, slot: ApiSlot): Locator {
-  return grid.getByRole("article").filter({ hasText: slot.label });
-}
-
-async function tick(grid: Locator, slot: ApiSlot) {
-  const checkbox = grid.getByRole("checkbox", {
-    name: `Sélectionner le créneau de ${slot.label}`,
-  });
-  // react-aria hides the input in a clipped span: click the wrapping label
-  await checkbox.locator("xpath=ancestor::label[1]").click();
-  await expect(checkbox).toBeChecked();
-}
-
 async function fillAndSend(page: Page, displayName: string, email: string) {
   await page.getByLabel("Nom affiché").fill(displayName);
   await page.getByLabel("Adresse e-mail").fill(email);
-  const consent = page.getByRole("checkbox", {
-    name: /J'accepte la politique de confidentialité/,
-  });
-  // The label holds the privacy policy link: click the box, on its left
-  await consent
-    .locator("xpath=ancestor::label[1]")
-    .click({ position: { x: 12, y: 12 } });
-  await expect(consent).toBeChecked();
+  // No consent checkbox anymore: sending the registration is accepting
   await page.getByRole("button", { name: "S'inscrire" }).click();
+}
+
+/** One line of the my-space picker, by slot label. */
+function pickerRow(page: Page, slot: ApiSlot): Locator {
+  const list = page
+    .getByRole("dialog", { name: "Choisir un créneau" })
+    .getByRole("list", { name: "Créneaux à venir" });
+
+  return list.getByRole("listitem").filter({ hasText: slot.label });
 }
 
 test.describe.configure({ mode: "serial" });
 
 /**
- * Inscription (F09-T21): a visitor picks two slots, fills the form and gets
- * the confirmation; back on the grid both slots are « Occupé » with their
- * priant counted. Registering again on one of them is refused with the
- * RG-IN-3 message (409). Each screen is audited with axe-core.
+ * Inscription (F09-T21): a visitor registers on two slots (the URL that
+ * the my-space picker builds), fills the form and gets the confirmation.
+ * Back in « Mon espace », the picker counts their priants and marks their
+ * rows « Vous y êtes ». Registering again on one of them is refused with
+ * the RG-IN-3 message (409). Each screen is audited with axe-core.
  */
 test.describe("Inscription (F09-T21)", () => {
   test.beforeAll(async ({ browser, request }) => {
@@ -86,14 +76,9 @@ test.describe("Inscription (F09-T21)", () => {
     const context = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await context.newPage();
 
-    // 1. Pick two empty slots on the public grid
-    await page.goto("/planning");
-    const grid = page.getByRole("region", { name: "Grille des créneaux" });
-    await expect(slotCard(grid, first)).toContainText("À pourvoir");
-    await tick(grid, first);
-    await tick(grid, second);
-    await page.getByRole("link", { name: "M'inscrire (2)" }).click();
-    await page.waitForURL(/\/inscription\?creneaux=/);
+    // 1. Both slots straight on /inscription — the URL the my-space picker
+    // builds for its signed-in users
+    await page.goto(`/inscription?creneaux=${first.id},${second.id}`);
 
     // 2. The form, then the confirmation with both slots
     await expect(
@@ -110,27 +95,22 @@ test.describe("Inscription (F09-T21)", () => {
     await expect(mine).toContainText(second.label);
     await expectNoA11yViolations(page);
 
-    // 3. Back on the grid: both slots are taken, their priant counted
-    await page.getByRole("link", { name: "Retour au planning" }).click();
+    // 3. « Mon espace »: the picker counts both slots' priants (RG-PL-1)
+    // and marks them « Vous y êtes » — neither offers « Choisir » (RG-IN-3)
+    await page.getByRole("link", { name: "Retour à mon espace" }).click();
+    await page.waitForURL("**/my-space");
+    await page.getByRole("button", { name: "Choisir un créneau" }).click();
     for (const slot of [first, second]) {
-      await expect(slotCard(grid, slot)).toContainText("Occupé");
-      await expect(slotCard(grid, slot)).toContainText("1 priant");
+      const row = pickerRow(page, slot);
+      await expect(row).toContainText("1 priant");
+      await expect(row).toContainText("Vous y êtes");
+      await expect(row.getByRole("link", { name: "Choisir" })).toHaveCount(0);
     }
 
-    // 4. This device cannot tick its own slot again (RG-IN-3)
-    await expect(slotCard(grid, first).getByRole("checkbox")).toHaveCount(0);
-    await expect(slotCard(grid, first)).toContainText("Vous y êtes inscrit");
-
-    // 5. Another device, same e-mail: the API refuses it (RG-IN-3, 409)
+    // 4. Another device, same e-mail: the API refuses it (RG-IN-3, 409)
     const other = await browser.newContext({ timezoneId: "Europe/Paris" });
     const otherPage = await other.newPage();
-    await otherPage.goto("/planning");
-    const otherGrid = otherPage.getByRole("region", {
-      name: "Grille des créneaux",
-    });
-    await tick(otherGrid, first);
-    await otherPage.getByRole("link", { name: "M'inscrire (1)" }).click();
-    await otherPage.waitForURL(/\/inscription\?creneaux=/);
+    await otherPage.goto(`/inscription?creneaux=${first.id}`);
     await fillAndSend(otherPage, "Famille E2E", email);
     await expect(
       otherPage.getByText("Vous êtes déjà inscrit sur ce créneau."),

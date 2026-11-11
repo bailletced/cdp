@@ -1,0 +1,11 @@
+Favicon — Notre-Dame du Mont-Carmel
+Statue de Notre-Dame du Mont-Carmel, photographie du site du Carmel Saint-Joseph :
+https://i0.wp.com/www.carmelsaintjoseph.com/wp-content/uploads/2019/12/notre-dame-mt-carmel.jpg
+(238 × 380 px, JPEG). Utilisée à titre d'usage photo pour le site de la
+communauté ; remplacer si le Carmel Saint-Joseph en conteste l'usage.
+
+Transformations (sips, sans recadrage de contenu) :
+- agrandissement 238 × 380 → 320 × 512, puis cadrage carré 512 × 512 sur fond
+  #211913 (couleur « theme-color » du site) ;
+- favicon.ico (16, 32, 48 px encapsulés en PNG), favicon-192.png (192 px),
+  apple-touch-icon.png (180 px).

@@ -2,12 +2,18 @@ import { Button, Modal } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { slotSuggestionQueryOptions } from "../api/hooks";
-import { withLocalTime } from "../lib/localTime";
+import { parisDayLabel, withLocalTime } from "../lib/localTime";
 import { ErrorState } from "./ErrorState";
 import { LoadingState } from "./LoadingState";
 
 /** The drawn slot, mounted only while the dialog is open. */
-function Draw({ editionId }: { editionId: string }) {
+function Draw({
+  editionId,
+  onFallbackToPicker,
+}: {
+  editionId: string;
+  onFallbackToPicker?: () => void;
+}) {
   const [excluded, setExcluded] = useState<string[]>([]);
   const query = useQuery(slotSuggestionQueryOptions(editionId, excluded));
 
@@ -27,7 +33,22 @@ function Draw({ editionId }: { editionId: string }) {
   const slot = query.data;
 
   if (!slot?.slotId) {
-    return <p>La chaîne est complète. Merci !</p>;
+    // Full chain: the free-slot draw stops, but slots can always be chosen
+    // (several priants relay each other on one slot, RG-PL-1) — the caller
+    // may provide its picker as the way out.
+    if (!onFallbackToPicker) {
+      return <p>La chaîne est complète. Merci&nbsp;!</p>;
+    }
+    return (
+      <div className="grid gap-5 text-center">
+        <p>La chaîne est complète. Merci&nbsp;!</p>
+        <div>
+          <Button variant="outline" onPress={onFallbackToPicker}>
+            Choisir un créneau quand même
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const slotId = slot.slotId;
@@ -38,7 +59,14 @@ function Draw({ editionId }: { editionId: string }) {
   return (
     <div className="grid gap-5">
       <div aria-live="polite">
-        <p className="font-display text-3xl font-bold lining-nums tabular-nums">
+        {slot.startsAt ? (
+          <p className="text-muted">{parisDayLabel(slot.startsAt)}</p>
+        ) : null}
+        <p
+          className={`font-display text-3xl font-bold lining-nums tabular-nums ${
+            slot.startsAt ? "mt-1" : ""
+          }`}
+        >
           {withLocalTime(slot.label ?? "", slot.startsAt ?? "")}
         </p>
         {slot.textTitle ? (
@@ -57,7 +85,7 @@ function Draw({ editionId }: { editionId: string }) {
           href={`/inscription?creneaux=${slotId}`}
           className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] bg-accent px-5 font-medium text-accent-foreground"
         >
-          Je le prends
+          Choisir
         </a>
         <Button
           variant="outline"
@@ -73,20 +101,34 @@ function Draw({ editionId }: { editionId: string }) {
 /**
  * « Prendre un créneau vide » (F13-T06, US-13.2): draws an empty slot still
  * to come at random — the chance spreads the priants — and shows its
- * schedule and the title of its text. « Je le prends » leads to the
+ * schedule and the title of its text. « Choisir » leads to the
  * inscription form, « Un autre » draws again, excluding the slots already
  * offered. React Aria moves the focus into the dialog and gives it back to
  * the button on close.
  */
-export function EmptySlotDraw({ editionId }: { editionId: string }) {
-  const [isOpen, setIsOpen] = useState(false);
+export function EmptySlotDraw({
+  editionId,
+  open,
+  onOpenChange,
+  onFallbackToPicker,
+}: {
+  editionId: string;
+  /** Controlled mode: omit it and the internal trigger owns the state. */
+  open?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+  /** Offered when the chain is complete: a way to choose anyway. */
+  onFallbackToPicker?: () => void;
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ?? internalOpen;
+  const setDialogOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <>
-      <Button variant="primary" onClick={() => setIsOpen(true)}>
+      <Button variant="primary" onClick={() => setDialogOpen(true)}>
         Prendre un créneau vide
       </Button>
-      <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
+      <Modal isOpen={isOpen} onOpenChange={setDialogOpen}>
         <Modal.Backdrop isDismissable>
           <Modal.Container>
             <Modal.Dialog>
@@ -94,10 +136,15 @@ export function EmptySlotDraw({ editionId }: { editionId: string }) {
                 <Modal.Heading>Un créneau vide pour vous</Modal.Heading>
               </Modal.Header>
               <Modal.Body>
-                {isOpen ? <Draw editionId={editionId} /> : null}
+                {isOpen ? (
+                  <Draw
+                    editionId={editionId}
+                    onFallbackToPicker={onFallbackToPicker}
+                  />
+                ) : null}
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="tertiary" onClick={() => setIsOpen(false)}>
+                <Button variant="tertiary" onClick={() => setDialogOpen(false)}>
                   Fermer
                 </Button>
               </Modal.Footer>

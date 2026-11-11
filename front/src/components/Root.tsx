@@ -107,33 +107,12 @@ export const Root = createRootRouteWithContext<AppRouterContext>()({
 });
 
 /**
- * The Carmel mark, drawn from the Order's coat of arms: Mount Carmel crowned
- * with a cross, under two stars. Decorative: the community name next to it
+ * The Carmel mark, in the header: the emblem of Our Lady of Mount Carmel
+ * (public/img/carmel-mark.png). Decorative: the community name next to it
  * names the link.
  */
 function CarmelMark() {
   return (
-    <svg
-      aria-hidden="true"
-      className="h-10 w-10 shrink-0 text-accent"
-      viewBox="0 0 40 40"
-      fill="none"
-    >
-      <path
-        d="M4 35 20 15l16 20Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20 3v12M15.5 7.5h9"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="20" cy="28" r="2" fill="currentColor" />
-      <circle cx="8" cy="9" r="2" fill="currentColor" />
-      <circle cx="32" cy="9" r="2" fill="currentColor" />
-    </svg>
+    <img src="/img/carmel-mark.png" alt="" className="h-10 w-auto shrink-0" />
   );
 }

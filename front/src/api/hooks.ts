@@ -217,7 +217,7 @@ export const myInscriptionsQueryOptions = {
 
 /**
  * Changes my display name (PATCH /api/me, F14-T08): it applies everywhere
- * (RG-IN-2), so « Mon espace » and the planning are refreshed.
+ * (RG-IN-2), so « Mon espace » and its slots are refreshed.
  */
 export function useRenameMe() {
   const queryClient = useQueryClient();
@@ -244,7 +244,7 @@ export function useRenameMe() {
 
 /**
  * Cancels one of my inscriptions (DELETE /api/inscriptions/{id}, F14-T09):
- * the slot may be empty again, so « Mon espace », the planning and its
+ * the slot may be empty again, so « Mon espace » and its
  * banner are refreshed (RG-EP-1).
  */
 export function useCancelInscription() {
@@ -278,7 +278,7 @@ export interface RegisterInscriptionsPayload {
 
 /**
  * Registers inscriptions on slots (POST /api/inscriptions, F09-T10).
- * The public planning queries are invalidated on success so the grid shows
+ * The current edition slots are invalidated on success so the picker shows
  * the updated registration counts (RG-PL-1).
  */
 export function useRegisterInscriptions() {

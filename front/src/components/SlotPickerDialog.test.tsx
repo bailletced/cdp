@@ -85,7 +85,7 @@ describe("SlotPickerDialog", () => {
     expect(within(list).getByText("3 priants")).toBeInTheDocument();
 
     const takeLinks = within(list).getAllByRole("link", {
-      name: "Je le prends",
+      name: "Choisir",
     });
     expect(takeLinks[0]).toHaveAttribute(
       "href",
@@ -149,14 +149,12 @@ describe("SlotPickerDialog", () => {
     expect(screen.queryByText("22h00–22h30 (passé)")).toBeNull();
 
     // My own slot stays visible (RG-IN-3): muted, wearing the « Vous y êtes »
-    // mark, its priants count — and no « Je le prends » to re-register on it
+    // mark, its priants count — and no « Choisir » to re-register on it
     const rows = within(list).getAllByRole("listitem");
     const mineRow = rows[1] as HTMLElement;
     expect(mineRow).toHaveTextContent(/Vous y êtes/);
     expect(mineRow).toHaveTextContent(/0 priant/);
-    expect(
-      within(mineRow).queryByRole("link", { name: "Je le prends" }),
-    ).toBeNull();
+    expect(within(mineRow).queryByRole("link", { name: "Choisir" })).toBeNull();
   });
 
   it("says the chain is complete once no slot is left to come", async () => {

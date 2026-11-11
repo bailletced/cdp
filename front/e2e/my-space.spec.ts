@@ -8,6 +8,7 @@ import {
 import { E2E_ORGANIZER_EMAIL } from "./globalSetup";
 import { expectNoA11yViolations } from "./helpers/a11y";
 import { createOpenEdition } from "./helpers/edition";
+import { registerOnSlots } from "./helpers/inscription";
 import { extractLinkFromEmail, waitForEmail } from "./helpers/mailpit";
 
 interface ApiSlot {
@@ -38,31 +39,12 @@ async function registerThenOpenMySpace(
   const address = `mon-espace-e2e-${Date.now()}@example.org`;
   const device = await browser.newContext({ timezoneId: "Europe/Paris" });
   const page = await device.newPage();
-  await page.goto("/planning");
-  const grid = page.getByRole("region", { name: "Grille des créneaux" });
-  for (const slot of slots) {
-    // react-aria hides the input in a clipped span: click the wrapping label
-    await grid
-      .getByRole("checkbox", {
-        name: `Sélectionner le créneau de ${slot.label}`,
-      })
-      .locator("xpath=ancestor::label[1]")
-      .click();
-  }
-  await page
-    .getByRole("link", { name: `M'inscrire (${slots.length})` })
-    .click();
-  await page.getByLabel("Nom affiché").fill(displayName);
-  await page.getByLabel("Adresse e-mail").fill(address);
-  // The label holds the privacy policy link: click the box, on its left
-  await page
-    .getByRole("checkbox", {
-      name: /J'accepte la politique de confidentialité/,
-    })
-    .locator("xpath=ancestor::label[1]")
-    .click({ position: { x: 12, y: 12 } });
-  await page.getByRole("button", { name: "S'inscrire" }).click();
-  await page.waitForURL(/\/inscription\/confirmation/);
+  await registerOnSlots(
+    page,
+    slots.map((slot) => slot.id),
+    displayName,
+    address,
+  );
   await device.close();
 
   const email = await waitForEmail(address, 30_000);
@@ -86,9 +68,9 @@ async function registerThenOpenMySpace(
 test.describe.configure({ mode: "serial" });
 
 /**
- * « Mon espace » (F14-T10, F14-T11): the single agenda file, then the
- * parcours §14.1 n° 1 — inscription → e-mail → personal link → my space →
- * change my name → cancel → then the empty-slot draw to add one again.
+ * « Mon espace » (F14-T11): the parcours §14.1 n° 1 — inscription → e-mail →
+ * personal link → my space → choose a slot from the picker → change my name
+ * → cancel → then the empty-slot draw to add one again.
  */
 test.describe("Mon espace (F14)", () => {
   test.beforeAll(async ({ browser, request }) => {
@@ -102,33 +84,6 @@ test.describe("Mon espace (F14)", () => {
       `24 heures de prière — espace personnel E2E ${Date.now()}`,
     );
     await page.close();
-  });
-
-  test("downloads one agenda file with all my slots (F14-T10)", async ({
-    browser,
-    request,
-  }) => {
-    test.setTimeout(90_000);
-    const slots = await fetchCurrentSlots(request);
-    const page = await registerThenOpenMySpace(
-      browser,
-      [slots[14], slots[20]],
-      `Agenda E2E ${Date.now()}`,
-    );
-
-    const mine = page.getByRole("region", { name: "Mes créneaux" });
-    await expect(mine.getByRole("listitem")).toHaveCount(2);
-    const download = page.waitForEvent("download");
-    await mine
-      .getByRole("link", { name: "Ajouter mes créneaux à mon agenda" })
-      .click();
-    const file = await download;
-    expect(file.suggestedFilename()).toBe("mes-creneaux.ics");
-    const path = await file.path();
-    const { readFile } = await import("node:fs/promises");
-    const calendar = await readFile(path, "utf8");
-    expect(calendar.match(/BEGIN:VEVENT/g)).toHaveLength(2);
-    await page.context().close();
   });
 
   test("chooses a specific slot from the picker, with the members count (F14-T12)", async ({
@@ -146,7 +101,7 @@ test.describe("Mon espace (F14)", () => {
     );
 
     // « Choisir un créneau » opens the compact picker: one line per slot to
-    // come, its schedule and its priants count, one « Je le prends »
+    // come, its schedule and its priants count, one « Choisir »
     await page.getByRole("button", { name: "Choisir un créneau" }).click();
     const dialog = page.getByRole("dialog", { name: "Choisir un créneau" });
     const list = dialog.getByRole("list", { name: "Créneaux à venir" });
@@ -155,14 +110,10 @@ test.describe("Mon espace (F14)", () => {
       .filter({ hasText: wanted.label });
     await expect(wantedRow).toBeVisible();
     await expect(wantedRow).toContainText(/\d priant/);
-    // the whole grid never mounts: no 48 cards, no empty-slot banner
-    await expect(
-      page.getByRole("region", { name: "Grille des créneaux" }),
-    ).toHaveCount(0);
 
-    // Taking it lands on the inscription form, pre-filled: the consent was
-    // already given, so no checkbox — one last « S'inscrire » and done
-    await wantedRow.getByRole("link", { name: "Je le prends" }).click();
+    // Taking it lands on the inscription form, pre-filled — no consent
+    // checkbox anymore, one last « S'inscrire » and done
+    await wantedRow.getByRole("link", { name: "Choisir" }).click();
     await page.waitForURL("**/inscription**");
     await expect(page.getByLabel("Nom affiché")).toHaveValue(
       `Famille Bertrand ${stamp}`,

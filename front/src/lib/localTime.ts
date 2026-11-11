@@ -79,3 +79,20 @@ export function withLocalTime(
 
   return local === null ? parisLabel : `${parisLabel} (${local} chez vous)`;
 }
+
+const parisDayFormat = new Intl.DateTimeFormat("fr-FR", {
+  timeZone: PARIS_TIME_ZONE,
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+
+/**
+ * « Mercredi 11 novembre » — Paris day of an instant, capitalised: the same
+ * « EEEE d MMMM » convention as the API's dayLabel (DayLabel.php).
+ */
+export function parisDayLabel(isoUtc: string): string {
+  const day = parisDayFormat.format(new Date(isoUtc));
+
+  return day.charAt(0).toUpperCase() + day.slice(1);
+}

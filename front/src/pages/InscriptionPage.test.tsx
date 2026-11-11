@@ -2,7 +2,6 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  CONSENT_REQUIRED_MESSAGE,
   DISPLAY_NAME_LENGTH_MESSAGE,
   DISPLAY_NAME_REQUIRED_MESSAGE,
   EMAIL_INVALID_MESSAGE,
@@ -179,14 +178,13 @@ function trackRegistrations() {
 
 /**
  * Fills the form as a recognized priant: in session the e-mail field is
- * gone (the account's e-mail is sent), only the display name and the
- * consent checkbox remain.
+ * gone (the account's e-mail is sent), only the display name remains —
+ * sending the registration is accepting the privacy policy.
  */
 function fillValidForm() {
   fireEvent.change(screen.getByLabelText("Nom affiché"), {
     target: { value: "Marie Dupont" },
   });
-  fireEvent.click(screen.getByRole("checkbox"));
 }
 
 function submitForm() {
@@ -217,8 +215,8 @@ describe("InscriptionPage — récapitulatif des créneaux (F09-T15)", () => {
       await screen.findByText("Aucun créneau sélectionné."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour au planning" }),
-    ).toHaveAttribute("href", "/planning");
+      screen.getByRole("link", { name: "Retour à mon espace" }),
+    ).toHaveAttribute("href", "/my-space");
   });
 
   it("signale qu'aucun créneau n'est sélectionné avec un paramètre vide", async () => {
@@ -240,8 +238,8 @@ describe("InscriptionPage — récapitulatif des créneaux (F09-T15)", () => {
       await screen.findByText("Les créneaux sélectionnés sont introuvables."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour au planning" }),
-    ).toHaveAttribute("href", "/planning");
+      screen.getByRole("link", { name: "Retour à mon espace" }),
+    ).toHaveAttribute("href", "/my-space");
   });
 
   it("récapitule les créneaux connus et signale les ids qui n'existent plus", async () => {
@@ -268,8 +266,8 @@ describe("InscriptionPage — récapitulatif des créneaux (F09-T15)", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Retour au planning" }),
-    ).toHaveAttribute("href", "/planning");
+      screen.getByRole("link", { name: "Retour à mon espace" }),
+    ).toHaveAttribute("href", "/my-space");
   });
 
   it("retire un créneau du récapitulatif via le paramètre d'URL", async () => {
@@ -369,9 +367,8 @@ describe("InscriptionPage — validation du formulaire (F09-T16)", () => {
 
     renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
 
-    // The email is pre-filled; only the consent remains to tick
+    // The email is pre-filled; sending is accepting, nothing to tick
     expect(await screen.findByLabelText("Nom affiché")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("checkbox"));
     submitForm();
 
     expect(
@@ -390,7 +387,6 @@ describe("InscriptionPage — validation du formulaire (F09-T16)", () => {
     fireEvent.change(screen.getByLabelText("Nom affiché"), {
       target: { value: "M".repeat(81) },
     });
-    fireEvent.click(screen.getByRole("checkbox"));
     submitForm();
 
     expect(
@@ -414,7 +410,6 @@ describe("InscriptionPage — validation du formulaire (F09-T16)", () => {
     fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
       target: { value: "marie@bailletced" },
     });
-    fireEvent.click(screen.getByRole("checkbox"));
     submitForm();
 
     expect(await screen.findByText(EMAIL_INVALID_MESSAGE)).toBeInTheDocument();
@@ -423,20 +418,20 @@ describe("InscriptionPage — validation du formulaire (F09-T16)", () => {
 });
 
 describe("InscriptionPage — consentement, champ piège, état d'envoi (F09-T17)", () => {
-  it("affiche la case de consentement avec un lien vers la politique de confidentialité, hors session", async () => {
+  it("mentionne la politique de confidentialité, sans case à cocher (hors session)", async () => {
     visitor();
     openEditionWithSlots([FUTURE_SLOT_1]);
 
     renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
 
-    expect(await screen.findByRole("checkbox")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "politique de confidentialité" }),
+      await screen.findByRole("link", { name: "politique de confidentialité" }),
     ).toHaveAttribute("href", "/confidentialite");
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
-  it("rend le consentement obligatoire hors session", async () => {
-    const posts = trackRegistrations();
+  it("s'inscrit sans rien cocher : l'envoi vaut acceptation (consent implicite)", async () => {
+    const captured = captureRegistrations();
     visitor();
     openEditionWithSlots([FUTURE_SLOT_1]);
 
@@ -452,21 +447,12 @@ describe("InscriptionPage — consentement, champ piège, état d'envoi (F09-T17
     submitForm();
 
     expect(
-      await screen.findByText(CONSENT_REQUIRED_MESSAGE),
+      await screen.findByRole("heading", { name: "Inscription confirmée" }),
     ).toBeInTheDocument();
-    expect(posts.called).toBe(false);
+    expect((captured.body as { consent: boolean }).consent).toBe(true);
   });
 
-  it("affiche la case de consentement en session quand le consentement n'a jamais été donné", async () => {
-    // Default MSW handler: /api/me without consentGiven
-    openEditionWithSlots([FUTURE_SLOT_1]);
-
-    renderApp(`/inscription?creneaux=${SLOT_FUTURE_1}`);
-
-    expect(await screen.findByRole("checkbox")).toBeInTheDocument();
-  });
-
-  it("masque la case et pré-remplit le formulaire quand le priant est reconnu et a déjà consenti (RG-IN-7)", async () => {
+  it("pré-remplit le formulaire quand le priant est reconnu et a déjà consenti (RG-IN-7)", async () => {
     const captured = captureRegistrations();
     consentedSession();
     openEditionWithSlots([FUTURE_SLOT_1]);
@@ -480,8 +466,8 @@ describe("InscriptionPage — consentement, champ piège, état d'envoi (F09-T17
     // e-mail is sent, nobody registers another member
     expect(screen.queryByLabelText("Adresse e-mail")).not.toBeInTheDocument();
     expect(screen.getByText("thomas@bailletced.org")).toBeInTheDocument();
-    // The consent checkbox is hidden: the consent was already given
-    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    // No consent checkbox anymore: sending the registration carries the
+    // consent (consent:true)
 
     submitForm();
 

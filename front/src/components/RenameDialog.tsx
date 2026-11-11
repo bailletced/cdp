@@ -78,7 +78,7 @@ export function RenameDialog({ currentName }: { currentName: string }) {
                 </Modal.Header>
                 <Modal.Body className="grid gap-4">
                   <p>
-                    Votre nom s'applique partout : dans le planning, le fil du
+                    Votre nom s'applique partout : sur vos créneaux, le fil du
                     relais, les intentions signées et l'historique.
                   </p>
                   <TextField isInvalid={fieldError !== null}>

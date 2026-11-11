@@ -48,22 +48,6 @@ function mySpace(inscriptions: unknown[], displayName = "Famille Martin") {
 
 const EDITION_ID = "01936f2e-7c4a-7b1e-8f2a-3c4d5e6f7a8b";
 
-/** The current public edition starting at the given ISO instant. */
-function currentEditionStartingAt(startsAt: string) {
-  server.use(
-    http.get("http://localhost:8080/api/editions/current", () =>
-      HttpResponse.json({
-        id: EDITION_ID,
-        title: "24 heures de prière — novembre 2026",
-        presentation: "",
-        startsAt,
-        opensAt: "2026-10-20T18:00:00+00:00",
-        status: "open",
-      }),
-    ),
-  );
-}
-
 /** An open public edition, answered to GET /api/editions/current. */
 function openEdition() {
   server.use(
@@ -80,57 +64,6 @@ function openEdition() {
   );
 }
 describe("MySpacePage — l'état de la chaîne (F14)", () => {
-  it("counts down to the start of the edition before it begins", async () => {
-    openEdition();
-    mySpace([]);
-
-    renderApp("/my-space");
-
-    const banner = await screen.findByRole("region", {
-      name: "État de l'édition",
-    });
-    expect(within(banner).getByText(/La chaîne commence/)).toBeInTheDocument();
-    expect(within(banner).getByText(/heure de Paris/)).toBeInTheDocument();
-    // The countdown is a live figure, tied to the server clock
-    expect(within(banner).getByRole("timer")).toBeInTheDocument();
-    expect(within(banner).getByRole("timer").textContent ?? "").toMatch(
-      /\u202f[jms]/,
-    );
-  });
-
-  it("says the chain is running while it is underway, with what is left to pray", async () => {
-    const startsAt = new Date(Date.now() - 2 * 3600_000).toISOString();
-    currentEditionStartingAt(startsAt);
-    mySpace([]);
-
-    renderApp("/my-space");
-
-    const banner = await screen.findByRole("region", {
-      name: "État de l'édition",
-    });
-    expect(
-      within(banner).getByText(/La chaîne est en cours/),
-    ).toBeInTheDocument();
-    expect(within(banner).getByText(/encore/)).toBeInTheDocument();
-    expect(within(banner).queryByRole("timer")).not.toBeInTheDocument();
-  });
-
-  it("thanks the priant once the edition is over", async () => {
-    const startsAt = new Date(Date.now() - 25 * 3600_000).toISOString();
-    currentEditionStartingAt(startsAt);
-    mySpace([]);
-
-    renderApp("/my-space");
-
-    const banner = await screen.findByRole("region", {
-      name: "État de l'édition",
-    });
-    expect(
-      within(banner).getByText(/Cette édition est terminée/),
-    ).toBeInTheDocument();
-    expect(within(banner).getByText(/Merci d'avoir prié/)).toBeInTheDocument();
-  });
-
   it("offers the one-way funnel of prayer on each of my slots", async () => {
     openEdition();
     mySpace([
@@ -245,14 +178,14 @@ describe("MySpacePage — mes créneaux (F14-T07, US-14.1)", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens the picker from « Ajouter des créneaux », no scroll involved", async () => {
+  it("opens the picker from « Choisir un créneau », no scroll involved", async () => {
     mySpace([]);
     openEdition();
 
     renderApp("/my-space");
 
     fireEvent.click(
-      await screen.findByRole("button", { name: "Ajouter des créneaux" }),
+      await screen.findByRole("button", { name: "Choisir un créneau" }),
     );
     expect(
       await screen.findByRole("dialog", { name: "Choisir un créneau" }),
@@ -317,9 +250,6 @@ describe("MySpacePage", () => {
       await screen.findByText("thomas@bailletced.org"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Ajouter des créneaux" }),
-    ).toBeInTheDocument();
-    expect(
       screen.getByRole("button", { name: "Me déconnecter" }),
     ).toBeInTheDocument();
   });
@@ -350,13 +280,10 @@ describe("MySpacePage", () => {
 
     renderApp("/my-space");
 
-    // Not the banner of the empty slots, not the 48 cards: two actions
+    // No heavy grid here: the draw and the picker are the two actions
     expect(
       await screen.findByRole("button", { name: "Prendre un créneau vide" }),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("region", { name: "Grille des créneaux" }),
-    ).toBeNull();
     expect(screen.queryByText(/Il reste/)).toBeNull();
 
     // « Choisir un créneau » lists every slot to come, compactly, with the
@@ -368,7 +295,7 @@ describe("MySpacePage", () => {
     expect(within(dialog).getByText("22h00\u201322h30")).toBeInTheDocument();
     expect(within(dialog).getByText("2 priants")).toBeInTheDocument();
     expect(
-      within(dialog).getByRole("link", { name: "Je le prends" }),
+      within(dialog).getByRole("link", { name: "Choisir" }),
     ).toHaveAttribute("href", "/inscription?creneaux=slot-14");
   });
 
@@ -415,7 +342,7 @@ describe("MySpacePage", () => {
     const dialog = await screen.findByRole("dialog");
     expect(await within(dialog).findByText("20h00–20h30")).toBeVisible();
     expect(
-      within(dialog).getByRole("link", { name: "Je le prends" }),
+      within(dialog).getByRole("link", { name: "Choisir" }),
     ).toHaveAttribute("href", "/inscription?creneaux=slot-12");
   });
 
@@ -501,7 +428,7 @@ describe("MySpacePage — changer mon nom (F14-T08, US-14.2)", () => {
       name: "Changer mon nom",
     });
     expect(dialog).toHaveTextContent(
-      "Votre nom s'applique partout : dans le planning, le fil du relais, les intentions signées et l'historique.",
+      "Votre nom s'applique partout : sur vos créneaux, le fil du relais, les intentions signées et l'historique.",
     );
     const field = within(dialog).getByLabelText("Nom affiché");
     expect(field).toHaveValue("Famille Martin");
@@ -687,43 +614,30 @@ describe("MySpacePage — me désinscrire (F14-T09, US-14.3)", () => {
   });
 });
 
-describe("MySpacePage — ajouter des créneaux et mon agenda (F14-T10, US-14.4)", () => {
-  it("leads to the planning and offers a single agenda file for all my slots", async () => {
+describe("MySpacePage — les CTA de l'espace (US-14.4, refonte)", () => {
+  it("n'affiche plus « Ajouter des créneaux » ni le fichier d'agenda : le sélecteur et le tirage portent l'action", async () => {
     openEdition();
     mySpace([myInscription(), myInscription({ id: "inscription-2" })]);
 
     renderApp("/my-space");
 
-    // Arbitrage Q15: one button for the whole edition, none per slot
-    const agenda = await screen.findAllByRole("link", {
-      name: "Ajouter mes créneaux à mon agenda",
-    });
-    expect(agenda).toHaveLength(1);
-    expect(agenda[0]).toHaveAttribute(
-      "href",
-      "http://localhost:8080/api/me/calendar.ics",
-    );
-    expect(agenda[0]).toHaveAttribute("download", "mes-creneaux.ics");
+    expect(
+      screen.queryByRole("button", { name: "Ajouter des créneaux" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("link", {
+        name: "Ajouter mes créneaux à mon agenda",
+      }),
+    ).toBeNull();
 
-    // « Ajouter des créneaux » opens the picker dialog at once (F14-T12)
-    fireEvent.click(
-      screen.getByRole("button", { name: "Ajouter des créneaux" }),
-    );
+    // The draw and the picker remain, the two CTAs of the space
+    expect(
+      await screen.findByRole("button", { name: "Prendre un créneau vide" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Choisir un créneau" }));
     expect(
       await screen.findByRole("dialog", { name: "Choisir un créneau" }),
     ).toBeInTheDocument();
-  });
-
-  it("offers no agenda file while I have no slot", async () => {
-    mySpace([]);
-
-    renderApp("/my-space");
-
-    expect(
-      await screen.findByText("Vous n'avez pas encore de créneau."),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: "Ajouter mes créneaux à mon agenda" }),
-    ).toBeNull();
   });
 });

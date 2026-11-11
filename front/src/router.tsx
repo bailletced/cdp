@@ -16,7 +16,6 @@ import { InscriptionConfirmationPage } from "./pages/InscriptionConfirmationPage
 import { InscriptionPage } from "./pages/InscriptionPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MySpacePage } from "./pages/MySpacePage";
-import { PublicPlanningPage } from "./pages/PublicPlanningPage";
 import { ReceiveMyLinkPage } from "./pages/ReceiveMyLinkPage";
 import { SlotTextPage } from "./pages/SlotTextPage";
 
@@ -35,14 +34,6 @@ const rootIndexRoute = createRoute({
   },
 });
 
-// The public planning of the current edition (F08-T07): schedules, priants
-// count, and the registration form for a visitor.
-const planningRoute = createRoute({
-  getParentRoute: () => Root,
-  path: "/planning",
-  component: PublicPlanningPage,
-});
-
 // Event landing (marketing page of the prayer chain): public on purpose —
 // the personal login link sent from this page lands the priant back here,
 // on the slot grid, so signed-in visitors must not be redirected away.
@@ -53,7 +44,7 @@ const eventLandingRoute = createRoute({
 });
 
 // The inscription pages carry the selected slot ids in ?creneaux=… (built
-// by the planning grid, F08-T10): the parameter is normalized here into a
+// by the my-space slot picker): the parameter is normalized here into a
 // comma-separated string, the pages validate it against the edition's slots.
 function inscriptionSearch(search: Record<string, unknown>): {
   creneaux: string;
@@ -255,7 +246,6 @@ const organisationTextEditRoute = createRoute({
 // Define the routes
 export const routeTree = Root.addChildren([
   rootIndexRoute,
-  planningRoute,
   eventLandingRoute,
   receiveMyLinkRoute,
   confidentialiteRoute,

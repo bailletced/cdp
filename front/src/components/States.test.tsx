@@ -50,13 +50,13 @@ describe("EmptyState (F01-T08)", () => {
     render(
       <EmptyState
         message="Aucun créneau disponible."
-        actionLabel="Voir le planning"
+        actionLabel="Voir mon espace"
         onAction={onAction}
       />,
     );
 
     expect(screen.getByText("Aucun créneau disponible.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Voir le planning" }));
+    fireEvent.click(screen.getByRole("button", { name: "Voir mon espace" }));
     expect(onAction).toHaveBeenCalledOnce();
   });
 

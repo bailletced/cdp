@@ -28,7 +28,7 @@ test.describe("Layout public", () => {
   test("shows the public layout: brand, skip link, footer", async ({
     page,
   }) => {
-    await page.goto("/planning");
+    await page.goto("/landing");
     // Header: the community name from the single site config, linking home
     await expect(page.getByRole("banner")).toBeVisible();
     await expect(page.getByRole("link", { name: SITE_NAME })).toBeVisible();

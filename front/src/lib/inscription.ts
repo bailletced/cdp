@@ -7,7 +7,7 @@ import type { PlanningSlot } from "./planning";
 
 /**
  * Parses the ?creneaux=… search parameter into slot ids (F09-T15). The
- * planning grid (F08-T10) builds the parameter as a comma-separated string;
+ * my-space slot picker builds the parameter as a comma-separated string;
  * the router may also hand over an already-parsed array. Empty segments,
  * whitespace and duplicates are dropped.
  */
@@ -63,19 +63,18 @@ export const EMAIL_REQUIRED_MESSAGE = "L'adresse e-mail est obligatoire.";
 export const EMAIL_LENGTH_MESSAGE =
   "L'adresse e-mail doit comporter entre 3 et 254 caractères.";
 export const EMAIL_INVALID_MESSAGE = "L'adresse e-mail n'est pas valide.";
-export const CONSENT_REQUIRED_MESSAGE =
-  "Le consentement est obligatoire pour s’inscrire.";
 
 /**
  * Validation schema of the inscription form (F09-T16): a Standard Schema
  * (zod) bounded by the OpenAPI contract of POST /api/inscriptions —
  * displayName 1–80, email 3–254 with the email format. The consent is
- * mandatory only when its checkbox is shown: off-session, or in session
- * when the priant never consented (RG-IN-5, RG-IN-7). The honeypot
- * `website` field is never validated: a filled honeypot must reach the API
- * untouched (§6.7).
+ * carried by the form but never asked as a checkbox: sending the
+ * registration is accepting the privacy policy (formerly RG-IN-5 —
+ * the checkbox was dropped by product decision, the API contract keeps
+ * consent:true). The honeypot `website` field is never validated: a filled
+ * honeypot must reach the API untouched (§6.7).
  */
-export function inscriptionFormSchema(consentRequired: boolean) {
+export function inscriptionFormSchema() {
   return z.object({
     displayName: z
       .string()
@@ -89,11 +88,7 @@ export function inscriptionFormSchema(consentRequired: boolean) {
       .min(3, EMAIL_LENGTH_MESSAGE)
       .max(254, EMAIL_LENGTH_MESSAGE)
       .email(EMAIL_INVALID_MESSAGE),
-    consent: consentRequired
-      ? z.boolean().refine((value) => value === true, {
-          message: CONSENT_REQUIRED_MESSAGE,
-        })
-      : z.boolean(),
+    consent: z.boolean(),
     website: z.string(),
   });
 }

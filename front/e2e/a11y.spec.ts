@@ -2,10 +2,10 @@ import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./helpers/a11y";
 
 test.describe("accessibility audit (F01-T12, US-01.4)", () => {
-  test("the root page (404 inside the layout) has no axe violation", async ({
+  test("the 404 page inside the layout has no axe violation", async ({
     page,
   }) => {
-    await page.goto("/planning");
+    await page.goto("/nowhere-at-all");
     await expectNoA11yViolations(page);
   });
 

@@ -1,6 +1,7 @@
 import { type APIRequestContext, expect, test } from "@playwright/test";
 import { E2E_ORGANIZER_EMAIL } from "./globalSetup";
 import { createOpenEdition } from "./helpers/edition";
+import { registerOnSlots } from "./helpers/inscription";
 import {
   extractLinkFromEmail,
   readAttachment,
@@ -55,29 +56,12 @@ test.describe("E-mail de confirmation (F11-T08)", () => {
 
     const context = await browser.newContext({ timezoneId: "Europe/Paris" });
     const page = await context.newPage();
-    await page.goto("/planning");
-    const grid = page.getByRole("region", { name: "Grille des créneaux" });
-    for (const slot of [first, second]) {
-      // react-aria hides the input in a clipped span: click the wrapping label
-      await grid
-        .getByRole("checkbox", {
-          name: `Sélectionner le créneau de ${slot.label}`,
-        })
-        .locator("xpath=ancestor::label[1]")
-        .click();
-    }
-    await page.getByRole("link", { name: "M'inscrire (2)" }).click();
-    await page.getByLabel("Nom affiché").fill("Confirmation E2E");
-    await page.getByLabel("Adresse e-mail").fill(address);
-    // The label holds the privacy policy link: click the box, on its left
-    await page
-      .getByRole("checkbox", {
-        name: /J'accepte la politique de confidentialité/,
-      })
-      .locator("xpath=ancestor::label[1]")
-      .click({ position: { x: 12, y: 12 } });
-    await page.getByRole("button", { name: "S'inscrire" }).click();
-    await page.waitForURL(/\/inscription\/confirmation/);
+    await registerOnSlots(
+      page,
+      [first.id, second.id],
+      "Confirmation E2E",
+      address,
+    );
     await context.close();
 
     // One email, both slots in Paris time
