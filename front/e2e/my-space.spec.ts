@@ -149,13 +149,13 @@ test.describe("Mon espace (F14)", () => {
     ).toBeVisible();
     const mine = page.getByRole("region", { name: "Mes créneaux" });
     await expect(mine.getByRole("listitem")).toHaveCount(2);
-    // The state of the chain is at a glance: before the start — the countdown
-    const banner = page.getByRole("region", { name: "État de l'édition" });
-    await expect(banner.getByText(/La chaîne commence/)).toBeVisible();
-    await expect(banner.getByRole("timer")).toBeVisible();
+    // Each card tells at a glance where the slot stands: still to come —
+    // the « À venir » badge carries the countdown, no « dans » needed
+    const keptCard = mine.getByRole("listitem").filter({ hasText: kept.label });
+    await expect(keptCard.getByText("À venir")).toBeVisible();
+    await expect(keptCard.getByRole("timer")).toBeVisible();
     // Each card offers the prayer funnel first: the golden CTA, and
     // « Me désinscrire » stays a muted link away from it
-    const keptCard = mine.getByRole("listitem").filter({ hasText: kept.label });
     await expect(
       keptCard.getByRole("link", { name: `Voir le créneau — ${kept.label}` }),
     ).toBeVisible();
@@ -200,9 +200,7 @@ test.describe("Mon espace (F14)", () => {
       page.getByText(`Vous êtes désinscrit du créneau de ${freed.label}.`),
     ).toBeVisible();
     await expect(mine.getByRole("listitem")).toHaveCount(1);
-    await expect(
-      page.getByRole("heading", { level: 2, name: "Ajouter des créneaux" }),
-    ).toBeVisible();
+    // No « Ajouter des créneaux » heading: the draw CTA speaks for itself
     await expect(
       page.getByRole("button", { name: "Prendre un créneau vide" }),
     ).toBeVisible();

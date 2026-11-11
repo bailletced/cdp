@@ -34,9 +34,11 @@ async function slotView(
 test.describe.configure({ mode: "serial" });
 
 /**
- * Device pass (F10-T11, US-10.1, US-10.2): once registered, the device opens
- * « Mon espace » without opening any e-mail, and the names of the priants
- * (RG-PL-4); a second browser, with no pass, only ever gets the count.
+ * Device pass (F10-T11, US-10.1, US-10.2): once registered, the device
+ * carries a pass (no e-mail to open) that unlocks the names of the priants
+ * (RG-PL-4); a second browser, with no pass, only ever gets the count. The
+ * pass alone never opens « Mon espace » — the space asks for a session
+ * (F02-T19) — the personal link of the e-mail provides it.
  */
 test.describe("Pass appareil (F10-T11)", () => {
   test.beforeAll(async ({ browser, request }) => {
@@ -73,11 +75,9 @@ test.describe("Pass appareil (F10-T11)", () => {
       (await phone.cookies()).some((cookie) => cookie.name === "cdp_pass"),
     ).toBe(true);
 
-    // 2. The pass opens « Mon espace » without any e-mail, and the API
-    // names the priants of the slot to the pass holder (RG-PL-4)
-    await page.goto("/my-space");
-    await page.waitForURL("**/my-space");
-    await expect(page.getByText(displayName).first()).toBeVisible();
+    // 2. The device pass carries the API visibility of the names (RG-PL-4),
+    //    but « Mon espace » asks for a session (F02-T19): the pass alone
+    //    bounces back to the landing page
     const edition = await (
       await page.request.get("/api/editions/current")
     ).json();
@@ -85,6 +85,8 @@ test.describe("Pass appareil (F10-T11)", () => {
     expect(mine.registrationCount).toBe(1);
     expect(mine.participants[0].name).toBe(displayName);
     await expectNoA11yViolations(page);
+    await page.goto("/my-space");
+    await page.waitForURL("**/landing");
     await phone.close();
 
     // 3. Another browser, no pass: the count, never a name (RG-PL-4)

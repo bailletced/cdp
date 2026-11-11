@@ -8,6 +8,7 @@ import {
 import { E2E_ORGANIZER_EMAIL } from "./globalSetup";
 import { expectNoA11yViolations } from "./helpers/a11y";
 import { createOpenEdition } from "./helpers/edition";
+import { extractLinkFromEmail, waitForEmail } from "./helpers/mailpit";
 
 interface ApiSlot {
   id: string;
@@ -95,9 +96,17 @@ test.describe("Inscription (F09-T21)", () => {
     await expect(mine).toContainText(second.label);
     await expectNoA11yViolations(page);
 
-    // 3. « Mon espace »: the picker counts both slots' priants (RG-PL-1)
-    // and marks them « Vous y êtes » — neither offers « Choisir » (RG-IN-3)
-    await page.getByRole("link", { name: "Retour à mon espace" }).click();
+    // 3. The personal link opens « Mon espace » (the device pass alone
+    //    never opens the space, F02-T19): the picker counts both slots'
+    //    priants (RG-PL-1) and marks them « Vous y êtes » — neither offers
+    //    « Choisir » (RG-IN-3)
+    const received = await waitForEmail(email, 30_000);
+    const link = received ? extractLinkFromEmail(received) : null;
+    expect(
+      link,
+      "the confirmation e-mail carries the personal link",
+    ).not.toBeNull();
+    await page.goto(link ?? "");
     await page.waitForURL("**/my-space");
     await page.getByRole("button", { name: "Choisir un créneau" }).click();
     for (const slot of [first, second]) {

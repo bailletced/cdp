@@ -95,8 +95,14 @@ test.describe("Créneaux vides (F13-T08)", () => {
     await page.waitForURL(/\/inscription\?creneaux=/);
     await page.getByRole("button", { name: "S'inscrire" }).click();
     await page.waitForURL(/\/inscription\/confirmation/);
+    // The confirmation recaps the batch just taken; « Mon espace » (the
+    // session is still on) keeps the whole picture of the priant
     await expect(
       page.getByRole("region", { name: "Vos créneaux" }).getByRole("listitem"),
+    ).toHaveCount(1);
+    await page.goto("/my-space");
+    await expect(
+      page.getByRole("region", { name: "Mes créneaux" }).getByRole("listitem"),
     ).toHaveCount(3);
 
     await context.close();
