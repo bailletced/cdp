@@ -72,7 +72,7 @@ describe("EventLandingPage (/landing)", () => {
     expect(
       screen.getByRole("heading", {
         level: 3,
-        name: "L'Évangile selon saint Marc, d'un bout à l'autre",
+        name: "L'Évangile selon saint Marc",
       }),
     ).toBeInTheDocument();
 
@@ -83,7 +83,7 @@ describe("EventLandingPage (/landing)", () => {
     expect(
       screen.getByRole("heading", {
         level: 3,
-        name: "Une demi-heure, offerte",
+        name: "Une demi-heure offerte",
       }),
     ).toBeInTheDocument();
     expect(
@@ -97,20 +97,17 @@ describe("EventLandingPage (/landing)", () => {
     expect(image).toHaveAttribute("src", "/img/christ-roi.jpg");
     expect(screen.getByText(/Hans von Kulmbach/)).toBeInTheDocument();
 
-    // The steps, then the second capture form
+    // The steps, then the single capture form with its submit button
     expect(
       screen.getByRole("heading", { level: 2, name: "Comment ça se passe" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Entrez votre e-mail")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "Offrez une demi-heure" }),
+      screen.getByRole("button", { name: "Je participe" }),
     ).toBeInTheDocument();
-    // One form only: the closing word links back to it, no second input
+    // No second invitation: no closing word, no other button
     expect(screen.queryByRole("button", { name: "Je m'inscris" })).toBeNull();
-    expect(screen.getByRole("link", { name: "Je participe" })).toHaveAttribute(
-      "href",
-      "#inscription",
-    );
+    expect(screen.queryByRole("link", { name: "Je participe" })).toBeNull();
   });
 
   it("shows one form in the hero, posting /auth/register", async () => {
@@ -159,12 +156,12 @@ describe("EventLandingPage (/landing)", () => {
 
     renderPage();
 
-    // The capture is replaced by a link to my-space; the closing word too
+    // The capture is replaced by a link to my-space
     expect(
-      await screen.findAllByRole("link", {
+      await screen.findByRole("link", {
         name: "Choisissez vos créneaux dans mon espace",
       }),
-    ).toHaveLength(2);
+    ).toHaveAttribute("href", "/my-space");
     expect(screen.queryByLabelText("Adresse e-mail")).toBeNull();
   });
 
