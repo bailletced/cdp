@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Chain\Infrastructure\Mailer;
 
 use App\Chain\Application\Dto\InscriptionConfirmation;
+use App\Chain\Application\Dto\SlotTextsEmail;
 use App\Chain\Application\Port\Notifier;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -46,6 +47,25 @@ final readonly class MailerNotifier implements Notifier
                 'link' => $confirmation->personalLink,
             ])
             ->attach($confirmation->calendar, 'mes-creneaux.ics', 'text/calendar')
+        ;
+
+        $this->mailer->send($email);
+    }
+
+    #[\Override]
+    public function sendSlotTexts(SlotTextsEmail $slotTexts): void
+    {
+        $email = new TemplatedEmail()
+            ->from(new Address($this->senderEmail, $this->senderName))
+            ->to($slotTexts->recipient->value)
+            ->subject(\sprintf('Vos textes : %s', $slotTexts->digest->editionTitle))
+            ->htmlTemplate('emails/slot_texts.html.twig')
+            ->textTemplate('emails/slot_texts.txt.twig')
+            ->context([
+                'displayName' => $slotTexts->displayName,
+                'editionTitle' => $slotTexts->digest->editionTitle,
+                'slots' => $slotTexts->digest->slots,
+            ])
         ;
 
         $this->mailer->send($email);

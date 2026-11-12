@@ -12,6 +12,7 @@ use App\Chain\Application\Port\CalendarFile;
 use App\Chain\Application\Port\HtmlSanitizer;
 use App\Chain\Application\Port\Notifier;
 use App\Chain\Application\Port\SlotPicker;
+use App\Chain\Application\Port\SlotTextsDeliveries;
 use App\Chain\Application\Query\AdminEditionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
 use App\Chain\Application\Query\EmptySlotsFinder;
@@ -19,6 +20,7 @@ use App\Chain\Application\Query\InscriptionDigestFinder;
 use App\Chain\Application\Query\MySpaceViewFinder;
 use App\Chain\Application\Query\PlanningViewFinder;
 use App\Chain\Application\Query\PublicEditionViewFinder;
+use App\Chain\Application\Query\SlotTextsRecipientsFinder;
 use App\Chain\Application\Query\SlotTextViewFinder;
 use App\Chain\Application\RegisterInscriptionsHandler;
 use App\Chain\Application\RenamePriantHandler;
@@ -31,11 +33,13 @@ use App\Chain\Application\UpdateTextHandler;
 use App\Chain\Domain\Entity\Edition;
 use App\Chain\Domain\Entity\Inscription;
 use App\Chain\Domain\Entity\Priant;
+use App\Chain\Domain\Entity\SlotTextsSent;
 use App\Chain\Domain\Entity\Text;
 use App\Chain\Domain\Policy\VisibilityPolicy;
 use App\Chain\Domain\Repository\EditionRepositoryInterface;
 use App\Chain\Domain\Repository\InscriptionRepositoryInterface;
 use App\Chain\Domain\Repository\PriantRepositoryInterface;
+use App\Chain\Domain\Repository\SlotTextsSentRepositoryInterface;
 use App\Chain\Domain\Repository\TextRepositoryInterface;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionDistributeTextsProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\AdminEditionProcessor;
@@ -62,10 +66,13 @@ use App\Chain\Infrastructure\Doctrine\DoctrineMySpaceViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePlanningViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrinePriantProfileReader;
 use App\Chain\Infrastructure\Doctrine\DoctrinePublicEditionViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrineSlotTextsDeliveries;
+use App\Chain\Infrastructure\Doctrine\DoctrineSlotTextsRecipientsFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineSlotTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineEditionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineInscriptionRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrinePriantRepository;
+use App\Chain\Infrastructure\Doctrine\Repository\DoctrineSlotTextsSentRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminTextViewFinder;
@@ -79,6 +86,7 @@ use App\Chain\Infrastructure\Symfony\Console\ImportGospelOfLukeCommand;
 use App\Chain\Infrastructure\Symfony\Console\ImportGospelOfMarkCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadEditionFixturesCommand;
 use App\Chain\Infrastructure\Symfony\Console\LoadTextFixturesCommand;
+use App\Chain\Infrastructure\Symfony\Console\SendSlotTextsCommand;
 use App\Chain\Infrastructure\Symfony\Controller\MyCalendarController;
 use App\Chain\Infrastructure\Symfony\HtmlSanitizer\SymfonyHtmlSanitizer;
 use App\Chain\Infrastructure\Symfony\Security\InscriptionVoter;
@@ -133,6 +141,17 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set(InMemoryInscriptionRepository::class)
         ->tag('app.in_memory_repository');
+
+    $services->set(DoctrineSlotTextsSentRepository::class)
+        ->args([
+            new Reference('doctrine'),
+            SlotTextsSent::class,
+        ])
+        ->alias(SlotTextsSentRepositoryInterface::class, DoctrineSlotTextsSentRepository::class);
+
+    $services->set(DoctrineSlotTextsDeliveries::class)
+        ->autowire()
+        ->alias(SlotTextsDeliveries::class, DoctrineSlotTextsDeliveries::class);
 
     $services->set(SymfonyHtmlSanitizer::class)
         ->autoconfigure()
@@ -218,6 +237,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set(DoctrineInscriptionDigestFinder::class)
         ->autowire()
         ->alias(InscriptionDigestFinder::class, DoctrineInscriptionDigestFinder::class);
+
+    $services->set(DoctrineSlotTextsRecipientsFinder::class)
+        ->autowire()
+        ->alias(SlotTextsRecipientsFinder::class, DoctrineSlotTextsRecipientsFinder::class);
 
     $services->set(DoctrineEmptySlotsFinder::class)
         ->autowire()
@@ -351,6 +374,11 @@ return static function (ContainerConfigurator $container): void {
         ->tag('console.command');
 
     $services->set(ImportGospelOfMarkCommand::class)
+        ->autoconfigure()
+        ->autowire()
+        ->tag('console.command');
+
+    $services->set(SendSlotTextsCommand::class)
         ->autoconfigure()
         ->autowire()
         ->tag('console.command');

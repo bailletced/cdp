@@ -19,6 +19,7 @@ return new Config()
                         App\Tests\Behat\Chain\AdminTextContext::class,
                         App\Tests\Behat\Chain\InscriptionContext::class,
                         App\Tests\Behat\Chain\ImportGospelOfMarkContext::class,
+                        App\Tests\Behat\Chain\SendSlotTextsContext::class,
                         App\Tests\Behat\Controller\LinkRequestContext::class,
                         App\Tests\Behat\Controller\RegisterContext::class,
                         App\Tests\Behat\Security\LoginLinkContext::class,

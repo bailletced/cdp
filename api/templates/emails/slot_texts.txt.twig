@@ -1,0 +1,27 @@
+{# Email of the slot texts of an edition, plain-text version (F24): the
+   day and hour of every slot of the priant, with the full text of each. #}
+{% extends 'emails/layout.txt.twig' %}
+
+{% block title %}Vos textes : {{ editionTitle }}{% endblock %}
+
+{% block content %}
+
+Bonjour {{ displayName }},
+
+Voici les textes des créneaux que vous portez dans la chaîne de prière « {{ editionTitle }} ».
+
+{% if slots|length > 1 %}Vos {{ slots|length }} créneaux{% else %}Votre créneau{% endif %}, en heure de Paris :
+{% for slot in slots %}
+
+{{ slot.dayLabel|capitalize }}, {{ slot.label }} (heure de Paris)
+--------------------------------
+{% if slot.textTitle %}
+{{ slot.textTitle }} — {{ slot.textSource }}
+
+{{ slot.textBody|plain_text }}
+{% else %}
+Le texte de ce créneau sera bientôt disponible.
+{% endif %}
+{% endfor %}
+
+{% endblock %}
