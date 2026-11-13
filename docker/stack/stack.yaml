@@ -234,7 +234,7 @@ services:
         - traefik.http.services.adminer.loadbalancer.server.port=8080
         # Basic auth obligatoire. User « admin », hash apr1 ($$ = $ littéral
         # pour Swarm). Rotation du mot de passe : runbook §2.6.
-        - traefik.http.middlewares.adminer-auth.basicauth.users=admin:$$apr1$$ynpkOOfq$$HMBUnBgai8.RyxCxCpn580
+        - traefik.http.middlewares.adminer-auth.basicauth.users=admin:$$apr1$$R2YWsIzk$$cR7bJo.TMOaKvd.Eqz0c50
         - traefik.http.routers.adminer.middlewares=adminer-auth@swarm,security-headers@swarm
     logging:
       driver: json-file
