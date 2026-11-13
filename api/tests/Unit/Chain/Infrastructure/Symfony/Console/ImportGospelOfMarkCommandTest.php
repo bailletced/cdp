@@ -94,6 +94,71 @@ final class ImportGospelOfMarkCommandTest extends TestCase
         self::assertSame(20, $chapters[16]);
     }
 
+    /**
+     * The cutting follows the reading table of the 2026 printed support:
+     * 48 half-hour slots, from Saturday 22:00 (Marc 1, 1-13) to Sunday 21:30
+     * (Marc 16, 9-20). The support table carries four typographical slips
+     * (Mc 1, 35-46, the skipped 4, 34 and 14, 30-31, and 15, 20 counted
+     * twice); the boundaries below keep the gospel whole: 1, 35 ends at
+     * verse 45, 4, 34 joins the parables, 14, 30-31 stay with the supper,
+     * and 15, 21 takes over after verse 20.
+     */
+    public function testTheCuttingFollowsTheReadingTableOfThePrintedSupport(): void
+    {
+        $expected = [
+            'Marc 1, 1-13',
+            'Marc 1, 14-20',
+            'Marc 1, 21-34',
+            'Marc 1, 35-45',
+            'Marc 2, 1-12',
+            'Marc 2, 13-28',
+            'Marc 3, 1-12',
+            'Marc 3, 13-19',
+            'Marc 3, 20-35',
+            'Marc 4, 1-34',
+            'Marc 4, 35-41',
+            'Marc 5, 1-20',
+            'Marc 5, 21-43',
+            'Marc 6, 1-13',
+            'Marc 6, 14-29',
+            'Marc 6, 30-52',
+            'Marc 6, 53-7, 23',
+            'Marc 7, 24-37',
+            'Marc 8, 1-10',
+            'Marc 8, 11-21',
+            'Marc 8, 22-30',
+            'Marc 8, 31-9, 1',
+            'Marc 9, 2-13',
+            'Marc 9, 14-29',
+            'Marc 9, 30-37',
+            'Marc 9, 38-50',
+            'Marc 10, 1-16',
+            'Marc 10, 17-31',
+            'Marc 10, 32-45',
+            'Marc 10, 46-52',
+            'Marc 11, 1-11',
+            'Marc 11, 12-26',
+            'Marc 11, 27-12, 12',
+            'Marc 12, 13-34',
+            'Marc 12, 35-44',
+            'Marc 13, 1-13',
+            'Marc 13, 14-37',
+            'Marc 14, 1-11',
+            'Marc 14, 12-31',
+            'Marc 14, 32-42',
+            'Marc 14, 43-54',
+            'Marc 14, 55-65',
+            'Marc 14, 66-72',
+            'Marc 15, 1-20',
+            'Marc 15, 21-39',
+            'Marc 15, 40-47',
+            'Marc 16, 1-8',
+            'Marc 16, 9-20',
+        ];
+
+        self::assertSame($expected, array_column(GospelOfMark::readings(), 'title'));
+    }
+
     public function testTheBodiesStayWithinWhatTheEditorProduces(): void
     {
         $sanitizer = new SymfonyHtmlSanitizer();

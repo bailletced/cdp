@@ -27,8 +27,9 @@ use Symfony\Component\Uid\Uuid;
  * source) is reused: the command can run again, for another edition.
  *
  * With --edition, the 48 readings are spread over the slots of that edition,
- * in order: the first slot opens the gospel, the last one closes it with the
- * sending on mission.
+ * in order: the first slot opens the gospel (Saturday 22:00, Marc 1, 1-13 in
+ * the reading table of the 2026 printed support), the last one closes it
+ * with the sending on mission.
  */
 #[AsCommand(name: 'app:chain:import-gospel-of-mark', description: 'Importe l’évangile selon saint Marc (Louis Segond 1910) en 48 lectures, et peut les répartir sur une édition')]
 final class ImportGospelOfMarkCommand extends Command
