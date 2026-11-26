@@ -40,6 +40,14 @@ interface InscriptionRepositoryInterface
     public function findById(InscriptionId $id): ?Inscription;
 
     /**
+     * The inscriptions of an edition, in registration order (F16: the
+     * organizer reads them slot by slot, with names and e-mails).
+     *
+     * @return list<Inscription>
+     */
+    public function findByEdition(EditionId $editionId): array;
+
+    /**
      * Remove an inscription (F14-T05, RG-EP-1): its slot is free again. The
      * removal reaches the database when the surrounding transaction flushes.
      */

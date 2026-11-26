@@ -727,6 +727,110 @@
                 }
             }
         },
+        "/api/admin/inscriptions": {
+            "get": {
+                "operationId": "api_admininscriptions_get_collection",
+                "tags": [
+                    "AdminInscription"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AdminInscription collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "AdminInscription.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchema"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/AdminInscription.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of AdminInscription resources.",
+                "description": "Retrieves the collection of AdminInscription resources.",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The collection page number",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "style": "form",
+                        "explode": true
+                    },
+                    {
+                        "name": "edition",
+                        "in": "query",
+                        "description": "Identifiant de l\u2019\u00e9dition dont on lit les inscriptions.",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "style": "form",
+                        "explode": true
+                    },
+                    {
+                        "name": "slot",
+                        "in": "query",
+                        "description": "Identifiant du cr\u00e9neau : restreint la liste \u00e0 ce cr\u00e9neau.",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            }
+        },
         "/api/admin/organizers": {
             "get": {
                 "operationId": "api_adminorganizers_get_collection",
@@ -2470,6 +2574,72 @@
                     }
                 ]
             },
+            "AdminInscription.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "displayName": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "email": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "origin": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "slotId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "slotRank": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "slotLabel": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "startsAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "endsAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
             "AdminOrganizer": {
                 "type": "object",
                 "properties": {
@@ -3597,6 +3767,10 @@
         {
             "name": "AdminEdition",
             "description": "Resource 'AdminEdition' operations."
+        },
+        {
+            "name": "AdminInscription",
+            "description": "Resource 'AdminInscription' operations."
         },
         {
             "name": "AdminSlot",

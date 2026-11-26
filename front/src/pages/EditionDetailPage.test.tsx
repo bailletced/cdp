@@ -97,6 +97,13 @@ describe("EditionDetailPage", () => {
       "href",
       `/organisation/editions/${EDITION_ID}/edit`,
     );
+    // Link to the registered inscriptions (F16-T12, US-16.2)
+    expect(
+      screen.getByRole("link", { name: "Voir les inscriptions" }),
+    ).toHaveAttribute(
+      "href",
+      `/organisation/editions/${EDITION_ID}/inscriptions`,
+    );
     // Scheduled edition: the unschedule action, not the schedule one
     expect(
       screen.getByRole("button", { name: "Repasser en brouillon" }),

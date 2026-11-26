@@ -216,6 +216,17 @@ const organisationEditionDistributeRoute = createRoute({
   ),
 });
 
+// Registered inscriptions of an edition (F16-T12): lazy-loaded with the
+// back-office section
+const organisationEditionInscriptionsRoute = createRoute({
+  getParentRoute: () => organisationRoute,
+  path: "/editions/$editionId/inscriptions",
+  component: lazyRouteComponent(
+    () => import("./pages/InscriptionsPage"),
+    "InscriptionsPage",
+  ),
+});
+
 // Text library (F06-T12): lazy-loaded with the back-office section
 const organisationTextsRoute = createRoute({
   getParentRoute: () => organisationRoute,
@@ -263,6 +274,7 @@ export const routeTree = Root.addChildren([
     organisationEditionDetailRoute,
     organisationEditionTextsRoute,
     organisationEditionDistributeRoute,
+    organisationEditionInscriptionsRoute,
     organisationTextsRoute,
     organisationTextNewRoute,
     organisationTextEditRoute,

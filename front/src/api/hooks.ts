@@ -448,6 +448,38 @@ export function useEdition(id: string | null) {
   });
 }
 
+/**
+ * Inscriptions of an edition (GET /api/admin/inscriptions?edition=, F16-T03):
+ * who is registered on which slot, with name and e-mail. Reserved to
+ * organizers — the e-mail addresses are served by /api/admin only (RG-PL-4).
+ */
+export const editionInscriptionsQueryOptions = (id: string) =>
+  ({
+    queryKey: ["admin", "editions", id, "inscriptions"],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET("/api/admin/inscriptions", {
+        params: { query: { edition: id } },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+  }) as const;
+
+/**
+ * Inscriptions of an edition (GET /api/admin/inscriptions?edition=). A null
+ * id disables the query: no request is ever sent for it.
+ */
+export function useEditionInscriptions(id: string | null) {
+  return useQuery({
+    ...editionInscriptionsQueryOptions(id ?? ""),
+    enabled: null !== id,
+  });
+}
+
 /** Form values of the edition form (F05-T20): instants are ISO 8601 with an explicit offset. */
 export interface EditionFormValues {
   title: string;

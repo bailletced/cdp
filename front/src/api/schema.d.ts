@@ -112,6 +112,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/inscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of AdminInscription resources.
+         * @description Retrieves the collection of AdminInscription resources.
+         */
+        get: operations["api_admininscriptions_get_collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/organizers": {
         parameters: {
             query?: never;
@@ -452,6 +472,17 @@ export interface components {
             slotsWithoutText?: number | null;
             duplicatedTextIds?: unknown[] | null;
             warning?: string | null;
+        };
+        "AdminInscription.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string | null;
+            displayName?: string | null;
+            email?: string | null;
+            origin?: string | null;
+            slotId?: string | null;
+            slotRank?: number | null;
+            slotLabel?: string | null;
+            startsAt?: string | null;
+            endsAt?: string | null;
         };
         AdminOrganizer: {
             id?: string | null;
@@ -1125,6 +1156,46 @@ export interface operations {
                     "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
                     "application/problem+json": components["schemas"]["ConstraintViolation"];
                     "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_admininscriptions_get_collection: {
+        parameters: {
+            query: {
+                /** @description The collection page number */
+                page?: number;
+                /** @description Identifiant de l’édition dont on lit les inscriptions. */
+                edition: string;
+                /** @description Identifiant du créneau : restreint la liste à ce créneau. */
+                slot?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminInscription collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
+                        member: components["schemas"]["AdminInscription.jsonld"][];
+                    };
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

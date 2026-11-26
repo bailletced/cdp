@@ -55,6 +55,12 @@ final class DoctrineInscriptionRepository extends ServiceEntityRepository implem
     }
 
     #[\Override]
+    public function findByEdition(EditionId $editionId): array
+    {
+        return $this->findBy(['editionId' => $editionId->value->toRfc4122()]);
+    }
+
+    #[\Override]
     public function remove(Inscription $inscription): void
     {
         $this->getEntityManager()->remove($inscription);

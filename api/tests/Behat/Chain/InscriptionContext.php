@@ -134,6 +134,12 @@ final class InscriptionContext implements Context
         $this->registerWithSlots([0, 1], $body);
     }
 
+    #[When('I register on the second slot of the last created edition with body:')]
+    public function iRegisterOnTheSecondSlotWithBody(PyStringNode $body): void
+    {
+        $this->registerWithSlots([1], $body);
+    }
+
     #[When('I register on an unknown slot with body:')]
     public function iRegisterOnAnUnknownSlotWithBody(PyStringNode $body): void
     {
@@ -150,6 +156,33 @@ final class InscriptionContext implements Context
         }
 
         $this->handleRequest(Request::create('/api/editions/'.$state->capturedEditionId.'/slots', 'GET'));
+    }
+
+    #[When('I request the admin inscriptions of the last created edition')]
+    public function iRequestTheAdminInscriptionsOfTheLastCreatedEdition(): void
+    {
+        $state = $this->state();
+
+        if (null === $state->capturedEditionId) {
+            throw new \RuntimeException('No edition captured. Create an edition first.');
+        }
+
+        $this->handleRequest(Request::create('/api/admin/inscriptions?edition='.$state->capturedEditionId, 'GET'));
+    }
+
+    #[When('I request the admin inscriptions of the first slot of the last created edition')]
+    public function iRequestTheAdminInscriptionsOfTheFirstSlotOfTheLastCreatedEdition(): void
+    {
+        $state = $this->state();
+
+        if (null === $state->capturedEditionId || [] === $state->capturedSlotIds) {
+            throw new \RuntimeException('No edition captured. Create an edition first.');
+        }
+
+        $this->handleRequest(Request::create(
+            '/api/admin/inscriptions?edition='.$state->capturedEditionId.'&slot='.$state->capturedSlotIds[0],
+            'GET',
+        ));
     }
 
     #[When('I PATCH JSON-LD to the last created edition with body:')]

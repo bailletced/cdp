@@ -72,6 +72,15 @@ final class InMemoryInscriptionRepository implements InscriptionRepositoryInterf
     }
 
     #[\Override]
+    public function findByEdition(EditionId $editionId): array
+    {
+        return array_values(array_filter(
+            $this->inscriptions,
+            static fn (Inscription $inscription): bool => $inscription->getEditionId()->equals($editionId),
+        ));
+    }
+
+    #[\Override]
     public function remove(Inscription $inscription): void
     {
         unset($this->inscriptions[$this->key($inscription->getSlotId(), $inscription->getPriantId())]);

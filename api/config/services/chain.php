@@ -14,6 +14,7 @@ use App\Chain\Application\Port\Notifier;
 use App\Chain\Application\Port\SlotPicker;
 use App\Chain\Application\Port\SlotTextsDeliveries;
 use App\Chain\Application\Query\AdminEditionViewFinder;
+use App\Chain\Application\Query\AdminInscriptionViewFinder;
 use App\Chain\Application\Query\AdminTextViewFinder;
 use App\Chain\Application\Query\EmptySlotsFinder;
 use App\Chain\Application\Query\InscriptionDigestFinder;
@@ -50,6 +51,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Processor\CancelInscriptionProces
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\RegisterInscriptionsProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Processor\RenameMeProcessor;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminEditionProvider;
+use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminInscriptionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\AdminTextProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\MyInscriptionsProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\PublicEditionProvider;
@@ -58,6 +60,7 @@ use App\Chain\Infrastructure\ApiPlatform\State\Provider\SlotSuggestionProvider;
 use App\Chain\Infrastructure\ApiPlatform\State\Provider\SlotTextProvider;
 use App\Chain\Infrastructure\Calendar\EluceoCalendarFile;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminEditionViewFinder;
+use App\Chain\Infrastructure\Doctrine\DoctrineAdminInscriptionViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineAdminTextViewFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineEmptySlotsFinder;
 use App\Chain\Infrastructure\Doctrine\DoctrineInscriptionDigestFinder;
@@ -75,6 +78,7 @@ use App\Chain\Infrastructure\Doctrine\Repository\DoctrinePriantRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineSlotTextsSentRepository;
 use App\Chain\Infrastructure\Doctrine\Repository\DoctrineTextRepository;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminEditionViewFinder;
+use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminInscriptionViewFinder;
 use App\Chain\Infrastructure\InMemory\Query\InMemoryAdminTextViewFinder;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryEditionRepository;
 use App\Chain\Infrastructure\InMemory\Repository\InMemoryInscriptionRepository;
@@ -214,6 +218,14 @@ return static function (ContainerConfigurator $container): void {
     $services->set(InMemoryAdminEditionViewFinder::class)
         ->autowire();
 
+    $services->set(DoctrineAdminInscriptionViewFinder::class)
+        ->autoconfigure()
+        ->autowire()
+        ->alias(AdminInscriptionViewFinder::class, DoctrineAdminInscriptionViewFinder::class);
+
+    $services->set(InMemoryAdminInscriptionViewFinder::class)
+        ->autowire();
+
     $services->set(DoctrineAdminTextViewFinder::class)
         ->autoconfigure()
         ->autowire()
@@ -300,6 +312,10 @@ return static function (ContainerConfigurator $container): void {
         ->autowire();
 
     $services->set(AdminTextProvider::class)
+        ->autoconfigure()
+        ->autowire();
+
+    $services->set(AdminInscriptionProvider::class)
         ->autoconfigure()
         ->autowire();
 

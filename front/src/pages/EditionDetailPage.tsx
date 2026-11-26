@@ -111,6 +111,13 @@ export function EditionDetailPage() {
             Modifier
           </Link>
           <Link
+            to="/organisation/editions/$editionId/inscriptions"
+            params={{ editionId }}
+            className="text-link underline underline-offset-4"
+          >
+            Voir les inscriptions
+          </Link>
+          <Link
             to="/organisation/editions/$editionId/texts"
             params={{ editionId }}
             className="text-link underline underline-offset-4"
