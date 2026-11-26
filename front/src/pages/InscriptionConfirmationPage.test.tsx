@@ -65,7 +65,7 @@ function openEditionWithSlots(slots: unknown[]) {
 }
 
 describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
-  it("récapitule les créneaux inscrits et annonce l'e-mail de confirmation", async () => {
+  it("récapitule les créneaux inscrits, sans promesse d'e-mail", async () => {
     openEditionWithSlots([
       planningSlot(SLOT_FUTURE_1, 1, "19h00–19h30"),
       planningSlot(SLOT_FUTURE_2, 2, "19h30–20h00"),
@@ -78,9 +78,11 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
     expect(
       await screen.findByRole("heading", { name: "Inscription confirmée" }),
     ).toBeInTheDocument();
+    // No promise of a confirmation e-mail: in-session the screen and the
+    // agenda button are the confirmation
     expect(
-      screen.getByText("Un e-mail de confirmation vous a été envoyé."),
-    ).toBeInTheDocument();
+      screen.queryByText("Un e-mail de confirmation vous a été envoyé."),
+    ).not.toBeInTheDocument();
 
     // The récapitulatif survives a reload: it is rebuilt from ?creneaux=
     const recap = await screen.findByRole("region", { name: "Vos créneaux" });
@@ -150,9 +152,6 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
       await screen.findByRole("heading", { name: "Inscription confirmée" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Un e-mail de confirmation vous a été envoyé."),
-    ).toBeInTheDocument();
-    expect(
       screen.getByRole("link", { name: "Retour à mon espace" }),
     ).toHaveAttribute("href", "/my-space");
     // No récapitulatif, but never an empty screen
@@ -168,9 +167,6 @@ describe("InscriptionConfirmationPage (F09-T19, US-09.6)", () => {
 
     expect(
       await screen.findByRole("heading", { name: "Inscription confirmée" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Un e-mail de confirmation vous a été envoyé."),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("region", { name: "Vos créneaux" }),

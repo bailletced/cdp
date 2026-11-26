@@ -13,16 +13,14 @@ const LINK_CLASS = "text-link underline underline-offset-4";
 
 /**
  * /inscription/confirmation?creneaux=a,b,c (F09-T19, US-09.6): confirmation
- * after a successful registration — récapitulatif des créneaux and « Un
- * e-mail de confirmation vous a été envoyé » (the email itself lands with
- * F11, RG-IN-1).
+ * after a successful registration — the récapitulatif des créneaux, each
+ * slot linking to its text once one is attributed and the device may read it
+ * — the pass it just received covers it (F12-T05). Then an empty slot next
+ * to the last one taken is suggested (F13-T07).
  *
  * The slot ids ride in the URL, so a reload re-fetches the récapitulatif
  * instead of showing an empty screen. Without the parameter (direct visit),
- * the confirmation message still shows. Each slot links to its text once
- * one is attributed and the device may read it — the pass it just received
- * covers it (F12-T05). Then an empty slot next to the last one taken is
- * suggested (F13-T07).
+ * the confirmation message still shows.
  */
 export function InscriptionConfirmationPage() {
   const { creneaux } = useSearch({ from: "/inscription/confirmation" });
@@ -41,9 +39,6 @@ export function InscriptionConfirmationPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <PageTitle>Inscription confirmée</PageTitle>
-      <p className="mb-8 text-lg">
-        Un e-mail de confirmation vous a été envoyé.
-      </p>
       {ids.length > 0 ? (
         slotsQuery.isPending ? (
           <LoadingState label="Chargement de vos créneaux…" />
