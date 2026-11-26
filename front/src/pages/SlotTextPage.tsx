@@ -10,9 +10,43 @@ import { parseSlotTextContent } from "../lib/slotText";
 
 const LINK_CLASS = "text-link underline underline-offset-4";
 
+/** The support PDF of the 2026 edition: « Pour vivre le temps de l’Oraison » */
+const ORAISON_PDF_URL = "/pour-vivre-les-24h-de-la-priere-2026.pdf";
+
 /** « samedi 28 novembre » → « Samedi 28 novembre » */
 function capitalized(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/**
+ * The PDF call to action: the pocket support of the 2026 edition (« Pour
+ * vivre le temps de l’Oraison »), opened in a new tab so the reading page
+ * stays open. Same CTA shape as « Prier maintenant » on « Mon espace ».
+ */
+function OraisonPDFCTA() {
+  return (
+    <a
+      href={ORAISON_PDF_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-[var(--radius)] bg-accent px-5 font-medium text-accent-foreground no-underline hover:bg-accent-hover"
+    >
+      Pour vivre le temps de l’Oraison
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+        aria-hidden="true"
+      >
+        <path d="M7 17 17 7" />
+        <path d="M8 7h9v9" />
+      </svg>
+    </a>
+  );
 }
 
 /**
@@ -100,6 +134,7 @@ export function SlotTextPage() {
           Le texte de ce créneau sera bientôt disponible.
         </p>
       )}
+      <OraisonPDFCTA />
       <p className="mt-12">
         <Link to="/" className={LINK_CLASS}>
           Retour au planning

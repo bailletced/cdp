@@ -61,6 +61,16 @@ describe("SlotTextPage (F12-T04, US-12.1)", () => {
     expect(
       screen.getByText("trouble", { selector: "strong" }),
     ).toBeInTheDocument();
+    // CTA to live the prayer time: the support PDF, in a new tab
+    const cta = screen.getByRole("link", {
+      name: "Pour vivre le temps de l’Oraison",
+    });
+    expect(cta).toHaveAttribute(
+      "href",
+      "/pour-vivre-les-24h-de-la-priere-2026.pdf",
+    );
+    expect(cta).toHaveAttribute("target", "_blank");
+    expect(cta).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("adds the local time for a priant outside Europe/Paris (RG-PL-3)", async () => {
@@ -90,6 +100,10 @@ describe("SlotTextPage (F12-T04, US-12.1)", () => {
     expect(
       screen.getByText("Le texte de ce créneau sera bientôt disponible."),
     ).toBeInTheDocument();
+    // The support PDF remains available, even before the text is attributed
+    expect(
+      screen.getByRole("link", { name: "Pour vivre le temps de l’Oraison" }),
+    ).toBeInTheDocument();
   });
 
   it("explains that the text is reserved to the priants of the slot (US-12.2)", async () => {
@@ -116,5 +130,11 @@ describe("SlotTextPage (F12-T04, US-12.1)", () => {
     expect(
       within(main).getByRole("link", { name: "Recevoir mon lien personnel" }),
     ).toHaveAttribute("href", "/receive-my-link");
+    // The meditation screen is not reached: no support PDF call to action
+    expect(
+      within(main).queryByRole("link", {
+        name: "Pour vivre le temps de l’Oraison",
+      }),
+    ).not.toBeInTheDocument();
   });
 });
