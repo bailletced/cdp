@@ -34,13 +34,15 @@ final class InMemoryAdminInscriptionViewFinderTest extends TestCase
         self::assertSame('self', $views[0]->origin);
         self::assertSame(1, $views[0]->slotRank);
         self::assertSame((string) $edition->getSlots()[0]->getId(), $views[0]->slotId);
+        // An edition spans two days, so a slot label alone needs its day
+        self::assertSame('samedi 28 novembre', $views[0]->dayLabel);
         self::assertSame('Marie Dupont', $views[1]->displayName);
         self::assertSame(2, $views[1]->slotRank);
-        // A priant registered by an organizer may have no e-mail (F16)
         self::assertSame('Marie-grand-mère de Thomas', $views[2]->displayName);
         self::assertNull($views[2]->email);
         self::assertSame('organizer', $views[2]->origin);
         self::assertSame(2, $views[2]->slotRank);
+        self::assertSame('samedi 28 novembre', $views[2]->dayLabel);
 
         // The slot label is the Paris wall-clock range of the slot
         self::assertSame('20h00–20h30', $views[0]->slotLabel);

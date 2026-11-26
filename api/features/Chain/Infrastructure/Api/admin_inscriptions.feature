@@ -44,8 +44,11 @@ Feature: Admin inscriptions list (F16-T03)
         And the response should contain JSON with "member.0.displayName" equal to "Famille Martin"
         And the response should contain JSON with "member.0.email" equal to "famille.martin@bailletced.org"
         And the response should contain JSON with "member.0.slotRank" equal to "1"
+        # An edition spans two days, so a slot label alone needs its day
+        And the response should contain JSON with "member.0.dayLabel" equal to "jeudi 1 janvier"
         And the response should contain JSON with "member.2.displayName" equal to "Paul Lebreton"
         And the response should contain JSON with "member.2.slotRank" equal to "2"
+        And the response should contain JSON with "member.2.dayLabel" equal to "jeudi 1 janvier"
 
     Scenario: The slot filter narrows the list to one slot
         Given an account exists with email "anne@bailletced.org"

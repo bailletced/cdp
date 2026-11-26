@@ -12,6 +12,7 @@ use App\Chain\Domain\Repository\PriantRepositoryInterface;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\PriantId;
 use App\Chain\Domain\ValueObject\SlotId;
+use App\Shared\Domain\Time\DayLabel;
 use App\Shared\Domain\Time\SlotLabel;
 use App\Shared\Domain\Time\TimeSlot;
 
@@ -74,6 +75,7 @@ final readonly class InMemoryAdminInscriptionViewFinder implements AdminInscript
                     origin: $inscription->getOrigin(),
                     slotId: (string) $slot->getId(),
                     slotRank: $slot->getRank(),
+                    dayLabel: DayLabel::for($slot->getStartsAt()),
                     slotLabel: SlotLabel::for($timeSlot),
                     startsAtUtc: $slot->getStartsAt()->format(\DateTimeInterface::ATOM),
                     endsAtUtc: $slot->getEndsAt()->format(\DateTimeInterface::ATOM),

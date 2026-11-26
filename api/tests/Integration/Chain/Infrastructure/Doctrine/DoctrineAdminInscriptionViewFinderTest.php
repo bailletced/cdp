@@ -71,6 +71,8 @@ final class DoctrineAdminInscriptionViewFinderTest extends KernelTestCase
         self::assertSame('self', $views[0]->origin);
         self::assertSame((string) $edition->getSlots()[0]->getId(), $views[0]->slotId);
         self::assertSame((string) $inscriptions[0]->getId(), $views[0]->inscriptionId);
+        // An edition spans two days, so a slot label alone needs its day
+        self::assertSame('samedi 28 novembre', $views[0]->dayLabel);
         self::assertSame('20h00–20h30', $views[0]->slotLabel);
         self::assertSame('2026-11-28T19:00:00+00:00', $views[0]->startsAtUtc);
         self::assertSame('2026-11-28T19:30:00+00:00', $views[0]->endsAtUtc);

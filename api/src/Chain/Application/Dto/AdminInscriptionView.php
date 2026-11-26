@@ -20,6 +20,7 @@ final readonly class AdminInscriptionView
         public string $origin,
         public string $slotId,
         public int $slotRank,
+        public string $dayLabel,
         public string $slotLabel,
         public string $startsAtUtc,
         public string $endsAtUtc,

@@ -2618,6 +2618,12 @@
                                     "null"
                                 ]
                             },
+                            "dayLabel": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
                             "slotLabel": {
                                 "type": [
                                     "string",

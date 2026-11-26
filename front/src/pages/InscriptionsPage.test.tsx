@@ -51,6 +51,7 @@ function inscription(overrides: Record<string, unknown> = {}, index = 0) {
     origin: "self",
     slotId: "33333333-3333-3333-3333-000000000001",
     slotRank: 1,
+    dayLabel: "samedi 28 novembre",
     slotLabel: "20h00–20h30",
     startsAt: "2026-11-28T19:00:00+00:00",
     endsAt: "2026-11-28T19:30:00+00:00",
@@ -87,6 +88,7 @@ describe("InscriptionsPage", () => {
     const table = await screen.findByRole("table");
     const headers = within(table).getAllByRole("columnheader");
     expect(headers.map((header) => header.textContent)).toEqual([
+      "Jour",
       "Créneau",
       "Nom",
       "Adresse e-mail",
@@ -97,6 +99,8 @@ describe("InscriptionsPage", () => {
     expect(rows).toHaveLength(3);
 
     const firstRow = rows[1];
+    // The day label, in Paris time (RG-ED-5): an edition spans two days
+    expect(firstRow).toHaveTextContent("Samedi 28 novembre");
     expect(firstRow).toHaveTextContent("20h00–20h30");
     expect(firstRow).toHaveTextContent("Famille Martin");
     expect(firstRow).toHaveTextContent("famille.martin@bailletced.org");
@@ -138,6 +142,7 @@ describe("InscriptionsPage", () => {
     const table = await screen.findByRole("table");
     const rows = within(table).getAllByRole("row");
     expect(rows).toHaveLength(2);
+    expect(rows[1]).toHaveTextContent("Samedi 28 novembre");
     expect(rows[1]).toHaveTextContent("Marie-grand-mère de Thomas");
     expect(rows[1]).toHaveTextContent("—");
   });

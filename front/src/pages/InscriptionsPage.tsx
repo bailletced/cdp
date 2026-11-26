@@ -4,14 +4,21 @@ import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { PageTitle } from "../components/PageTitle";
 
+function capitalized(value: string): string {
+  return 0 === value.length
+    ? value
+    : value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 /**
  * /organisation/editions/$editionId/inscriptions (F16-T12, US-16.2): the
  * inscriptions of the edition, read slot by slot. Each row of the accessible
- * table carries the slot label, the display name and the e-mail address of
- * the priant — a priant registered by phone may have no e-mail (F16): a dash
- * is shown then. The list is only reachable by organizers: the back-office
- * guard rejects other profiles, and the API serves the e-mails under
- * /api/admin only (T17, RG-PL-4).
+ * table carries the Paris day of the slot — an edition spans two days, so a
+ * slot label alone (« 0h30–1h00 ») needs its day — then the slot label, the
+ * display name and the e-mail address of the priant. A priant registered by
+ * phone may have no e-mail (F16): a dash is shown then. The list is only
+ * reachable by organizers: the back-office guard rejects other profiles, and
+ * the API serves the e-mails under /api/admin only (T17, RG-PL-4).
  */
 export function InscriptionsPage() {
   const { editionId } = useParams({
@@ -69,6 +76,9 @@ export function InscriptionsPage() {
             <thead>
               <tr>
                 <th scope="col" className="px-2 py-1">
+                  Jour
+                </th>
+                <th scope="col" className="px-2 py-1">
                   Créneau
                 </th>
                 <th scope="col" className="px-2 py-1">
@@ -82,6 +92,9 @@ export function InscriptionsPage() {
             <tbody>
               {rows.map((inscription) => (
                 <tr key={inscription.id} className="border-t border-border">
+                  <td className="px-2 py-1">
+                    {capitalized(inscription.dayLabel ?? "")}
+                  </td>
                   <td className="px-2 py-1">{inscription.slotLabel}</td>
                   <td className="px-2 py-1">{inscription.displayName}</td>
                   <td className="px-2 py-1">{inscription.email ?? "—"}</td>

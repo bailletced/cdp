@@ -8,6 +8,7 @@ use App\Chain\Application\Dto\AdminInscriptionView;
 use App\Chain\Application\Query\AdminInscriptionViewFinder;
 use App\Chain\Domain\ValueObject\EditionId;
 use App\Chain\Domain\ValueObject\SlotId;
+use App\Shared\Domain\Time\DayLabel;
 use App\Shared\Domain\Time\SlotLabel;
 use App\Shared\Domain\Time\TimeSlot;
 use Doctrine\DBAL\Connection;
@@ -63,6 +64,7 @@ final readonly class DoctrineAdminInscriptionViewFinder implements AdminInscript
                 origin: $row['origin'],
                 slotId: Uuid::fromString($row['slot_id'])->toRfc4122(),
                 slotRank: (int) $row['rank'],
+                dayLabel: DayLabel::for($startsAt),
                 slotLabel: SlotLabel::for($timeSlot),
                 startsAtUtc: $startsAt->format(\DateTimeInterface::ATOM),
                 endsAtUtc: $endsAt->format(\DateTimeInterface::ATOM),

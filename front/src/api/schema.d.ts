@@ -480,6 +480,7 @@ export interface components {
             origin?: string | null;
             slotId?: string | null;
             slotRank?: number | null;
+            dayLabel?: string | null;
             slotLabel?: string | null;
             startsAt?: string | null;
             endsAt?: string | null;
