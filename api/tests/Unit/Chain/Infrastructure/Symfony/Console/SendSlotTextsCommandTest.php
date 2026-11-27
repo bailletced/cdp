@@ -161,6 +161,69 @@ final class SendSlotTextsCommandTest extends TestCase
         self::assertStringContainsString('0 e-mail envoyé', $secondRun->getDisplay());
     }
 
+    public function testTheEmailOptionSendsToOnePriantOnly(): void
+    {
+        $marie = $this->recipient('0193ca20-0000-7000-8000-000000000001', 'Marie Dupont', 'marie@bailletced.org');
+        $jean = $this->recipient('0193ca20-0000-7000-8000-000000000002', 'Jean Martin', 'jean@bailletced.org');
+        $editionId = new EditionId('0193ca20-0000-7000-8000-00000000000a');
+        $notifier = $this->fakeNotifier();
+
+        $tester = new CommandTester($this->command(
+            $this->fakeRecipientsFinder([$marie, $jean], $editionId),
+            $this->fakeDigestFinder([
+                (string) $marie->priantId->value => $this->digest('Marie', ['20h00–20h30']),
+                (string) $jean->priantId->value => $this->digest('Jean', ['21h00–21h30']),
+            ]),
+            $notifier,
+            $this->fakePublicEditionFinder(null),
+            $this->fakeDeliveries(),
+        ));
+
+        self::assertSame(0, $tester->execute(['--edition' => (string) $editionId, '--email' => 'jean@bailletced.org']));
+        self::assertCount(1, $notifier->slotTextsSent);
+        self::assertSame('jean@bailletced.org', $notifier->slotTextsSent[0]->recipient->value);
+        self::assertStringContainsString('1 e-mail envoyé', $tester->getDisplay());
+    }
+
+    public function testTheEmailOptionWithAnUnknownAddressSendsNothingAndStillSucceeds(): void
+    {
+        $marie = $this->recipient('0193ca20-0000-7000-8000-000000000001', 'Marie Dupont', 'marie@bailletced.org');
+        $editionId = new EditionId('0193ca20-0000-7000-8000-00000000000a');
+        $notifier = $this->fakeNotifier();
+
+        $tester = new CommandTester($this->command(
+            $this->fakeRecipientsFinder([$marie], $editionId),
+            $this->fakeDigestFinder([(string) $marie->priantId->value => $this->digest('Marie', ['20h00–20h30'])]),
+            $notifier,
+            $this->fakePublicEditionFinder(null),
+            $this->fakeDeliveries(),
+        ));
+
+        self::assertSame(0, $tester->execute(['--edition' => (string) $editionId, '--email' => 'inconnu@bailletced.org']));
+        self::assertCount(0, $notifier->slotTextsSent);
+        self::assertStringContainsString('Aucun priant avec cette adresse', $tester->getDisplay());
+        self::assertStringContainsString('0 e-mail envoyé', $tester->getDisplay());
+    }
+
+    public function testItRefusesAnInvalidEmailAddress(): void
+    {
+        $marie = $this->recipient('0193ca20-0000-7000-8000-000000000001', 'Marie Dupont', 'marie@bailletced.org');
+        $editionId = new EditionId('0193ca20-0000-7000-8000-00000000000a');
+        $notifier = $this->fakeNotifier();
+
+        $tester = new CommandTester($this->command(
+            $this->fakeRecipientsFinder([$marie], $editionId),
+            $this->fakeDigestFinder([]),
+            $notifier,
+            $this->fakePublicEditionFinder(null),
+            $this->fakeDeliveries(),
+        ));
+
+        self::assertSame(1, $tester->execute(['--edition' => (string) $editionId, '--email' => 'pas-une-adresse']));
+        self::assertCount(0, $notifier->slotTextsSent);
+        self::assertStringContainsString('Adresse e-mail invalide', $tester->getDisplay());
+    }
+
     private function command(
         SlotTextsRecipientsFinder $recipients,
         InscriptionDigestFinder $digests,

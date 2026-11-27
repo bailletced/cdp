@@ -1,0 +1,7 @@
+Pour vivre les 24 heures de prière — support 2026
+Pièce jointe des e-mails « Vos textes » (app:chain:send-slot-texts, F24) :
+le priant prie aussi avec le support papier, même loin du site.
+Jumeau exact de front/public/pour-vivre-les-24h-de-la-priere-2026.pdf
+(servi par le CTA de la page de lecture) : quand le feuillet change,
+remplacer les deux copies par le même fichier.
+Source : voir front/public/pour-vivre-les-24h-de-la-priere-2026.source.txt.

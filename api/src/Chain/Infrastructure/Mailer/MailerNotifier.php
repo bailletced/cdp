@@ -22,6 +22,15 @@ use Symfony\Component\Mime\Address;
  */
 final readonly class MailerNotifier implements Notifier
 {
+    /**
+     * The prayer leaflet (« Pour vivre le temps de l’Oraison », support 2026)
+     * shipped with the slot texts: the priant prays with the paper support
+     * too, even away from the site. Same file as the front CTA.
+     */
+    private const string ORAISON_PDF = __DIR__.'/Resources/pour-vivre-les-24h-de-la-priere-2026.pdf';
+
+    private const string ORAISON_PDF_NAME = 'pour-vivre-les-24h-de-la-priere-2026.pdf';
+
     public function __construct(
         private MailerInterface $mailer,
         #[Autowire('%communion_email%')]
@@ -66,8 +75,20 @@ final readonly class MailerNotifier implements Notifier
                 'editionTitle' => $slotTexts->digest->editionTitle,
                 'slots' => $slotTexts->digest->slots,
             ])
+            ->attach($this->oraisonLeaflet(), self::ORAISON_PDF_NAME, 'application/pdf')
         ;
 
         $this->mailer->send($email);
+    }
+
+    private function oraisonLeaflet(): string
+    {
+        $content = file_get_contents(self::ORAISON_PDF);
+
+        if (false === $content) {
+            throw new \RuntimeException(\sprintf('Le feuillet d’aide à l’oraison est introuvable : %s', self::ORAISON_PDF));
+        }
+
+        return $content;
     }
 }

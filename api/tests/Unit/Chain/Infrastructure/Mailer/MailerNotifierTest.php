@@ -92,6 +92,17 @@ final class MailerNotifierTest extends TestCase
         self::assertSame('Marie Dupont', $email->getContext()['displayName']);
         self::assertSame('24 heures de prière', $email->getContext()['editionTitle']);
         self::assertSame([$withText, $withoutText], $email->getContext()['slots']);
-        self::assertCount(0, $email->getAttachments());
+
+        // The prayer leaflet travels with the texts (F24): the priant prays
+        // with the paper support too, even away from the site
+        $attachments = $email->getAttachments();
+        self::assertCount(1, $attachments);
+        self::assertSame('pour-vivre-les-24h-de-la-priere-2026.pdf', $attachments[0]->getFilename());
+        self::assertSame('application/pdf', $attachments[0]->getContentType());
+        self::assertSame(
+            file_get_contents(__DIR__.'/../../../../../src/Chain/Infrastructure/Mailer/Resources/pour-vivre-les-24h-de-la-priere-2026.pdf'),
+            $attachments[0]->getBody(),
+            'The attachment is the leaflet shipped in the Mailer Resources.',
+        );
     }
 }

@@ -21,6 +21,35 @@ Feature: Send the slot texts by e-mail
         And the slot texts email sent to "famille.martin@bailletced.org" mentions "20h00–20h30"
         And the slot texts email sent to "famille.martin@bailletced.org" mentions "20h30–21h00"
         And the slot texts email sent to "famille.martin@bailletced.org" mentions "Que rien ne te trouble"
+        And the slot texts email sent to "famille.martin@bailletced.org" carries the attachment "pour-vivre-les-24h-de-la-priere-2026.pdf" of type "application/pdf"
+
+    Scenario: The --email option sends the texts to one priant only, the others hear nothing
+        Given I register on the first slot of the last created edition with body:
+            """
+            {"displayName": "Famille Martin", "email": "famille.martin@bailletced.org", "consent": true}
+            """
+        And I process the async queue
+        And I register on the second slot of the last created edition with body:
+            """
+            {"displayName": "Marie Dupont", "email": "marie@bailletced.org", "consent": true}
+            """
+        And I process the async queue
+        When I send the slot texts of the last created edition to "marie@bailletced.org"
+        Then the command should succeed
+        And the command output should mention "1 e-mail envoyé"
+        And exactly 1 slot texts email is sent to "marie@bailletced.org"
+        And exactly 0 slot texts email is sent to "famille.martin@bailletced.org"
+
+    Scenario: The --email option with an address no priant carries sends nothing and still succeeds
+        Given I register on the first slot of the last created edition with body:
+            """
+            {"displayName": "Famille Martin", "email": "famille.martin@bailletced.org", "consent": true}
+            """
+        And I process the async queue
+        When I send the slot texts of the last created edition to "inconnu@bailletced.org"
+        Then the command should succeed
+        And the command output should mention "Aucun priant avec cette adresse"
+        And exactly 0 slot texts email is sent to "famille.martin@bailletced.org"
 
     Scenario: Without --edition, the command sends the texts of the current open edition
         Given I register on the first slot of the last created edition with body:

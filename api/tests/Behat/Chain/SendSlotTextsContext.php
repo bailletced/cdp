@@ -102,6 +102,13 @@ final class SendSlotTextsContext implements Context
         $this->runCommand([]);
     }
 
+    #[When('I send the slot texts of the last created edition to :email')]
+    public function iSendTheSlotTextsOfTheLastCreatedEditionTo(string $email): void
+    {
+        $state = $this->state();
+        $this->runCommand(['--edition' => $state->capturedEditionId, '--email' => $email]);
+    }
+
     #[Then('a slot texts email is sent to :email')]
     public function aSlotTextsEmailIsSentTo(string $email): void
     {
@@ -117,6 +124,20 @@ final class SendSlotTextsContext implements Context
         if (!str_contains($body, $content)) {
             throw new \RuntimeException(\sprintf('The slot texts email does not mention "%s".', $content));
         }
+    }
+
+    #[Then('the slot texts email sent to :email carries the attachment :filename of type :mimeType')]
+    public function theSlotTextsEmailSentToCarriesTheAttachment(string $email, string $filename, string $mimeType): void
+    {
+        $email = $this->slotTextsEmailSentTo($email);
+
+        foreach ($email->getAttachments() as $attachment) {
+            if ($attachment->getFilename() === $filename && $attachment->getContentType() === $mimeType && '' !== (string) $attachment->getBody()) {
+                return;
+            }
+        }
+
+        throw new \RuntimeException(\sprintf('The slot texts email does not carry the attachment "%s" of type "%s".', $filename, $mimeType));
     }
 
     #[Then('exactly :count slot texts email is sent to :email')]
