@@ -94,6 +94,13 @@ describe("InscriptionsPage", () => {
       "Adresse e-mail",
     ]);
 
+    // On mobile the table scrolls horizontally in its own white container
+    // (bg-surface): the page never scrolls, and the overflowing rows never
+    // end up over the dark canvas behind the body (html keeps the vigil
+    // theme background).
+    expect(table.parentElement).toHaveClass("overflow-x-auto");
+    expect(table.parentElement).toHaveClass("bg-surface");
+
     const rows = within(table).getAllByRole("row");
     // Header row + one row per inscription
     expect(rows).toHaveLength(3);

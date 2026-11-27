@@ -72,36 +72,42 @@ export function InscriptionsPage() {
         {rows.length === 0 ? (
           <p className="text-muted">Aucune inscription pour le moment.</p>
         ) : (
-          <table className="w-full text-left">
-            <thead>
-              <tr>
-                <th scope="col" className="px-2 py-1">
-                  Jour
-                </th>
-                <th scope="col" className="px-2 py-1">
-                  Créneau
-                </th>
-                <th scope="col" className="px-2 py-1">
-                  Nom
-                </th>
-                <th scope="col" className="px-2 py-1">
-                  Adresse e-mail
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((inscription) => (
-                <tr key={inscription.id} className="border-t border-border">
-                  <td className="px-2 py-1">
-                    {capitalized(inscription.dayLabel ?? "")}
-                  </td>
-                  <td className="px-2 py-1">{inscription.slotLabel}</td>
-                  <td className="px-2 py-1">{inscription.displayName}</td>
-                  <td className="px-2 py-1">{inscription.email ?? "—"}</td>
+          // On mobile the wide table scrolls in its own white container
+          // (bg-surface) instead of extending the page: an horizontal page
+          // scroll would reveal the dark canvas behind the body (html keeps
+          // the vigil theme background), where the rows are unreadable.
+          <div className="w-full overflow-x-auto rounded-[var(--radius)] bg-surface">
+            <table className="w-full text-left">
+              <thead>
+                <tr>
+                  <th scope="col" className="px-2 py-1">
+                    Jour
+                  </th>
+                  <th scope="col" className="px-2 py-1">
+                    Créneau
+                  </th>
+                  <th scope="col" className="px-2 py-1">
+                    Nom
+                  </th>
+                  <th scope="col" className="px-2 py-1">
+                    Adresse e-mail
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rows.map((inscription) => (
+                  <tr key={inscription.id} className="border-t border-border">
+                    <td className="px-2 py-1">
+                      {capitalized(inscription.dayLabel ?? "")}
+                    </td>
+                    <td className="px-2 py-1">{inscription.slotLabel}</td>
+                    <td className="px-2 py-1">{inscription.displayName}</td>
+                    <td className="px-2 py-1">{inscription.email ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
